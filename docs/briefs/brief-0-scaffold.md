@@ -84,3 +84,10 @@ On completion, open a pull request containing:
 - the transcript of `make pins` (clean and mutants);
 - the `measure.yml` file;
 - a `REPORT.md` with a verdict of L0 PASSED or NOT PASSED.
+
+---
+
+## Amendment A1 (appended; overrides earlier text where they conflict)
+1. **Required status check.** GitHub can only require a status check after it has run once. At precondition time, `main` requires a pull request and forbids direct pushes. Guy adds `pins.yml` as a required check after this session's PR has run it.
+2. **Brief file names.** The briefs live in the repository as `docs/briefs/brief-0-scaffold.md`, `docs/briefs/brief-1-judge-and-crafter.md` and `docs/briefs/brief-2-nethack.md`.
+3. **Workflow authority.** This brief names `.github/workflows/`. Creating `pins.yml` and `measure.yml` there is authorised.
