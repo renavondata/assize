@@ -1,0 +1,4 @@
+# Harness configuration. Committed before the first scored run; never tuned after seeing results.
+[harness]
+# Wall-clock limit, in seconds, for one child check process. Exceeding it records the run as a timeout.
+child_timeout_s = 120

@@ -1,0 +1,3 @@
+# Fixture configuration for P0d: a short child timeout so fixture/toy/hangs times out quickly.
+[harness]
+child_timeout_s = 3

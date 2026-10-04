@@ -1,0 +1,9 @@
+[project]
+name = "assize"
+version = "0.0.0"
+description = "The court: World bindings, interface, sealed judge and reference incumbents."
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv]
+package = false
