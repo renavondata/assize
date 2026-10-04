@@ -1,0 +1,24 @@
+pin:       P0e
+protects:  a registry with a mutant-less pin or a duplicated pin or mutant name is refused
+mode:      mutant validation_off
+flags:     P0b/leak_probe,P0e/validation_off
+cwd:       /home/user/assize
+nested no_mutants: registry=fixture.no_mutants phase=all extra_flags=(none) exit=1 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0e/validation_off/nested/no_mutants/pins.jsonl
+  [ok] no_mutants: summary row exit_code equals process exit code
+  [FAIL] no_mutants: fixture.no_mutants refused with no_mutants
+  [FAIL] no_mutants: no pin was run
+  [ok] no_mutants: suite exits non-zero
+nested dup_pin: registry=fixture.dup_pin phase=all extra_flags=(none) exit=1 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0e/validation_off/nested/dup_pin/pins.jsonl
+  [ok] dup_pin: summary row exit_code equals process exit code
+  [FAIL] dup_pin: fixture.dup_pin refused with duplicate_pin
+  [FAIL] dup_pin: no pin was run
+  [ok] dup_pin: suite exits non-zero
+nested dup_mutant: registry=fixture.dup_mutant phase=all extra_flags=(none) exit=1 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0e/validation_off/nested/dup_mutant/pins.jsonl
+  [ok] dup_mutant: summary row exit_code equals process exit code
+  [FAIL] dup_mutant: fixture.dup_mutant refused with duplicate_mutant
+  [FAIL] dup_mutant: no pin was run
+  [ok] dup_mutant: suite exits non-zero
+nested accepted: registry=fixture.basic phase=clean extra_flags=(none) exit=1 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0e/validation_off/nested/accepted/pins.jsonl
+  [ok] accepted: summary row exit_code equals process exit code
+  [ok] accepted: control: fixture.basic accepted
+result:    FAIL

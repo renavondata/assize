@@ -1,0 +1,9 @@
+registry fixture.basic: 1 pins, 2 mutants; phase=mutants; child_timeout_s=120.0 (harness/config.toml)
+[mutant] fixture/toy/off_by_one: expected fail, observed pass -> SURVIVED (0.064s) reports/L0/pins/runs/P0/clean/nested/checks_always_pass/runs/fixture__toy/off_by_one/transcript.log
+MUTANT SURVIVED: fixture/toy/off_by_one
+[mutant] fixture/toy/off_by_one_patch: expected fail, observed pass -> SURVIVED (0.073s) reports/L0/pins/runs/P0/clean/nested/checks_always_pass/runs/fixture__toy/off_by_one_patch/transcript.log
+MUTANT SURVIVED: fixture/toy/off_by_one_patch
+clean: 0/0 passed, 0/0 failed
+mutants: 0/2 killed, 2/2 survived, 0/2 inconclusive
+report: reports/L0/pins/runs/P0/clean/nested/checks_always_pass/pins.jsonl
+PINS FAILED

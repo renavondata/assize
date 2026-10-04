@@ -1,0 +1,5 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      mutant hangs
+flags:     P0d/inconclusive_dropped,fixture/toy/hangs
+cwd:       /home/user/assize

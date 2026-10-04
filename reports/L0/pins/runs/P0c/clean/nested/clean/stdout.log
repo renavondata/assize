@@ -1,0 +1,8 @@
+registry fixture.broken: 2 pins, 2 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: expected pass, observed pass -> ok (0.065s) reports/L0/pins/runs/P0c/clean/nested/clean/runs/fixture__toy/clean/transcript.log
+[clean ] fixture/broken: expected pass, observed fail -> FAILED (0.064s) reports/L0/pins/runs/P0c/clean/nested/clean/runs/fixture__broken/clean/transcript.log
+CLEAN FAILED: fixture/broken (observed fail)
+clean: 1/2 passed, 1/2 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive
+report: reports/L0/pins/runs/P0c/clean/nested/clean/pins.jsonl
+PINS FAILED

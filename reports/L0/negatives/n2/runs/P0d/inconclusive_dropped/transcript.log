@@ -1,0 +1,14 @@
+pin:       P0d
+protects:  errors and timeouts are recorded INCONCLUSIVE, counted in the denominator, and fail the suite
+mode:      mutant inconclusive_dropped
+flags:     P0b/leak_probe,P0d/inconclusive_dropped
+cwd:       /home/user/assize
+nested inconclusive: registry=fixture.inconclusive phase=mutants extra_flags=(none) exit=0 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0d/inconclusive_dropped/nested/inconclusive/pins.jsonl
+  [ok] inconclusive: summary row exit_code equals process exit code
+  [FAIL] inconclusive: raises: observed error, INCONCLUSIVE
+  [FAIL] inconclusive: hangs: observed timeout, INCONCLUSIVE
+  [ok] inconclusive: timeout taken from committed config
+  [FAIL] inconclusive: hang ran at least the configured timeout
+  [FAIL] inconclusive: denominator: 3 mutants, 2 inconclusive, 1 killed
+  [FAIL] inconclusive: suite exits non-zero
+result:    FAIL

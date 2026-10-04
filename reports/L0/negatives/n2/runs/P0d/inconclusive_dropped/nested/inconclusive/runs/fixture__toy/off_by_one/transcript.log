@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      mutant off_by_one
+flags:     P0b/leak_probe,P0d/inconclusive_dropped,fixture/toy/off_by_one
+cwd:       /home/user/assize
+result:    FAIL

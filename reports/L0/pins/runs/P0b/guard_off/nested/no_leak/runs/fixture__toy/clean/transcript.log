@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      clean
+flags:     P0b/guard_off
+cwd:       /home/user/assize
+result:    PASS

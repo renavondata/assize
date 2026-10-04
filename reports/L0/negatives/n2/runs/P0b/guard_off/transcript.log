@@ -1,0 +1,13 @@
+pin:       P0b
+protects:  a mutant flag leaking into the clean run is detected
+mode:      mutant guard_off
+flags:     P0b/guard_off,P0b/leak_probe
+cwd:       /home/user/assize
+nested no_leak: registry=fixture.basic phase=clean extra_flags=(none) exit=0 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0b/guard_off/nested/no_leak/pins.jsonl
+  [ok] no_leak: summary row exit_code equals process exit code
+  [ok] no_leak: control: clean run with no flag passes
+nested leak: registry=fixture.basic phase=clean extra_flags=['P0b/leak_probe'] exit=0 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0b/guard_off/nested/leak/pins.jsonl
+  [ok] leak: summary row exit_code equals process exit code
+  [FAIL] leak: leaked flag: clean row observed leak, verdict FAILED
+  [FAIL] leak: leaked flag: suite exits non-zero
+result:    FAIL

@@ -1,0 +1,57 @@
+# 2026-10-04T02:15:15Z Linux 6.18.44-fc-v64 x86_64 commit=efb4281 dirty=0
+## N1. Seeded mutant P0/checks_always_pass, applied directly to a fixture suite (every check returns success)
+$ ASSIZE_MUTANT=P0/checks_always_pass uv run --frozen python -m harness run --registry fixture.basic --phase mutants --out reports/L0/negatives/n1
+registry fixture.basic: 1 pins, 2 mutants; phase=mutants; child_timeout_s=120.0 (harness/config.toml)
+[mutant] fixture/toy/off_by_one: expected fail, observed pass -> SURVIVED (0.064s) reports/L0/negatives/n1/runs/fixture__toy/off_by_one/transcript.log
+MUTANT SURVIVED: fixture/toy/off_by_one
+[mutant] fixture/toy/off_by_one_patch: expected fail, observed pass -> SURVIVED (0.072s) reports/L0/negatives/n1/runs/fixture__toy/off_by_one_patch/transcript.log
+MUTANT SURVIVED: fixture/toy/off_by_one_patch
+clean: 0/0 passed, 0/0 failed
+mutants: 0/2 killed, 2/2 survived, 0/2 inconclusive
+report: reports/L0/negatives/n1/pins.jsonl
+PINS FAILED
+[exit 1]
+
+## N2. A mutant flag leaked into the top-level clean run of make pins
+$ ASSIZE_MUTANT=P0b/leak_probe make pins PINS_OUT=reports/L0/negatives/n2
+uv run --frozen python -m harness run --registry harness --phase all --out reports/L0/negatives/n2
+registry harness: 5 pins, 5 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: expected pass, observed leak -> FAILED (0.115s) reports/L0/negatives/n2/runs/P0/clean/transcript.log
+CLEAN FAILED: P0 (observed leak)
+[clean ] P0b: expected pass, observed leak -> FAILED (0.064s) reports/L0/negatives/n2/runs/P0b/clean/transcript.log
+CLEAN FAILED: P0b (observed leak)
+[clean ] P0c: expected pass, observed leak -> FAILED (0.065s) reports/L0/negatives/n2/runs/P0c/clean/transcript.log
+CLEAN FAILED: P0c (observed leak)
+[clean ] P0d: expected pass, observed leak -> FAILED (0.064s) reports/L0/negatives/n2/runs/P0d/clean/transcript.log
+CLEAN FAILED: P0d (observed leak)
+[clean ] P0e: expected pass, observed leak -> FAILED (0.064s) reports/L0/negatives/n2/runs/P0e/clean/transcript.log
+CLEAN FAILED: P0e (observed leak)
+[mutant] P0/survivors_ignored: expected fail, observed fail -> killed (0.466s) reports/L0/negatives/n2/runs/P0/survivors_ignored/transcript.log
+[mutant] P0b/guard_off: expected fail, observed fail -> killed (0.365s) reports/L0/negatives/n2/runs/P0b/guard_off/transcript.log
+[mutant] P0c/clean_failures_ignored: expected fail, observed fail -> killed (0.265s) reports/L0/negatives/n2/runs/P0c/clean_failures_ignored/transcript.log
+[mutant] P0d/inconclusive_dropped: expected fail, observed fail -> killed (3.279s) reports/L0/negatives/n2/runs/P0d/inconclusive_dropped/transcript.log
+[mutant] P0e/validation_off: expected fail, observed fail -> killed (1.018s) reports/L0/negatives/n2/runs/P0e/validation_off/transcript.log
+clean: 0/5 passed, 5/5 failed
+mutants: 5/5 killed, 0/5 survived, 0/5 inconclusive
+report: reports/L0/negatives/n2/pins.jsonl
+PINS FAILED
+make: *** [Makefile:9: pins] Error 1
+[exit 2]
+
+## N3. make measure without ASSIZE_HOST=measure
+$ make measure
+measure: refused: ASSIZE_HOST=measure is not set; this target runs only on the measurement host.
+make: *** [Makefile:15: measure] Error 1
+[exit 2]
+
+## N4. make smoke
+$ make smoke
+smoke: no-op placeholder at L0 (no Worlds yet).
+[exit 0]
+
+## N5. bootstrap idempotence (two consecutive runs)
+$ scripts/bootstrap.sh; scripts/bootstrap.sh
+Audited in 0.00ms
+[exit 0]
+Audited in 0.00ms
+[exit 0]

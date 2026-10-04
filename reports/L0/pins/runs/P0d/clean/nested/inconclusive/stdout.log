@@ -1,0 +1,10 @@
+registry fixture.inconclusive: 1 pins, 3 mutants; phase=mutants; child_timeout_s=3.0 (harness/fixtures/fast.toml)
+[mutant] fixture/toy/off_by_one: expected fail, observed fail -> killed (0.064s) reports/L0/pins/runs/P0d/clean/nested/inconclusive/runs/fixture__toy/off_by_one/transcript.log
+[mutant] fixture/toy/raises: expected fail, observed error -> INCONCLUSIVE (0.064s) reports/L0/pins/runs/P0d/clean/nested/inconclusive/runs/fixture__toy/raises/transcript.log
+MUTANT INCONCLUSIVE: fixture/toy/raises (observed error)
+[mutant] fixture/toy/hangs: expected fail, observed timeout -> INCONCLUSIVE (3.002s) reports/L0/pins/runs/P0d/clean/nested/inconclusive/runs/fixture__toy/hangs/transcript.log
+MUTANT INCONCLUSIVE: fixture/toy/hangs (observed timeout)
+clean: 0/0 passed, 0/0 failed
+mutants: 1/3 killed, 0/3 survived, 2/3 inconclusive
+report: reports/L0/pins/runs/P0d/clean/nested/inconclusive/pins.jsonl
+PINS FAILED

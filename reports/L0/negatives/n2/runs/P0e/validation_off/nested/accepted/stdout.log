@@ -1,0 +1,7 @@
+registry fixture.basic: 1 pins, 2 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: expected pass, observed leak -> FAILED (0.064s) reports/L0/negatives/n2/runs/P0e/validation_off/nested/accepted/runs/fixture__toy/clean/transcript.log
+CLEAN FAILED: fixture/toy (observed leak)
+clean: 0/1 passed, 1/1 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive
+report: reports/L0/negatives/n2/runs/P0e/validation_off/nested/accepted/pins.jsonl
+PINS FAILED
