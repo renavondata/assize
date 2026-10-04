@@ -2,7 +2,7 @@
 
 This repository is the court: the World bindings, the interface, the sealed judge and the reference incumbents. No agent under evaluation may live in, import from, or write to this repository. Agents live elsewhere and are judged by a released judge image pinned by digest.
 
-Guy Freeman holds all signatures. This file, `.github/`, and branch protection are his alone to change.
+Guy Freeman holds all signatures. This file, branch protection, repository settings and runner registration are his alone to change. Files under `.github/` may be created or edited only under a brief that names them.
 
 ## Layer ladder
 Each layer is built on the one below. A layer starts only after the previous layer's exit verdict is recorded in `REPORT.md` and Guy has merged it. Lower layers freeze when the next layer begins; upper layers never relitigate them.
@@ -33,7 +33,7 @@ Each layer is built on the one below. A layer starts only after the previous lay
 ## Git
 - Work on a feature branch and open a pull request.
 - Never merge, never push to `main`, never tag, never delete branches.
-- Never modify this file, `.github/`, runner labels, or repository settings.
+- Never modify this file, runner labels, or repository settings. Touch `.github/` only under a brief that names it.
 
 ## Execution: cloud versus host
 Development sessions run in a cloud VM. Its time and hardware limits make it unfit for measurement.
