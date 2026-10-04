@@ -103,3 +103,12 @@ PINS FAILED
 ```
 
 ## Addenda
+
+### A1 — 2026-10-04: pins.yml witness; verdict
+**Verdict: L0 PASSED** (cloud and CI criteria). All three pre-stated criteria are now witnessed:
+- 2b, P0's mutant killed in `pins.yml`: MET. PR #2 check `pins` on head `cd5cddb`, [run 37202929460](https://github.com/gfrmin/assize/actions/runs/37202929460/job/111438131029), conclusion success. Clean 5/5 passed; mutants 5/5 killed, 0/5 survived, 0/5 inconclusive; `P0/survivors_ignored -> killed`. Transcript: `pins-yml-run.txt`.
+- The host run of `measure.yml` remains unwitnessed and unclaimed; Guy confirms it after merge.
+
+Notes appended:
+- **Base branch.** The repository's default branch is `master`; brief 0's precondition and `CLAUDE.md` say `main`. A PR against `main` was refused by GitHub (base invalid). The PR targets `master` on Guy's explicit instruction in this session. Whether `master` carries the protection the precondition describes was not verified by this session.
+- **Runner warning.** GitHub reports that the pinned `actions/checkout` v4.2.2 and `actions/upload-artifact` v4.6.2 target Node.js 20, now forced onto Node.js 24. Not a failure; a later brief may bump the pinned SHAs.
