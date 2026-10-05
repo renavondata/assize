@@ -1,0 +1,32 @@
+# pins.yml witness: PR #2, head 735f357ae265e20b4b0375f71436ddcfe1fa4a31
+# run   https://github.com/gfrmin/assize/actions/runs/37344138903
+# job   https://github.com/gfrmin/assize/actions/runs/37344138903/job/111878357745
+# check "pins": conclusion success, GitHub-hosted ubuntu-latest
+# Excerpt of the job log (make pins step), timestamps kept, transcript paths elided:
+2026-10-05T16:52:30.7267338Z   clean: true
+2026-10-05T16:52:37.0200747Z Using CPython 3.11.13
+2026-10-05T16:52:37.0288485Z ##[group]Run make pins PINS_OUT=out/pins
+2026-10-05T16:52:37.0288876Z ^[[36;1mmake pins PINS_OUT=out/pins^[[0m
+2026-10-05T16:52:37.0458504Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+2026-10-05T16:53:25.1480483Z registry harness: 8 pins, 9 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+2026-10-05T16:53:25.1488560Z [clean ] P0: observed pass -> ok (0.974s)
+2026-10-05T16:53:25.1490114Z [clean ] P0b: observed pass -> ok (0.172s)
+2026-10-05T16:53:25.1491174Z [clean ] P0c: observed pass -> ok (0.272s)
+2026-10-05T16:53:25.1492196Z [clean ] P0d: observed pass -> ok (3.63s)
+2026-10-05T16:53:25.1493169Z [clean ] P0e: observed pass -> ok (0.422s)
+2026-10-05T16:53:25.1495008Z [clean ] P0f: observed pass -> ok (0.372s)
+2026-10-05T16:53:25.1496127Z [clean ] P0g: observed pass -> ok (0.523s)
+2026-10-05T16:53:25.1497309Z [clean ] P0h: observed pass -> ok (3.429s)
+2026-10-05T16:53:25.1498647Z [mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.936s + 0.936s)
+2026-10-05T16:53:25.1520732Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.084s + 0.084s)
+2026-10-05T16:53:25.1540623Z [mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.335s + 0.284s)
+2026-10-05T16:53:25.1542544Z [mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.593s + 3.592s)
+2026-10-05T16:53:25.1555734Z [mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.74s + 0.485s)
+2026-10-05T16:53:25.1557450Z [mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.435s + 0.384s)
+2026-10-05T16:53:25.1559058Z [mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.685s + 0.535s)
+2026-10-05T16:53:25.1561108Z [mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (13.469s + 3.441s)
+2026-10-05T16:53:25.1562791Z [mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.442s + 3.441s)
+2026-10-05T16:53:25.1563886Z clean: 8/8 passed, 0/8 failed
+2026-10-05T16:53:25.1564645Z mutants: 9/9 killed, 0/9 survived, 0/9 inconclusive, 0/9 stale, 0/9 non-causal
+2026-10-05T16:53:25.1565458Z twins: 9/9 passed
+2026-10-05T16:53:25.1566550Z PINS PASSED
