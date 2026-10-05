@@ -4,3 +4,4 @@ One line per layer verdict. Lines are appended, never edited.
 
 - L0 — verdict pending the `pins.yml` witness on its PR; criteria 1, 2a, 3 met in the cloud session — [reports/L0/REPORT.md](reports/L0/REPORT.md)
 - L0 — **PASSED** (cloud session and `pins.yml` on PR #2; host `measure.yml` run not witnessed, Guy to confirm) — [reports/L0/REPORT.md](reports/L0/REPORT.md#a1--2026-10-04-pinsyml-witness-verdict)
+- L0 — **PASSED under brief 0 A2** (one mutation mechanism, causal twins; dev-box session and `pins.yml` at `477d477`; A1's causality claim for P0b and P0c withdrawn; host `measure.yml` run not witnessed) — [reports/L0/REPORT.md](reports/L0/REPORT.md#a2--2026-10-05-one-mutation-mechanism-brief-0-amendment-a2-verdict)

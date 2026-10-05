@@ -1,0 +1,29 @@
+# pins.yml witness: PR #2, head 477d477faf56590648c37faebc3dc27fa27c5ad2
+# run   https://github.com/gfrmin/assize/actions/runs/37339180067
+# job   https://github.com/gfrmin/assize/actions/runs/37339180067/job/111861576846
+# check "pins": conclusion success, GitHub-hosted ubuntu-latest
+# Excerpt of the job log (make pins step), timestamps kept, transcript paths elided:
+2026-10-05T16:13:52.7407146Z Using CPython 3.11.13
+2026-10-05T16:13:52.7492959Z ##[group]Run make pins PINS_OUT=out/pins
+2026-10-05T16:13:52.7493390Z make pins PINS_OUT=out/pins
+2026-10-05T16:13:52.7663929Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+2026-10-05T16:14:13.9002024Z registry harness: 7 pins, 7 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+2026-10-05T16:14:13.9003619Z [clean ] P0: observed pass -> ok (0.971s)
+2026-10-05T16:14:13.9011701Z [clean ] P0b: observed pass -> ok (0.166s)
+2026-10-05T16:14:13.9019189Z [clean ] P0c: observed pass -> ok (0.267s)
+2026-10-05T16:14:13.9036846Z [clean ] P0d: observed pass -> ok (3.575s)
+2026-10-05T16:14:13.9038184Z [clean ] P0e: observed pass -> ok (0.467s)
+2026-10-05T16:14:13.9043488Z [clean ] P0f: observed pass -> ok (0.367s)
+2026-10-05T16:14:13.9044895Z [clean ] P0g: observed pass -> ok (0.467s)
+2026-10-05T16:14:13.9049208Z [mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.881s + 0.88s)
+2026-10-05T16:14:13.9051164Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.078s + 0.078s)
+2026-10-05T16:14:13.9053243Z [mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.04s + 0.278s)
+2026-10-05T16:14:13.9077470Z [mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.587s + 3.588s)
+2026-10-05T16:14:13.9097097Z [mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.682s + 0.481s)
+2026-10-05T16:14:13.9098971Z [mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.379s + 0.379s)
+2026-10-05T16:14:13.9104443Z [mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.63s + 0.479s)
+2026-10-05T16:14:13.9126783Z clean: 7/7 passed, 0/7 failed
+2026-10-05T16:14:13.9128749Z mutants: 7/7 killed, 0/7 survived, 0/7 inconclusive, 0/7 stale, 0/7 non-causal
+2026-10-05T16:14:13.9146774Z twins: 7/7 passed
+2026-10-05T16:14:13.9172465Z PINS PASSED
+2026-10-05T16:14:15.7186646Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

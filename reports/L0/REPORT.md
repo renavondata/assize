@@ -112,3 +112,63 @@ PINS FAILED
 Notes appended:
 - **Base branch.** The repository's default branch is `master`; brief 0's precondition and `CLAUDE.md` say `main`. A PR against `main` was refused by GitHub (base invalid). The PR targets `master` on Guy's explicit instruction in this session. Whether `master` carries the protection the precondition describes was not verified by this session.
 - **Runner warning.** GitHub reports that the pinned `actions/checkout` v4.2.2 and `actions/upload-artifact` v4.6.2 target Node.js 20, now forced onto Node.js 24. Not a failure; a later brief may bump the pinned SHAs.
+
+### A2 — 2026-10-05: one mutation mechanism (brief 0 Amendment A2); verdict
+**Verdict: L0 PASSED under brief 0 A2** (dev-box session and `pins.yml`). `make pins`: clean 7/7 passed; mutants 7/7 KILLED, 0/7 survived, 0/7 inconclusive, 0/7 stale, 0/7 non-causal; twins 7/7 passed. Witnessed locally at `9ab8dd1` (`a2/make-pins.txt`) and by `pins.yml` on PR #2 at `477d477`, [run 37339180067](https://github.com/gfrmin/assize/actions/runs/37339180067/job/111861576846) (`a2/pins-yml-run.txt`). The host run of `measure.yml` remains unwitnessed and unclaimed.
+
+**Withdrawal.** The A1 verdict's causality claim for the kills of **P0b** (`P0b/guard_off`) and **P0c** (`P0c/clean_failures_ignored`) is withdrawn. Under the previous design the mutant flag was inherited by every nested clean child, which the leak guard then failed. Each of those two checks therefore failed under *any* flag, whatever the flag's code path did. Witness `a2/withdrawal.txt` replays `5f7372a` with an inert flag `<pin>/inert` that selects no code path:
+
+| Pin | Under inert flag | Reading |
+|---|---|---|
+| P0 | PASS | kill not shown non-causal by this test |
+| P0b | FAIL (control run trips the leak guard) | kill NON-CAUSAL; claim withdrawn |
+| P0c | FAIL (both clean rows observed `leak`) | kill NON-CAUSAL; claim withdrawn |
+| P0d | PASS | kill not shown non-causal by this test |
+| P0e | PASS | kill not shown non-causal by this test |
+
+The A1 verdict line is not edited. It is superseded by this addendum's verdict, which rests on the redesign below.
+
+**Redesign** (commits `e21d1b8` briefs, `8f10cd0` refactor, `9ab8dd1` process fix):
+- *One mechanism.* A mutant is a committed TOML file of `[[edit]]` tables `(path, old, new)` (`harness/edits.py`). At application, `old` must occur exactly once; otherwise the run is STALE. Unified diffs are retired (`harness/fixtures/patches/` deleted).
+- *Trusted base.* Edits apply only inside `tree.disposable_copy`. That copies the tree of the running code, so edits compose, and excludes the top-level `.git`, `.venv`, `out`, `reports` and caches. Clean runs execute in the invocation tree, which never executes mutated code.
+- *No switches.* The following are deleted: `harness/mutants.py`, every `mutants.active` switch, the flag variable, flag inheritance, the clean-run leak guard, the `ASSIZE_RUN_DIR` environment hand-off, and the in-child all-pass switch. The child's invocation root and run directory now arrive as command-line arguments (`harness/context.py`).
+- *Causal twin.* Every mutant run is paired with a fresh unedited copy. The verdict, in order: STALE if an anchor failed; NON-CAUSAL if the twin did not pass; KILLED if the mutant failed; SURVIVED if it passed; INCONCLUSIVE otherwise. Mutant and twin rows are both exported, and STALE, NON-CAUSAL and INCONCLUSIVE all count in the denominator and fail the suite.
+- *Kept:* runner structure, registries, validation (extended to `malformed_edit`), JSONL export, nested probes reading `pins.jsonl`, config, workflows, report layout.
+
+**Pins** (each mutant is an anchored edit to the harness, in `harness/edits/`):
+
+| Pin | Check | Mutant | Kill witnessed (mutant fails / twin passes) |
+|---|---|---|---|
+| P0 | inner run over `fixture.basic` in a copy carrying `P0_checks_always_pass` (every child check returns success) reports 2/2 SURVIVED and exits non-zero; control run kills 2/2 with twins passing, every mutant and twin runs in a discarded copy, and the invocation tree's `harness/` digest is unchanged | `survivors_ignored` | yes |
+| P0b | static scan of 29 code files (`.py`, `.sh`, `.yml`, `.yaml`, `Makefile`, `Dockerfile`, `Containerfile`; top-level exclusions as above) finds no `ASSIZE_MUTANT` or `ASSIZE_TEST*` token, no import of a mutant-switch module, and no such module | `env_switch` (adds an environment read to `harness/config.py`) | yes: `VIOLATION harness/config.py:13` |
+| P0c | `fixture/broken` recorded FAILED; 1 of 2 clean runs failed; exit non-zero | `clean_failures_ignored` | yes |
+| P0d | `raises` observed error and `hangs` observed timeout (committed 3 s `fast.toml`), both INCONCLUSIVE with twins passing; 3 mutants, 2 inconclusive, 1 killed; exit non-zero | `inconclusive_dropped` | yes |
+| P0e | `no_mutants`, `duplicate_pin`, `duplicate_mutant` and `malformed_edit` registries each refused, with no pin run; control accepted | `validation_off` | yes |
+| P0f | `fixture/outside` passes in the invocation tree; its mutant and twin both fail in copies, giving NON-CAUSAL; 1 of 1 non-causal; exit non-zero | `twin_ignored` | yes |
+| P0g | the absent anchor (0 occurrences) and the duplicated anchor (2 occurrences) are each STALE; control KILLED; 3 mutants, 2 stale, 1 killed; exit non-zero | `stale_ignored` | yes |
+
+**Witnesses** (`reports/L0/a2/`, regenerated by `witness.sh`; stamps show `9ab8dd1`, `dirty=0`):
+- `make-pins.txt`, `pins/`: every pin's clean run; every mutant run with its twin.
+- `fixtures.txt`, `fixtures/`: `fixture.stale` gives 2 of 3 STALE, exit 1; `fixture.noncausal` gives 1 of 1 NON-CAUSAL with its twin failing, exit 1.
+- `review-mutants.txt`, `review/`: the whole suite, run in a disposable copy carrying each unregistered review mutant (`run --under-edits`; committed 30 s child timeout in `review-mutants/config.toml`). All four went red, and the invocation tree's `harness/` digest was `db910df6b90565c5` both before and after:
+
+| Review mutant | Exit | What turned it red |
+|---|---|---|
+| exit code 2 treated as pass | 1 | P0d clean FAILED (`raises` no longer INCONCLUSIVE); P0d's mutant NON-CAUSAL |
+| inconclusive runs omitted from the denominator | 1 | P0d clean FAILED (denominator 3 → 1); P0d's mutant NON-CAUSAL |
+| edits applied to the original tree | 1 | 6 of 7 clean FAILED; 7 of 7 mutants NON-CAUSAL; 0 of 7 twins passed |
+| clean failures ignored | 1 | P0c's mutant STALE (its anchor is the line this edit replaces), and its twin also failed. P0c's own check failed, but the mutated top level records that clean failure as ok: this mutant masks its own clean signal. The red comes from the mutant and twin accounting, which the twin exists to provide. |
+
+- `withdrawal.txt`: as above.
+- `orphan-probe.txt`: see the defect below.
+- `pins-yml-run.txt`: the CI transcript.
+
+**Defect found and fixed.** Children ran in new sessions, and a timeout killed only the child's process group. A nested orchestrator's own children, in further sessions, escaped, and a hanging one ran for ever. The witness run under review mutant 3 left grandchildren running past 540 s. Since `9ab8dd1`, every spawn sets `PR_SET_PDEATHSIG` (`harness/proc.py`, Linux), so a kill cascades down the tree. `orphan-probe.txt` shows 1 process left alive at `8f10cd0` and 0 at HEAD after SIGKILLing an orchestrator whose child hangs. **No pin protects this fix.** P0d's hang runs in a direct child, so its fixtures cannot tell the two behaviours apart. A pin needs a fixture whose check hangs in a grandchild, plus a mutant that drops the parent-death signal. Proposed for a later brief; not claimed here.
+
+**Limitations and notes.**
+- *Copies left by killed children.* A child SIGKILLed on timeout cannot remove copies it created. The review-mutant-3 run left 9 in the system temp dir, all carrying the hang edit; they were deleted by hand after the run. This happens only when a child times out.
+- *P0b scope.* The scan reads code files only and excludes top-level `reports/`. Historical witnesses there are records, not code: for example, `reports/L0/witness.sh` sets the withdrawn variable and no longer runs against the current harness. Documentation (`.md`) is not scanned. Brief 1 A3 extends the scan to the built judge image; that is L1 work.
+- *Additions beyond the letter of A2:* P0's trusted-base assertions (the digest, and copies distinct from the invocation tree); `run --under-edits`; the parent-death signal.
+- *Brief 1 A3* (appended verbatim) replaces "A2 item 2 (P8 …)". Brief 1 as committed has no A2 and no P8; its only amendment is A1. The reference does not resolve in the repository; Guy to confirm whether a brief 1 A2 is missing.
+- *Where these witnesses ran.* Witnesses other than `pins-yml-run.txt` ran on Guy's development machine (Arch Linux, Python 3.11.11), not the cloud VM. They are pass/fail evidence only; no timing in them is evidence for anything.
+- `pins.yml` still warns that the pinned actions target Node.js 20.
