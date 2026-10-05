@@ -119,3 +119,9 @@ Commit locally; do not push.
 4. **Long commands.** Never run a command expected to exceed 10 minutes in the session.
 5. **Git.** Replace "Commit locally; do not push" with: "Push to a feature branch and open a pull request; never merge."
 6. **Pins.** Register all pins with the L0 harness so that `make pins` runs them with their mutants.
+
+---
+
+## Amendment A3: follows from brief 0 A2 (appended)
+1. **Mutants.** Mutants are anchored edits applied to a disposable copy (brief 0 A2). No environment switch exists anywhere in the repository.
+2. **P8 replaced.** A2 item 2 (P8, the judge refusing to start if `ASSIZE_MUTANT` is set) is replaced by brief 0's P0b static scan, extended to the built judge image. A2 items 1 and 3 stand.

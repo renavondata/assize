@@ -91,3 +91,40 @@ On completion, open a pull request containing:
 1. **Required status check.** GitHub can only require a status check after it has run once. At precondition time, `main` requires a pull request and forbids direct pushes. Guy adds `pins.yml` as a required check after this session's PR has run it.
 2. **Brief file names.** The briefs live in the repository as `docs/briefs/brief-0-scaffold.md`, `docs/briefs/brief-1-judge-and-crafter.md` and `docs/briefs/brief-2-nethack.md`.
 3. **Workflow authority.** This brief names `.github/workflows/`. Creating `pins.yml` and `measure.yml` there is authorised.
+
+---
+
+## Amendment A2: one mutation mechanism (appended; overrides earlier text and A1 where they conflict)
+The original brief permitted mutants "selected by an environment flag or a patch file". Two mechanisms interacted: inherited flags tripped the leak guard, which made two kills non-causal. This amendment withdraws environment-flag mutants entirely.
+
+1. **Anchored edits only.** A mutant is a committed file listing one or more edits, each of the form `(path, old, new)`.
+   - At application time, `old` must occur exactly once in `path`.
+   - Zero or multiple matches make the run STALE. A STALE run is recorded, counted in the denominator, and fails the suite.
+   - Unified diffs are retired.
+
+2. **Trusted base.** Edits are applied only to a disposable copy of the repository tree. The tree from which `make pins` is invoked never executes mutated code.
+   - The copy excludes top-level paths only: `.git`, `.venv`, `out`, `reports`, caches.
+   - A child running in a copy that makes further copies copies its own tree, so edits compose.
+
+3. **No switches.**
+   - Delete `harness/mutants.py`, every `mutants.active(...)` switch, the `ASSIZE_MUTANT` variable, flag inheritance, and the clean-run leak guard.
+   - No code in the repository may read a mutant or test variable from the environment.
+
+4. **Causal twin.** Every mutant run is paired with a twin run: an identical fresh copy with no edits applied. The twin must pass.
+   - A mutant counts as KILLED only if the mutant run fails and its twin passes.
+   - A mutant whose twin fails is NON-CAUSAL; it is counted and fails the suite.
+   - Both rows are exported. The twin is the ablation witness, so no separate ablation exercise is needed.
+
+5. **L0 pins.** Each pin's own mutant is an anchored edit to the harness, and each must be causal under item 4.
+   - **P0, survivors reported.** The check runs an inner orchestrator over a fixture registry in a copy carrying an edit that makes every child check return success. It must observe every fixture mutant SURVIVED and a non-zero exit.
+   - **P0b, no switches.** A static scan finds no environment read of any `ASSIZE_MUTANT` or `ASSIZE_TEST*` variable, and no import of a mutant-switch module, anywhere in the repository. A mutant edit that adds one must be caught.
+   - **P0c, clean failures.** Unchanged in intent: a failing clean fixture is recorded FAILED and fails the suite.
+   - **P0d, inconclusive.** Fixture mutants that make the check raise, and that make it hang past the configured timeout, are recorded INCONCLUSIVE, counted, and fail the suite.
+   - **P0e, registry validation.** A pin with zero mutants, duplicate pin or mutant names, and a mutant file with a malformed edit are each refused.
+   - **P0f, non-causal detection.** A fixture whose check fails whenever it runs outside the invocation tree must be recorded NON-CAUSAL, with a non-zero exit.
+   - **P0g, stale anchors.** A fixture mutant whose `old` string is absent, and one whose `old` occurs twice, are each recorded STALE, counted, and fail the suite.
+
+6. **Record.** Append Addendum A2 to `reports/L0/REPORT.md` and a new line to the root index. The addendum must record:
+   - the withdrawal of the causality claim for P0b and P0c under the previous design;
+   - the redesign;
+   - the new verdict.
