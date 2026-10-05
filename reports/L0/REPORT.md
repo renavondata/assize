@@ -242,3 +242,15 @@ Guy confirmed in session that the base branch is `master`, not `main`. This sett
 
 #### A3 finding — 2026-10-05: branch protection unavailable
 `gh api repos/gfrmin/assize/branches/master/protection`, `.../rulesets` and `.../rules/branches/master` each return HTTP 403: "Upgrade to GitHub Pro or make this repository public to enable this feature." The repository is PRIVATE with default branch `master`. On the current plan, therefore, `master` cannot be protected and `pins` cannot be made a required check, so brief 0's precondition does not hold. The constitution's "never push or merge" rules are currently enforced by discipline alone. The remedy is Guy's: GitHub Pro, which keeps the repository private, or making the repository public, which conflicts with brief 0's "private until L2 is sealed" and would need an amendment. Neither affects the L0 verdict, whose criteria are the pins.
+
+#### A3 note — 2026-10-05: repository transferred; master protected
+On Guy's instruction:
+- **Signed text.** The five `main` references were changed to `master` in `5177756`: `CLAUDE.md` line 35, brief 0 lines 7, 73 and 91, brief 2 line 108. No other line changed.
+- **Transfer.** The repository was transferred from `gfrmin/assize` to `renavondata/assize`, an organisation on GitHub Enterprise. It is still PRIVATE, with default branch `master`. History, PR #2 and Actions history moved with it. Run and job links cited earlier in this report name `gfrmin/assize`; GitHub redirects them after a transfer.
+- **Protection on `master`,** applied with `PUT /repos/renavondata/assize/branches/master/protection`:
+  - pull request required, with 0 approvals;
+  - required status check `pins` (GitHub Actions app), not strict;
+  - enforced for admins;
+  - force-pushes and deletion disallowed.
+  Read-back: `protected: true`, `required_checks: ["pins"]`. PR #2 then reported `mergeStateStatus: CLEAN` with `pins: SUCCESS`. A direct push was not attempted, because `CLAUDE.md` forbids pushing to `master`. This resolves the A3 finding above for `renavondata/assize`, and with it brief 0 A1.1.
+- **Finding: no self-hosted runner exists.** Before the transfer, `GET /repos/gfrmin/assize/actions/runners` returned `total_count: 0`. Brief 0's precondition of a runner labelled `measure` therefore did not hold, and `measure.yml` cannot run until Guy registers one, now under `renavondata`. Runner registration is Guy's alone.
