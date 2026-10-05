@@ -4,7 +4,7 @@
 Guy has done all of the following:
 - created the repository `assize`, private until L2 is sealed;
 - committed `CLAUDE.md` and `docs/briefs/brief-1-judge-and-crafter.md` and `docs/briefs/brief-2-nethack.md`;
-- protected `main`: pull request required, status checks required, no direct pushes;
+- protected `master`: pull request required, status checks required, no direct pushes;
 - registered a self-hosted GitHub Actions runner on the measurement host, running as an unprivileged user, labelled `measure`.
 
 Read `CLAUDE.md` first. It governs this session.
@@ -70,7 +70,7 @@ Guy confirms the host run of `measure.yml` after merge. The session cannot witne
 - No World, judge, agent or incumbent code.
 - No secrets, tokens or credentials in any file.
 - No changes to `CLAUDE.md`, branch protection, repository settings or runner registration.
-- No workflow may push, merge, tag or write to `main`.
+- No workflow may push, merge, tag or write to `master`.
 - No LLM calls.
 
 ## Stop-and-report boundaries
@@ -88,7 +88,7 @@ On completion, open a pull request containing:
 ---
 
 ## Amendment A1 (appended; overrides earlier text where they conflict)
-1. **Required status check.** GitHub can only require a status check after it has run once. At precondition time, `main` requires a pull request and forbids direct pushes. Guy adds `pins.yml` as a required check after this session's PR has run it.
+1. **Required status check.** GitHub can only require a status check after it has run once. At precondition time, `master` requires a pull request and forbids direct pushes. Guy adds `pins.yml` as a required check after this session's PR has run it.
 2. **Brief file names.** The briefs live in the repository as `docs/briefs/brief-0-scaffold.md`, `docs/briefs/brief-1-judge-and-crafter.md` and `docs/briefs/brief-2-nethack.md`.
 3. **Workflow authority.** This brief names `.github/workflows/`. Creating `pins.yml` and `measure.yml` there is authorised.
 

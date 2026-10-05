@@ -32,7 +32,7 @@ Each layer is built on the one below. A layer starts only after the previous lay
 
 ## Git
 - Work on a feature branch and open a pull request.
-- Never merge, never push to `main`, never tag, never delete branches.
+- Never merge, never push to `master`, never tag, never delete branches.
 - Never modify this file, runner labels, or repository settings. Touch `.github/` only under a brief that names it.
 
 ## Execution: cloud versus host

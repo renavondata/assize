@@ -105,4 +105,4 @@ Commit locally; do not push.
 1. **Inherited amendments.** Brief 1's Amendment A1 items 2–6 apply here unchanged.
 2. **AutoAscend source.** Vendor AutoAscend as a git submodule pinned to a named commit. If the cloud session cannot fetch it, stop and report.
 3. **Measurement.** All pilots, including AutoAscend episodes, run only on the host via `measure.yml`. In the cloud, each incumbent runs at most 3 smoke episodes per World, with a step cap committed in config.
-4. **Zero diff.** P1 (zero diff on `judge/` and `worlds/spec/`) compares against the merged L1 commit on `main`, not a local commit.
+4. **Zero diff.** P1 (zero diff on `judge/` and `worlds/spec/`) compares against the merged L1 commit on `master`, not a local commit.
