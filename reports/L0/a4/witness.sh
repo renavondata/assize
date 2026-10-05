@@ -7,7 +7,7 @@ W=reports/L0/a4
 RAW=out/a4-witness                      # gitignored
 PY="uv run --frozen python"
 stamp() { echo "# $(date -u +%Y-%m-%dT%H:%M:%SZ) $(uname -srm) commit=$(git rev-parse --short HEAD) dirty=$(git status --porcelain -- harness Makefile pyproject.toml uv.lock scripts .github .python-version docs | wc -l)"; }
-markers() { local n=0; for p in /proc/[0-9]*; do c=$(tr '\0' ' ' < $p/cmdline 2>/dev/null) || continue
+markers() { local n=0; for p in /proc/[0-9]*; do c=$(tr '\0' ' ' 2>/dev/null < $p/cmdline) || continue
               case "$c" in *"-c "*assize-*) n=$((n+1));; esac; done; echo "$n"; }
 leftovers() { echo "leftovers: /tmp/assize-* dirs=$(find /tmp -maxdepth 1 -name 'assize-*' | wc -l); harness processes=$(pgrep -fc 'harness (run|check)'); marker processes (assize-* grandchildren/daemons)=$(markers)"; }
 pack() {  # pack <dir-containing-runs-or-files> <name> <subpath>

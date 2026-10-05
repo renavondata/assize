@@ -13,7 +13,7 @@ HOLD=10   # R1 grandchild lifetime, s; > reap_grace_s (5, default config at both
 mkdir -p "$OUT"
 
 alive() { [ "$(awk '{print $3}' /proc/$1/stat 2>/dev/null)" != Z ] && tr '\0' ' ' 2>/dev/null < /proc/$1/cmdline | grep -q "$2"; }
-markers() { local n=0; for p in /proc/[0-9]*; do c=$(tr '\0' ' ' < $p/cmdline 2>/dev/null) || continue
+markers() { local n=0; for p in /proc/[0-9]*; do c=$(tr '\0' ' ' 2>/dev/null < $p/cmdline) || continue
               case "$c" in *"-c "*assize-probe-*) n=$((n+1));; esac; done; echo "$n"; }
 
 prepare() {  # prepare <rev|WORKTREE> <dest> <fixture-python-file>
