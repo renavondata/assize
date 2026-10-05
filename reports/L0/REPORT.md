@@ -254,3 +254,79 @@ On Guy's instruction:
   - force-pushes and deletion disallowed.
   Read-back: `protected: true`, `required_checks: ["pins"]`. PR #2 then reported `mergeStateStatus: CLEAN` with `pins: SUCCESS`. A direct push was not attempted, because `CLAUDE.md` forbids pushing to `master`. This resolves the A3 finding above for `renavondata/assize`, and with it brief 0 A1.1.
 - **Finding: no self-hosted runner exists.** Before the transfer, `GET /repos/gfrmin/assize/actions/runners` returned `total_count: 0`. Brief 0's precondition of a runner labelled `measure` therefore did not hold, and `measure.yml` cannot run until Guy registers one, now under `renavondata`. Runner registration is Guy's alone.
+
+### A4 — 2026-10-05: review finding F1 disposed (brief 0 Amendment A3); verdict
+**Verdict: L0 PASSED under brief 0 A2 and A3.** `make pins`: clean 8/8 passed; mutants 10/10 KILLED, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal; 0 leaked; twins 10/10 passed; exit 0. Witnessed locally at `cea5957` (`a4/make-pins.txt`) and by `pins.yml` on PR #2 at `f07330a`, the first CI run of this session's head: [run 37358542927](https://github.com/renavondata/assize/actions/runs/37358542927/job/111927025551) (`a4/pins-yml-run.txt`). The host run of `measure.yml` remains unwitnessed and unclaimed, and needs a registered runner.
+
+**F1, quoted in full** (as stated in brief 0 A3; no other text of the review was supplied to this session):
+> Review of 47af530 found (F1) that P0h is stated universally but witnessed only for cooperating processes, and that a run recording `scratch_quiescent: false` keeps its verdict and has its scratch root deleted anyway.
+
+**Reviewer probes, reconstructed from F1 and reproduced** (`a4/probes.txt`, `a4/probes.sh`; rows in `a4/probe-*.jsonl`). Each probe runs on a disposable copy carrying an injected probe fixture; nothing is added to `harness/`.
+
+| Probe | Revision | Row | Suite | Afterwards |
+|---|---|---|---|---|
+| R1: a clean check returns True; its grandchild (new session, no death signal, cwd in the scratch root) lives 10 s | `47af530` | observed pass, `scratch_quiescent: False`, verdict **ok** | **PINS PASSED**, exit 0 (the defect) | grandchild alive right after; exited on its own within 10 s; 0 markers |
+| R1 | HEAD (`cea5957`) | observed pass, `scratch_quiescent: False`, verdict **LEAKED**; summary leaked 1 | PINS FAILED, exit 1 | as above |
+| N6: a clean check double-forks a daemon (new session, no death signal, cwd `/`) and returns True | HEAD (`cea5957`) | observed pass, `scratch_quiescent: True`, verdict **ok** | **PINS PASSED**, exit 0 (the declared gap) | daemon alive after the suite (ppid 1, own session, cwd `/`); `kill -9` by PID file; shown dead; 0 markers |
+
+**Disposition of A3 items 1–4.**
+1. *LEAKED verdict* (`f5be46e`, `harness/runner.py` `_leak_override`):
+   - a row with `scratch_quiescent == false` is LEAKED whatever was observed;
+   - LEAKED on the mutant or the twin row makes the pair LEAKED;
+   - `leaked` is counted in `TALLY` and the summary row. A clean LEAKED row also counts in `clean_failed`. The summary's `leaked` covers clean and mutant rows together;
+   - it is printed like the other verdicts and exits non-zero;
+   - the scratch root is still deleted.
+2. *`fixture.escapee`* (`harness/fixtures/escapee.py`):
+   - Its grandchild starts in a new session with no death signal, works inside the run's scratch root, sleeps `escape_hold_s` and exits on its own, while the check hangs.
+   - `harness/fixtures/fast.toml` commits `child_timeout_s = 3`, `reap_grace_s = 2` and `escape_hold_s = 12`.
+   - **Margin: 12 − (3 + 2) = 7 s.** The grandchild starts after the child, while the parent stops waiting about 5 s after the child's start. Only a stall of over 7 s could flip the verdict; shared-runner jitter is milliseconds to hundreds of milliseconds.
+   - Observed: the parent stopped waiting at 5.065 s locally and at 5.033 s on `ubuntu-latest`. The local run gave timeout, `scratch_quiescent: false`, LEAKED, leaked = 1, exit 1. Afterwards the grandchild exited on its own, the scratch root was gone, and nothing was left (`a4/escapee-fixture.txt`).
+   - **Not witnessed on the cloud VM.** This session ran on Guy's development machine; `ubuntu-latest` and the development machine are witnessed.
+3. *P0h:*
+   - The escapee assertions (observed timeout, `scratch_quiescent == false`, verdict LEAKED, summary leaked = 1, exit non-zero and equal to the summary's) are read from exported rows. P0h then waits for the grandchild, up to `escape_hold_s` plus `poll_step_s`, and asserts no survivor and no scratch root.
+   - The cooperating-grandchild assertions stay.
+   - The description is replaced with the witnessed scope, verbatim from A3 item 3.
+   - Mutants, each KILLED with its twin passing (`a4/make-pins-runs.tar.xz`):
+     - `leaked_not_counted` fails exactly on "verdict LEAKED" and "summary leaked = 1";
+     - `death_signal_reverted` now also fails the cooperating run's INCONCLUSIVE assertion, because that run is LEAKED;
+     - `scratch_kept` fails on the copy and the root not being removed.
+4. *N6* is witnessed as above. The daemon was killed by the probe and shown dead. This gap is out of scope at L0 by item 3 and is discharged by item 5.
+
+Also per A3 item 6:
+- `registry` rows carry `proposer` (`kind`, `model`, `session`), from committed `harness/proposer.toml`;
+- `poll_step_s` = 0.05 is committed in `harness/config.toml`, and every bounded wait uses it.
+
+**L1 obligation (brief 0 A3 item 5, verbatim; not built):**
+> Harness: every orchestrator process sets `PR_SET_CHILD_SUBREAPER`; children run one at a time, asserted; after every child run and before its scratch root is deleted, every remaining descendant is killed, repeating until none remain, and the count is recorded as `leaked_processes`; `leaked_processes > 0` is `LEAKED`. Fixtures: the cooperating grandchild; a non-cooperating grandchild (new session, no death signal, SIGTERM ignored, hanging past the timeout); a double-forked daemon from a clean check returning True. Mutants, each an anchored edit, each `KILLED` with a passing twin: subreaper not set; sweep skipped; `LEAKED` not counted; scratch kept. If `death_signal_reverted` then survives because the subreaper makes the death signal redundant, either pin a case only the death signal covers or remove the death signal and retire the mutant, recording why; no mechanism without a killed mutant. Judge: containers started by the judge are killed and removed on timeout, witnessed by a pin (P10) with a non-cooperating process inside the container that ignores SIGTERM; a candidate container alive after teardown is an episode with termination code `LEAKED`, counted, never dropped. Process-level sweeping does not reach containerd-shim children.
+
+**Correction to the A3 correction.** It reported "0 harness processes" after the review-mutant re-run, including after review mutant 3. That probe matched only `harness (run|check)` command lines. This session found **13 live P0h grandchildren** (marker `assize-p0h-grandchild`), all spawned under `out/a3-witness/review/applied_to_original_tree/...` and alive about 95 minutes. Review mutant 3 writes edits into the shared tree, so P0h's `death_signal_reverted` edit took the death signal away from every later spawn in that run. All 13 were killed by hand before any run in this session. They are an instance of exactly the class that item 5 discharges at L1. Witness scripts from A4 onwards count processes by marker as well (`leftovers:` lines).
+
+**Forecasts** (`reports/L0/forecasts.jsonl`, created before this session's first `make pins`):
+
+| id | Claim | p | Outcome |
+|---|---|---|---|
+| `876d1d05c550` | pins green on the first CI run of this PR head | 0.80 | TRUE (run 37358542927) |
+| `a30e37db1152` | fixture.escapee recorded LEAKED with leaked = 1 inside P0h on ubuntu-latest in that first CI run | 0.90 | TRUE (artefact rows) |
+| `ed89fc300206` | reviewer verdict ACCEPT with no blocking finding | 0.45 | open |
+
+Cumulative log-loss over the 2 resolved forecasts is 0.329 nats, against 1.386 nats for a base rate of p = 0.5.
+
+**Witnesses** (`reports/L0/a4/`, regenerated by `witness.sh`; stamps show `cea5957`, `dirty=0`; zero `/tmp/assize-*` directories, zero harness processes and zero marker processes before and after each):
+
+| Archive | SHA-256 | Compressed bytes | Uncompressed tar bytes | Files |
+|---|---|---|---|---|
+| `a4/make-pins-runs.tar.xz` | `7d398c8904ad61f24232c8621f1ac806ca7eda1692259889e622eff33f25dbeb` | 20,072 | 686,080 | 259 |
+| `a4/escapee-fixture-runs.tar.xz` | `61ec61a4d41b26d709e52708535ca56a08f25d01023686d5e00f7f8a84a4aa18` | 368 | 10,240 | 2 |
+| `a4/probes-runs.tar.xz` | `9f28ef78f5aa18895fb5127f2bfbde6eee1e1e19f7141c8e00db27f549ffa24d` | 1,228 | 20,480 | 8 |
+
+Uncompressed alongside: `make-pins.txt` and `.jsonl`, `escapee-fixture.txt` and `.jsonl`, `probes.txt` and `probe-*.jsonl`, `pins-yml-run.txt`, `MANIFEST.txt`.
+
+**A3 pre-stated criteria:**
+
+| Criterion | Status |
+|---|---|
+| `make pins` passes with every mutant, including `P0h/leaked_not_counted`, KILLED with a passing twin | MET (local and CI) |
+| the nested `fixture.escapee` run is LEAKED, leaked = 1, exit non-zero, and leaves no process and no scratch root | MET (P0h transcript in the archive; CI artefact; `a4/escapee-fixture.txt`) |
+| N6 witnessed, daemon shown killed | MET (`a4/probes.txt`) |
+| `pins` green on the PR head | MET at `f07330a`; re-checked on the report commit |
+| A4, index line, `forecasts.jsonl`, `proposer`, `STATUS.md` exist | MET |

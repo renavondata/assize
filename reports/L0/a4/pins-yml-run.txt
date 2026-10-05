@@ -1,0 +1,33 @@
+# pins.yml witness: PR #2, head f07330a03d1191dcc445afae9ce5f7c8a003cd69 (first CI run of this session's head)
+# run   https://github.com/renavondata/assize/actions/runs/37358542927
+# job   https://github.com/renavondata/assize/actions/runs/37358542927/job/111927025551
+# check "pins": conclusion success, GitHub-hosted ubuntu-latest
+# From the run's artefact pins-report, runs/P0h/clean/nested/escapee/pins.jsonl:
+#   fixture/escapee: observed=timeout scratch_quiescent=false verdict=LEAKED duration_s=5.033; summary leaked=1 exit_code=1
+# Excerpt of the job log (make pins step), timestamps kept, transcript paths elided:
+2026-10-05T18:47:00.3741138Z   clean: true
+2026-10-05T18:47:05.7748184Z Using CPython 3.11.13
+2026-10-05T18:47:05.7819064Z ##[group]Run make pins PINS_OUT=out/pins
+2026-10-05T18:47:05.7819498Z ^[[36;1mmake pins PINS_OUT=out/pins^[[0m
+2026-10-05T18:48:59.1827892Z [clean ] P0: observed pass -> ok (1.025s)
+2026-10-05T18:48:59.1829509Z [clean ] P0b: observed pass -> ok (0.172s)
+2026-10-05T18:48:59.1841988Z [clean ] P0c: observed pass -> ok (0.322s)
+2026-10-05T18:48:59.1863877Z [clean ] P0d: observed pass -> ok (3.583s)
+2026-10-05T18:48:59.1865465Z [clean ] P0e: observed pass -> ok (0.474s)
+2026-10-05T18:48:59.1869594Z [clean ] P0f: observed pass -> ok (0.423s)
+2026-10-05T18:48:59.1870846Z [clean ] P0g: observed pass -> ok (0.523s)
+2026-10-05T18:48:59.1872124Z [clean ] P0h: observed pass -> ok (15.808s)
+2026-10-05T18:48:59.1873743Z [mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.938s + 0.937s)
+2026-10-05T18:48:59.1886176Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.086s + 0.085s)
+2026-10-05T18:48:59.1888647Z [mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.337s + 0.336s)
+2026-10-05T18:48:59.1890669Z [mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.644s + 3.644s)
+2026-10-05T18:48:59.1892317Z [mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.79s + 0.486s)
+2026-10-05T18:48:59.1894077Z [mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.447s + 0.436s)
+2026-10-05T18:48:59.1896067Z [mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.688s + 0.536s)
+2026-10-05T18:48:59.1897907Z [mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (10.509s + 15.57s)
+2026-10-05T18:48:59.1899688Z [mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.443s + 15.571s)
+2026-10-05T18:48:59.1901528Z [mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (15.571s + 15.569s)
+2026-10-05T18:48:59.1902865Z clean: 8/8 passed, 0/8 failed
+2026-10-05T18:48:59.1903940Z mutants: 10/10 killed, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal, 0 leaked (clean and mutant)
+2026-10-05T18:48:59.1905317Z twins: 10/10 passed
+2026-10-05T18:48:59.1906593Z PINS PASSED
