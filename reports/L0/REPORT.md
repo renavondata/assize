@@ -236,3 +236,6 @@ The invocation tree's `harness/` digest was `4328bce9a12ada73` both before and a
 | `a3/review-clean_failures_ignored.tar.xz` | `9406c8e67061b2cf9bac0d515bc9382d082fef85fca5b42e470489d6c4c406d4` | 18,948 | 614,400 | 218 |
 
 The verdict is unchanged.
+
+#### A3 note — 2026-10-05: base branch decided
+Guy confirmed in session that the base branch is `master`, not `main`. This settles the discrepancy noted in Addendum A1. Signed text still names `main`: `CLAUDE.md` line 35, brief 0 lines 7, 73 and 91, and brief 2 line 108. This session edited none of it, because `CLAUDE.md` reserves that file to Guy and the briefs change only by amendment. No workflow, Make target or harness code names a branch, so the change has no functional effect. Still to be confirmed by Guy: that `master` carries the protection brief 0's precondition describes, and that `pins` is a required check.
