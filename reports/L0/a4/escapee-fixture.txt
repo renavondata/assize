@@ -1,0 +1,16 @@
+# 2026-10-05T18:42:42Z Linux 7.2.6-arch2-1 x86_64 commit=9c6a148 dirty=0
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0
+$ uv run --frozen python -m harness run --registry fixture.escapee --phase clean --config harness/fixtures/fast.toml --out out/a4-witness/escapee
+registry fixture.escapee: 1 pins, 1 mutants; phase=clean; child_timeout_s=3.0 (harness/fixtures/fast.toml)
+[clean ] fixture/escapee: observed timeout -> LEAKED (5.008s) out/a4-witness/escapee/runs/fixture__escapee/clean/transcript.log
+CLEAN FAILED: fixture/escapee (observed timeout)
+clean: 0/1 passed, 1/1 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 1 leaked (clean and mutant)
+twins: 0/0 passed
+report: out/a4-witness/escapee/pins.jsonl
+PINS FAILED
+[exit 1]
+escapee grandchild 722068 alive right after the run: yes
+escapee grandchild 722068 alive after waiting for it to exit on its own: no
+scratch root recorded: /tmp/assize-scratch-px1hcsqs exists now: no
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0

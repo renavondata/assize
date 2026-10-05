@@ -30,9 +30,9 @@ cp "$RAW/pins/pins.jsonl" "$W/make-pins.jsonl"; pack "$RAW/pins" make-pins runs
   $PY -m harness run --registry fixture.escapee --phase clean --config harness/fixtures/fast.toml --out "$RAW/escapee" 2>&1
   echo "[exit $?]"
   pid=$(cat "$RAW"/escapee/runs/fixture__escapee/clean/escapee.pid)
-  echo "escapee grandchild $pid alive right after the run: $(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null | grep -q assize-escapee && echo yes || echo no)"
-  for _ in $(seq 1 300); do tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null | grep -q assize-escapee || break; sleep 0.05; done
-  echo "escapee grandchild $pid alive after waiting for it to exit on its own: $(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null | grep -q assize-escapee && echo yes || echo no)"
+  echo "escapee grandchild $pid alive right after the run: $(tr '\0' ' ' 2>/dev/null < /proc/$pid/cmdline | grep -q assize-escapee && echo yes || echo no)"
+  for _ in $(seq 1 300); do tr '\0' ' ' 2>/dev/null < /proc/$pid/cmdline | grep -q assize-escapee || break; sleep 0.05; done
+  echo "escapee grandchild $pid alive after waiting for it to exit on its own: $(tr '\0' ' ' 2>/dev/null < /proc/$pid/cmdline | grep -q assize-escapee && echo yes || echo no)"
   echo "scratch root recorded: $(grep -o '"scratch": "[^"]*"' "$RAW/escapee/pins.jsonl" | cut -d'"' -f4) exists now: $([ -e "$(grep -o '"scratch": "[^"]*"' "$RAW/escapee/pins.jsonl" | cut -d'"' -f4)" ] && echo yes || echo no)"
   leftovers
 } > "$W/escapee-fixture.txt"

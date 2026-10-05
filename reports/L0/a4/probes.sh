@@ -8,11 +8,11 @@
 #       its PID file, and shown dead.
 # Usage: probes.sh OUTDIR   (raw per-child output; the caller packs it)
 set -uo pipefail
-OUT="$1"; REPO=$(pwd); PY="$REPO/.venv/bin/python"
+OUT=$(realpath -m "$1"); REPO=$(pwd); PY="$REPO/.venv/bin/python"
 HOLD=10   # R1 grandchild lifetime, s; > reap_grace_s (5, default config at both revisions) with 5 s margin
 mkdir -p "$OUT"
 
-alive() { [ "$(awk '{print $3}' /proc/$1/stat 2>/dev/null)" != Z ] && tr '\0' ' ' < /proc/$1/cmdline 2>/dev/null | grep -q "$2"; }
+alive() { [ "$(awk '{print $3}' /proc/$1/stat 2>/dev/null)" != Z ] && tr '\0' ' ' 2>/dev/null < /proc/$1/cmdline | grep -q "$2"; }
 markers() { local n=0; for p in /proc/[0-9]*; do c=$(tr '\0' ' ' < $p/cmdline 2>/dev/null) || continue
               case "$c" in *"-c "*assize-probe-*) n=$((n+1));; esac; done; echo "$n"; }
 
