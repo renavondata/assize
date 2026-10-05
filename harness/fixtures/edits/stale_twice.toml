@@ -1,0 +1,5 @@
+# Seeded defect: the anchor occurs twice in the file (definition and call).
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "add("
+new = "plus("

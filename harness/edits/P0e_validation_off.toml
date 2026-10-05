@@ -1,0 +1,8 @@
+# P0e's mutant: registry validation accepts everything.
+[[edit]]
+path = "harness/pin.py"
+old = "    from harness import edits\n"
+new = """    from harness import edits
+
+    return
+"""

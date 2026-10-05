@@ -1,0 +1,5 @@
+# P0c's mutant: a failing clean run is recorded ok.
+[[edit]]
+path = "harness/runner.py"
+old = "    verdict = \"ok\" if observed == \"pass\" else \"FAILED\"\n"
+new = "    verdict = \"ok\"\n"

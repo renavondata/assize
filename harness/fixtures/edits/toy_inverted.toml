@@ -1,0 +1,4 @@
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "    return add(2, 2) == 4\n"
+new = "    return add(2, 2) != 4\n"

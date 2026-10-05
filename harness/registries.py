@@ -11,9 +11,12 @@ REGISTRIES = {
     "fixture.basic": "harness.fixtures.basic",
     "fixture.broken": "harness.fixtures.broken",
     "fixture.inconclusive": "harness.fixtures.inconclusive",
+    "fixture.noncausal": "harness.fixtures.noncausal",
+    "fixture.stale": "harness.fixtures.stale",
     "fixture.no_mutants": "harness.fixtures.no_mutants",
     "fixture.dup_pin": "harness.fixtures.dup_pin",
     "fixture.dup_mutant": "harness.fixtures.dup_mutant",
+    "fixture.malformed_edit": "harness.fixtures.malformed_edit",
 }
 
 

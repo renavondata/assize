@@ -1,13 +1,13 @@
 """Probe for the harness's own pins: run a nested orchestrator and read its exported rows.
 
 Assertions read `pins.jsonl` rows only, never stdout text. The nested run's
-stdout is kept beside its rows as a transcript.
+stdout is kept beside its rows as a transcript. With `edits`, the nested
+orchestrator runs in a disposable copy of this tree carrying those edits.
 """
 
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -15,14 +15,15 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from harness import mutants
+from harness import context, edits as edits_mod
 from harness.pin import ROOT
+from harness.tree import disposable_copy
 
 
 @dataclass
 class Nested:
     label: str
-    exit_code: int
+    exit_code: int | None
     rows: list[dict]
     out: Path
     failures: list[str] = field(default_factory=list)
@@ -40,8 +41,11 @@ class Nested:
         rows = self.of("summary")
         return rows[0] if len(rows) == 1 else {}
 
-    def run(self, pin: str, mutant: str | None = None) -> dict:
-        hits = [r for r in self.of("run") if r["pin"] == pin and r["mutant"] == mutant]
+    def runs(self, role: str) -> list[dict]:
+        return [r for r in self.of("run") if r.get("role") == role]
+
+    def run(self, pin: str, mutant: str | None = None, role: str = "clean") -> dict:
+        hits = [r for r in self.of("run") if r["pin"] == pin and r["mutant"] == mutant and r["role"] == role]
         return hits[0] if len(hits) == 1 else {}
 
     def expect(self, cond: bool, what: str) -> None:
@@ -54,24 +58,33 @@ class Nested:
         return not self.failures
 
 
-def run_nested(label: str, registry: str, phase: str, *extra_flags: str,
-               config: Path | None = None) -> Nested:
-    base = os.environ.get("ASSIZE_RUN_DIR") or tempfile.mkdtemp(prefix="assize-nested-")
-    out = Path(base) / "nested" / label
+def run_nested(label: str, registry: str, phase: str, *,
+               edits: str | None = None, config: Path | None = None) -> Nested:
+    base = context.run_dir or Path(tempfile.mkdtemp(prefix="assize-nested-"))
+    out = base / "nested" / label
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
-    env = mutants.with_mutants(os.environ, *extra_flags)
-    env.pop("ASSIZE_RUN_DIR", None)
-    cmd = [sys.executable, "-m", "harness", "run", "--registry", registry,
-           "--phase", phase, "--out", str(out)]
+    cmd = [sys.executable, "-m", "harness", "run", "--registry", registry, "--phase", phase, "--out", str(out)]
     if config is not None:
         cmd += ["--config", str(config)]
+    stale = None
     with (out / "stdout.log").open("w") as log:
-        code = subprocess.run(cmd, env=env, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT).returncode
+        if edits is None:
+            code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT).returncode
+        else:
+            with disposable_copy(ROOT) as copy:
+                try:
+                    edits_mod.apply(copy, edits_mod.load(edits))
+                    log.write(f"nested run in copy {copy} carrying {edits}\n")
+                    log.flush()
+                    code = subprocess.run(cmd, cwd=copy, stdout=log, stderr=subprocess.STDOUT).returncode
+                except edits_mod.Stale as e:
+                    stale, code = str(e), None
     rows_path = out / "pins.jsonl"
     rows = [json.loads(line) for line in rows_path.read_text().splitlines()] if rows_path.exists() else []
-    print(f"nested {label}: registry={registry} phase={phase} "
-          f"extra_flags={list(extra_flags) or '(none)'} exit={code} rows={rows_path}")
+    print(f"nested {label}: registry={registry} phase={phase} edits={edits or '(none)'} "
+          f"exit={code} rows={rows_path}")
     n = Nested(label, code, rows, out)
+    n.expect(stale is None, f"seeded edits applied ({stale or 'anchors unique'})")
     n.expect(n.summary.get("exit_code") == code, "summary row exit_code equals process exit code")
     return n

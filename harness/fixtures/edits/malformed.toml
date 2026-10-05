@@ -1,0 +1,4 @@
+# Seeded defect: an edit without `new`.
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "    return a + b\n"

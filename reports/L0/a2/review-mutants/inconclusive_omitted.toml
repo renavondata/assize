@@ -1,0 +1,5 @@
+# Review mutant 2 (unregistered): INCONCLUSIVE runs are omitted from the mutant denominator.
+[[edit]]
+path = "harness/runner.py"
+old = "                counts[\"mutants_total\"] += 1\n"
+new = "                counts[\"mutants_total\"] += verdict != \"INCONCLUSIVE\"\n"

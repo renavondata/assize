@@ -1,0 +1,5 @@
+# Review mutant 4 (unregistered): a failing clean run is recorded ok.
+[[edit]]
+path = "harness/runner.py"
+old = "    verdict = \"ok\" if observed == \"pass\" else \"FAILED\"\n"
+new = "    verdict = \"ok\"\n"

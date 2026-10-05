@@ -1,0 +1,8 @@
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "def check_toy() -> bool:\n"
+new = """def check_toy() -> bool:
+    import time
+    while True:
+        time.sleep(1)
+"""

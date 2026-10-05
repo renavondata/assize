@@ -1,3 +1,3 @@
-from harness.fixtures.toy import OFF_BY_ONE, OFF_BY_ONE_PATCH, toy_pin
+from harness.fixtures.toy import INVERTED, OFF_BY_ONE, toy_pin
 
-PINS = [toy_pin(OFF_BY_ONE, OFF_BY_ONE_PATCH)]
+PINS = [toy_pin(OFF_BY_ONE, INVERTED)]

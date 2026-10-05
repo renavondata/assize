@@ -1,0 +1,5 @@
+# Seeded edit used by P0's check (not P0's own mutant): every child check returns success.
+[[edit]]
+path = "harness/runner.py"
+old = "        ok = bool(pin.check())\n"
+new = "        ok = True\n"

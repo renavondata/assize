@@ -2,32 +2,28 @@
 
 from __future__ import annotations
 
-import time
-
-from harness import mutants
 from harness.pin import Mutant, Pin
 
 
 def add(a: int, b: int) -> int:
-    if mutants.active("fixture/toy/off_by_one"):
-        return a + b + 1
     return a + b
 
 
 def check_toy() -> bool:
-    if mutants.active("fixture/toy/raises"):
-        raise RuntimeError("seeded mutant fixture/toy/raises")
-    if mutants.active("fixture/toy/hangs"):
-        while True:
-            time.sleep(1)
     return add(2, 2) == 4
 
 
-OFF_BY_ONE = Mutant("off_by_one")
-OFF_BY_ONE_PATCH = Mutant("off_by_one_patch", selector="patch",
-                          patch="harness/fixtures/patches/toy_off_by_one.diff")
-RAISES = Mutant("raises")
-HANGS = Mutant("hangs")
+def _edits(name: str) -> str:
+    return f"harness/fixtures/edits/{name}.toml"
+
+
+OFF_BY_ONE = Mutant("off_by_one", _edits("toy_off_by_one"))
+INVERTED = Mutant("inverted", _edits("toy_inverted"))
+RAISES = Mutant("raises", _edits("toy_raises"))
+HANGS = Mutant("hangs", _edits("toy_hangs"))
+ABSENT = Mutant("absent", _edits("stale_absent"))
+TWICE = Mutant("twice", _edits("stale_twice"))
+MALFORMED = Mutant("malformed", _edits("malformed"))
 
 
 def toy_pin(*mutant_set: Mutant) -> Pin:
