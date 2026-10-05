@@ -1,0 +1,8 @@
+# 2026-10-05T16:12:37Z Linux 7.2.6-arch2-1 x86_64 commit=9ab8dd1 dirty=0
+## at 8f10cd0 (children in new sessions, no parent-death signal)
+hanging child running: 1
+processes left alive 2 s after SIGKILL of the orchestrator: 1
+
+## at HEAD (PR_SET_PDEATHSIG on every spawn)
+hanging child running: 1
+processes left alive 2 s after SIGKILL of the orchestrator: 0

@@ -1,0 +1,9 @@
+copy of /tmp/assize-copy-u7ywlmff/repo
+  at /tmp/assize-copy-eqifr6r7/repo
+applied 1 edit(s) from harness/fixtures/edits/toy_off_by_one.toml
+pin:       fixture/outside
+protects:  fails outside the invocation tree
+role:      mutant
+tree:      /tmp/assize-copy-eqifr6r7/repo
+invoked:   /tmp/assize-copy-u7ywlmff/repo
+result:    FAIL

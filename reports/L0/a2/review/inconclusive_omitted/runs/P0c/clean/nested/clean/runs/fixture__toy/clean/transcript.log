@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      clean
+tree:      /tmp/assize-copy-_vhokbvs/repo
+invoked:   /tmp/assize-copy-_vhokbvs/repo
+result:    PASS

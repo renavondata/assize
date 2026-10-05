@@ -1,0 +1,11 @@
+registry fixture.inconclusive: 1 pins, 3 mutants; phase=mutants; child_timeout_s=3.0 (harness/fixtures/fast.toml)
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.071s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0d/clean/nested/inconclusive/runs/fixture__toy/off_by_one/mutant/transcript.log
+[mutant] fixture/toy/raises: mutant pass, twin pass -> SURVIVED (0.071s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0d/clean/nested/inconclusive/runs/fixture__toy/raises/mutant/transcript.log
+MUTANT SURVIVED: fixture/toy/raises
+[mutant] fixture/toy/hangs: mutant timeout, twin pass -> INCONCLUSIVE (3.01s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0d/clean/nested/inconclusive/runs/fixture__toy/hangs/mutant/transcript.log
+MUTANT INCONCLUSIVE: fixture/toy/hangs
+clean: 0/0 passed, 0/0 failed
+mutants: 1/3 killed, 1/3 survived, 1/3 inconclusive, 0/3 stale, 0/3 non-causal
+twins: 3/3 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0d/clean/nested/inconclusive/pins.jsonl
+PINS FAILED

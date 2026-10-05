@@ -1,0 +1,37 @@
+copy of /tmp/assize-copy-ie5v5mmm/repo
+  at /tmp/assize-copy-cj8jtygw/repo
+applied 1 edit(s) from harness/edits/P0e_validation_off.toml
+pin:       P0e
+protects:  a registry with a mutant-less pin, a duplicated name or a malformed edit is refused
+role:      mutant
+tree:      /tmp/assize-copy-cj8jtygw/repo
+invoked:   /tmp/assize-copy-ie5v5mmm/repo
+nested no_mutants: registry=fixture.no_mutants phase=all edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/no_mutants/pins.jsonl
+  [ok] no_mutants: seeded edits applied (anchors unique)
+  [ok] no_mutants: summary row exit_code equals process exit code
+  [FAIL] no_mutants: fixture.no_mutants refused with no_mutants
+  [FAIL] no_mutants: no pin was run
+  [FAIL] no_mutants: suite exits non-zero
+nested dup_pin: registry=fixture.dup_pin phase=all edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_pin/pins.jsonl
+  [ok] dup_pin: seeded edits applied (anchors unique)
+  [ok] dup_pin: summary row exit_code equals process exit code
+  [FAIL] dup_pin: fixture.dup_pin refused with duplicate_pin
+  [FAIL] dup_pin: no pin was run
+  [FAIL] dup_pin: suite exits non-zero
+nested dup_mutant: registry=fixture.dup_mutant phase=all edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_mutant/pins.jsonl
+  [ok] dup_mutant: seeded edits applied (anchors unique)
+  [ok] dup_mutant: summary row exit_code equals process exit code
+  [FAIL] dup_mutant: fixture.dup_mutant refused with duplicate_mutant
+  [FAIL] dup_mutant: no pin was run
+  [FAIL] dup_mutant: suite exits non-zero
+nested malformed_edit: registry=fixture.malformed_edit phase=all edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/malformed_edit/pins.jsonl
+  [ok] malformed_edit: seeded edits applied (anchors unique)
+  [FAIL] malformed_edit: summary row exit_code equals process exit code
+  [FAIL] malformed_edit: fixture.malformed_edit refused with malformed_edit
+  [FAIL] malformed_edit: no pin was run
+  [ok] malformed_edit: suite exits non-zero
+nested accepted: registry=fixture.basic phase=clean edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/accepted/pins.jsonl
+  [ok] accepted: seeded edits applied (anchors unique)
+  [ok] accepted: summary row exit_code equals process exit code
+  [ok] accepted: control: fixture.basic accepted
+result:    FAIL

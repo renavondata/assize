@@ -1,0 +1,24 @@
+copy of /tmp/assize-copy-_vhokbvs/repo
+  at /tmp/assize-copy-a6od1oij/repo
+applied 1 edit(s) from harness/edits/P0_survivors_ignored.toml
+pin:       P0
+protects:  surviving mutants are reported and fail the suite
+role:      mutant
+tree:      /tmp/assize-copy-a6od1oij/repo
+invoked:   /tmp/assize-copy-_vhokbvs/repo
+nested control: registry=fixture.basic phase=mutants edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0/survivors_ignored/mutant/nested/control/pins.jsonl
+  [ok] control: seeded edits applied (anchors unique)
+  [ok] control: summary row exit_code equals process exit code
+  [ok] control: invocation tree's harness/ unchanged by the mutant runs (trusted base)
+  [ok] control: control exits 0
+  [ok] control: control: 2 mutants, 2 twins
+  [ok] control: control: every mutant KILLED
+  [ok] control: control: every twin passed
+  [ok] control: control: every mutant and twin ran in a discarded copy, not the invocation tree
+nested checks_always_pass: registry=fixture.basic phase=mutants edits=harness/edits/P0_checks_always_pass.toml exit=0 rows=/home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0/survivors_ignored/mutant/nested/checks_always_pass/pins.jsonl
+  [ok] checks_always_pass: seeded edits applied (anchors unique)
+  [ok] checks_always_pass: summary row exit_code equals process exit code
+  [FAIL] checks_always_pass: every check forced to succeed: suite exits non-zero
+  [FAIL] checks_always_pass: every fixture mutant reported SURVIVED (2/2)
+  [FAIL] checks_always_pass: every mutant row: observed pass, verdict SURVIVED
+result:    FAIL

@@ -1,0 +1,2 @@
+{"child_timeout_s": 120.0, "code": "no_mutants", "config": "harness/config.toml", "detail": "fixture/bare", "invocation_root": "/home/g/git/assize", "kind": "registry", "phase": "all", "python": "3.11.11", "registry": "fixture.no_mutants", "status": "refused"}
+{"exit_code": 4, "kind": "summary", "registry": "fixture.no_mutants"}

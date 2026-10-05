@@ -1,0 +1,6 @@
+pin:       fixture/broken
+protects:  a clean check that fails (seeded defect)
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+result:    FAIL

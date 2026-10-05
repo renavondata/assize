@@ -1,0 +1,1 @@
+{"child_timeout_s": 120.0, "config": "harness/config.toml", "invocation_root": "/tmp/assize-copy-tkxvkb6q/repo", "kind": "registry", "mutants": ["fixture/toy/off_by_one", "fixture/toy/inverted"], "phase": "mutants", "pins": ["fixture/toy"], "python": "3.11.11", "registry": "fixture.basic", "status": "accepted"}

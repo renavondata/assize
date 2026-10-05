@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      clean
+tree:      /tmp/assize-copy-gko2dmtf/repo
+invoked:   /tmp/assize-copy-gko2dmtf/repo
+result:    PASS

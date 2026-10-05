@@ -1,0 +1,9 @@
+copy of /tmp/assize-copy-5346uwag/repo
+  at /tmp/assize-copy-pjj8nv6a/repo
+twin: no edits applied
+pin:       fixture/outside
+protects:  fails outside the invocation tree
+role:      twin
+tree:      /tmp/assize-copy-pjj8nv6a/repo
+invoked:   /tmp/assize-copy-5346uwag/repo
+result:    FAIL

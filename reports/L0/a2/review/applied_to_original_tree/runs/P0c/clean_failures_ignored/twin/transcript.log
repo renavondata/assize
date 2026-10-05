@@ -1,0 +1,8 @@
+copy of /tmp/assize-copy-44efyxaa/repo
+  at /tmp/assize-copy-ir9atfzm/repo
+twin: no edits applied
+pin:       P0c
+protects:  a failing clean check is recorded and fails the suite
+role:      twin
+tree:      /tmp/assize-copy-ir9atfzm/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

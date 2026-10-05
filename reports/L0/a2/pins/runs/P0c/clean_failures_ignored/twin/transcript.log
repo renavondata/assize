@@ -1,0 +1,16 @@
+copy of /home/g/git/assize
+  at /tmp/assize-copy-sevm11u9/repo
+twin: no edits applied
+pin:       P0c
+protects:  a failing clean check is recorded and fails the suite
+role:      twin
+tree:      /tmp/assize-copy-sevm11u9/repo
+invoked:   /home/g/git/assize
+nested clean: registry=fixture.broken phase=clean edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0c/clean_failures_ignored/twin/nested/clean/pins.jsonl
+  [ok] clean: seeded edits applied (anchors unique)
+  [ok] clean: summary row exit_code equals process exit code
+  [ok] clean: fixture/broken recorded FAILED
+  [ok] clean: fixture/toy recorded ok
+  [ok] clean: denominator: 1/2 failed
+  [ok] clean: suite exits non-zero
+result:    PASS

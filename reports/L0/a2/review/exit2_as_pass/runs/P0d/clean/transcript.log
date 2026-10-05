@@ -1,0 +1,16 @@
+pin:       P0d
+protects:  errors and timeouts are INCONCLUSIVE, counted in the denominator, and fail the suite
+role:      clean
+tree:      /tmp/assize-copy-ie5v5mmm/repo
+invoked:   /tmp/assize-copy-ie5v5mmm/repo
+nested inconclusive: registry=fixture.inconclusive phase=mutants edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0d/clean/nested/inconclusive/pins.jsonl
+  [ok] inconclusive: seeded edits applied (anchors unique)
+  [ok] inconclusive: summary row exit_code equals process exit code
+  [FAIL] inconclusive: raises: observed error, INCONCLUSIVE
+  [ok] inconclusive: hangs: observed timeout, INCONCLUSIVE
+  [ok] inconclusive: both twins passed
+  [ok] inconclusive: timeout taken from committed config
+  [ok] inconclusive: hang ran at least the configured timeout
+  [FAIL] inconclusive: denominator: 3 mutants, 2 inconclusive, 1 killed
+  [ok] inconclusive: suite exits non-zero
+result:    FAIL

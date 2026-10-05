@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+result:    PASS

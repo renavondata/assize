@@ -1,0 +1,11 @@
+registry fixture.stale: 1 pins, 3 mutants; phase=mutants; child_timeout_s=120.0 (harness/config.toml)
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.072s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0g/stale_ignored/twin/nested/stale/runs/fixture__toy/off_by_one/mutant/transcript.log
+[mutant] fixture/toy/absent: mutant stale, twin pass -> STALE (0.006s + 0.07s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0g/stale_ignored/twin/nested/stale/runs/fixture__toy/absent/mutant/transcript.log
+MUTANT STALE: fixture/toy/absent
+[mutant] fixture/toy/twice: mutant stale, twin pass -> STALE (0.005s + 0.07s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0g/stale_ignored/twin/nested/stale/runs/fixture__toy/twice/mutant/transcript.log
+MUTANT STALE: fixture/toy/twice
+clean: 0/0 passed, 0/0 failed
+mutants: 1/3 killed, 0/3 survived, 0/3 inconclusive, 2/3 stale, 0/3 non-causal
+twins: 3/3 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0g/stale_ignored/twin/nested/stale/pins.jsonl
+PINS FAILED

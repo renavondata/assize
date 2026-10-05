@@ -1,0 +1,8 @@
+copy of /tmp/assize-copy-acsntzol/repo
+  at /tmp/assize-copy-tbn0397c/repo
+applied 1 edit(s) from harness/fixtures/edits/toy_hangs.toml
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      mutant
+tree:      /tmp/assize-copy-tbn0397c/repo
+invoked:   /tmp/assize-copy-acsntzol/repo

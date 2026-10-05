@@ -1,0 +1,24 @@
+# 2026-10-05T16:05:54Z Linux 7.2.6-arch2-1 x86_64 commit=9ab8dd1 dirty=0
+$ make pins PINS_OUT=reports/L0/a2/pins
+uv run --frozen python -m harness run --registry harness --phase all --out reports/L0/a2/pins
+registry harness: 7 pins, 7 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (0.766s) reports/L0/a2/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.065s) reports/L0/a2/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (0.266s) reports/L0/a2/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (3.471s) reports/L0/a2/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (0.366s) reports/L0/a2/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (0.316s) reports/L0/a2/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (0.416s) reports/L0/a2/pins/runs/P0g/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.775s + 0.773s) reports/L0/a2/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.072s + 0.071s) reports/L0/a2/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.272s + 0.272s) reports/L0/a2/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.476s + 3.477s) reports/L0/a2/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.474s + 0.372s) reports/L0/a2/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.322s + 0.322s) reports/L0/a2/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.573s + 0.422s) reports/L0/a2/pins/runs/P0g/stale_ignored/mutant/transcript.log
+clean: 7/7 passed, 0/7 failed
+mutants: 7/7 killed, 0/7 survived, 0/7 inconclusive, 0/7 stale, 0/7 non-causal
+twins: 7/7 passed
+report: reports/L0/a2/pins/pins.jsonl
+PINS PASSED
+[exit 0]

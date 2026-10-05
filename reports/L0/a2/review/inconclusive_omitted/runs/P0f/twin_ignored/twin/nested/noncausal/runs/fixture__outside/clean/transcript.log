@@ -1,0 +1,6 @@
+pin:       fixture/outside
+protects:  fails outside the invocation tree
+role:      clean
+tree:      /tmp/assize-copy-u7ywlmff/repo
+invoked:   /tmp/assize-copy-u7ywlmff/repo
+result:    PASS

@@ -1,0 +1,10 @@
+registry fixture.dup_pin: 2 pins, 2 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_pin/runs/fixture__toy/clean/transcript.log
+[clean ] fixture/toy: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_pin/runs/fixture__toy/clean/transcript.log
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.071s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_pin/runs/fixture__toy/off_by_one/mutant/transcript.log
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.071s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_pin/runs/fixture__toy/off_by_one/mutant/transcript.log
+clean: 2/2 passed, 0/2 failed
+mutants: 2/2 killed, 0/2 survived, 0/2 inconclusive, 0/2 stale, 0/2 non-causal
+twins: 2/2 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0e/validation_off/mutant/nested/dup_pin/pins.jsonl
+PINS PASSED

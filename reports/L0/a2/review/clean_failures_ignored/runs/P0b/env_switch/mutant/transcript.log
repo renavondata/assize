@@ -1,0 +1,13 @@
+copy of /tmp/assize-copy-3pfgi_eu/repo
+  at /tmp/assize-copy-y_ibkij0/repo
+applied 1 edit(s) from harness/edits/P0b_env_switch.toml
+pin:       P0b
+protects:  no code reads a mutant or test variable from the environment
+role:      mutant
+tree:      /tmp/assize-copy-y_ibkij0/repo
+invoked:   /tmp/assize-copy-3pfgi_eu/repo
+scanned 29 code files under /tmp/assize-copy-y_ibkij0/repo (top-level exclusions: ['.git', '.mypy_cache', '.pytest_cache', '.ruff_cache', '.venv', '__pycache__', 'out', 'reports'])
+  VIOLATION harness/config.py:13: _SWITCH = os.environ.get("ASSIZE_MUTANT")
+  [ok] scan is non-vacuous
+  [FAIL] no switch found (1 violations)
+result:    FAIL

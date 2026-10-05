@@ -1,0 +1,8 @@
+copy of /tmp/assize-copy-44efyxaa/repo
+  at /tmp/assize-copy-w2qq81q_/repo
+twin: no edits applied
+pin:       P0e
+protects:  a registry with a mutant-less pin, a duplicated name or a malformed edit is refused
+role:      twin
+tree:      /tmp/assize-copy-w2qq81q_/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

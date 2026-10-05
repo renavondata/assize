@@ -1,0 +1,9 @@
+pin:       P0b
+protects:  no code reads a mutant or test variable from the environment
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+scanned 29 code files under /home/g/git/assize (top-level exclusions: ['.git', '.mypy_cache', '.pytest_cache', '.ruff_cache', '.venv', '__pycache__', 'out', 'reports'])
+  [ok] scan is non-vacuous
+  [ok] no switch found (0 violations)
+result:    PASS

@@ -1,0 +1,1 @@
+REGISTRY REFUSED: fixture.malformed_edit: malformed_edit: fixture/toy/malformed: harness/fixtures/edits/malformed.toml: edit 0: keys must be exactly path, old, new

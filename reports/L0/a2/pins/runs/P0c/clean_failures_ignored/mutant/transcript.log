@@ -1,0 +1,16 @@
+copy of /home/g/git/assize
+  at /tmp/assize-copy-flppdhxq/repo
+applied 1 edit(s) from harness/edits/P0c_clean_failures_ignored.toml
+pin:       P0c
+protects:  a failing clean check is recorded and fails the suite
+role:      mutant
+tree:      /tmp/assize-copy-flppdhxq/repo
+invoked:   /home/g/git/assize
+nested clean: registry=fixture.broken phase=clean edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0c/clean_failures_ignored/mutant/nested/clean/pins.jsonl
+  [ok] clean: seeded edits applied (anchors unique)
+  [ok] clean: summary row exit_code equals process exit code
+  [FAIL] clean: fixture/broken recorded FAILED
+  [ok] clean: fixture/toy recorded ok
+  [FAIL] clean: denominator: 1/2 failed
+  [FAIL] clean: suite exits non-zero
+result:    FAIL

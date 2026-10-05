@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/__main__.py", line 38, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/__main__.py", line 33, in main
+    return runner.run(a.registry, a.phase, a.out, a.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/runner.py", line 216, in run
+    mrow, trow = _run_mutant(registry, pin, mutant, out, cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/runner.py", line 155, in _run_mutant
+    mrow = _run_in_copy(registry, pin, mutant, "mutant", out, cfg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/runner.py", line 120, in _run_in_copy
+    mutant_edits = edits.load(mutant.edits)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/edits.py", line 43, in load
+    return tuple(_edit(rel, i, t) for i, t in enumerate(tables))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/edits.py", line 43, in <genexpr>
+    return tuple(_edit(rel, i, t) for i, t in enumerate(tables))
+                 ^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-hnlv0w_4/repo/harness/edits.py", line 49, in _edit
+    raise EditError(f"{where}: keys must be exactly path, old, new")
+harness.edits.EditError: harness/fixtures/edits/malformed.toml: edit 0: keys must be exactly path, old, new
+registry fixture.malformed_edit: 1 pins, 1 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/pins/runs/P0e/validation_off/mutant/nested/malformed_edit/runs/fixture__toy/clean/transcript.log

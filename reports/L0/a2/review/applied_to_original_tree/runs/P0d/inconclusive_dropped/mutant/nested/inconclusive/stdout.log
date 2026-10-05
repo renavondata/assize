@@ -1,0 +1,12 @@
+registry fixture.inconclusive: 1 pins, 3 mutants; phase=mutants; child_timeout_s=3.0 (harness/fixtures/fast.toml)
+[mutant] fixture/toy/off_by_one: mutant stale, twin timeout -> STALE (0.006s + 3.009s) ../../../home/g/git/assize/reports/L0/a2/review/applied_to_original_tree/runs/P0d/inconclusive_dropped/mutant/nested/inconclusive/runs/fixture__toy/off_by_one/mutant/transcript.log
+MUTANT STALE: fixture/toy/off_by_one
+[mutant] fixture/toy/raises: mutant timeout, twin error -> NON-CAUSAL (3.009s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/applied_to_original_tree/runs/P0d/inconclusive_dropped/mutant/nested/inconclusive/runs/fixture__toy/raises/mutant/transcript.log
+MUTANT NON-CAUSAL: fixture/toy/raises
+[mutant] fixture/toy/hangs: mutant error, twin timeout -> NON-CAUSAL (0.071s + 3.009s) ../../../home/g/git/assize/reports/L0/a2/review/applied_to_original_tree/runs/P0d/inconclusive_dropped/mutant/nested/inconclusive/runs/fixture__toy/hangs/mutant/transcript.log
+MUTANT NON-CAUSAL: fixture/toy/hangs
+clean: 0/0 passed, 0/0 failed
+mutants: 0/3 killed, 0/3 survived, 0/3 inconclusive, 1/3 stale, 2/3 non-causal
+twins: 0/3 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/applied_to_original_tree/runs/P0d/inconclusive_dropped/mutant/nested/inconclusive/pins.jsonl
+PINS FAILED
