@@ -23,7 +23,7 @@ import traceback
 from pathlib import Path
 
 from harness import config as config_mod
-from harness import context, edits, registries
+from harness import context, edits, proc, registries
 from harness.pin import ROOT, Mutant, Pin, RegistryError
 from harness.tree import disposable_copy
 
@@ -67,12 +67,12 @@ def _slug(s: str) -> str:
 
 
 def _spawn(cmd: list[str], cwd: Path, timeout: float, log) -> tuple[str, int | None]:
-    proc = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    child = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(True))
     try:
-        code = proc.wait(timeout=timeout)
+        code = child.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(proc.pid, signal.SIGKILL)
-        proc.wait()
+        os.killpg(child.pid, signal.SIGKILL)
+        child.wait()
         return "timeout", None
     return OBSERVED.get(code, "error"), code
 
@@ -260,4 +260,4 @@ def run_under_edits(edits_file: str, registry: str, phase: str, out: Path, confi
                "--out", str(out.resolve())]
         if config_path is not None:
             cmd += ["--config", str(config_path.resolve())]
-        return subprocess.run(cmd, cwd=copy).returncode
+        return subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False)).returncode

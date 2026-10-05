@@ -32,8 +32,8 @@ mkdir -p "$W"
     echo
     echo "## $f"
     sed 's/^/    /' "$W/review-mutants/$f.toml"
-    echo "\$ $PY -m harness run --under-edits $W/review-mutants/$f.toml --out $W/review/$f"
-    $PY -m harness run --under-edits $W/review-mutants/$f.toml --out $W/review/$f 2>&1; echo "[exit $?]"
+    echo "\$ $PY -m harness run --under-edits $W/review-mutants/$f.toml --config $W/review-mutants/config.toml --out $W/review/$f"
+    $PY -m harness run --under-edits $W/review-mutants/$f.toml --config $W/review-mutants/config.toml --out $W/review/$f 2>&1; echo "[exit $?]"
   done
   echo
   echo "harness/ digest of the invocation tree after:  $(digest)"
@@ -57,4 +57,17 @@ git archive 5f7372a harness | tar -x -C "$OLD"
     echo "[exit $rc]"
   done
 } > "$W/withdrawal.txt"
+rm -rf "$OLD"
+
+# W5. Orphan probe: SIGKILL an orchestrator while its hanging child runs; count survivors. Before (8f10cd0) and after the fix.
+OLD=$(mktemp -d)
+git archive 8f10cd0 . | tar -x -C "$OLD"
+{
+  stamp
+  echo "## at 8f10cd0 (children in new sessions, no parent-death signal)"
+  "$W/orphan-probe.sh" "$OLD" "$REPO/.venv/bin/python" 2>&1 | grep -v Killed
+  echo
+  echo "## at HEAD (PR_SET_PDEATHSIG on every spawn)"
+  "$W/orphan-probe.sh" "$REPO" "$REPO/.venv/bin/python" 2>&1 | grep -v Killed
+} > "$W/orphan-probe.txt"
 rm -rf "$OLD"

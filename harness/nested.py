@@ -15,7 +15,7 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from harness import context, edits as edits_mod
+from harness import context, edits as edits_mod, proc
 from harness.pin import ROOT
 from harness.tree import disposable_copy
 
@@ -70,14 +70,14 @@ def run_nested(label: str, registry: str, phase: str, *,
     stale = None
     with (out / "stdout.log").open("w") as log:
         if edits is None:
-            code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT).returncode
+            code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False)).returncode
         else:
             with disposable_copy(ROOT) as copy:
                 try:
                     edits_mod.apply(copy, edits_mod.load(edits))
                     log.write(f"nested run in copy {copy} carrying {edits}\n")
                     log.flush()
-                    code = subprocess.run(cmd, cwd=copy, stdout=log, stderr=subprocess.STDOUT).returncode
+                    code = subprocess.run(cmd, cwd=copy, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False)).returncode
                 except edits_mod.Stale as e:
                     stale, code = str(e), None
     rows_path = out / "pins.jsonl"

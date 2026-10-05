@@ -1,0 +1,5 @@
+# Child timeout for the review-mutant witness runs (W3), committed before those runs.
+# Every honest check finishes in under 4 s on the cloud VM and the dev box; 30 s cannot time one out,
+# while bounding the cost of checks that review mutant 3 leaves hanging.
+[harness]
+child_timeout_s = 30
