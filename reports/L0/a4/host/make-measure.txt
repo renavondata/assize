@@ -1,0 +1,138 @@
+# measure.yml witness: PR #2 labelled 'measure', head 744868f955293a72d5bf7cb1ccd52be4d429137b
+# run   https://github.com/renavondata/assize/actions/runs/37369883675
+# job   https://github.com/renavondata/assize/actions/runs/37369883675/job/111964119882
+# runner steel-legend (labels self-hosted, measure), user assize-runner; conclusion success; 2026-10-05T20:27:51Z -> 20:29:58Z
+# Job log, make measure step (host facts, then make pins), verbatim apart from the CI timestamp prefix:
+##[group]Run make measure HOST_OUT=out/host
+^[[36;1mmake measure HOST_OUT=out/host^[[0m
+shell: /usr/bin/bash -e {0}
+env:
+  ASSIZE_HOST: measure
+##[endgroup]
+bash scripts/host_facts.sh out/host
+### date
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-05T20:27:59Z
+[exit 0]
+
+### whoami
+$ whoami
+assize-runner
+[exit 0]
+
+### lscpu
+$ lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  12
+On-line CPU(s) list:                     0-11
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD Ryzen 5 5600X 6-Core Processor
+CPU family:                              25
+Model:                                   33
+Thread(s) per core:                      2
+Core(s) per socket:                      6
+Socket(s):                               1
+Stepping:                                2
+Microcode version:                       0xa201211
+Frequency boost:                         enabled
+CPU(s) scaling MHz:                      84%
+CPU max MHz:                             4654.2881
+CPU min MHz:                             560.7580
+BogoMIPS:                                7386.74
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 invpcid cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor smca debug_swap
+Virtualization:                          AMD-V
+L1d cache:                               192 KiB (6 instances)
+L1i cache:                               192 KiB (6 instances)
+L2 cache:                                3 MiB (6 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-11
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Ghostwrite:                Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Old microcode:             Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Mitigation; Safe RET
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Mitigation; Clear CPU buffers
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+[exit 0]
+
+### free
+$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:            31Gi        11Gi        11Gi       206Mi       8.4Gi        19Gi
+Swap:           23Gi       9.8Gi        13Gi
+[exit 0]
+
+### uname
+$ uname -a
+Linux steel-legend 7.2.6-arch2-1 #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 22:41:30 +0000 x86_64 GNU/Linux
+[exit 0]
+
+### uv
+$ uv --version
+uv 0.12.17 (635500036 2026-09-18 x86_64-unknown-linux-gnu)
+[exit 0]
+
+### python3
+$ python3 --version
+Python 3.14.7
+[exit 0]
+
+### docker
+$ docker --version
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+podman version 6.1.2
+[exit 0]
+
+### podman
+$ podman --version
+podman version 6.1.2
+[exit 0]
+
+### podman-rootless
+$ podman info --format rootless={{.Host.Security.Rootless}}
+rootless=true
+[exit 0]
+
+make pins PINS_OUT=out/host/pins
+make[1]: Entering directory '/home/assize-runner/actions-runner/_work/assize/assize'
+uv run --frozen python -m harness run --registry harness --phase all --out out/host/pins
+registry harness: 8 pins, 10 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (0.885s) out/host/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.134s) out/host/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (0.284s) out/host/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (3.589s) out/host/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (0.385s) out/host/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (0.384s) out/host/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (0.534s) out/host/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (15.557s) out/host/pins/runs/P0h/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.943s + 0.941s) out/host/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.09s + 0.09s) out/host/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.29s + 0.291s) out/host/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.645s + 3.596s) out/host/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.792s + 0.39s) out/host/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.391s + 0.391s) out/host/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.691s + 0.541s) out/host/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (10.506s + 15.611s) out/host/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.445s + 15.561s) out/host/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (15.563s + 15.562s) out/host/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+clean: 8/8 passed, 0/8 failed
+mutants: 10/10 killed, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal, 0 leaked (clean and mutant)
+twins: 10/10 passed
+report: out/host/pins/pins.jsonl
+PINS PASSED

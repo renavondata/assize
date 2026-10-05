@@ -330,3 +330,13 @@ Uncompressed alongside: `make-pins.txt` and `.jsonl`, `escapee-fixture.txt` and 
 | N6 witnessed, daemon shown killed | MET (`a4/probes.txt`) |
 | `pins` green on the PR head | MET at `f07330a`; re-checked on the report commit |
 | A4, index line, `forecasts.jsonl`, `proposer`, `STATUS.md` exist | MET |
+
+#### A4 note — 2026-10-05: host run of measure.yml witnessed
+This discharges brief 0's "Guy confirms the host run of `measure.yml` after merge" with a witness instead of a manual confirmation. The L0 verdict is unchanged and no index line is added.
+- **Trigger.** PR #2 was labelled `measure` on Guy's instruction, which ran `measure.yml` on head `744868f`: [run 37369883675](https://github.com/renavondata/assize/actions/runs/37369883675/job/111964119882), conclusion success, 2026-10-05T20:27:51Z → 20:29:58Z.
+- **Runner.** `steel-legend`, labels `self-hosted, measure`, running as the unprivileged user `assize-runner`. `ASSIZE_HOST=measure` was set by the workflow, and `make measure` ran host facts, then `make pins`.
+- **Host facts** (`a4/host/facts.txt`, SHA-256 `fcf096331c05bf98060ff3ec01fbab8abc661b872331d9483545d7241e006346`): AMD Ryzen 5 5600X, 6 cores / 12 threads; 31 GiB RAM, 23 GiB swap; Linux 7.2.6-arch2-1; uv 0.12.17; system Python 3.14.7. Pins ran on uv-managed Python 3.11.16. Podman 6.1.2 is rootless (`rootless=true`), and the `docker` command is Podman's Docker emulation.
+- **Pins on the host** (`a4/host/make-measure.txt`, `a4/host/pins.jsonl`): clean 8/8 passed; mutants 10/10 KILLED, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal; 0 leaked; twins 10/10 passed; exit 0. That includes P0h with `fixture.escapee` and all three of its mutants. The `registry` row carries the `proposer`, and its `invocation_root` is the runner's work tree.
+- **Per-child transcripts:** `a4/host/host-pins-runs.tar.xz`, SHA-256 `e483b1925e024470518b4f91c7577f3959d43c1722f97520389b14c092e4c55c`, 19,988 bytes compressed, 706,560 bytes as an uncompressed tar, 259 files (also in `a4/MANIFEST.txt`).
+- **Same machine.** `steel-legend` is the machine on which the development-box witnesses of Addenda A2–A4 were produced: the same hostname and kernel. Those runs used Guy's user account and the session's tree, not the runner's account and checkout. Only this run is the host witness.
+- These are pass/fail results. No timing in them is evidence for any verdict.
