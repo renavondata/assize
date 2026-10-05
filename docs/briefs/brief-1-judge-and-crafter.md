@@ -122,6 +122,15 @@ Commit locally; do not push.
 
 ---
 
+## Amendment A2: mutation hygiene (appended; overrides earlier text where they conflict)
+1. **Patch mutants only.** Every mutant targeting code under `judge/`, `worlds/` or `incumbents/` uses the harness's patch selector. No mutant switch, environment flag or test hook may exist in that code.
+2. **New pin P8, no switches shipped.** The judge entrypoint refuses to start, with a non-zero exit, if `ASSIZE_MUTANT` or any variable prefixed `ASSIZE_TEST` is set.
+   - The check starts the judge with each variable set and must observe refusal.
+   - A patch mutant that removes the refusal must make P8 fail.
+3. **Static check.** A static scan of the built judge image finds no reference to `harness.mutants`. A patch mutant that adds one must be caught.
+
+---
+
 ## Amendment A3: follows from brief 0 A2 (appended)
 1. **Mutants.** Mutants are anchored edits applied to a disposable copy (brief 0 A2). No environment switch exists anywhere in the repository.
 2. **P8 replaced.** A2 item 2 (P8, the judge refusing to start if `ASSIZE_MUTANT` is set) is replaced by brief 0's P0b static scan, extended to the built judge image. A2 items 1 and 3 stand.
