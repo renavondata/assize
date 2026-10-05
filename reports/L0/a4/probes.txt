@@ -1,77 +1,58 @@
-# 2026-10-05T18:42:55Z Linux 7.2.6-arch2-1 x86_64 commit=9c6a148 dirty=0
+# 2026-10-05T18:45:40Z Linux 7.2.6-arch2-1 x86_64 commit=cea5957 dirty=0
 leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0
 ## R1 at 47af530
 probe markers alive before: 0
 registry probe: 1 pins, 1 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
-[clean ] probe/r1: observed pass -> ok (5.106s)
+[clean ] probe/r1: observed pass -> ok (5.08s)
 clean: 1/1 passed, 0/1 failed
 mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal
 twins: 0/0 passed
-report: out/a4-witness/probes/r1-47af530/pins.jsonl
+report: ../../../home/g/git/assize/out/a4-witness/probes/r1-47af530/pins.jsonl
 PINS PASSED
 [exit 0]
-Traceback (most recent call last):
-  File "<stdin>", line 2, in <module>
-FileNotFoundError: [Errno 2] No such file or directory: 'out/a4-witness/probes/r1-47af530/pins.jsonl'
-cat: out/a4-witness/probes/r1-47af530/runs/probe__r1/clean/r1.pid: No such file or directory
-reports/L0/a4/probes.sh: line 15: /proc/assize-probe-r1/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: $2: unbound variable
-  grandchild  alive right after the run: no
-reports/L0/a4/probes.sh: line 15: /proc/assize-probe-r1/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: $2: unbound variable
-reports/L0/a4/probes.sh: line 15: /proc/assize-probe-r1/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: $2: unbound variable
-  grandchild  alive after waiting up to HOLD=10s for it to exit on its own: no
-probe markers alive after: 1
+  row: pin=probe/r1 observed=pass scratch_quiescent=False scratch_removed=True verdict=ok
+  summary: clean_ok=1 clean_failed=0 leaked=(field absent at this revision) exit_code=0
+  grandchild 751285 alive right after the run: yes
+  grandchild 751285 alive after waiting up to HOLD=10s for it to exit on its own: no
+probe markers alive after: 0
 
-## R1 at HEAD (9c6a148)
-probe markers alive before: 1
+## R1 at HEAD (cea5957)
+probe markers alive before: 0
+cp: cannot stat 'reports/L0/a4/probes-runs.tar.xz': No such file or directory
 registry probe: 1 pins, 1 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
-[clean ] probe/r1: observed pass -> LEAKED (5.111s)
+[clean ] probe/r1: observed pass -> LEAKED (5.069s)
 CLEAN FAILED: probe/r1 (observed pass)
 clean: 0/1 passed, 1/1 failed
 mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 1 leaked (clean and mutant)
 twins: 0/0 passed
-report: out/a4-witness/probes/r1-head/pins.jsonl
+report: ../../../home/g/git/assize/out/a4-witness/probes/r1-head/pins.jsonl
 PINS FAILED
 [exit 1]
-Traceback (most recent call last):
-  File "<stdin>", line 2, in <module>
-FileNotFoundError: [Errno 2] No such file or directory: 'out/a4-witness/probes/r1-head/pins.jsonl'
-cat: out/a4-witness/probes/r1-head/runs/probe__r1/clean/r1.pid: No such file or directory
-reports/L0/a4/probes.sh: line 15: /proc/assize-probe-r1/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: $2: unbound variable
-  grandchild  alive right after the run: no
-reports/L0/a4/probes.sh: line 15: /proc/assize-probe-r1/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: $2: unbound variable
-reports/L0/a4/probes.sh: line 15: /proc/assize-probe-r1/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: $2: unbound variable
-  grandchild  alive after waiting up to HOLD=10s for it to exit on its own: no
-probe markers alive after: 1
+  row: pin=probe/r1 observed=pass scratch_quiescent=False scratch_removed=True verdict=LEAKED
+  summary: clean_ok=0 clean_failed=1 leaked=1 exit_code=1
+  grandchild 755810 alive right after the run: yes
+  grandchild 755810 alive after waiting up to HOLD=10s for it to exit on its own: no
+probe markers alive after: 0
 
-## N6 at HEAD (9c6a148): double-forked daemon from a clean check
-probe markers alive before: 1
+## N6 at HEAD (cea5957): double-forked daemon from a clean check
+probe markers alive before: 0
+cp: cannot stat 'reports/L0/a4/probes-runs.tar.xz': No such file or directory
 registry probe: 1 pins, 1 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
-[clean ] probe/n6: observed pass -> ok (0.139s)
+[clean ] probe/n6: observed pass -> ok (0.14s)
 clean: 1/1 passed, 0/1 failed
 mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 0 leaked (clean and mutant)
 twins: 0/0 passed
-report: out/a4-witness/probes/n6-head/pins.jsonl
+report: ../../../home/g/git/assize/out/a4-witness/probes/n6-head/pins.jsonl
 PINS PASSED
 [exit 0]
-Traceback (most recent call last):
-  File "<stdin>", line 2, in <module>
-FileNotFoundError: [Errno 2] No such file or directory: 'out/a4-witness/probes/n6-head/pins.jsonl'
-  daemon pid (from PID file): 734950
+  row: pin=probe/n6 observed=pass scratch_quiescent=True scratch_removed=True verdict=ok
+  summary: clean_ok=1 clean_failed=0 leaked=0 exit_code=0
+  daemon pid (from PID file): 760440
   daemon alive after the suite finished: yes
-  daemon: ppid=1 sid=734949 cwd=/
-$ kill -9 734950   # by PID file
+  daemon: ppid=1 sid=760439 cwd=/
+$ kill -9 760440   # by PID file
 [exit 0]
-reports/L0/a4/probes.sh: line 15: /proc/734950/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 15: /proc/734950/cmdline: No such file or directory
   daemon alive after the probe's kill: no
-reports/L0/a4/probes.sh: line 16: /proc/678676/cmdline: No such file or directory
-reports/L0/a4/probes.sh: line 16: /proc/680097/cmdline: No such file or directory
-probe markers alive after: 1
+probe markers alive after: 0
 [exit 0]
-leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=1
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0
