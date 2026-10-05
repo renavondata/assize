@@ -215,3 +215,24 @@ The same figures are in `a3/MANIFEST.txt`; both archives pass `xz -t`.
 - The A2 review-mutant files under `a2/review-mutants/` were written against the A2-era runner. Some anchors may no longer apply to the current code, which `--under-edits` reports as STALE. They are historical witnesses and were not re-run here.
 - These witnesses, other than `pins-yml-run.txt`, ran on Guy's development machine (Arch Linux, Python 3.11.11). They are pass/fail evidence only.
 - P0h relies on Linux `/proc` and `prctl`. That holds on the cloud VM, GitHub's `ubuntu-latest` (witnessed above) and the host (to be witnessed by `measure.yml`).
+
+#### A3 correction — 2026-10-05: review mutants re-run
+The A3 note saying some A2 review-mutant anchors "may no longer apply" was wrong. All four still apply exactly once to the current harness. They were re-run at `5c14c3e` (`a3/review-mutants.txt`, script `a3/review-rerun.sh`, same committed 30 s config), and all four went red:
+
+| Review mutant | Exit | What turned it red |
+|---|---|---|
+| exit code 2 treated as pass | 1 | P0d clean FAILED; P0d's mutant NON-CAUSAL |
+| inconclusive runs omitted from the denominator | 1 | P0d clean FAILED; P0d's mutant NON-CAUSAL |
+| edits applied to the original tree | 1 | 7 of 8 clean FAILED; 9 of 9 mutants NON-CAUSAL; 0 of 9 twins passed |
+| clean failures ignored | 1 | P0c's mutant STALE, with its twin failing (the self-masking case explained in Addendum A2) |
+
+The invocation tree's `harness/` digest was `4328bce9a12ada73` both before and after. Before and after the run there were 0 `/tmp/assize-*` directories and 0 harness processes, including after review mutant 3: in the A2 round that mutant left 9 copies behind, and parent-owned scratch roots now remove them.
+
+| Archive | SHA-256 | Compressed bytes | Uncompressed tar bytes | Files |
+|---|---|---|---|---|
+| `a3/review-exit2_as_pass.tar.xz` | `f360c9ba7638314511c0a99d0d0e6ffdd32c3bf64e17feeb5c87f499cd3fcd3b` | 19,244 | 624,640 | 222 |
+| `a3/review-inconclusive_omitted.tar.xz` | `7703c14e0c7041f1a7b73019abdaf54ee3145b0c1c97e8f85cbf632608476761` | 19,248 | 624,640 | 222 |
+| `a3/review-applied_to_original_tree.tar.xz` | `0838b12e4c9a349140e56ca4edc25f1086065739186dd093d658c679104d95b8` | 14,708 | 481,280 | 220 |
+| `a3/review-clean_failures_ignored.tar.xz` | `9406c8e67061b2cf9bac0d515bc9382d082fef85fca5b42e470489d6c4c406d4` | 18,948 | 614,400 | 218 |
+
+The verdict is unchanged.
