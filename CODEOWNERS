@@ -1,0 +1,6 @@
+# Entrenched paths. A pull request touching any of these requires Guy's review.
+/CLAUDE.md        @gfrmin
+/CODEOWNERS       @gfrmin
+/.github/         @gfrmin
+/judge/           @gfrmin
+/worlds/spec/     @gfrmin
