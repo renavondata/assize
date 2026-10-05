@@ -18,8 +18,11 @@ import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from harness import config as config_mod
@@ -35,9 +38,10 @@ OBSERVED = {EXIT_PASS: "pass", EXIT_FAIL: "fail"}
 # --------------------------------------------------------------------- child
 
 
-def check(registry: str, pin_name: str, role: str, invocation_root: Path, run_dir: Path) -> int:
+def check(registry: str, pin_name: str, role: str, invocation_root: Path, run_dir: Path, scratch: Path) -> int:
     context.invocation_root = invocation_root.resolve()
     context.run_dir = run_dir.resolve()
+    context.scratch = scratch.resolve()
     try:
         pin = {p.name: p for p in registries.load(registry)}[pin_name]
     except Exception:
@@ -48,6 +52,7 @@ def check(registry: str, pin_name: str, role: str, invocation_root: Path, run_di
     print(f"role:      {role}")
     print(f"tree:      {ROOT}")
     print(f"invoked:   {context.invocation_root}")
+    print(f"scratch:   {context.scratch}")
     sys.stdout.flush()
     try:
         ok = bool(pin.check())
@@ -77,11 +82,28 @@ def _spawn(cmd: list[str], cwd: Path, timeout: float, log) -> tuple[str, int | N
     return OBSERVED.get(code, "error"), code
 
 
-def _child(registry: str, pin: Pin, role: str, tree: Path, run_dir: Path, cfg, log) -> tuple[str, int | None]:
+def _child(registry: str, pin: Pin, role: str, tree: Path, run_dir: Path, scratch: Path, cfg, log
+           ) -> tuple[str, int | None]:
     cmd = [sys.executable, "-m", "harness", "check", "--registry", registry, "--pin", pin.name,
-           "--role", role, "--invocation-root", str(ROOT), "--run-dir", str(run_dir.resolve())]
+           "--role", role, "--invocation-root", str(ROOT), "--run-dir", str(run_dir.resolve()),
+           "--scratch", str(scratch)]
     log.flush()
     return _spawn(cmd, tree, cfg.child_timeout_s, log)
+
+
+@contextmanager
+def _scratch(scratch_root: Path | None, cfg, row: dict) -> Iterator[Path]:
+    """A scratch root owned by this parent for one child run. After the child exits or is killed, wait
+    (up to reap_grace_s) until no live process holds it, then delete it: a killed child cannot clean up
+    after itself, so the parent does."""
+    scratch = Path(tempfile.mkdtemp(prefix="assize-scratch-", dir=scratch_root))
+    row["scratch"] = str(scratch)
+    try:
+        yield scratch
+    finally:
+        row["scratch_quiescent"] = proc.wait_until(lambda: not proc.holders(scratch), cfg.reap_grace_s)
+        shutil.rmtree(scratch, ignore_errors=True)
+        row["scratch_removed"] = not scratch.exists()
 
 
 def _fresh_dir(path: Path) -> Path:
@@ -99,42 +121,45 @@ def _row(registry: str, pin: Pin, mutant: Mutant | None, role: str, run_dir: Pat
         "role": role,
         "expected": "fail" if role == "mutant" else "pass",
         "transcript": os.path.relpath(run_dir / "transcript.log", Path.cwd()),
+        "run_dir": str(run_dir.resolve()),
     }
 
 
-def _run_clean(registry: str, pin: Pin, out: Path, cfg) -> dict:
+def _run_clean(registry: str, pin: Pin, out: Path, cfg, scratch_root: Path | None) -> dict:
     run_dir = _fresh_dir(out / "runs" / _slug(pin.name) / "clean")
     row = _row(registry, pin, None, "clean", run_dir) | {"tree": "invocation"}
     t0 = time.monotonic()
-    with (run_dir / "transcript.log").open("w") as log:
-        observed, code = _child(registry, pin, "clean", ROOT, run_dir, cfg, log)
+    with (run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch:
+        observed, code = _child(registry, pin, "clean", ROOT, run_dir, scratch, cfg, log)
     verdict = "ok" if observed == "pass" else "FAILED"
     return row | {"observed": observed, "exit_code": code,
                   "duration_s": round(time.monotonic() - t0, 3), "verdict": verdict}
 
 
-def _run_in_copy(registry: str, pin: Pin, mutant: Mutant, role: str, out: Path, cfg) -> dict:
+def _run_in_copy(registry: str, pin: Pin, mutant: Mutant, role: str, out: Path, cfg,
+                 scratch_root: Path | None) -> dict:
     """role 'mutant': copy plus the mutant's edits. role 'twin': identical fresh copy, no edits."""
     run_dir = _fresh_dir(out / "runs" / _slug(pin.name) / mutant.name / role)
     row = _row(registry, pin, mutant, role, run_dir) | {"edits": mutant.edits}
     mutant_edits = edits.load(mutant.edits)
     row["edits_sha256"] = hashlib.sha256((ROOT / mutant.edits).read_bytes()).hexdigest()
     t0 = time.monotonic()
-    with (run_dir / "transcript.log").open("w") as log, disposable_copy(ROOT) as copy:
+    with ((run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch,
+          disposable_copy(ROOT, under=scratch) as copy):
         row["tree"] = str(copy)
         log.write(f"copy of {ROOT}\n  at {copy}\n")
         if role == "mutant":
             try:
                 edits.apply(copy, mutant_edits)
                 log.write(f"applied {len(mutant_edits)} edit(s) from {mutant.edits}\n")
-                observed, code = _child(registry, pin, role, copy, run_dir, cfg, log)
+                observed, code = _child(registry, pin, role, copy, run_dir, scratch, cfg, log)
             except edits.Stale as e:
                 log.write(f"STALE: {e}\n")
                 row["stale_detail"] = str(e)
                 observed, code = "stale", None
         else:
             log.write("twin: no edits applied\n")
-            observed, code = _child(registry, pin, role, copy, run_dir, cfg, log)
+            observed, code = _child(registry, pin, role, copy, run_dir, scratch, cfg, log)
     row["copy_discarded"] = not Path(row["tree"]).exists()
     return row | {"observed": observed, "exit_code": code, "duration_s": round(time.monotonic() - t0, 3)}
 
@@ -151,9 +176,10 @@ def _verdict(mutant_obs: str, twin_obs: str) -> str:
     return "INCONCLUSIVE"
 
 
-def _run_mutant(registry: str, pin: Pin, mutant: Mutant, out: Path, cfg) -> tuple[dict, dict]:
-    mrow = _run_in_copy(registry, pin, mutant, "mutant", out, cfg)
-    trow = _run_in_copy(registry, pin, mutant, "twin", out, cfg)
+def _run_mutant(registry: str, pin: Pin, mutant: Mutant, out: Path, cfg,
+                scratch_root: Path | None) -> tuple[dict, dict]:
+    mrow = _run_in_copy(registry, pin, mutant, "mutant", out, cfg, scratch_root)
+    trow = _run_in_copy(registry, pin, mutant, "twin", out, cfg, scratch_root)
     trow["verdict"] = "ok" if trow["observed"] == "pass" else "FAILED"
     mrow["twin_observed"] = trow["observed"]
     mrow["verdict"] = _verdict(mrow["observed"], trow["observed"])
@@ -164,7 +190,7 @@ TALLY = {"KILLED": "killed", "SURVIVED": "survived", "INCONCLUSIVE": "inconclusi
          "STALE": "stale", "NON-CAUSAL": "non_causal"}
 
 
-def run(registry: str, phase: str, out: Path, config_path: Path | None) -> int:
+def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_root: Path | None = None) -> int:
     cfg = config_mod.load(config_path)
     out.mkdir(parents=True, exist_ok=True)
     rows_path = out / "pins.jsonl"
@@ -180,6 +206,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None) -> int:
             "phase": phase,
             "config": os.path.relpath(cfg.path, ROOT),
             "child_timeout_s": cfg.child_timeout_s,
+            "reap_grace_s": cfg.reap_grace_s,
             "invocation_root": str(ROOT),
             "python": sys.version.split()[0],
         }
@@ -202,7 +229,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None) -> int:
 
         if phase in ("all", "clean"):
             for pin in pins:
-                row = _run_clean(registry, pin, out, cfg)
+                row = _run_clean(registry, pin, out, cfg, scratch_root)
                 emit(row)
                 print(f"[clean ] {pin.name}: observed {row['observed']} -> {row['verdict']} "
                       f"({row['duration_s']}s) {row['transcript']}")
@@ -213,7 +240,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None) -> int:
 
         if phase in ("all", "mutants"):
             for pin, mutant in [(p, m) for p in pins for m in p.mutants]:
-                mrow, trow = _run_mutant(registry, pin, mutant, out, cfg)
+                mrow, trow = _run_mutant(registry, pin, mutant, out, cfg, scratch_root)
                 emit(mrow)
                 emit(trow)
                 label = pin.label(mutant)

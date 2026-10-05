@@ -3,7 +3,13 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 
 from __future__ import annotations
 
-from harness import scan, tree
+import os
+import shutil
+import signal
+from pathlib import Path
+
+from harness import config, proc, scan, tree
+from harness.fixtures import leaky
 from harness.nested import run_nested
 from harness.pin import ROOT, Mutant, Pin
 
@@ -134,6 +140,35 @@ def p0g_stale() -> bool:
     return n.ok
 
 
+def p0h_timeouts_leave_nothing() -> bool:
+    """A child that times out leaves no surviving process and no temporary copy behind."""
+    grace = config.load().reap_grace_s
+    n = run_nested("leaks", "fixture.leaks", "mutants", config=ROOT / "harness" / "fixtures" / "fast.toml")
+    row = n.run("fixture/toy", "fixture/toy/leaks_and_hangs", "mutant")
+    n.expect(row.get("observed") == "timeout" and row.get("verdict") == "INCONCLUSIVE",
+             "leaking mutant: observed timeout, INCONCLUSIVE")
+    n.expect(row.get("twin_observed") == "pass", "its twin passed")
+    run_dir = Path(row.get("run_dir", "/nonexistent"))
+    pid_file, copy_file = run_dir / leaky.PID_FILE, run_dir / leaky.COPY_FILE
+    n.expect(pid_file.is_file() and copy_file.is_file(), "the check recorded its grandchild PID and nested copy")
+    pid = int(pid_file.read_text()) if pid_file.is_file() else None
+    nested_copy = Path(copy_file.read_text()) if copy_file.is_file() else None
+    scratch = Path(row.get("scratch", "/nonexistent"))
+
+    gone = pid is not None and proc.wait_until(lambda: not proc.alive(pid, leaky.MARKER), grace)
+    n.expect(gone, f"grandchild {pid} (ignores SIGTERM) no longer alive")
+    n.expect(not proc.holders(scratch), "no live process holds the run's scratch root")
+    n.expect(row.get("scratch_quiescent") is True, "parent saw the scratch root quiescent before deleting it")
+    n.expect(nested_copy is not None and not nested_copy.exists(), f"nested copy {nested_copy} removed")
+    n.expect(row.get("scratch_removed") is True and not scratch.exists(), f"scratch root {scratch} removed")
+
+    # Leave the machine clean whatever the verdict.
+    if pid is not None and proc.alive(pid, leaky.MARKER):
+        os.kill(pid, signal.SIGKILL)
+    shutil.rmtree(scratch, ignore_errors=True)
+    return n.ok
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -149,4 +184,7 @@ PINS = [
         p0f_non_causal, (Mutant("twin_ignored", _edits("P0f_twin_ignored")),)),
     Pin("P0g", "an anchor that does not occur exactly once is STALE and fails the suite",
         p0g_stale, (Mutant("stale_ignored", _edits("P0g_stale_ignored")),)),
+    Pin("P0h", "a timed-out child leaves no surviving process and no temporary copy behind",
+        p0h_timeouts_leave_nothing, (Mutant("death_signal_reverted", _edits("P0h_death_signal_reverted")),
+                                     Mutant("scratch_kept", _edits("P0h_scratch_kept")))),
 ]

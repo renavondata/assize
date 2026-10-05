@@ -24,6 +24,7 @@ HANGS = Mutant("hangs", _edits("toy_hangs"))
 ABSENT = Mutant("absent", _edits("stale_absent"))
 TWICE = Mutant("twice", _edits("stale_twice"))
 MALFORMED = Mutant("malformed", _edits("malformed"))
+LEAKS_AND_HANGS = Mutant("leaks_and_hangs", _edits("toy_leaks_and_hangs"))
 
 
 def toy_pin(*mutant_set: Mutant) -> Pin:

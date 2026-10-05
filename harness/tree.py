@@ -9,6 +9,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
+from harness import context
 from harness.pin import ROOT
 
 # Excluded from copies, at the top level only.
@@ -17,9 +18,11 @@ TOP_LEVEL_EXCLUDE = frozenset({".git", ".venv", "out", "reports",
 
 
 @contextmanager
-def disposable_copy(root: Path = ROOT) -> Iterator[Path]:
-    """Copy `root` (the tree of the running code, so edits compose) into a temporary directory; delete it on exit."""
-    tmp = Path(tempfile.mkdtemp(prefix="assize-copy-"))
+def disposable_copy(root: Path = ROOT, under: Path | None = None) -> Iterator[Path]:
+    """Copy `root` (the tree of the running code, so edits compose) into a temporary directory; delete it on exit.
+    The directory is created under `under`, else under the scratch root the parent passed to this child,
+    else under the system temporary directory."""
+    tmp = Path(tempfile.mkdtemp(prefix="assize-copy-", dir=under or context.scratch))
     copy = tmp / "repo"
     shutil.copytree(root, copy, symlinks=True,
                     ignore=lambda d, names: set(names) & TOP_LEVEL_EXCLUDE if Path(d) == root else set())

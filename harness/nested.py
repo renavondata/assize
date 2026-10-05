@@ -67,6 +67,8 @@ def run_nested(label: str, registry: str, phase: str, *,
     cmd = [sys.executable, "-m", "harness", "run", "--registry", registry, "--phase", phase, "--out", str(out)]
     if config is not None:
         cmd += ["--config", str(config)]
+    if context.scratch is not None:
+        cmd += ["--scratch-root", str(context.scratch)]
     stale = None
     with (out / "stdout.log").open("w") as log:
         if edits is None:

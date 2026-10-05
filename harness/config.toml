@@ -2,3 +2,6 @@
 [harness]
 # Wall-clock limit, in seconds, for one child check process. Exceeding it records the run as a timeout.
 child_timeout_s = 120
+# After a child exits or is killed, how long, in seconds, the parent waits for every process holding the
+# run's scratch root to die before deleting the root regardless (the run then records scratch_quiescent=false).
+reap_grace_s = 5
