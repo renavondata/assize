@@ -9,7 +9,7 @@ import signal
 from pathlib import Path
 
 from harness import config, proc, scan, tree
-from harness.fixtures import leaky
+from harness.fixtures import escapee, leaky
 from harness.nested import run_nested
 from harness.pin import ROOT, Mutant, Pin
 
@@ -140,9 +140,15 @@ def p0g_stale() -> bool:
     return n.ok
 
 
+P0H_SCOPE = ("a timed-out child, and every descendant that either carries the parent-death signal or holds the run's "
+             "scratch root, is dead or recorded LEAKED before the scratch root is deleted. Out of scope at L0: a "
+             "descendant detached from both (new session, no death signal, not holding the scratch root), and the "
+             "outermost orchestrator being SIGKILLed.")
+
+
 def p0h_timeouts_leave_nothing() -> bool:
-    """A child that times out leaves no surviving process and no temporary copy behind."""
-    grace = config.load().reap_grace_s
+    """Witnessed scope: see P0H_SCOPE (brief 0 A3 item 3)."""
+    cfg = config.load()
     n = run_nested("leaks", "fixture.leaks", "mutants", config=ROOT / "harness" / "fixtures" / "fast.toml")
     row = n.run("fixture/toy", "fixture/toy/leaks_and_hangs", "mutant")
     n.expect(row.get("observed") == "timeout" and row.get("verdict") == "INCONCLUSIVE",
@@ -155,7 +161,8 @@ def p0h_timeouts_leave_nothing() -> bool:
     nested_copy = Path(copy_file.read_text()) if copy_file.is_file() else None
     scratch = Path(row.get("scratch", "/nonexistent"))
 
-    gone = pid is not None and proc.wait_until(lambda: not proc.alive(pid, leaky.MARKER), grace)
+    gone = pid is not None and proc.wait_until(lambda: not proc.alive(pid, leaky.MARKER), cfg.reap_grace_s,
+                                                cfg.poll_step_s)
     n.expect(gone, f"grandchild {pid} (ignores SIGTERM) no longer alive")
     n.expect(not proc.holders(scratch), "no live process holds the run's scratch root")
     n.expect(row.get("scratch_quiescent") is True, "parent saw the scratch root quiescent before deleting it")
@@ -166,7 +173,33 @@ def p0h_timeouts_leave_nothing() -> bool:
     if pid is not None and proc.alive(pid, leaky.MARKER):
         os.kill(pid, signal.SIGKILL)
     shutil.rmtree(scratch, ignore_errors=True)
-    return n.ok
+    return n.ok and p0h_escapee()
+
+
+def p0h_escapee() -> bool:
+    """A descendant that escapes both kill paths but holds the scratch root makes the run LEAKED."""
+    fast = config.load(escapee.FAST)
+    e = run_nested("escapee", "fixture.escapee", "clean", config=escapee.FAST)
+    row = e.run("fixture/escapee")
+    e.expect(row.get("observed") == "timeout", "escapee: child observed timeout")
+    e.expect(row.get("scratch_quiescent") is False, "escapee: scratch_quiescent false")
+    e.expect(row.get("verdict") == "LEAKED", "escapee: verdict LEAKED")
+    e.expect(e.summary.get("leaked") == 1, "escapee: summary leaked = 1")
+    e.expect(e.exit_code not in (0, None) and e.exit_code == e.summary.get("exit_code"),
+             "escapee: exit non-zero and equal to the summary's")
+    pid_file = Path(row.get("run_dir", "/nonexistent")) / escapee.PID_FILE
+    pid = int(pid_file.read_text()) if pid_file.is_file() else None
+    e.expect(pid is not None, f"escapee: grandchild PID recorded ({pid})")
+    # The grandchild exits on its own after escape_hold_s; wait for it so this pin leaves nothing behind.
+    gone = pid is not None and proc.wait_until(lambda: not proc.alive(pid, escapee.MARKER),
+                                                fast.escape_hold_s + fast.poll_step_s, fast.poll_step_s)
+    e.expect(gone, "escapee: grandchild gone by the end (exited on its own)")
+    scratch = Path(row.get("scratch", "/nonexistent"))
+    e.expect(row.get("scratch_removed") is True and not scratch.exists(), f"escapee: scratch root {scratch} removed")
+    if pid is not None and proc.alive(pid, escapee.MARKER):
+        os.kill(pid, signal.SIGKILL)
+    shutil.rmtree(scratch, ignore_errors=True)
+    return e.ok
 
 
 PINS = [
@@ -184,7 +217,8 @@ PINS = [
         p0f_non_causal, (Mutant("twin_ignored", _edits("P0f_twin_ignored")),)),
     Pin("P0g", "an anchor that does not occur exactly once is STALE and fails the suite",
         p0g_stale, (Mutant("stale_ignored", _edits("P0g_stale_ignored")),)),
-    Pin("P0h", "a timed-out child leaves no surviving process and no temporary copy behind",
+    Pin("P0h", P0H_SCOPE,
         p0h_timeouts_leave_nothing, (Mutant("death_signal_reverted", _edits("P0h_death_signal_reverted")),
-                                     Mutant("scratch_kept", _edits("P0h_scratch_kept")))),
+                                     Mutant("scratch_kept", _edits("P0h_scratch_kept")),
+                                     Mutant("leaked_not_counted", _edits("P0h_leaked_not_counted")))),
 ]

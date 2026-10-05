@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 
-from harness import context, proc
+from harness import config, context, proc
 from harness.tree import disposable_copy
 
 MARKER = "assize-p0h-grandchild"
@@ -30,8 +30,9 @@ def leak_and_hang() -> None:
     pid_file = context.run_dir / PID_FILE
     subprocess.Popen([sys.executable, "-c", GRANDCHILD, str(pid_file), MARKER],
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=proc.setup(True))
+    step = config.load().poll_step_s
     while not pid_file.exists():
-        time.sleep(0.05)
+        time.sleep(step)
     with disposable_copy() as nested:
         (context.run_dir / COPY_FILE).write_text(str(nested))
         while True:

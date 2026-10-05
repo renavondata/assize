@@ -66,7 +66,7 @@ def alive(pid: int, marker: str) -> bool:
         return False
 
 
-def wait_until(predicate: Callable[[], bool], timeout: float, step: float = 0.05) -> bool:
+def wait_until(predicate: Callable[[], bool], timeout: float, step: float) -> bool:
     deadline = time.monotonic() + timeout
     while not predicate():
         if time.monotonic() >= deadline:

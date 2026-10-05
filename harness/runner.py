@@ -20,6 +20,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tomllib
 import traceback
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -101,7 +102,8 @@ def _scratch(scratch_root: Path | None, cfg, row: dict) -> Iterator[Path]:
     try:
         yield scratch
     finally:
-        row["scratch_quiescent"] = proc.wait_until(lambda: not proc.holders(scratch), cfg.reap_grace_s)
+        row["scratch_quiescent"] = proc.wait_until(lambda: not proc.holders(scratch), cfg.reap_grace_s,
+                                                   cfg.poll_step_s)
         shutil.rmtree(scratch, ignore_errors=True)
         row["scratch_removed"] = not scratch.exists()
 
@@ -132,8 +134,8 @@ def _run_clean(registry: str, pin: Pin, out: Path, cfg, scratch_root: Path | Non
     with (run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch:
         observed, code = _child(registry, pin, "clean", ROOT, run_dir, scratch, cfg, log)
     verdict = "ok" if observed == "pass" else "FAILED"
-    return row | {"observed": observed, "exit_code": code,
-                  "duration_s": round(time.monotonic() - t0, 3), "verdict": verdict}
+    row |= {"observed": observed, "exit_code": code, "duration_s": round(time.monotonic() - t0, 3)}
+    return row | {"verdict": _leak_override(verdict, row)}
 
 
 def _run_in_copy(registry: str, pin: Pin, mutant: Mutant, role: str, out: Path, cfg,
@@ -164,6 +166,13 @@ def _run_in_copy(registry: str, pin: Pin, mutant: Mutant, role: str, out: Path, 
     return row | {"observed": observed, "exit_code": code, "duration_s": round(time.monotonic() - t0, 3)}
 
 
+def _leak_override(verdict: str, *rows: dict) -> str:
+    """A run whose scratch root was still held after reap_grace_s is LEAKED, whatever was observed (brief 0 A3)."""
+    if any(r.get("scratch_quiescent") is False for r in rows):
+        return "LEAKED"
+    return verdict
+
+
 def _verdict(mutant_obs: str, twin_obs: str) -> str:
     if mutant_obs == "stale":
         return "STALE"
@@ -180,14 +189,20 @@ def _run_mutant(registry: str, pin: Pin, mutant: Mutant, out: Path, cfg,
                 scratch_root: Path | None) -> tuple[dict, dict]:
     mrow = _run_in_copy(registry, pin, mutant, "mutant", out, cfg, scratch_root)
     trow = _run_in_copy(registry, pin, mutant, "twin", out, cfg, scratch_root)
-    trow["verdict"] = "ok" if trow["observed"] == "pass" else "FAILED"
+    trow["verdict"] = _leak_override("ok" if trow["observed"] == "pass" else "FAILED", trow)
     mrow["twin_observed"] = trow["observed"]
-    mrow["verdict"] = _verdict(mrow["observed"], trow["observed"])
+    mrow["verdict"] = _leak_override(_verdict(mrow["observed"], trow["observed"]), mrow, trow)
     return mrow, trow
 
 
 TALLY = {"KILLED": "killed", "SURVIVED": "survived", "INCONCLUSIVE": "inconclusive",
-         "STALE": "stale", "NON-CAUSAL": "non_causal"}
+         "STALE": "stale", "NON-CAUSAL": "non_causal", "LEAKED": "leaked"}
+
+
+def _proposer() -> dict:
+    with (ROOT / "harness" / "proposer.toml").open("rb") as f:
+        data = tomllib.load(f)
+    return {k: data[k] for k in ("kind", "model", "session")}
 
 
 def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_root: Path | None = None) -> int:
@@ -209,6 +224,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
             "reap_grace_s": cfg.reap_grace_s,
             "invocation_root": str(ROOT),
             "python": sys.version.split()[0],
+            "proposer": _proposer(),
         }
         try:
             pins = registries.load(registry)
@@ -224,7 +240,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
               f"child_timeout_s={cfg.child_timeout_s} ({os.path.relpath(cfg.path, ROOT)})")
 
         counts = dict(clean_total=0, clean_ok=0, clean_failed=0,
-                      mutants_total=0, killed=0, survived=0, inconclusive=0, stale=0, non_causal=0,
+                      mutants_total=0, killed=0, survived=0, inconclusive=0, stale=0, non_causal=0, leaked=0,
                       twins_total=0, twins_ok=0, twins_failed=0)
 
         if phase in ("all", "clean"):
@@ -235,6 +251,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
                       f"({row['duration_s']}s) {row['transcript']}")
                 counts["clean_total"] += 1
                 counts["clean_ok" if row["verdict"] == "ok" else "clean_failed"] += 1
+                counts["leaked"] += row["verdict"] == "LEAKED"
                 if row["verdict"] != "ok":
                     print(f"CLEAN FAILED: {pin.name} (observed {row['observed']})")
 
@@ -254,7 +271,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
                 if verdict != "KILLED":
                     print(f"MUTANT {verdict}: {label}")
 
-        bad = sum(counts[k] for k in ("clean_failed", "survived", "inconclusive", "stale", "non_causal"))
+        bad = sum(counts[k] for k in ("clean_failed", "survived", "inconclusive", "stale", "non_causal", "leaked"))
         code = 0 if bad == 0 else 1
         emit({"kind": "summary", "registry": registry, "phase": phase, **counts, "exit_code": code})
     n = counts["mutants_total"]
@@ -262,7 +279,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
           f"{counts['clean_failed']}/{counts['clean_total']} failed")
     print(f"mutants: {counts['killed']}/{n} killed, {counts['survived']}/{n} survived, "
           f"{counts['inconclusive']}/{n} inconclusive, {counts['stale']}/{n} stale, "
-          f"{counts['non_causal']}/{n} non-causal")
+          f"{counts['non_causal']}/{n} non-causal, {counts['leaked']} leaked (clean and mutant)")
     print(f"twins: {counts['twins_ok']}/{counts['twins_total']} passed")
     print(f"report: {os.path.relpath(rows_path, Path.cwd())}")
     print("PINS PASSED" if code == 0 else "PINS FAILED")
