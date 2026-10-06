@@ -924,6 +924,52 @@ def p3_survivorship() -> bool:
     return ok()
 
 
+def p4_measured_compute() -> bool:
+    """Under every usable runtime, the judge's measured compute comes from the container's cgroup, never from the
+    candidate: a fixture that busy-loops a known CPU time per step and self-reports zero on stderr is measured at least
+    that known time in each of two episodes in one container, and less than two episodes' worth, so each episode is
+    charged its own; its wall-clock is at least the known time; its peak memory at least the block it filled and freed
+    between samples; nothing of it unmeasured. A fixture that busy-loops and then crashes is recorded crash, with its
+    known CPU time either measured or covered by the configured CPUs times its unmeasured stretch (brief 1 section 2)."""
+    from harness.fixtures import candidates
+    from judge import episodes, runtime
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    lim = runtime.limits()
+    known = LOOP_STEPS * candidates.BUSY_S
+    block = candidates.BUSY_MIB << 20
+    print(f"  known: {known} CPU s per busy episode ({LOOP_STEPS} steps of {candidates.BUSY_S} s); "
+          f"{block} bytes filled and freed per step; limits {lim}")
+    usable, image = _usable_runtimes(expect)
+    for rt in usable:
+        before = _candidates(rt)
+        records = episodes.run(rt, image, _short_crafter(2), binding.manifest(), command=candidates.command("busy"))
+        print(f"  {rt.name} busy: {json.dumps(records)}")
+        expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)] * 2,
+               f"{rt.name} busy: two episodes of {LOOP_STEPS} steps, ended by the World")
+        for r in records:
+            used, n = r.get("compute", {}), f"{rt.name} busy episode {r['episode']}"
+            expect(known <= used.get("cpu_s", -1) < 2 * known,
+                   f"{n}: measured CPU {used.get('cpu_s')} s is at least the known {known} s and less than two "
+                   f"episodes' {2 * known} s")
+            expect(used.get("wall_s", -1) >= known, f"{n}: wall-clock {used.get('wall_s')} s is at least {known} s")
+            expect(used.get("peak_memory_bytes", -1) >= block,
+                   f"{n}: peak memory {used.get('peak_memory_bytes')} bytes is at least the {block} filled")
+            expect(used.get("unmeasured_s") == 0, f"{n}: nothing unmeasured ({used.get('unmeasured_s')} s)")
+        records = episodes.run(rt, image, _short_crafter(1), binding.manifest(),
+                               command=candidates.command("busy_crash"))
+        print(f"  {rt.name} busy_crash: {json.dumps(records)}")
+        used = records[0].get("compute", {}) if records else {}
+        expect([r["termination"] for r in records] == ["crash"], f"{rt.name} busy_crash: recorded crash")
+        expect(used.get("cpu_s", -1) + lim.cpus * used.get("unmeasured_s", -1) >= candidates.BUSY_S,
+               f"{rt.name} busy_crash: measured {used.get('cpu_s')} s plus {lim.cpus} CPUs times unmeasured "
+               f"{used.get('unmeasured_s')} s covers the known {candidates.BUSY_S} s")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+    return ok()
+
+
 def p10_container_teardown() -> bool:
     """Under every usable runtime, a candidate container whose processes ignore SIGTERM, a child in its own session
     among them, is killed and removed: the runtime lists nothing of it afterwards, both when torn down directly and
@@ -1076,6 +1122,11 @@ PINS = [
                   Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped")))),
     Pin("P3", "every requested episode is recorded with its termination code, failures included",
         p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),)),
+    Pin("P4", "an episode's CPU and peak memory are measured from its container's cgroup, never self-reported",
+        p4_measured_compute, (Mutant("self_reported", _edits("P4_self_reported")),
+                              Mutant("client_rusage", _edits("P4_client_rusage")),
+                              Mutant("not_differenced", _edits("P4_not_differenced")),
+                              Mutant("peak_from_current", _edits("P4_peak_from_current")))),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),

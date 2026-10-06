@@ -1,14 +1,20 @@
-"""Fixture candidates for P3, P7 and P10: each a Python program run as `python -I -c <source>` in the judge's candidate
+"""Fixture candidates for P3, P4, P7 and P10: each a Python program run as `python -I -c <source>` in the judge's candidate
 base image, speaking the judge's JSON-RPC over stdio. `BEHAVIOUR` says what each does at its first step; at
 begin_episode and end_episode every one acknowledges, keeping the manifest's `targets` from begin_episode."""
 
 from __future__ import annotations
 
-_LOOP = """
+# P4's busy fixtures: CPU seconds each spends per step, and MiB the `busy` fixture fills and frees per step.
+BUSY_S = 0.2
+BUSY_MIB = 256
+
+_LOOP = f"""
 import json, os, signal, sys, time
 
+BUSY_S, BUSY_MIB = {BUSY_S}, {BUSY_MIB}
+
 def reply(rid, result):
-    sys.stdout.write(json.dumps({"jsonrpc": "2.0", "id": rid, "result": result}) + "\\n")
+    sys.stdout.write(json.dumps({{"jsonrpc": "2.0", "id": rid, "result": result}}) + "\\n")
     sys.stdout.flush()
 
 targets = []
@@ -17,7 +23,7 @@ for line in sys.stdin:
     if msg["method"] == "begin_episode":
         targets = msg["params"]["manifest"]["targets"]
     if msg["method"] != "step":
-        reply(msg["id"], {})
+        reply(msg["id"], {{}})
         continue
     p = msg["params"]
 """
@@ -54,6 +60,18 @@ BEHAVIOUR = {
     # P7: predicts the first target with NaN probabilities, which Python's json writes and JSON does not admit.
     "nan": ('n = len(targets[0]["support"])\n'
             '    reply(msg["id"], {"action": p["legal_actions"][0], "prediction": {targets[0]["name"]: [float("nan")] * n}})'),
+    # P4: at every step, fills and frees BUSY_MIB MiB, then busy-loops until its own CPU time has advanced BUSY_S seconds
+    # since the step began, and self-reports zero CPU on stderr, which the judge never reads.
+    "busy": ("t0 = time.process_time()\n"
+             "    block = b'\\x01' * (BUSY_MIB << 20)\n"
+             "    del block\n"
+             "    while time.process_time() - t0 < BUSY_S: pass\n"
+             "    sys.stderr.write('cpu_s 0\\n'); sys.stderr.flush()\n"
+             "    reply(msg['id'], {'action': p['legal_actions'][0]})"),
+    # P4: busy-loops BUSY_S seconds of its own CPU time at its first step, then exits with status 3 unanswered.
+    "busy_crash": ("t0 = time.process_time()\n"
+                   "    while time.process_time() - t0 < BUSY_S: pass\n"
+                   "    sys.exit(3)"),
     # Ignores SIGTERM, starts a child that ignores it too, and never replies: only a forced kill ends it (P10).
     "stubborn": ("signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
                  "    if os.fork() == 0:\n"

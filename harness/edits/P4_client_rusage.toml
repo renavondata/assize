@@ -1,0 +1,10 @@
+# P4's mutant `client_rusage` (brief 1 section 2): the judge measures the CPU time of the runtime's client process,
+# its own child, instead of the container's cgroup, where the candidate's processes run.
+[[edit]]
+path = "judge/episodes.py"
+old = "        s = compute.sample(self.cgroup) if self.cgroup else None\n"
+new = """        s = compute.sample(self.cgroup) if self.cgroup else None
+        if s and self.proc.poll() is None:
+            ticks = open(f"/proc/{self.proc.pid}/stat").read().rsplit(")", 1)[1].split()[11:13]
+            s = compute.Sample(sum(map(int, ticks)) * 10**6 // os.sysconf("SC_CLK_TCK"), s.peak_bytes)
+"""

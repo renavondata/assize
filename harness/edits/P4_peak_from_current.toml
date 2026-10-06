@@ -1,0 +1,6 @@
+# P4's mutant `peak_from_current` (brief 1 section 2): peak memory is read from the cgroup's current usage, which
+# misses memory the candidate used and freed between samples.
+[[edit]]
+path = "judge/compute.py"
+old = '(cgroup / "memory.peak")'
+new = '(cgroup / "memory.current")'
