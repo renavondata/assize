@@ -134,3 +134,44 @@ Commit locally; do not push.
 ## Amendment A3: follows from brief 0 A2 (appended)
 1. **Mutants.** Mutants are anchored edits applied to a disposable copy (brief 0 A2). No environment switch exists anywhere in the repository.
 2. **P8 replaced.** A2 item 2 (P8, the judge refusing to start if `ASSIZE_MUTANT` is set) is replaced by brief 0's P0b static scan, extended to the built judge image. A2 items 1 and 3 stand.
+
+---
+
+## Amendment A4: ledger integrity, proposers, calibration, process hygiene (appended; overrides earlier text and A1–A3 where they conflict)
+
+### 1. Tamper-evident ledger
+- Every judge record carries `prev_sha256`, the SHA-256 of the previous record's canonical serialisation (sorted keys, no whitespace), and `sha256`, its own. The first record of a request chains from the request's `request_id`.
+- After every `evaluate()` call the judge writes the chain head to judge-private storage, signed with a key the judge generates on first start and never exports. Verification recomputes the chain and checks the signature; it is a judge subcommand and a pin.
+- **P9 Ledger tamper.** Three mutants, each an anchored edit, each KILLED with a passing twin: one record dropped; one record's `utility` altered after writing; chain update skipped. Verification must fail each.
+- Records are append-only at the file-system level as well: the judge opens the ledger `O_APPEND` and never seeks. A mutant that opens it for rewrite must be caught by P9's second case.
+
+### 2. Proposer
+Every judge record, every candidate registration and every pilot report carries `proposer: {kind, model, session}` for the party that submitted the candidate image. The judge takes `proposer` from the credential that registered the image, never from a file the candidate shipped; a candidate with no attributable proposer is refused at registration, witnessed by a pin.
+
+### 3. Calibration beside log-loss
+For each declared prediction target, report alongside log-loss a reliability table over the declared support (predicted probability bins against realised frequency, with counts) and the mean predicted entropy. Nothing is pooled across targets or Worlds. Overconfidence shows as +∞ and in the reliability table before it shows in utility; that is the point.
+
+### 4. Compute priced before scoring
+"Compute is priced in utility" needs an exchange rate. Commit, before the first scored run, the price of one CPU-second and of one gigabyte-second of peak memory in units of the World's per-episode utility, in config, with the rationale. The L5 adoption criterion (utility minus priced compute, on fresh seeds) is undefined without it, and must not be tuned after a score is seen.
+
+### 5. Process hygiene (obligation from L0, brief 0 A3 item 5)
+- Harness: every orchestrator sets `PR_SET_CHILD_SUBREAPER`; children run one at a time, asserted; after every child run and before its scratch root is deleted, every remaining descendant is killed, repeating until none remain, with the count recorded as `leaked_processes`; any run with `leaked_processes > 0`, or a scratch root still held after the sweep, has verdict LEAKED, counted, failing the suite. Fixtures: the cooperating grandchild; a non-cooperating grandchild (new session, no death signal, SIGTERM ignored, hanging past the timeout); a double-forked daemon from a clean check returning True. Mutants, each KILLED with a passing twin: subreaper not set; sweep skipped; LEAKED not counted; scratch kept. If `death_signal_reverted` then survives, either pin a case only the death signal covers or remove the death signal and retire the mutant, recording why.
+- Judge, **P10 Container teardown.** A candidate container holding a process that ignores SIGTERM is killed and removed on timeout, witnessed by the container runtime listing nothing afterwards, under both runtimes. A candidate container alive after teardown is an episode with termination code LEAKED, counted, never dropped. A mutant that skips removal must fail P10.
+
+### 6. Scope and order
+Item 5 (harness) is built first in this layer, before any pilot, because leaked processes on the measurement host contaminate throughput and therefore every time-to-learn figure. Pilots run only after the harness half of item 5 is witnessed on the host via `measure.yml`.
+
+### 7. Obligations from the L0 review (copy verbatim)
+Copy, word for word, the three OBLIGATION findings F2, F3 and F4 from `reports/L0/review-5e81d054f56ccbc59f0c1799f9438368ab80d086.md`, each with its pin and mutant as the reviewer wrote them, as items 7a, 7b and 7c. Do not rephrase them.
+
+7a. F2: Forecast resolution records do not have the A1.6 shape. The Builder's two resolutions use `{"resolves", "ts", "outcome", "evidence"}` with no `proposer` and no `id`, and the Builder resolved its own forecasts, which A1.6 assigns to the Reviewer. — severity: OBLIGATION on L1. Pin: a ledger validator in `make pins` rejects any `forecasts.jsonl` resolution row that lacks `id`, `ts`, `proposer` or `outcome`, or whose `id` matches no forecast. Mutant: an anchored edit that drops the `proposer` check must be KILLED by a fixture ledger carrying a proposer-less resolution. — witness: reports/L0/forecasts.jsonl (rows 4–5)
+
+7b. F3: CI claims are not bound to the head they describe. STATUS.md (`7697a05`) reports "pins.yml green (f07330a)" and a PASSED verdict. Its own head and the PR head `5e81d05` both have red `pins` runs, and STATUS does not say so. — severity: OBLIGATION on L1. Pin: STATUS.md and every layer verdict line cite the `pins` run by run id and head sha; a checker rejects a verdict whose cited run's `head_sha` differs from the sha the STATUS names, or whose conclusion is not `success`. Mutant: an edit that skips the sha comparison must be KILLED by a fixture STATUS citing a run on an older sha. — witness: reports/L0/STATUS.md; reports/L0/review/5e81d054f56ccbc59f0c1799f9438368ab80d086/ci-runs.txt
+
+7c. F4: The proposer of a commit cannot be recovered from git. Every commit on the branch is authored `Guy Freeman`, including session commits, so `5177756` (the only change to `CLAUDE.md` in this PR: `main` → `master`, "on Guy's instruction") cannot be attributed from git alone to Guy or to a session. The PR touches entrenched paths (`CLAUDE.md`, `.github/`), so Guy's merge disposes of it. This review does not find a violation. — severity: OBLIGATION on L1. Pin: every commit on a PR branch carries a `Proposer: <kind> <model> <session>` trailer (A1.7), and a check fails any commit touching an entrenched path whose trailer is not `guy`. Mutant: an edit that disables the trailer check must be KILLED by a fixture commit to `CLAUDE.md` with a `builder` trailer. — witness: `git log --format='%h %an | %s' master..5e81d05 -- CLAUDE.md`
+
+### 8. Host facts
+`scripts/host_facts.sh` additionally records `uptime` (load averages), the runner's pinned CPU set (`cat /sys/fs/cgroup/user.slice/user-$(id -u).slice/cpuset.cpus.effective`), the runner version from `~/actions-runner/.runner` or `./config.sh --version`, and the output of `podman info --format '{{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}'`. A measurement whose facts lack any of these is not a measurement.
+
+### 9. Pre-stated criteria added by A4
+P9 and P10 KILLED with passing twins; the harness half of item 5 witnessed on the host before the first pilot; the compute price committed before the first scored run; every judge record carrying `proposer` taken from the registering credential; the three item-7 pins present with their mutants KILLED. These join brief 1's existing criteria; none replaces one.

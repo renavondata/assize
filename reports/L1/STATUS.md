@@ -1,20 +1,17 @@
-# STATUS — L1 — 2026-10-06 — b6461f6 — PR #4
+# STATUS — L1 — 2026-10-06 — 57a5a04 — PR #5
 VERDICT: SESSION DONE
-LAYER BOUNDARY: no
+LAYER BOUNDARY: yes (opens L1 under A4; Guy merges, auto-merge not enabled)
 pins: clean 8/8; mutants 10/10 KILLED; twins 10/10; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: (b6461f6) .claude/commands/{build,review}.md context lines; (earlier) scripts/bootstrap.sh; .gitignore; .claude/commands/{build,review}.md; harness/proposer.toml; reports/L1/{forecasts.jsonl,make-pins.txt,STATUS.md}
-did: on Guy's written instruction 2026-10-06 (a402309, Proposer: guy): PR #3 review F2, F3 from L2; bootstrap.sh writes session_id to .claude/.session_id
-did: /review reads proposer, layer, brief and open forecasts (claims minus resolutions) from FETCH_HEAD; Builder guard on own session id
-did: /build: own-session-id line; host-verdict forecast; STATUS bound to the pins sha (this commit is 334918f's child, reports/ only)
-did: on Guy's instruction 2026-10-06 (b6461f6, Proposer: guy): ` || true` on every context line but `gh api user -q .login`
-did: make pins at b6461f6 (transcript reports/L1/make-pins.txt): PINS PASSED, 8/8 clean, 10/10 KILLED
-decided (not asked): harness/proposer.toml session = "unknown": this session started before the hook existed, and the new rule forbids path-inferred ids — p(stands on review)=0.7
-decided (not asked): Guy's text applied verbatim, no repairs; risks below left for review — p(stands on review)=0.85
-decided (not asked): log-loss base rate held at 0.5: per-type empirical frequency is degenerate at n=1 (ACCEPT type 0/1 → ∞) — p(stands on review)=0.6
-forecasts: made 3; resolved 0; cumulative log-loss 1.388 vs base rate 3.466 (0.5) over 5
-obligations added: L2: with no PR yet, "Fetched head" fetches "" (default branch), so `assize-review <branch>` reads master's proposer.toml; fetch the argument branch when no PR resolves
-obligations added: L2: review.md context commands call python3, absent from its allowed-tools
-obligations added: L2: a reviewer with id "unknown" against proposer session "unknown" matches the guard's first sentence; the second sentence should govern
-obligations added: L2: open-forecast file chosen by `sort | tail -1` misorders at L10+
-NEEDS YOU (at most 1): approve and merge the constitution-2 PR (entrenched .claude/) once the Reviewer has accepted
-next: assize-review 4
+changed: docs/briefs/brief-1-judge-and-crafter.md (A4 appended); harness/proposer.toml (session); reports/L1/{forecasts.jsonl,make-pins.txt,STATUS.md}
+did: on Guy's instruction 2026-10-06 (Proposer: guy): appended brief 1 Amendment A4 verbatim
+did: items 7a–7c = L0 review 5e81d05 F2, F3, F4, each line copied whole (label, pin, mutant, severity, witness); `grep -xF` match for all three
+did: items 8–9 kept as supplied; no item of brief 1 or of A4 started
+did: make pins at 57a5a04 (transcript reports/L1/make-pins.txt): PINS PASSED; no assize process or scratch root left after
+decided (not asked): "add items 7–9" read as: keep Guy's item-7 instruction text verbatim and append 7a–7c beneath it; 8–9 already complete — p(stands on review)=0.8
+decided (not asked): 7a–7c keep the reviewer's "F2:"/"F3:"/"F4:" prefixes, since "do not rephrase" forbids trimming — p(stands on review)=0.75
+decided (not asked): LAYER BOUNDARY yes: the PR opens L1 and A1.10 reserves its merge to Guy — p(stands on review)=0.7
+decided (not asked): host-FIT forecast re-made at p=0.6 (earlier 0.85 by session "unknown" stays open; not edited) — p(stands on review)=0.85
+forecasts: made 11; resolved 7; cumulative log-loss 1.781 vs base rate 4.852 (0.5) over 7
+obligations added: none
+NEEDS YOU (at most 1): merge PR #5 (layer-opening brief amendment) once the Reviewer has accepted
+next: assize-review 5
