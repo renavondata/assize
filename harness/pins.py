@@ -3,6 +3,7 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 
 from __future__ import annotations
 
+import json
 import os
 import py_compile
 import shutil
@@ -12,7 +13,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from harness import config, context, edits, proc, scan, tree
+from harness import claims, config, context, edits, proc, scan, tree
 from harness.fixtures import daemon, escapee, leaky
 from harness.nested import run_nested
 from harness.pin import ROOT, Mutant, Pin
@@ -356,6 +357,209 @@ def p0j_host_facts_complete() -> bool:
     return ok
 
 
+def _expecter():
+    """An `expect` that prints each assertion and remembers whether all held."""
+    failures: list[str] = []
+
+    def expect(cond: bool, what: str) -> None:
+        print(f"  [{'ok' if cond else 'FAIL'}] {what}")
+        if not cond:
+            failures.append(what)
+
+    return expect, lambda: not failures
+
+
+def _codes(findings) -> set[tuple[str, str]]:
+    return {(f.where, f.code) for f in findings}
+
+
+def _real_root() -> Path:
+    """The invocation tree: reports/ and .git are never copied, so the real ledgers, STATUS files and branch are
+    read there by clean runs, mutants and twins alike."""
+    return context.invocation_root or ROOT
+
+
+# Rows of reports/L0/forecasts.jsonl written before CLAUDE.md A1.6 was enforced: the two resolutions named in brief 1
+# A4 item 7a's witness. Ledgers are never edited, so these stay; any other L0 finding fails the pin.
+L0_PRE_RULE = {("row 4", "missing_key"), ("row 5", "missing_key")}
+LEDGER_PROPOSER = {"kind": "reviewer", "model": "m", "session": "s"}
+
+
+def _ledger_fixture() -> tuple[dict, dict]:
+    claim, ts = "pins green on the first CI run", "2026-01-01T00:00:00Z"
+    forecast = {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": LEDGER_PROPOSER | {"kind": "builder"},
+                "sha_before": "0" * 40, "claim": claim, "p": 0.8, "resolves_by": "first run"}
+    resolution = {"id": forecast["id"], "ts": "2026-01-02T00:00:00Z", "proposer": LEDGER_PROPOSER, "outcome": True}
+    return forecast, resolution
+
+
+def _ledger(*rows: dict) -> list[str]:
+    return [json.dumps(r) for r in rows]
+
+
+def p0k_forecast_ledger() -> bool:
+    """A forecasts.jsonl resolution row lacking id, ts, proposer or outcome, matching no earlier forecast, or not
+    proposed by the Reviewer is rejected (brief 1 A4 item 7a, CLAUDE.md A1.6); every real ledger is validated."""
+    expect, ok = _expecter()
+    forecast, resolution = _ledger_fixture()
+    got = claims.ledger_findings(_ledger(forecast, resolution))
+    expect(not got, f"well-formed forecast and Reviewer resolution accepted ({[str(f) for f in got]})")
+    for key in ("id", "ts", "proposer", "outcome"):  # stated by 7a, independently of the checker
+        got = claims.ledger_findings(_ledger(forecast, {k: v for k, v in resolution.items() if k != key}))
+        expect(("row 2", "missing_key") in _codes(got) and any(key in f.detail for f in got),
+               f"resolution lacking {key} rejected ({[str(f) for f in got]})")
+    cases = (("orphan", resolution | {"id": "000000000000"}, "orphan"),
+             ("builder-proposed", resolution | {"proposer": LEDGER_PROPOSER | {"kind": "builder"}}, "not_reviewer"),
+             ("L0 shape (resolves, evidence)", {"resolves": forecast["id"], "ts": resolution["ts"], "outcome": True,
+                                                "evidence": "url"}, "missing_key"))
+    for label, row, code in cases:
+        got = claims.ledger_findings(_ledger(forecast, row))
+        expect(("row 2", code) in _codes(got), f"{label} resolution rejected with {code} ({[str(f) for f in got]})")
+    got = claims.ledger_findings(_ledger(resolution, forecast))
+    expect(("row 1", "orphan") in _codes(got), "a resolution before its forecast matches no earlier forecast")
+    got = claims.ledger_findings(_ledger(forecast | {"id": "ffffffffffff"}))
+    expect(("row 1", "bad_id") in _codes(got), "a forecast whose id is not sha256(claim + ts)[:12] rejected")
+
+    ledgers = sorted(_real_root().glob("reports/L*/forecasts.jsonl"))
+    expect(bool(ledgers), f"real ledgers found: {[str(p.relative_to(_real_root())) for p in ledgers]}")
+    for path in ledgers:
+        lines = path.read_text().splitlines()
+        got = claims.ledger_findings(lines)
+        allowed = L0_PRE_RULE if path.parent.name == "L0" else set()
+        for f in got:
+            print(f"    {path.parent.name}: {f}")
+        expect(_codes(got) == allowed if allowed else not got,
+               f"{path.relative_to(_real_root())}: {len(lines)} rows, {len(got)} findings; "
+               f"expected exactly {sorted(allowed) or 'none'}")
+    return ok()
+
+
+RUN = {"path": claims.PINS_WORKFLOW, "conclusion": "success"}
+HEAD_SHA, OLDER_SHA = "a" * 40, "b" * 40
+CI_RUNS = {1: RUN | {"id": 1, "head_sha": HEAD_SHA}, 2: RUN | {"id": 2, "head_sha": OLDER_SHA},
+           3: RUN | {"id": 3, "head_sha": HEAD_SHA, "conclusion": "failure"},
+           4: RUN | {"id": 4, "head_sha": HEAD_SHA, "path": ".github/workflows/measure.yml"}}
+
+
+def _status(cites: str, verdict: str = "SESSION DONE", sha: str = HEAD_SHA[:7]) -> str:
+    return f"# STATUS — L1 — 2026-01-01 — {sha} — PR #1\nVERDICT: {verdict}\ndid: {cites}\n"
+
+
+def p0l_ci_claims() -> bool:
+    """A STATUS or layer verdict line whose cited `pins` run ran on another sha than the one it names, or did not
+    conclude success, is rejected (brief 1 A4 item 7b); every real STATUS and verdict line from L1 is checked."""
+    expect, ok = _expecter()
+    a, b = HEAD_SHA[:7], OLDER_SHA[:7]
+    cases = (("cites a successful pins run on its own sha", _status(f"pins CI run 1 on {a}: success"), set()),
+             ("cites a run on an older sha", _status(f"pins CI run 2 on {b}: success"), {"head_mismatch"}),
+             ("cites a failed run", _status(f"pins CI run 3 on {a}"), {"not_success"}),
+             ("STOPPED, cites a failed run on its own sha", _status(f"pins CI run 3 on {a}", "STOPPED: x"), set()),
+             ("cites no run", _status("pins green"), {"uncited"}),
+             ("cites an unrecorded run", _status(f"pins CI run 9 on {a}"), {"unrecorded"}),
+             ("cites a measure run", _status(f"pins CI run 4 on {a}"), {"not_pins"}),
+             ("cites a run under the wrong sha", _status(f"pins CI run 1 on {b}"), {"citation_mismatch"}))
+    for label, text, want in cases:
+        got = {f.code for f in claims.status_findings("fixture", text, CI_RUNS)}
+        expect(got == want, f"STATUS {label}: findings {sorted(got)}, want {sorted(want)}")
+    report = (f"- L0 — **PASSED** (pins.yml green)\n- L1 — **SEALED** (pins CI run 1 on {a})\n"
+              f"- L1 — **SEALED** (pins CI run 2 on {a})\n- L1 — **SEALED** (pins green)\n")
+    got = _codes(claims.report_findings("REPORT", report, CI_RUNS, 1))
+    expect(got == {("REPORT:3", "citation_mismatch"), ("REPORT:3", "head_mismatch"), ("REPORT:4", "uncited")},
+           f"REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({got})")
+
+    root = _real_root()
+    runs = claims.load_runs(root)
+    statuses = sorted(p for p in root.glob("reports/L*/STATUS.md") if int(p.parent.name[1:]) >= 1)
+    expect(bool(statuses), f"real STATUS files from L1: {[str(p.relative_to(root)) for p in statuses]}; "
+                           f"{len(runs)} committed run records")
+    for path in statuses:
+        got = claims.status_findings(str(path.relative_to(root)), path.read_text(), runs)
+        expect(not got, f"{path.relative_to(root)}: cites {claims.CITATION.findall(path.read_text())}; "
+                        f"findings {[str(f) for f in got]}")
+    text = (root / "REPORT.md").read_text()
+    lines = [m for m in claims.VERDICT_LINE.finditer(text) if int(m.group(1)) >= 1]
+    got = claims.report_findings("REPORT.md", text, runs, 1)
+    expect(not got, f"REPORT.md: {len(lines)} verdict lines from L1; findings {[str(f) for f in got]}")
+    return ok()
+
+
+TRAILER_FIXTURE = (  # (label, path written, Proposer trailer lines, finding codes wanted)
+    ("builder, ordinary path", "harness/x.py", ("builder m s",), set()),
+    ("no trailer", "docs/x.md", (), {"no_proposer"}),
+    ("builder only, CLAUDE.md", "CLAUDE.md", ("builder m s",), {"entrenched_without_guy"}),
+    ("guy then builder, CLAUDE.md", "CLAUDE.md", ("guy", "builder m s"), set()),
+    ("builder then guy, .github/", ".github/x.yml", ("builder m s", "guy"), set()),
+    ("malformed party", "docs/y.md", ("builder m",), {"bad_party"}),
+)
+FIXTURE_GIT = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@f", "GIT_COMMITTER_NAME": "f",
+               "GIT_COMMITTER_EMAIL": "f@f"}
+
+
+def _trailer_repo(repo: Path) -> list[str]:
+    """A fixture repository: a base commit, then one commit per TRAILER_FIXTURE case. Returns their shas."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    def commit(path: str, trailers: tuple[str, ...], n: int) -> str:
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(f"{n}\n")
+        git("add", "-A")
+        git("commit", "-q", "-m", f"case {n}\n\nbody\n\n" + "".join(f"Proposer: {t}\n" for t in trailers))
+        return git("rev-parse", "HEAD")
+
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    commit("CODEOWNERS", ("guy",), 0)
+    return [commit(path, trailers, n) for n, (_, path, trailers, _) in enumerate(TRAILER_FIXTURE, 1)]
+
+
+def _branch_base(root: Path) -> str | None:
+    for ref in ("origin/master", "master"):
+        try:
+            return claims._git(root, "merge-base", "HEAD", ref).strip()
+        except subprocess.CalledProcessError:
+            continue
+    return None
+
+
+def p0m_commit_proposers() -> bool:
+    """Every commit on the branch carries well-formed `Proposer:` trailers; one touching an entrenched path
+    (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2)."""
+    expect, ok = _expecter()
+    patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
+    expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0m-", dir=context.scratch))
+    shas = _trailer_repo(work / "repo")
+    commits = claims.branch_commits(work / "repo", "master~" + str(len(TRAILER_FIXTURE)))
+    expect([c.sha for c in commits] == shas, f"fixture: {len(commits)} branch commits read, want {len(shas)}")
+    for (label, _, trailers, want), c in zip(TRAILER_FIXTURE, commits):
+        got = {f.code for f in claims.commit_findings(c, patterns)}
+        expect(got == want and c.parties == trailers,
+               f"{label}: parties reported {list(c.parties)}, findings {sorted(got)}; want {list(trailers)}, "
+               f"{sorted(want)}")
+    shutil.rmtree(work, ignore_errors=True)
+
+    root = _real_root()
+    shallow = claims._git(root, "rev-parse", "--is-shallow-repository").strip() == "true"
+    base = _branch_base(root)
+    if base is None and shallow:
+        print(f"  [skip] real branch at {root}: shallow clone without master, base unresolvable; not checked in "
+              f"this run (checked by every make pins in a full clone)")
+        return ok()
+    expect(base is not None, f"real branch: base resolved ({base})")
+    real = claims.branch_commits(root, base) if base else []
+    found = [f for c in real for f in claims.commit_findings(c, patterns)]
+    for c in real:
+        print(f"    {c.sha[:12]} parties {list(c.parties)}")
+    expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
+                      f"{[str(f) for f in found]}")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -382,4 +586,11 @@ PINS = [
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset")))),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),)),
+    Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, or matching no forecast, is rejected",
+        p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),)),
+    Pin("P0l", "a verdict citing a pins run on another sha, or one not concluded success, is rejected",
+        p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),)),
+    Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
+        p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
+                                Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
 ]

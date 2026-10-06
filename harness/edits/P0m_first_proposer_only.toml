@@ -1,0 +1,5 @@
+# P0m's second mutant (brief 1 A5 F2): the checker reads only the first `Proposer:` line of a commit.
+[[edit]]
+path = "harness/claims.py"
+old = "trailer_values.split(TRAILER_SEP) if v.strip())"
+new = "trailer_values.split(TRAILER_SEP)[:1] if v.strip())"

@@ -1,0 +1,5 @@
+# P0l's mutant (brief 1 A4 item 7b): the cited run's head_sha is no longer compared with the sha the verdict names.
+[[edit]]
+path = "harness/claims.py"
+old = "(not head.startswith(named_sha), \"head_mismatch\""
+new = "(False, \"head_mismatch\""

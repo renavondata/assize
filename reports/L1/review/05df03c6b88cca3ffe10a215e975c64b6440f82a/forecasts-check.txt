@@ -1,0 +1,3 @@
+claims 29; resolved 19; open 10; id-less outcome rows 2
+cumulative log-loss 4.039 vs constant 0.5 13.170 over 19
+STATUS claims: 29 claims, 19 resolved, 10 open; 4.039 vs 13.170 over 19
