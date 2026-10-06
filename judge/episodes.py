@@ -6,6 +6,11 @@ the World's own ending (`terminal`, `truncated`) or a failure of the candidate (
 `episode_timeout`, `invalid_reply`, `illegal_action`), never dropped (P3). After a failure the container is torn down
 and the next episode starts in a fresh one, so no episode inherits a broken candidate.
 
+Every completed step's prediction is validated against the manifest before the World advances, and scored against the
+observation the World then emits (`scoring.py`): log-loss per declared target, +inf counted and never clipped, a
+missing target recorded missing and never imputed. A reply carrying NaN or an infinity is not JSON and is
+`invalid_reply`.
+
 Teardown force-removes the container by name and then asks the runtime whether anything of that name is left. A
 container still listed is an episode with termination `leaked`, counted, never dropped (brief 1 A4 item 5, P10)."""
 
@@ -25,7 +30,7 @@ from pathlib import Path
 import jsonschema
 import referencing
 
-from judge import runtime
+from judge import runtime, scoring
 
 SPEC = Path(__file__).resolve().parent.parent / "worlds" / "spec"
 SCHEMA_VERSION = "1.0.0"
@@ -63,6 +68,10 @@ class Failure(Exception):
         super().__init__(f"{code}: {detail}")
         self.code = code
         self.detail = detail
+
+
+def _not_json(token: str):
+    raise ValueError(f"{token} is not a JSON number")
 
 
 class Container:
@@ -115,8 +124,8 @@ class Container:
         rid = self._send(method, params)
         line = self._line(time.monotonic() + t.step_s, episode_deadline, t.reply_bytes)
         try:
-            reply = json.loads(line)
-        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            reply = json.loads(line, parse_constant=_not_json)
+        except (ValueError, UnicodeDecodeError) as e:
             raise Failure("invalid_reply", f"{method}: not JSON ({e})") from e
         errors = [e.message for e in REPLY.iter_errors(reply)]
         if errors or reply["id"] != rid or "result" not in reply:
@@ -153,8 +162,9 @@ def listed_prefix(rt: runtime.Runtime, prefix: str) -> list[str]:
     return [n for n in _names(rt, f"name=^{prefix}") if n.startswith(prefix)]
 
 
-def _play(c: Container, world, manifest: Mapping, t: Timeouts) -> tuple[str, str]:
-    """One episode on `world` with `c`; returns its termination code and detail."""
+def _play(c: Container, world, manifest: Mapping, t: Timeouts, losses: list) -> tuple[str, str]:
+    """One episode on `world` with `c`; returns its termination code and detail, and appends to `losses` each
+    completed step's log-loss per declared target."""
     deadline = time.monotonic() + t.episode_s
     try:
         c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest}, t, deadline)
@@ -164,7 +174,12 @@ def _play(c: Container, world, manifest: Mapping, t: Timeouts) -> tuple[str, str
                             t, deadline)
             if result.get("action") not in legal:
                 raise Failure("illegal_action", f"t={world.t}: action {result.get('action')!r} not legal")
+            prediction = result.get("prediction", {})
+            why = scoring.invalid(prediction, manifest["targets"])
+            if why:
+                raise Failure("invalid_reply", f"t={world.t}: prediction: {why}")
             world.step(result["action"])
+            losses.append(scoring.step_losses(prediction, manifest["targets"], world.observation))
         c.call("end_episode", {"termination": world.termination, "utility": world.utility}, t, deadline)
         return world.termination, ""
     except Failure as f:
@@ -180,13 +195,14 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
     c: Container | None = None
     for i, world in enumerate(worlds):
         c = c or Container(rt, image, lim, command)
-        code, detail = _play(c, world, manifest, t)
+        losses: list[dict] = []
+        code, detail = _play(c, world, manifest, t, losses)
         if code not in WORLD_ENDINGS:
             if not c.teardown(t):
                 code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
             c = None
         records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
-                        "utility": world.utility})
+                        "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"])})
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
     return records
