@@ -1,0 +1,213 @@
+"""Checkers for the court's own claims (brief 1 A4 item 7): forecast ledgers (7a), CI claims bound to the head they
+describe (7b), and commit proposers (7c, with A5 F2). Each checker is a pure function returning findings; an empty
+list means accepted. Readers of git and of committed files are kept apart from the rules."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+import subprocess
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+
+
+@dataclass(frozen=True)
+class Finding:
+    where: str
+    code: str
+    detail: str
+
+    def __str__(self) -> str:
+        return f"{self.where}: {self.code}: {self.detail}"
+
+
+# ------------------------------------------------------- 7a: forecast ledgers (CLAUDE.md A1.6)
+
+FORECAST_KEYS = ("id", "ts", "proposer", "sha_before", "claim", "p", "resolves_by")
+RESOLUTION_KEYS = ("id", "ts", "proposer", "outcome")
+PROPOSER_KINDS = frozenset({"builder", "reviewer", "guy", "counsel"})
+
+
+def forecast_id(claim: str, ts: str) -> str:
+    return hashlib.sha256((claim + ts).encode()).hexdigest()[:12]
+
+
+def _proposer_findings(where: str, p: object) -> list[Finding]:
+    if not isinstance(p, dict) or p.get("kind") not in PROPOSER_KINDS:
+        return [Finding(where, "bad_proposer", f"proposer {p!r} lacks a kind in {sorted(PROPOSER_KINDS)}")]
+    lacking = [k for k in ("model", "session") if p["kind"] != "guy" and not (isinstance(p.get(k), str) and p[k])]
+    return [Finding(where, "bad_proposer", f"proposer lacks {k}") for k in lacking]
+
+
+def _forecast_findings(where: str, r: dict) -> list[Finding]:
+    missing = [Finding(where, "missing_key", f"forecast lacks {k}") for k in FORECAST_KEYS if k not in r]
+    if missing:
+        return missing
+    wrong_id = ([Finding(where, "bad_id", f"id {r['id']!r} is not sha256(claim + ts)[:12]")]
+                if r["id"] != forecast_id(str(r["claim"]), str(r["ts"])) else [])
+    bad_p = ([Finding(where, "bad_p", f"p {r['p']!r} not in (0, 1)")]
+             if not (isinstance(r["p"], (int, float)) and 0 < r["p"] < 1) else [])
+    return wrong_id + bad_p + _proposer_findings(where, r["proposer"])
+
+
+def _resolution_findings(where: str, r: dict, earlier_ids: frozenset[str]) -> list[Finding]:
+    missing = [Finding(where, "missing_key", f"resolution lacks {k}") for k in RESOLUTION_KEYS if k not in r]
+    proposer = (_proposer_findings(where, r["proposer"])
+                + ([Finding(where, "not_reviewer", "A1.6 assigns resolutions to the Reviewer")]
+                   if isinstance(r["proposer"], dict) and r["proposer"].get("kind") != "reviewer" else [])
+                if "proposer" in r else [])
+    orphan = ([Finding(where, "orphan", f"id {r['id']!r} matches no earlier forecast")]
+              if "id" in r and r["id"] not in earlier_ids else [])
+    outcome = ([Finding(where, "bad_outcome", f"outcome {r['outcome']!r} is not a boolean")]
+               if "outcome" in r and not isinstance(r["outcome"], bool) else [])
+    return missing + proposer + orphan + outcome
+
+
+def _parse(n: int, line: str) -> dict | Finding:
+    try:
+        row = json.loads(line)
+    except json.JSONDecodeError as e:
+        return Finding(f"row {n}", "bad_json", str(e))
+    return row if isinstance(row, dict) else Finding(f"row {n}", "bad_json", "row is not an object")
+
+
+def ledger_findings(lines: Sequence[str]) -> list[Finding]:
+    """A row carrying `claim` is a forecast; every other row is a resolution. Rows are numbered from 1."""
+    rows = [(n, _parse(n, line)) for n, line in enumerate(lines, 1) if line.strip()]
+    forecast_rows = [(n, r["id"]) for n, r in rows if isinstance(r, dict) and "claim" in r and "id" in r]
+
+    def findings(n: int, r: dict | Finding) -> list[Finding]:
+        if isinstance(r, Finding):
+            return [r]
+        if "claim" in r:
+            return _forecast_findings(f"row {n}", r)
+        return _resolution_findings(f"row {n}", r, frozenset(i for m, i in forecast_rows if m < n))
+
+    return [f for n, r in rows for f in findings(n, r)]
+
+
+# ------------------------------------------- 7b: CI claims bound to the head they describe (A4 item 7b)
+
+STATUS_HEADER = re.compile(r"^# STATUS — L(\d+) — \S+ — ([0-9a-f]{7,40}) — PR #\d+", re.M)
+STATUS_VERDICT = re.compile(r"^VERDICT: (.*)$", re.M)
+CITATION = re.compile(r"\bpins CI run (\d+) on ([0-9a-f]{7,40})\b")
+VERDICT_LINE = re.compile(r"^- L(\d+) — ", re.M)
+PINS_WORKFLOW = ".github/workflows/pins.yml"
+
+
+def _citation_findings(where: str, run_id: int, cited_sha: str, named_sha: str, runs: Mapping[int, dict],
+                       need_success: bool) -> list[Finding]:
+    run = runs.get(run_id)
+    if run is None:
+        return [Finding(where, "unrecorded", f"run {run_id} has no committed record (reports/L<n>/ci/{run_id}.json)")]
+    head = str(run.get("head_sha", ""))
+    rules = (
+        (run.get("id") != run_id, "bad_record", f"record of run {run_id} carries id {run.get('id')!r}"),
+        (run.get("path") != PINS_WORKFLOW, "not_pins", f"run {run_id} is workflow {run.get('path')!r}"),
+        (not head.startswith(cited_sha), "citation_mismatch", f"cites run {run_id} on {cited_sha}; head_sha {head}"),
+        (not head.startswith(named_sha), "head_mismatch", f"run {run_id} ran on {head}; the verdict names {named_sha}"),
+        (need_success and run.get("conclusion") != "success", "not_success",
+         f"run {run_id} concluded {run.get('conclusion')!r}"),
+    )
+    return [Finding(where, code, detail) for broken, code, detail in rules if broken]
+
+
+def status_findings(where: str, text: str, runs: Mapping[int, dict]) -> list[Finding]:
+    """A STATUS names its sha in the header and cites `pins CI run <id> on <sha>`; every cited run is a recorded
+    `pins` run on the named sha, concluded success unless the verdict is STOPPED."""
+    header = STATUS_HEADER.search(text)
+    if header is None:
+        return [Finding(where, "no_header", "no `# STATUS — L<n> — <date> — <sha> — PR #<k>` header")]
+    verdict = STATUS_VERDICT.search(text)
+    need_success = not (verdict and verdict.group(1).startswith("STOPPED"))
+    cited = [(int(i), s) for i, s in CITATION.findall(text)]
+    if not cited:
+        return [Finding(where, "uncited", "no `pins CI run <id> on <sha>` citation")]
+    return [f for i, s in cited for f in _citation_findings(where, i, s, header.group(2), runs, need_success)]
+
+
+def report_findings(where: str, text: str, runs: Mapping[int, dict], from_layer: int) -> list[Finding]:
+    """Every layer verdict line of layer >= `from_layer` cites a recorded, successful `pins` run on the sha it
+    cites."""
+    lines = [(n, line) for n, line in enumerate(text.splitlines(), 1)
+             if (m := VERDICT_LINE.match(line)) and int(m.group(1)) >= from_layer]
+
+    def findings(n: int, line: str) -> list[Finding]:
+        cited = [(int(i), s) for i, s in CITATION.findall(line)]
+        if not cited:
+            return [Finding(f"{where}:{n}", "uncited", "verdict line cites no `pins CI run <id> on <sha>`")]
+        return [f for i, s in cited for f in _citation_findings(f"{where}:{n}", i, s, s, runs, True)]
+
+    return [f for n, line in lines for f in findings(n, line)]
+
+
+def load_runs(root: Path) -> dict[int, dict]:
+    """Committed run records, `reports/L<n>/ci/<run id>.json`, each a projection of the Actions API run object."""
+    return {int(p.stem): json.loads(p.read_text()) for p in sorted(root.glob("reports/L*/ci/*.json"))}
+
+
+# ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
+
+PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel) \S+ \S+)$")
+TRAILER_SEP = "\x1e"
+
+
+@dataclass(frozen=True)
+class Commit:
+    sha: str
+    parties: tuple[str, ...]
+    paths: tuple[str, ...]
+
+
+def parties(trailer_values: str) -> tuple[str, ...]:
+    """Every `Proposer:` trailer value of a commit, one party per line, in order."""
+    return tuple(v.strip() for v in trailer_values.split(TRAILER_SEP) if v.strip())
+
+
+def codeowners_patterns(text: str) -> tuple[str, ...]:
+    return tuple(line.split()[0].lstrip("/") for line in text.splitlines()
+                 if line.strip() and not line.lstrip().startswith("#"))
+
+
+def entrenched(path: str, patterns: Sequence[str]) -> bool:
+    return any(path.startswith(p) if p.endswith("/") else path == p for p in patterns)
+
+
+def commit_findings(c: Commit, patterns: Sequence[str]) -> list[Finding]:
+    where = f"commit {c.sha[:12]}"
+    if not c.parties:
+        return [Finding(where, "no_proposer", "no `Proposer:` trailer")]
+    malformed = [Finding(where, "bad_party", f"{p!r} is not `guy` or `<kind> <model> <session>`")
+                 for p in c.parties if not PARTY.match(p)]
+    touched = sorted(p for p in c.paths if entrenched(p, patterns))
+    unsigned = ([Finding(where, "entrenched_without_guy", f"touches {touched}; parties {list(c.parties)}")]
+                if touched and "guy" not in c.parties else [])
+    return malformed + unsigned
+
+
+# Git reads no user or system configuration here, so no local setting (e.g. log.showSignature) can alter what is parsed.
+GIT_ENV = {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1"}
+
+
+def _git(repo: Path, *args: str) -> str:
+    return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                          env=os.environ | GIT_ENV).stdout
+
+
+def branch_commits(repo: Path, base: str, head: str = "HEAD") -> list[Commit]:
+    """Commits in base..head, oldest first, with their `Proposer:` parties (parsed by git) and the paths each
+    changes itself: for a merge, only paths differing from every parent (`-c`), so content a merge brings in from
+    its other parent is attributed to the commit that authored it."""
+    fmt = "%H%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1d"
+    records = [r.strip("\n") for r in _git(repo, "log", "--reverse", f"--format={fmt}", f"{base}..{head}")
+               .split("\x1d") if r.strip()]
+
+    def commit(record: str) -> Commit:
+        sha, values = record.split("\x1f", 1)
+        paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", "-c", sha).splitlines()
+        return Commit(sha, parties(values), tuple(paths))
+
+    return [commit(r) for r in records]

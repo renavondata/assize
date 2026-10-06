@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-06T15:10:46Z","event":"pull_request","head_branch":"l1-pycache-prefix","head_sha":"3210f7ee790d2eabcf5562bbff54bbc3d213623e","html_url":"https://github.com/renavondata/assize/actions/runs/37485211229","id":37485211229,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
