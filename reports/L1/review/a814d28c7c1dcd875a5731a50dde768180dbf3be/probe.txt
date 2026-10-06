@@ -1,0 +1,42 @@
+# Reviewer probe, independent of the Builder's: fresh seeds 11-16, actions random.Random(1000+seed), 300 steps; hash over semantic+inventory+reward.
+# Each line: mode seed, two runs in one process (PYTHONHASHSEED=7), then one fresh process (PYTHONHASHSEED=8). venv: python 3.11, crafter==1.8.3 from PyPI, outside the repository.
+$ cat rp.py
+"""Reviewer probe (independent of the Builder's): trajectory hash for crafter 1.8.3, stock or with
+insertion-ordered chunk containers. argv: mode seed steps reps. Prints one hash per rep (same process)."""
+import collections, hashlib, random, sys
+import crafter
+from crafter import engine
+
+class Ordered(dict):
+    def add(self, x): self[x] = None
+    def remove(self, x): del self[x]
+
+mode, seed, steps, reps = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
+if mode == "ordered":
+    _r = engine.World.reset
+    def reset(self, seed=None):
+        _r(self, seed); self._chunks = collections.defaultdict(Ordered)
+    engine.World.reset = reset
+
+def run():
+    env = crafter.Env(seed=seed); env.reset(); acts = random.Random(1000 + seed); h = hashlib.sha256(); n = 0
+    for n in range(1, steps + 1):
+        _, r, done, info = env.step(acts.randrange(17))
+        h.update(info["semantic"].tobytes()); h.update(repr(sorted(info["inventory"].items())).encode()); h.update(repr(r).encode())
+        if done: break
+    return f"{h.hexdigest()[:12]}@{n}"
+
+print(mode, seed, *[run() for _ in range(reps)])
+$ for m in stock ordered; for s in 11..16: rp.py $m $s 300 2 (PYTHONHASHSEED=7); rp.py $m $s 300 1 (PYTHONHASHSEED=8)
+stock 11 ca3a7d010276@209 66548f2bde11@209 | fresh-proc: 6bbf9efc3cd8@209
+stock 12 342ad04b9401@153 e27934c11427@163 | fresh-proc: e516f0c46e1b@158
+stock 13 c550e07a23f6@184 0ae83362e811@178 | fresh-proc: 193de4a8efe0@182
+stock 14 426dd70ccdde@157 68b17cabd792@151 | fresh-proc: dea4458345ec@200
+stock 15 b8b0da1121af@168 0b3b320f18ec@168 | fresh-proc: 736bc89f2ef8@168
+stock 16 1265e5f770a6@50 d8fcbbd4b319@50 | fresh-proc: 94627d0316d4@48
+ordered 11 ca3a7d010276@209 ca3a7d010276@209 | fresh-proc: ca3a7d010276@209
+ordered 12 891b800f9c52@194 891b800f9c52@194 | fresh-proc: 891b800f9c52@194
+ordered 13 959a8f49eb45@160 959a8f49eb45@160 | fresh-proc: 959a8f49eb45@160
+ordered 14 1a6ab9491528@200 1a6ab9491528@200 | fresh-proc: 1a6ab9491528@200
+ordered 15 7979f709f5e1@168 7979f709f5e1@168 | fresh-proc: 7979f709f5e1@168
+ordered 16 3f8e3f75b21c@50 3f8e3f75b21c@50 | fresh-proc: 3f8e3f75b21c@50

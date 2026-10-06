@@ -1,0 +1,77 @@
+# Crafter 1.8.3 is non-deterministic given a seed (brief 1 stop-and-report boundary).
+# host steel-legend 2026-10-06T18:18:35Z; python 3.11.11; crafter 1.8.3; numpy 2.4.6
+# reproduce: `uv run --with crafter==1.8.3 python -B probe.py <mode> <seed> 400` (crafter 1.8.3 is locked on branch
+# l1-s2-crafter-binding-wip, not yet on master).
+# probe: /tmp/assize-detprobe-sEjY/probe.py (outside the repository), copied below. Each run: one Env(seed), reset, up to 400 steps
+# of actions from random.Random(seed); per step: t, objects removed, sha256[:12] of info['semantic'] + inventory.
+# Two fresh processes per seed and mode (PYTHONHASHSEED=1, 2). stock = crafter as shipped; ordered = World._chunks
+# a defaultdict of insertion-ordered containers instead of defaultdict(set); nothing else changed.
+
+$ cat probe.py
+"""Probe: does crafter 1.8.3 give the same trajectory twice for one seed, and where does it first diverge?
+argv: mode (stock|ordered) seed steps. Prints one line per step: t, despawned?, sha of semantic+inventory."""
+import collections, hashlib, json, random, sys
+import crafter
+from crafter import engine
+
+class OrderedSet(dict):
+    """Insertion-ordered stand-in for the per-chunk object set: add/remove/iterate as set does."""
+    def add(self, x): self[x] = None
+    def remove(self, x): del self[x]
+
+if sys.argv[1] == "ordered":
+    _reset = engine.World.reset
+    def reset(self, seed=None):
+        _reset(self, seed)
+        self._chunks = collections.defaultdict(OrderedSet)
+    engine.World.reset = reset
+
+seed, steps = int(sys.argv[2]), int(sys.argv[3])
+env = crafter.Env(seed=seed); env.reset()
+removed = []
+_remove = env._world.remove
+def remove(obj):
+    removed.append(type(obj).__name__); _remove(obj)
+env._world.remove = remove
+rng = random.Random(seed)
+for t in range(1, steps + 1):
+    n = len(removed)
+    _, _, done, info = env.step(rng.randrange(17))
+    h = hashlib.sha256(info["semantic"].tobytes() + json.dumps(info["inventory"], sort_keys=True).encode()).hexdigest()[:12]
+    print(t, removed[n:] or "-", h)
+    if done: break
+
+seed 1 stock: DIVERGE first at t=30: run1 '30 ['Cow', 'Zombie'] afd9d6e0b559' run2 '30 ['Cow', 'Zombie'] 0fb8e40a48a6'
+seed 1 ordered: identical (116 steps)
+seed 1: stock run1 and ordered run1 first differ at line 30
+seed 2 stock: DIVERGE first at t=10: run1 '10 ['Zombie', 'Zombie', 'Zombie'] c82fe4495a18' run2 '10 ['Zombie', 'Zombie', 'Zombie'] 5cabc645ebbb'
+seed 2 ordered: identical (161 steps)
+seed 2: stock run1 and ordered run1 first differ at line 20
+seed 3 stock: DIVERGE first at t=10: run1 '10 ['Zombie', 'Cow', 'Zombie', 'Zombie', 'Zombie'] 4983deea65dc' run2 '10 ['Zombie', 'Cow', 'Zombie', 'Zombie', 'Zombie'] 55965d4a5efa'
+seed 3 ordered: identical (187 steps)
+seed 3: stock run1 and ordered run1 first differ at line 10
+seed 4 stock: DIVERGE first at t=40: run1 '40 ['Zombie', 'Cow', 'Zombie'] 7c7654240883' run2 '40 ['Zombie', 'Cow', 'Zombie'] df0c967a7f75'
+seed 4 ordered: identical (153 steps)
+seed 4: stock run1 and ordered run1 first differ at line 40
+seed 5 stock: DIVERGE first at t=20: run1 '20 ['Zombie', 'Zombie', 'Zombie', 'Zombie', 'Zombie'] 08f65574050e' run2 '20 ['Zombie', 'Zombie', 'Zombie', 'Zombie', 'Zombie'] 7f67c27de03c'
+seed 5 ordered: identical (184 steps)
+seed 5: stock run1 and ordered run1 first differ at line none
+
+# Same process, stock: seed s, the same 400 actions, two Envs in sequence; sha256 over every step's semantic+inventory.
+$ cat same.py
+import hashlib, json, random, crafter
+for s in (1, 2, 3, 4, 5):
+    hs = []
+    for _ in range(2):
+        env = crafter.Env(seed=s); env.reset(); rng = random.Random(s); h = hashlib.sha256()
+        for _ in range(400):
+            _, _, done, info = env.step(rng.randrange(17))
+            h.update(info["semantic"].tobytes() + json.dumps(info["inventory"], sort_keys=True).encode())
+            if done: break
+        hs.append(h.hexdigest()[:12])
+    print(f"seed {s} stock same-process: {hs[0]} {hs[1]}", "identical" if hs[0] == hs[1] else "DIFFER")
+seed 1 stock same-process: 69bcac37a455 6e78a2dba17a DIFFER
+seed 2 stock same-process: 239de0b3d562 28f2085b37b2 DIFFER
+seed 3 stock same-process: b857d647dc77 77c26410b72e DIFFER
+seed 4 stock same-process: 3759f0ca3537 51c3369b15df DIFFER
+seed 5 stock same-process: ca82aa361c90 6ce40c98983f DIFFER

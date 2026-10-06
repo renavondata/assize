@@ -1,0 +1,7 @@
+$ ls -d /tmp/assize-review-13* 2>&1
+ls: cannot access '/tmp/assize-review-13*': No such file or directory
+$ pgrep -af "harness run|rp.py|assize-review-13" | grep -v pgrep
+(none)
+$ ls -d /tmp/assize-* 2>&1
+/tmp/assize-make-pins.txt
+/tmp/assize-mkpins.txt

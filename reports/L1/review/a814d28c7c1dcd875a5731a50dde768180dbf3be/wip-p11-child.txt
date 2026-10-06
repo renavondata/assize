@@ -1,0 +1,7 @@
+# WIP branch l1-s2-crafter-binding-wip @ db7719128942bfce20cbe94bb893054b0b90890a, scratch clone /tmp/assize-review-13-wip; P11's TRAJECTORY_RUN child extracted verbatim from harness/pins.py, run with seeds [1,2,3], 400 steps, under two PYTHONHASHSEEDs (uv run --frozen; stock crafter 1.8.3 as locked there).
+PYTHONHASHSEED=1 seed 1 ['bc417c14b6a6', '5a7d4c57350d'] steps 116 violations []
+PYTHONHASHSEED=1 seed 2 ['3b22f25fc100', 'cda9b777c652'] steps 161 violations []
+PYTHONHASHSEED=1 seed 3 ['d44e59c7e90a', 'a900db23d0d6'] steps 164 violations []
+PYTHONHASHSEED=2 seed 1 ['09d4f9f30ac3', 'c681f9bc3a5c'] steps 116 violations []
+PYTHONHASHSEED=2 seed 2 ['a39cf143b840', 'cda9b777c652'] steps 161 violations []
+PYTHONHASHSEED=2 seed 3 ['24d39f062769', '9366228353f1'] steps 187 violations []

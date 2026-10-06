@@ -1,0 +1,65 @@
+# crafter 1.8.3 source: every use of per-chunk containers and object sets (site-packages/crafter)
+objects.py:252:    nearby, _ = self.world.nearby(self.pos, 1)
+objects.py:254:    if not all(util in nearby for util in info['nearby']):
+objects.py:408:    if any(isinstance(obj, (Zombie, Skeleton, Cow)) for obj in objs):
+env.py:91:      for chunk, objs in self._world.chunks.items():
+env.py:162:    creatures = [obj for obj in objs if isinstance(obj, cls)]
+env.py:176:      obj = creatures[random.randint(0, len(creatures))]
+engine.py:36:    self._chunks = collections.defaultdict(set)
+engine.py:48:    return self._chunks.copy()
+engine.py:57:    self._chunks[self.chunk_key(obj.pos)].add(obj)
+engine.py:64:    self._chunks[self.chunk_key(obj.pos)].remove(obj)
+engine.py:78:      self._chunks[old_chunk].remove(obj)
+engine.py:79:      self._chunks[new_chunk].add(obj)
+engine.py:95:  def nearby(self, pos, distance):
+
+$ sed -n 70,81p env.py
+  def reset(self):
+    center = (self._world.area[0] // 2, self._world.area[1] // 2)
+    self._episode += 1
+    self._step = 0
+    self._world.reset(seed=hash((self._seed, self._episode)) % (2 ** 31 - 1))
+    self._update_time()
+    self._player = objects.Player(self._world, center)
+    self._last_health = self._player.health
+    self._world.add(self._player)
+    self._unlocked = set()
+    worldgen.generate_world(self._world, self._player)
+    return self._obs()
+$ sed -n 158,180p env.py
+      self, chunk, objs, cls, material, span_dist, despan_dist,
+      spawn_prob, despawn_prob, ctor, target_fn):
+    xmin, xmax, ymin, ymax = chunk
+    random = self._world.random
+    creatures = [obj for obj in objs if isinstance(obj, cls)]
+    mask = self._world.mask(*chunk, material)
+    target_min, target_max = target_fn(len(creatures), mask.sum())
+    if len(creatures) < int(target_min) and random.uniform() < spawn_prob:
+      xs = np.tile(np.arange(xmin, xmax)[:, None], [1, ymax - ymin])
+      ys = np.tile(np.arange(ymin, ymax)[None, :], [xmax - xmin, 1])
+      xs, ys = xs[mask], ys[mask]
+      i = random.randint(0, len(xs))
+      pos = np.array((xs[i], ys[i]))
+      empty = self._world[pos][1] is None
+      away = self._player.distance(pos) >= span_dist
+      if empty and away:
+        self._world.add(ctor(pos))
+    elif len(creatures) > int(target_max) and random.uniform() < despawn_prob:
+      obj = creatures[random.randint(0, len(creatures))]
+      away = self._player.distance(obj.pos) >= despan_dist
+      if away:
+        self._world.remove(obj)
+$ sed -n 250,255p objects.py
+
+  def _make(self, name):
+    nearby, _ = self.world.nearby(self.pos, 1)
+    info = constants.make[name]
+    if not all(util in nearby for util in info['nearby']):
+      return
+$ sed -n 404,409p objects.py
+
+  def update(self):
+    self.grown += 1
+    objs = [self.world[self.pos + dir_][1] for dir_ in self.all_dirs]
+    if any(isinstance(obj, (Zombie, Skeleton, Cow)) for obj in objs):
+      self.health -= 1

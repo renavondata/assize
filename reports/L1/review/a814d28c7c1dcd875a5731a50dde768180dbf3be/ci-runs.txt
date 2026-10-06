@@ -1,0 +1,5 @@
+$ gh api "repos/renavondata/assize/actions/runs?branch=l1-s2-crafter-binding&per_page=50" (before this review push)
+pins pull_request a814d28c7c1dcd875a5731a50dde768180dbf3be completed success 37512015587 1 2026-10-06T18:31:49Z
+pins pull_request fe99a8316a62281abb11124849ac5d1835f9bf3f completed success 37511509891 1 2026-10-06T18:27:55Z
+$ cat reports/L1/ci/37511509891.json
+{"conclusion":"success","created_at":"2026-10-06T18:27:55Z","event":"pull_request","head_branch":"l1-s2-crafter-binding","head_sha":"fe99a8316a62281abb11124849ac5d1835f9bf3f","html_url":"https://github.com/renavondata/assize/actions/runs/37511509891","id":37511509891,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
