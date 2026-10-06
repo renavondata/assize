@@ -1,0 +1,28 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-sjtxdywk/assize-copy-pc2i9t4o/repo
+applied 2 edit(s) from harness/edits/P11_chunks_replaced_after_worldgen.toml
+pin:       P11
+protects:  the same seed and actions give an identical Crafter trajectory hash; emitted observations conform
+role:      mutant
+tree:      /tmp/assize-scratch-sjtxdywk/assize-copy-pc2i9t4o/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-sjtxdywk
+Traceback (most recent call last):
+  File "/tmp/assize-scratch-sjtxdywk/assize-copy-pc2i9t4o/repo/harness/runner.py", line 59, in check
+    ok = bool(pin.check())
+              ^^^^^^^^^^^
+  File "/tmp/assize-scratch-sjtxdywk/assize-copy-pc2i9t4o/repo/harness/pins.py", line 687, in p11_crafter_determinism
+    a, b = _trajectories("1"), _trajectories("2")
+           ^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-scratch-sjtxdywk/assize-copy-pc2i9t4o/repo/harness/pins.py", line 674, in _trajectories
+    raise RuntimeError(f"trajectory child exited {out.returncode}: {out.stderr.strip()[-500:]}")
+RuntimeError: trajectory child exited 1:     self.move(direction)
+  File "/home/g/git/assize/.venv/lib/python3.11/site-packages/crafter/objects.py", line 40, in move
+    self.world.move(self, target)
+  File "/home/g/git/assize/.venv/lib/python3.11/site-packages/crafter/engine.py", line 78, in move
+    self._chunks[old_chunk].remove(obj)
+  File "/tmp/assize-scratch-sjtxdywk/assize-copy-pc2i9t4o/repo/worlds/crafter/binding.py", line 34, in remove
+    del self[obj]
+        ~~~~^^^^^
+KeyError: <crafter.objects.Cow object at 0x7f558a90e050>
+result:    ERROR (check raised)

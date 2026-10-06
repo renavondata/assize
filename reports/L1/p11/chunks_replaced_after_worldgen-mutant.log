@@ -1,0 +1,24 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-jo3dz9ga/assize-copy-insojgxq/repo
+applied 2 edit(s) from harness/edits/P11_chunks_replaced_after_worldgen.toml
+pin:       P11
+protects:  the same seed and actions give an identical Crafter trajectory hash; emitted observations conform
+role:      mutant
+tree:      /tmp/assize-scratch-jo3dz9ga/assize-copy-insojgxq/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-jo3dz9ga
+  [ok] seed 1: observations conform to the manifest ([])
+  [FAIL] seed 1: every chunk container holds exactly its live objects after reset and every step (250 departures; first [[0, 'chunk (np.int64(0), np.int64(12), np.int64(0), np.int64(12)): 0 held, 1 live'], [0, 'chunk (np.int64(0), np.int64(12), np.int64(12), np.int64(24)): 0 held, 2 live']])
+  [FAIL] seed 1: the World plays the action stream without raising (['KeyError: <crafter.objects.Cow object at 0x7fa67614d6d0>'])
+  [ok] seed 2: observations conform to the manifest ([])
+  [FAIL] seed 2: every chunk container holds exactly its live objects after reset and every step (75 departures; first [[0, 'chunk (np.int64(0), np.int64(12), np.int64(0), np.int64(12)): 0 held, 2 live'], [0, 'chunk (np.int64(0), np.int64(12), np.int64(36), np.int64(48)): 0 held, 1 live']])
+  [FAIL] seed 2: the World plays the action stream without raising (['KeyError: <crafter.objects.Cow object at 0x7fa6760b4b10>'])
+  [ok] seed 3: observations conform to the manifest ([])
+  [FAIL] seed 3: every chunk container holds exactly its live objects after reset and every step (72 departures; first [[0, 'chunk (np.int64(0), np.int64(12), np.int64(0), np.int64(12)): 0 held, 3 live'], [0, 'chunk (np.int64(0), np.int64(12), np.int64(12), np.int64(24)): 0 held, 2 live']])
+  [FAIL] seed 3: the World plays the action stream without raising (['KeyError: <crafter.objects.Skeleton object at 0x7fa6760dd150>'])
+  [FAIL] seed 1: trajectory hash  is the committed golden f65aed28a596149b
+  [FAIL] 3 seeds give 1 distinct hashes
+  [ok] Hafner score of 1 episodes: 0.000000, want 0.000000
+  [ok] Hafner score of 2 episodes: 100.000000, want 100.000000
+  [ok] Hafner score of 2 episodes: 0.195685, want 0.195685
+result:    FAIL

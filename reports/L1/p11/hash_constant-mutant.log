@@ -1,0 +1,30 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-1m4eh9pz/assize-copy-_pn4zpi1/repo
+applied 1 edit(s) from harness/edits/P11_hash_constant.toml
+pin:       P11
+protects:  the same seed and actions give an identical Crafter trajectory hash; emitted observations conform
+role:      mutant
+tree:      /tmp/assize-scratch-1m4eh9pz/assize-copy-_pn4zpi1/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-1m4eh9pz
+  [ok] seed 1: observations conform to the manifest ([])
+  [ok] seed 1: every chunk container holds exactly its live objects after reset and every step (0 departures; first [])
+  [ok] seed 1: the World plays the action stream without raising ([])
+  [ok] seed 1: 4 trajectory hashes, 2 per process, 1 distinct (116 steps; e3b0c44298fc1c14)
+  [ok] seed 1: utility 2 = |['collect_wood', 'wake_up']|, each a declared component
+  [ok] seed 2: observations conform to the manifest ([])
+  [ok] seed 2: every chunk container holds exactly its live objects after reset and every step (0 departures; first [])
+  [ok] seed 2: the World plays the action stream without raising ([])
+  [ok] seed 2: 4 trajectory hashes, 2 per process, 1 distinct (161 steps; e3b0c44298fc1c14)
+  [ok] seed 2: utility 3 = |['collect_sapling', 'place_plant', 'wake_up']|, each a declared component
+  [ok] seed 3: observations conform to the manifest ([])
+  [ok] seed 3: every chunk container holds exactly its live objects after reset and every step (0 departures; first [])
+  [ok] seed 3: the World plays the action stream without raising ([])
+  [ok] seed 3: 4 trajectory hashes, 2 per process, 1 distinct (187 steps; e3b0c44298fc1c14)
+  [ok] seed 3: utility 1 = |['wake_up']|, each a declared component
+  [FAIL] seed 1: trajectory hash e3b0c44298fc1c14 is the committed golden f65aed28a596149b
+  [FAIL] 3 seeds give 1 distinct hashes
+  [ok] Hafner score of 1 episodes: 0.000000, want 0.000000
+  [ok] Hafner score of 2 episodes: 100.000000, want 100.000000
+  [ok] Hafner score of 2 episodes: 0.195685, want 0.195685
+result:    FAIL
