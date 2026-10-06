@@ -6,15 +6,15 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 
 ## Context, gathered now (from the PR head, not the working tree)
 - Acting as GitHub account: !`gh api user -q .login`
-- Own session id: !`cat .claude/.session_id 2>/dev/null || echo unknown`
+- Own session id: !`cat .claude/.session_id 2>/dev/null || echo unknown || true`
 - Argument: `$ARGUMENTS`
-- PR: !`gh pr view $ARGUMENTS --json number,title,headRefName,headRefOid,baseRefName,isDraft,author -q '"#\(.number) \(.title) — \(.headRefName)@\(.headRefOid) -> \(.baseRefName) draft=\(.isDraft) author=\(.author.login)"' 2>&1`
-- Fetched head: !`git fetch -q origin "$(gh pr view $ARGUMENTS --json headRefName -q .headRefName 2>/dev/null)" 2>&1 && git rev-parse --short FETCH_HEAD`
-- Files touched: !`gh pr view $ARGUMENTS --json files -q '[.files[].path] | join(", ")' 2>&1`
-- Builder of record at head: !`git show FETCH_HEAD:harness/proposer.toml 2>&1`
-- Current layer at head: !`git show FETCH_HEAD:CLAUDE.md | grep -m1 'Current layer'`
-- Brief at head: !`git ls-tree --name-only FETCH_HEAD docs/briefs/ | grep "brief-$(git show FETCH_HEAD:CLAUDE.md | grep -oP 'Current layer: L\K[0-9]+')-"`
-- Open forecasts at head (claims with no resolution): !`f=$(git ls-tree -r --name-only FETCH_HEAD | grep 'forecasts.jsonl$' | sort | tail -1); [ -n "$f" ] && git show "FETCH_HEAD:$f" | python3 -c 'import sys,json; r=[json.loads(l) for l in sys.stdin if l.strip()]; c={x["id"] for x in r if "claim" in x}; o={x["id"] for x in r if "outcome" in x}; print(len(c-o))' || echo none`
+- PR: !`gh pr view $ARGUMENTS --json number,title,headRefName,headRefOid,baseRefName,isDraft,author -q '"#\(.number) \(.title) — \(.headRefName)@\(.headRefOid) -> \(.baseRefName) draft=\(.isDraft) author=\(.author.login)"' 2>&1 || true`
+- Fetched head: !`git fetch -q origin "$(gh pr view $ARGUMENTS --json headRefName -q .headRefName 2>/dev/null)" 2>&1 && git rev-parse --short FETCH_HEAD || true`
+- Files touched: !`gh pr view $ARGUMENTS --json files -q '[.files[].path] | join(", ")' 2>&1 || true`
+- Builder of record at head: !`git show FETCH_HEAD:harness/proposer.toml 2>&1 || true`
+- Current layer at head: !`git show FETCH_HEAD:CLAUDE.md | grep -m1 'Current layer' || true`
+- Brief at head: !`git ls-tree --name-only FETCH_HEAD docs/briefs/ | grep "brief-$(git show FETCH_HEAD:CLAUDE.md | grep -oP 'Current layer: L\K[0-9]+')-" || true`
+- Open forecasts at head (claims with no resolution): !`f=$(git ls-tree -r --name-only FETCH_HEAD | grep 'forecasts.jsonl$' | sort | tail -1); [ -n "$f" ] && git show "FETCH_HEAD:$f" | python3 -c 'import sys,json; r=[json.loads(l) for l in sys.stdin if l.strip()]; c={x["id"] for x in r if "claim" in x}; o={x["id"] for x in r if "outcome" in x}; print(len(c-o))' || echo none || true`
 
 ## Guards
 - If the account above is not `assize-reviewer`, stop and report: wrong credentials; do nothing else.

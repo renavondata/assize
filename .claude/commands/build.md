@@ -6,13 +6,13 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 
 ## Context, gathered now
 - Acting as GitHub account: !`gh api user -q .login`
-- GH_TOKEN set: !`[ -n "$GH_TOKEN" ] && echo YES || echo no`
-- Own session id: !`cat .claude/.session_id 2>/dev/null || echo unknown`
-- Branch: !`git branch --show-current` at !`git rev-parse --short HEAD`; changed files: !`git status --porcelain | wc -l`
-- Current layer: !`grep -m1 'Current layer' CLAUDE.md`
-- Brief: !`ls docs/briefs/brief-$(grep -oP 'Current layer: L\K[0-9]+' CLAUDE.md)-*.md`
-- Last STATUS: !`s=$(ls reports/L*/STATUS.md 2>/dev/null | tail -1); [ -n "$s" ] && cat "$s" || echo none`
-- Newest review: !`r=$(ls -t reports/L*/review-*.md 2>/dev/null | head -1); [ -n "$r" ] && head -5 "$r" || echo none`
+- GH_TOKEN set: !`[ -n "$GH_TOKEN" ] && echo YES || echo no || true`
+- Own session id: !`cat .claude/.session_id 2>/dev/null || echo unknown || true`
+- Branch: !`git branch --show-current || true` at !`git rev-parse --short HEAD || true`; changed files: !`git status --porcelain | wc -l || true`
+- Current layer: !`grep -m1 'Current layer' CLAUDE.md || true`
+- Brief: !`ls docs/briefs/brief-$(grep -oP 'Current layer: L\K[0-9]+' CLAUDE.md)-*.md || true`
+- Last STATUS: !`s=$(ls reports/L*/STATUS.md 2>/dev/null | tail -1); [ -n "$s" ] && cat "$s" || echo none || true`
+- Newest review: !`r=$(ls -t reports/L*/review-*.md 2>/dev/null | head -1); [ -n "$r" ] && head -5 "$r" || echo none || true`
 
 ## Guards
 - If the account above is `assize-reviewer`, or GH_TOKEN is set, stop and report: a Builder must never hold the reviewer's credentials. Do nothing else.
