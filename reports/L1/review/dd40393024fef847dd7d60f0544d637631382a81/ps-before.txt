@@ -1,0 +1,8 @@
+ 912906 assize-+ /usr/lib/systemd/systemd --user
+ 912908 assize-+ (sd-pam)
+ 918425 assize-+ catatonit -P
+ 918438 assize-+ /usr/bin/dbus-broker-launch --scope user
+ 918439 assize-+ dbus-broker --log 11 --controller 10 --machine-id 11446a29a68740949b11611623554df4 --max-bytes 100000000000000 --max-fds 25000000000000 --max-matches 5000000000
+ 955013 assize-+ /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+ 955048 assize-+ ./externals/node20/bin/node ./bin/RunnerService.js
+ 955067 assize-+ /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service
