@@ -1,0 +1,15 @@
+# read-only cgroup probe on steel-legend, uid 1000, 2026-10-06T11:50:01Z
+$ cat /sys/fs/cgroup/cgroup.subtree_control
+cpu memory pids
+$ cat /sys/fs/cgroup/user.slice/cgroup.subtree_control
+cpu memory pids
+$ cat /sys/fs/cgroup/user.slice/cgroup.controllers
+cpu memory pids
+$ cat /sys/fs/cgroup/user.slice/user-1000.slice/cgroup.controllers
+cpu memory pids
+$ cat /sys/fs/cgroup/user.slice/user-1000.slice/cpuset.cpus
+cat: /sys/fs/cgroup/user.slice/user-1000.slice/cpuset.cpus: No such file or directory
+$ cat /sys/fs/cgroup/user.slice/user-1000.slice/cpuset.cpus.effective
+cat: /sys/fs/cgroup/user.slice/user-1000.slice/cpuset.cpus.effective: No such file or directory
+$ systemctl show user-1000.slice -p AllowedCPUs
+AllowedCPUs=

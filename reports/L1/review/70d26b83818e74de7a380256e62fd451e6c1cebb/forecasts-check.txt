@@ -1,0 +1,53 @@
+# forecasts check at 70d26b8 (L0+L1 ledgers): id = sha256(claim+ts)[:12]; base 'empirical-by-type' = unsmoothed frequency of prior outcomes of the same claim type, 0.5 before any
+claims 23 id mismatches []
+resolution rows with id 15 rows w/o id 2
+orphans []
+876d1d05c550 pins     p=0.8 y=True base=0.500 Lp=0.223 Lb=0.693
+a30e37db1152 other:fixture.escapee recorded leaked with lea p=0.9 y=True base=0.500 Lp=0.105 Lb=0.693
+ed89fc300206 review   p=0.45 y=False base=0.500 Lp=0.598 Lb=0.693
+f10042c28c01 pins     p=0.9 y=True base=1.000 Lp=0.105 Lb=-0.000
+39c7566f41c1 review   p=0.7 y=True base=0.000 Lp=0.357 Lb=inf
+1d42825b59cd pins     p=0.9 y=True base=1.000 Lp=0.105 Lb=-0.000
+8bb9cda2bc61 review   p=0.75 y=True base=0.500 Lp=0.288 Lb=0.693
+dd537e267ba5 pins     p=0.92 y=True base=1.000 Lp=0.083 Lb=-0.000
+c0834181919c review   p=0.8 y=True base=0.667 Lp=0.223 Lb=0.405
+bac95e050e0d pins     p=0.9 y=True base=1.000 Lp=0.105 Lb=-0.000
+f01921f37bce review   p=0.8 y=True base=0.750 Lp=0.223 Lb=0.288
+954b5ff2ee57 pins     p=0.75 y=True base=1.000 Lp=0.288 Lb=-0.000
+b6a19fb797b3 review   p=0.7 y=True base=0.800 Lp=0.357 Lb=0.223
+52aa3a44d8a7 pins     p=0.9 y=True base=1.000 Lp=0.105 Lb=-0.000
+0fa622856b1b review   p=0.85 y=True base=0.833 Lp=0.163 Lb=0.182
+resolved 15; open 8: ['11503575a841', '1608ce8c1b56', '3a9cd81ca8e6', '7eff9e8b7183', 'a8599bb8e846', 'aedc770007cf', 'c86d08b75084', 'd2c4349bd09f']
+log-loss 3.329; vs 0.5 10.397; vs empirical-by-type inf
+## script
+import json, hashlib, math, sys, re
+rows=[]
+for p in sys.argv[1:]:
+    rows += [json.loads(l) for l in open(p) if l.strip()]
+claims={r["id"]:r for r in rows if "claim" in r}
+bad=[i for i,r in claims.items() if hashlib.sha256((r["claim"]+r["ts"]).encode()).hexdigest()[:12]!=i]
+print("claims",len(claims),"id mismatches",bad)
+res=[r for r in rows if "outcome" in r and "id" in r]
+print("resolution rows with id",len(res),"rows w/o id", sum(1 for r in rows if "outcome" in r and "id" not in r))
+orphan=[r["id"] for r in res if r["id"] not in claims]; print("orphans",orphan)
+seen={}; 
+for r in res: seen.setdefault(r["id"],r)
+def typ(c):
+    c=c.lower()
+    if "pins" in c and "green" in c: return "pins"
+    if "reviewer verdict" in c or "accept" in c: return "review"
+    if "host verdict" in c: return "host"
+    return "other:"+c[:40]
+ll=0; ll5=0; hist={}
+for i,r in sorted(seen.items(), key=lambda kv: kv[1]["ts"]):
+    c=claims[i]; y=bool(r["outcome"]); p=c["p"]; t=typ(c["claim"])
+    h=hist.get(t,[]); b=(sum(h)/len(h)) if h else 0.5
+    def L(q): 
+        q=q if y else 1-q
+        return -math.log(q) if q>0 else math.inf
+    ll+=L(p); ll5+=math.log(2); 
+    print(f"{i} {t:8} p={p} y={y} base={b:.3f} Lp={L(p):.3f} Lb={L(b):.3f}")
+    hist.setdefault(t,[]).append(y)
+    r["_lb"]=L(b)
+print(f"resolved {len(seen)}; open {len(set(claims)-set(seen))}: {sorted(set(claims)-set(seen))}")
+print(f"log-loss {ll:.3f}; vs 0.5 {ll5:.3f}; vs empirical-by-type {sum(r['_lb'] for r in seen.values()):.3f}")

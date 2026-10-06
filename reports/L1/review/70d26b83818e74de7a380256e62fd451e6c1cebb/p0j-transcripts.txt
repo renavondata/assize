@@ -1,0 +1,39 @@
+## P0j/clean
+  [ok] every fact present: exit 0 (got 0)
+  [ok] facts record ('uptime', 'cpuset', 'runner-version', 'podman-info')
+  [ok] facts carry each probe's output
+  [ok] complete facts are not refused
+  [ok] uptime missing: exit non-zero (got 1)
+  [ok] uptime missing: refusal names it ('NOT A MEASUREMENT: required facts missing: uptime')
+  [ok] cpuset missing: exit non-zero (got 1)
+  [ok] cpuset missing: refusal names it ('NOT A MEASUREMENT: required facts missing: cpuset')
+  [ok] runner-version missing: exit non-zero (got 1)
+  [ok] runner-version missing: refusal names it ('NOT A MEASUREMENT: required facts missing: runner-version')
+  [ok] podman-info missing: exit non-zero (got 1)
+  [ok] podman-info missing: refusal names it ('NOT A MEASUREMENT: required facts missing: podman-info')
+## P0j/incomplete_facts_accepted/mutant
+  [ok] every fact present: exit 0 (got 0)
+  [ok] facts record ('uptime', 'cpuset', 'runner-version', 'podman-info')
+  [ok] facts carry each probe's output
+  [ok] complete facts are not refused
+  [FAIL] uptime missing: exit non-zero (got 0)
+  [ok] uptime missing: refusal names it ('NOT A MEASUREMENT: required facts missing: uptime')
+  [FAIL] cpuset missing: exit non-zero (got 0)
+  [ok] cpuset missing: refusal names it ('NOT A MEASUREMENT: required facts missing: cpuset')
+  [FAIL] runner-version missing: exit non-zero (got 0)
+  [ok] runner-version missing: refusal names it ('NOT A MEASUREMENT: required facts missing: runner-version')
+  [FAIL] podman-info missing: exit non-zero (got 0)
+  [ok] podman-info missing: refusal names it ('NOT A MEASUREMENT: required facts missing: podman-info')
+## P0j/incomplete_facts_accepted/twin
+  [ok] every fact present: exit 0 (got 0)
+  [ok] facts record ('uptime', 'cpuset', 'runner-version', 'podman-info')
+  [ok] facts carry each probe's output
+  [ok] complete facts are not refused
+  [ok] uptime missing: exit non-zero (got 1)
+  [ok] uptime missing: refusal names it ('NOT A MEASUREMENT: required facts missing: uptime')
+  [ok] cpuset missing: exit non-zero (got 1)
+  [ok] cpuset missing: refusal names it ('NOT A MEASUREMENT: required facts missing: cpuset')
+  [ok] runner-version missing: exit non-zero (got 1)
+  [ok] runner-version missing: refusal names it ('NOT A MEASUREMENT: required facts missing: runner-version')
+  [ok] podman-info missing: exit non-zero (got 1)
+  [ok] podman-info missing: refusal names it ('NOT A MEASUREMENT: required facts missing: podman-info')
