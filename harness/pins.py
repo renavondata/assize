@@ -560,6 +560,79 @@ def p0m_commit_proposers() -> bool:
     return ok()
 
 
+PURITY_FIXTURE = (  # (label, schema, tokens wanted) against a fixture manifest's vocabulary
+    ("clean", {"type": "object", "description": "a generic field"}, set()),
+    ("as a key", {"properties": {"semantic": {}}}, {"semantic"}),
+    ("as a value", {"enum": ["wood_pickaxe"]}, {"wood_pickaxe", "wood", "pickaxe"}),
+    ("inside a description", {"description": "counts the Wood held"}, {"wood"}),
+    ("as an underscore part", {"const": "max_wood"}, {"wood"}),
+)
+PURITY_MANIFEST = {"world": "fx", "observation": [{"name": "semantic", "vocabulary": ["grass"]}],
+                   "actions": ["noop"], "targets": [{"name": "wood_pickaxe", "field": "semantic", "support": [0, 1]}],
+                   "utility": {"components": []}}
+
+
+def p6_schema_purity() -> bool:
+    """No manifest vocabulary token appears in any interface schema file; the schemas are valid JSON Schema carrying
+    schema_version, every manifest conforms to the manifest schema, and the step messages they define carry no seed
+    (brief 1 section 1)."""
+    import jsonschema
+    import referencing
+    from worlds.spec import purity
+
+    expect, ok = _expecter()
+    vocab = purity.vocabulary([PURITY_MANIFEST])
+    for label, schema, want in PURITY_FIXTURE:
+        got = {tok for _, tok in purity.violations({"fx": schema}, vocab)}
+        expect(got == want, f"fixture token {label}: found {sorted(got)}, want {sorted(want)}")
+
+    schemas = purity.load(purity.schema_files())
+    manifests = purity.load(purity.manifest_files())
+    expect(sorted(schemas) == ["manifest.schema.json", "rpc.schema.json"], f"schema files: {sorted(schemas)}")
+    expect(bool(manifests), f"manifests: {sorted(manifests)}")
+    for name, s in schemas.items():
+        try:
+            jsonschema.Draft202012Validator.check_schema(s)
+            valid = True
+        except jsonschema.SchemaError as e:
+            valid, name = False, f"{name} ({e.message})"
+        expect(valid and s.get("schema_version") == "1.0.0", f"{name}: valid 2020-12 schema, schema_version 1.0.0")
+    registry = referencing.Registry().with_resources(
+        (s["$id"], referencing.Resource.from_contents(s)) for s in schemas.values())
+    manifest_v = jsonschema.Draft202012Validator(schemas["manifest.schema.json"], registry=registry)
+    rpc_v = jsonschema.Draft202012Validator(schemas["rpc.schema.json"], registry=registry)
+    for name, m in manifests.items():
+        errors = [e.message for e in manifest_v.iter_errors(m)]
+        expect(not errors, f"{name} conforms to manifest.schema.json ({errors[:2]})")
+    m = next(iter(manifests.values()))
+    bare = m | {"observation": [{k: v for k, v in f.items() if k != "vocabulary"} for f in m["observation"]]}
+    expect(not manifest_v.is_valid(bare), "manifest.schema.json rejects a categorical field with no vocabulary")
+
+    obs = {f["name"]: 0 for f in m["observation"]}
+    step = {"jsonrpc": "2.0", "id": 1, "method": "step", "params": {"t": 0, "observation": obs, "legal_actions": [0]}}
+    messages = (
+        ("begin_episode with the manifest", {"jsonrpc": "2.0", "id": 0, "method": "begin_episode",
+                                             "params": {"schema_version": "1.0.0", "manifest": m}}, True),
+        ("step", step, True),
+        ("step carrying a seed", step | {"params": step["params"] | {"seed": 7}}, False),
+        ("begin_episode carrying a seed", {"jsonrpc": "2.0", "id": 0, "method": "begin_episode",
+                                           "params": {"schema_version": "1.0.0", "manifest": m, "seed": 7}}, False),
+        ("reply with a prediction", {"jsonrpc": "2.0", "id": 1, "result": {
+            "action": 0, "prediction": {t["name"]: [1 / len(t["support"])] * len(t["support"]) for t in m["targets"]}}},
+         True),
+        ("end_episode", {"jsonrpc": "2.0", "id": 2, "method": "end_episode",
+                         "params": {"termination": "crash", "utility": 0}}, True),
+    )
+    for label, msg, want in messages:
+        expect(rpc_v.is_valid(msg) == want, f"rpc.schema.json {'accepts' if want else 'rejects'} {label}")
+
+    vocab = purity.vocabulary(manifests.values())
+    found = purity.violations(schemas, vocab)
+    expect(len(vocab) > 0 and not found,
+           f"real schemas: {len(vocab)} vocabulary tokens from {sorted(manifests)}; found in schemas: {found}")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -593,4 +666,6 @@ PINS = [
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
+    Pin("P6", "no manifest vocabulary token appears in an interface schema file",
+        p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),)),
 ]

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assize.local/worlds/spec/rpc.schema.json",
+  "schema_version": "1.0.0",
+  "title": "Judge-candidate messages",
+  "description": "JSON-RPC 2.0 over stdio, one message per line. The judge sends requests; the candidate answers each with exactly one response. No seed appears in any message. Every World-specific name lives in the World's manifest, never here (brief 1 section 1; P6).",
+  "oneOf": [
+    {"$ref": "#/$defs/begin_episode_request"},
+    {"$ref": "#/$defs/step_request"},
+    {"$ref": "#/$defs/end_episode_request"},
+    {"$ref": "#/$defs/response"}
+  ],
+  "$defs": {
+    "id": {"type": "integer", "minimum": 0},
+    "request": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "method", "params"],
+      "properties": {
+        "jsonrpc": {"const": "2.0"},
+        "id": {"$ref": "#/$defs/id"}
+      }
+    },
+    "begin_episode_request": {
+      "$ref": "#/$defs/request",
+      "properties": {
+        "method": {"const": "begin_episode"},
+        "params": {
+          "type": "object",
+          "required": ["schema_version", "manifest"],
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {"const": "1.0.0"},
+            "manifest": {"$ref": "manifest.schema.json"}
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "step_request": {
+      "description": "The World does not advance until the candidate has replied.",
+      "$ref": "#/$defs/request",
+      "properties": {
+        "method": {"const": "step"},
+        "params": {
+          "type": "object",
+          "required": ["t", "observation", "legal_actions"],
+          "additionalProperties": false,
+          "properties": {
+            "t": {"type": "integer", "minimum": 0},
+            "observation": {
+              "description": "Maps each manifest observation field to its value.",
+              "type": "object",
+              "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+              "additionalProperties": {"$ref": "#/$defs/value"}
+            },
+            "legal_actions": {
+              "description": "Indices into the manifest's action list.",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "end_episode_request": {
+      "$ref": "#/$defs/request",
+      "properties": {
+        "method": {"const": "end_episode"},
+        "params": {
+          "type": "object",
+          "required": ["termination", "utility"],
+          "additionalProperties": false,
+          "properties": {
+            "termination": {"$ref": "#/$defs/termination"},
+            "utility": {"type": "number"}
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "termination": {
+      "description": "Why an episode ended. terminal: the World ended it; truncated: the World's episode length was reached; the rest are failures of the candidate or its container, recorded and never dropped.",
+      "enum": ["terminal", "truncated", "crash", "step_timeout", "episode_timeout", "invalid_reply", "illegal_action", "leaked"]
+    },
+    "value": {
+      "description": "A scalar, or a nested array of the field's declared shape.",
+      "oneOf": [
+        {"type": "number"},
+        {"type": "array", "items": {"$ref": "#/$defs/value"}}
+      ]
+    },
+    "response": {
+      "type": "object",
+      "required": ["jsonrpc", "id"],
+      "properties": {
+        "jsonrpc": {"const": "2.0"},
+        "id": {"$ref": "#/$defs/id"}
+      },
+      "oneOf": [
+        {"required": ["result"], "properties": {"result": {"oneOf": [{"$ref": "#/$defs/step_result"}, {"$ref": "#/$defs/ack"}]}}},
+        {"required": ["error"], "properties": {"error": {"$ref": "#/$defs/error"}}}
+      ],
+      "unevaluatedProperties": false
+    },
+    "ack": {
+      "description": "The result of begin_episode and end_episode.",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "step_result": {
+      "type": "object",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "action": {"description": "An index into the manifest's action list; it must be among legal_actions.", "type": "integer", "minimum": 0},
+        "prediction": {
+          "description": "Maps manifest target names to probability lists aligned with each target's declared support. A target omitted is recorded missing, never imputed.",
+          "type": "object",
+          "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "integer"},
+        "message": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,1 +1,7 @@
-L1 — generic typed JSON-RPC interface schemas and per-World manifests (brief 1). Empty at L0.
+L1 — generic typed interface (brief 1 §1), `schema_version` 1.0.0.
+
+- `rpc.schema.json`: JSON-RPC 2.0 over stdio, one message per line. The judge sends `begin_episode {schema_version, manifest}`, then per step `step {t, observation, legal_actions}`, to which the candidate replies `{action, prediction?}` before the World advances, then `end_episode {termination, utility}`. Candidates answer `begin_episode` and `end_episode` with `{}`. No message carries a seed.
+- `manifest.schema.json`: the shape of a per-World manifest (`worlds/<world>/manifest.json`), which holds every World-specific name as data: observation fields (name, `categorical` with vocabulary or `integer` with inclusive range, shape), the action set (an action travels as its index), prediction targets (name, field, horizon 1, finite ordered support; a prediction is a probability list aligned with the support), and utility components.
+- `purity.py`: P6. No token of any manifest's names (whole, and each underscore-separated part) appears as a key or string value, descriptions included, in a `*.schema.json` here. Run: `make pins` (pin P6, mutant `crafter_field_in_schema`).
+
+The interface is PROVISIONAL until brief 2's zero-diff test.
