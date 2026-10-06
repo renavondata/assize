@@ -1,0 +1,4 @@
+ledger L0+L1 at 1247b4d: claims 32; resolved 21; open 11; every forecast id == sha256(claim+ts)[:12]
+cumulative log-loss 4.619 vs constant 0.5 14.556 over 21 (STATUS: 4.619 vs 14.556 over 21) — matches
+new forecasts 9fb992a08130, 3aa85a54fcac, 4c58b8342e24: ts 2026-10-06T17:45:58Z, sha_before a1c8b61, session 4127d142
+ea19ca6 committed 2026-10-06T17:48:25Z; reports/L1/make-pins.txt header stamps 17:48:29Z with real 3m07s and does not say whether the stamp is start or end

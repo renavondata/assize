@@ -1,0 +1,12 @@
+# cleanup at 2026-10-06T18:03:40Z
+ls /tmp | grep assize:
+assize-make-pins.txt
+assize-mkpins.txt
+processes matching harness|assize-rv12|make pins:
+(none)
+git worktree list:
+/home/g/git/assize        1247b4d [l1-s1-interface]
+/home/g/git/assize-review 1247b4d (detached HEAD)
+(pre-existing, not created by this review: mtimes above predate review start ~17:58Z)
+-rw-r--r-- 1 g g 4163 2026-10-06 20:23:40.996668494 +0300 /tmp/assize-make-pins.txt
+-rw-r--r-- 1 g g 2937 2026-10-06 13:30:55.829647544 +0300 /tmp/assize-mkpins.txt

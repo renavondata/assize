@@ -1,0 +1,10 @@
+Actions API, pins runs (event=pull_request):
+ea19ca6b8b678a8757b790b2f45aa38d5308320c completed success 37506834948 attempt=1 2026-10-06T17:51:55Z
+1247b4d888dd7d465481348015dc336ba557dac8 completed success 37507418784 attempt=1 2026-10-06T17:56:22Z
+
+committed record reports/L1/ci/37506834948.json:
+{"conclusion":"success","created_at":"2026-10-06T17:51:55Z","event":"pull_request","head_branch":"l1-s1-interface","head_sha":"ea19ca6b8b678a8757b790b2f45aa38d5308320c","html_url":"https://github.com/renavondata/assize/actions/runs/37506834948","id":37506834948,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
+
+API projection of 37506834948:
+{"conclusion":"success","head_sha":"ea19ca6b8b678a8757b790b2f45aa38d5308320c","id":37506834948,"path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
+37506834948 ea19ca6b8b678a8757b790b2f45aa38d5308320c .github/workflows/pins.yml completed success attempt=1
