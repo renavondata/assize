@@ -1,0 +1,2 @@
+ 955013  955013  955013   25600 /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+ 955067  955013  955013   25600 /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service

@@ -1,0 +1,2 @@
+{"child_timeout_s": 120.0, "code": "malformed_edit", "config": "harness/config.toml", "detail": "fixture/toy/malformed: harness/fixtures/edits/malformed.toml: edit 0: keys must be exactly path, old, new", "invocation_root": "/tmp/assize-copy-o2v44r9g/repo", "kind": "registry", "phase": "all", "python": "3.11.11", "registry": "fixture.malformed_edit", "status": "refused"}
+{"exit_code": 4, "kind": "summary", "registry": "fixture.malformed_edit"}

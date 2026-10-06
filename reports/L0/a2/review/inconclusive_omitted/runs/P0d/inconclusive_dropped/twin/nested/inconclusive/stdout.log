@@ -1,0 +1,11 @@
+registry fixture.inconclusive: 1 pins, 3 mutants; phase=mutants; child_timeout_s=3.0 (harness/fixtures/fast.toml)
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.072s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0d/inconclusive_dropped/twin/nested/inconclusive/runs/fixture__toy/off_by_one/mutant/transcript.log
+[mutant] fixture/toy/raises: mutant error, twin pass -> INCONCLUSIVE (0.071s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0d/inconclusive_dropped/twin/nested/inconclusive/runs/fixture__toy/raises/mutant/transcript.log
+MUTANT INCONCLUSIVE: fixture/toy/raises
+[mutant] fixture/toy/hangs: mutant timeout, twin pass -> INCONCLUSIVE (3.009s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0d/inconclusive_dropped/twin/nested/inconclusive/runs/fixture__toy/hangs/mutant/transcript.log
+MUTANT INCONCLUSIVE: fixture/toy/hangs
+clean: 0/0 passed, 0/0 failed
+mutants: 1/1 killed, 0/1 survived, 2/1 inconclusive, 0/1 stale, 0/1 non-causal
+twins: 3/3 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0d/inconclusive_dropped/twin/nested/inconclusive/pins.jsonl
+PINS FAILED

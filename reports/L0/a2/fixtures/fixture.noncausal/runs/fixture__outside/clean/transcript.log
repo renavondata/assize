@@ -1,0 +1,6 @@
+pin:       fixture/outside
+protects:  fails outside the invocation tree
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+result:    PASS

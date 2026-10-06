@@ -1,0 +1,26 @@
+# 2026-10-06T03:31:39Z as assize-reviewer
+$ gh api "repos/renavondata/assize/actions/runs?branch=ccr-019a6604-4sjnsn&per_page=30"  (id sha name event attempt conclusion created)
+37370261211 5e81d05 pins pull_request att=2 failure 2026-10-05T20:31:23Z
+37370237085 7697a05 pins pull_request att=1 failure 2026-10-05T20:31:09Z
+37369883675 744868f measure pull_request att=1 success 2026-10-05T20:27:48Z
+37359026815 744868f pins pull_request att=1 success 2026-10-05T18:50:46Z
+37358542927 f07330a pins pull_request att=1 success 2026-10-05T18:46:55Z
+37351475735 47af530 pins pull_request att=1 success 2026-10-05T17:50:48Z
+37348121296 5177756 pins pull_request att=1 success 2026-10-05T17:23:57Z
+37346695019 b6dda15 pins pull_request att=1 success 2026-10-05T17:12:33Z
+37346654020 8fe688c pins pull_request att=1 success 2026-10-05T17:12:13Z
+37345764386 9250214 pins pull_request att=1 success 2026-10-05T17:05:09Z
+37344377875 0ab889b pins pull_request att=1 success 2026-10-05T16:54:17Z
+37344138903 735f357 pins pull_request att=1 success 2026-10-05T16:52:24Z
+37339437531 0758546 pins pull_request att=1 success 2026-10-05T16:15:35Z
+37339180067 477d477 pins pull_request att=1 success 2026-10-05T16:13:40Z
+37203099935 5f7372a pins pull_request att=1 success 2026-10-04T12:43:41Z
+37202929460 cd5cddb pins pull_request att=1 success 2026-10-04T12:40:42Z
+# head 5e81d05, run 37370261211 attempt 1 jobs:
+job 111965361988 completed cancelled started=2026-10-05T20:31:23Z completed=2026-10-05T20:46:25Z runner_name=[] labels=["ubuntu-latest"] steps=0
+# head 5e81d05, run 37370261211 attempt 2 jobs:
+job 111970782945 completed cancelled started=2026-10-05T20:47:05Z completed=2026-10-05T21:02:07Z runner_name=[] labels=["ubuntu-latest"] steps=0
+# 7697a05, run 37370237085 jobs:
+job 111965280427 completed cancelled started=2026-10-05T20:31:09Z completed=2026-10-05T20:46:11Z runner_name=[] labels=["ubuntu-latest"] steps=0
+# f07330a, run 37358542927 jobs:
+job 111927025551 completed success started=2026-10-05T18:46:58Z completed=2026-10-05T18:49:02Z runner_name=[GitHub Actions 1000000005] labels=["ubuntu-latest"] steps=8

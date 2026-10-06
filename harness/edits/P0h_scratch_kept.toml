@@ -1,0 +1,5 @@
+# P0h's second mutant: the parent skips deleting a run's scratch root.
+[[edit]]
+path = "harness/runner.py"
+old = "        shutil.rmtree(scratch, ignore_errors=True)\n"
+new = "        pass\n"

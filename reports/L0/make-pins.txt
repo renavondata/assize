@@ -1,0 +1,19 @@
+# 2026-10-04T02:15:04Z Linux 6.18.44-fc-v64 x86_64 commit=efb4281 dirty=0
+$ make pins PINS_OUT=reports/L0/pins
+uv run --frozen python -m harness run --registry harness --phase all --out reports/L0/pins
+registry harness: 5 pins, 5 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: expected pass, observed pass -> ok (0.466s) reports/L0/pins/runs/P0/clean/transcript.log
+[clean ] P0b: expected pass, observed pass -> ok (0.315s) reports/L0/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: expected pass, observed pass -> ok (0.265s) reports/L0/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: expected pass, observed pass -> ok (3.277s) reports/L0/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: expected pass, observed pass -> ok (0.365s) reports/L0/pins/runs/P0e/clean/transcript.log
+[mutant] P0/survivors_ignored: expected fail, observed fail -> killed (0.566s) reports/L0/pins/runs/P0/survivors_ignored/transcript.log
+[mutant] P0b/guard_off: expected fail, observed fail -> killed (0.315s) reports/L0/pins/runs/P0b/guard_off/transcript.log
+[mutant] P0c/clean_failures_ignored: expected fail, observed fail -> killed (0.315s) reports/L0/pins/runs/P0c/clean_failures_ignored/transcript.log
+[mutant] P0d/inconclusive_dropped: expected fail, observed fail -> killed (3.377s) reports/L0/pins/runs/P0d/inconclusive_dropped/transcript.log
+[mutant] P0e/validation_off: expected fail, observed fail -> killed (1.018s) reports/L0/pins/runs/P0e/validation_off/transcript.log
+clean: 5/5 passed, 0/5 failed
+mutants: 5/5 killed, 0/5 survived, 0/5 inconclusive
+report: reports/L0/pins/pins.jsonl
+PINS PASSED
+[exit 0]

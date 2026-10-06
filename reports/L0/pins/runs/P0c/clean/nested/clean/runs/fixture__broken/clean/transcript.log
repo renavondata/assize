@@ -1,0 +1,6 @@
+pin:       fixture/broken
+protects:  a clean check that fails (seeded defect)
+mode:      clean
+flags:     (none)
+cwd:       /home/user/assize
+result:    FAIL

@@ -1,0 +1,5 @@
+# P0h's third mutant: a run whose scratch root stayed held keeps the verdict it would otherwise have had.
+[[edit]]
+path = "harness/runner.py"
+old = "        return \"LEAKED\"\n"
+new = "        return verdict\n"

@@ -1,0 +1,66 @@
+# 2026-10-05T16:12:32Z Linux 7.2.6-arch2-1 x86_64 commit=9ab8dd1 dirty=0
+previous design: git archive 5f7372a harness -> <tmp>; python 3.11.11
+Each pin's check is run once with ASSIZE_MUTANT=<pin>/inert, a flag that selects no code path.
+A pin that fails under it would have failed under its registered flag whatever that flag's code did:
+its kill was not caused by the mutant (NON-CAUSAL).
+
+## P0 with ASSIZE_MUTANT=P0/inert
+  [ok] control: summary row exit_code equals process exit code
+  [ok] control: control exits 0
+  [ok] control: control: 2 mutant rows in denominator
+  [ok] control: control covers env and patch selectors
+  [ok] control: control: every mutant killed
+  [ok] control: patch mutant killed and its repository copy discarded
+  [ok] checks_always_pass: summary row exit_code equals process exit code
+  [ok] checks_always_pass: seeded all-pass mutant: suite exits non-zero
+  [ok] checks_always_pass: seeded all-pass mutant: 2/2 mutants reported SURVIVED
+  [ok] checks_always_pass: every row verdict SURVIVED, observed pass
+result:    PASS
+[exit 0]
+
+## P0b with ASSIZE_MUTANT=P0b/inert
+  [ok] no_leak: summary row exit_code equals process exit code
+  [FAIL] no_leak: control: clean run with no flag passes
+  [ok] leak: summary row exit_code equals process exit code
+  [ok] leak: leaked flag: clean row observed leak, verdict FAILED
+  [ok] leak: leaked flag: suite exits non-zero
+result:    FAIL
+[exit 1]
+
+## P0c with ASSIZE_MUTANT=P0c/inert
+  [ok] clean: summary row exit_code equals process exit code
+  [FAIL] clean: fixture/broken recorded FAILED
+  [FAIL] clean: fixture/toy recorded ok
+  [FAIL] clean: denominator 1/2 failed
+  [ok] clean: suite exits non-zero
+result:    FAIL
+[exit 1]
+
+## P0d with ASSIZE_MUTANT=P0d/inert
+  [ok] inconclusive: summary row exit_code equals process exit code
+  [ok] inconclusive: raises: observed error, INCONCLUSIVE
+  [ok] inconclusive: hangs: observed timeout, INCONCLUSIVE
+  [ok] inconclusive: timeout taken from committed config
+  [ok] inconclusive: hang ran at least the configured timeout
+  [ok] inconclusive: denominator: 3 mutants, 2 inconclusive, 1 killed
+  [ok] inconclusive: suite exits non-zero
+result:    PASS
+[exit 0]
+
+## P0e with ASSIZE_MUTANT=P0e/inert
+  [ok] no_mutants: summary row exit_code equals process exit code
+  [ok] no_mutants: fixture.no_mutants refused with no_mutants
+  [ok] no_mutants: no pin was run
+  [ok] no_mutants: suite exits non-zero
+  [ok] dup_pin: summary row exit_code equals process exit code
+  [ok] dup_pin: fixture.dup_pin refused with duplicate_pin
+  [ok] dup_pin: no pin was run
+  [ok] dup_pin: suite exits non-zero
+  [ok] dup_mutant: summary row exit_code equals process exit code
+  [ok] dup_mutant: fixture.dup_mutant refused with duplicate_mutant
+  [ok] dup_mutant: no pin was run
+  [ok] dup_mutant: suite exits non-zero
+  [ok] accepted: summary row exit_code equals process exit code
+  [ok] accepted: control: fixture.basic accepted
+result:    PASS
+[exit 0]

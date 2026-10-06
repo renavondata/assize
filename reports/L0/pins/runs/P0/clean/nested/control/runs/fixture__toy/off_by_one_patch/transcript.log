@@ -1,0 +1,10 @@
+patch copy: /tmp/assize-patch-qa5vsy0n/repo
+$ git apply --verbose /home/user/assize/harness/fixtures/patches/toy_off_by_one.diff
+Checking patch harness/fixtures/toy.py...
+Applied patch harness/fixtures/toy.py cleanly.
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      mutant off_by_one_patch
+flags:     (none)
+cwd:       /tmp/assize-patch-qa5vsy0n/repo
+result:    FAIL

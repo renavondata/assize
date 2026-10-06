@@ -1,0 +1,9 @@
+registry fixture.no_mutants: 2 pins, 1 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0e/validation_off/mutant/nested/no_mutants/runs/fixture__toy/clean/transcript.log
+[clean ] fixture/bare: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0e/validation_off/mutant/nested/no_mutants/runs/fixture__bare/clean/transcript.log
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.072s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0e/validation_off/mutant/nested/no_mutants/runs/fixture__toy/off_by_one/mutant/transcript.log
+clean: 2/2 passed, 0/2 failed
+mutants: 1/1 killed, 0/1 survived, 0/1 inconclusive, 0/1 stale, 0/1 non-causal
+twins: 1/1 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/inconclusive_omitted/runs/P0e/validation_off/mutant/nested/no_mutants/pins.jsonl
+PINS PASSED

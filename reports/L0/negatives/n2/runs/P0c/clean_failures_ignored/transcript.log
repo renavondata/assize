@@ -1,0 +1,12 @@
+pin:       P0c
+protects:  a failing clean check is recorded and fails the suite
+mode:      mutant clean_failures_ignored
+flags:     P0b/leak_probe,P0c/clean_failures_ignored
+cwd:       /home/user/assize
+nested clean: registry=fixture.broken phase=clean extra_flags=(none) exit=0 rows=/home/user/assize/reports/L0/negatives/n2/runs/P0c/clean_failures_ignored/nested/clean/pins.jsonl
+  [ok] clean: summary row exit_code equals process exit code
+  [FAIL] clean: fixture/broken recorded FAILED
+  [ok] clean: fixture/toy recorded ok
+  [FAIL] clean: denominator 1/2 failed
+  [FAIL] clean: suite exits non-zero
+result:    FAIL

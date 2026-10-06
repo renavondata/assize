@@ -1,0 +1,20 @@
+# 2026-10-05T16:51:54Z Linux 7.2.6-arch2-1 x86_64 commit=196d5b4 dirty=0
+temporary directories /tmp/assize-*: 0
+live processes carrying the P0h grandchild marker: 0
+$ uv run --frozen python -m harness run --registry fixture.leaks --phase mutants --config harness/fixtures/fast.toml --out out/a3-witness/leaks
+registry fixture.leaks: 1 pins, 2 mutants; phase=mutants; child_timeout_s=3.0 (harness/fixtures/fast.toml)
+[mutant] fixture/toy/off_by_one: mutant fail, twin pass -> KILLED (0.095s + 0.094s) out/a3-witness/leaks/runs/fixture__toy/off_by_one/mutant/transcript.log
+[mutant] fixture/toy/leaks_and_hangs: mutant timeout, twin pass -> INCONCLUSIVE (3.033s + 0.094s) out/a3-witness/leaks/runs/fixture__toy/leaks_and_hangs/mutant/transcript.log
+MUTANT INCONCLUSIVE: fixture/toy/leaks_and_hangs
+clean: 0/0 passed, 0/0 failed
+mutants: 1/2 killed, 0/2 survived, 1/2 inconclusive, 0/2 stale, 0/2 non-causal
+twins: 2/2 passed
+report: out/a3-witness/leaks/pins.jsonl
+PINS FAILED
+[exit 1]
+grandchild PID recorded: 472987
+  alive now: no
+nested copy recorded: /tmp/assize-scratch-qcv750g0/assize-copy-37bo5ph_/repo
+  exists now: no
+temporary directories /tmp/assize-*: 0
+live processes carrying the P0h grandchild marker: 0

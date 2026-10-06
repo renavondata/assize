@@ -1,0 +1,5 @@
+pin:       P0e
+protects:  a registry with a mutant-less pin, a duplicated name or a malformed edit is refused
+role:      clean
+tree:      /tmp/assize-copy-44efyxaa/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

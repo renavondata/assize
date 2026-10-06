@@ -1,0 +1,135 @@
+# 2026-10-05T16:54:41Z Linux 7.2.6-arch2-1 x86_64 commit=5c14c3e dirty=0
+temporary directories /tmp/assize-*: 0; harness processes: 0
+harness/ digest of the invocation tree before: 4328bce9a12ada73
+
+## exit2_as_pass
+$ uv run --frozen python -m harness run --under-edits reports/L0/a2/review-mutants/exit2_as_pass.toml --config reports/L0/a2/review-mutants/config.toml --out out/a3-witness/review/exit2_as_pass
+UNDER EDITS: reports/L0/a2/review-mutants/exit2_as_pass.toml (sha256 bc27a55d19bb7c33d9804939405a25bca9ac842e8ca21939317efc59f6108af6)
+registry harness: 8 pins, 9 mutants; phase=all; child_timeout_s=30.0 (../../../home/g/git/assize/reports/L0/a2/review-mutants/config.toml)
+[clean ] P0: observed pass -> ok (0.939s)
+[clean ] P0b: observed pass -> ok (0.088s)
+[clean ] P0c: observed pass -> ok (0.338s)
+[clean ] P0d: observed fail -> FAILED (3.643s)
+CLEAN FAILED: P0d (observed fail)
+[clean ] P0e: observed pass -> ok (0.388s)
+[clean ] P0f: observed pass -> ok (0.439s)
+[clean ] P0g: observed pass -> ok (0.588s)
+[clean ] P0h: observed pass -> ok (3.492s)
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.996s + 0.946s)
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.094s + 0.094s)
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.345s + 0.344s)
+[mutant] P0d/inconclusive_dropped: mutant fail, twin fail -> NON-CAUSAL (3.649s + 3.65s)
+MUTANT NON-CAUSAL: P0d/inconclusive_dropped
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.949s + 0.446s)
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.445s + 0.445s)
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.695s + 0.595s)
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (13.514s + 3.498s)
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.498s + 3.498s)
+clean: 7/8 passed, 1/8 failed
+mutants: 8/9 killed, 0/9 survived, 0/9 inconclusive, 0/9 stale, 1/9 non-causal
+twins: 8/9 passed
+PINS FAILED
+[exit 1]
+
+## inconclusive_omitted
+$ uv run --frozen python -m harness run --under-edits reports/L0/a2/review-mutants/inconclusive_omitted.toml --config reports/L0/a2/review-mutants/config.toml --out out/a3-witness/review/inconclusive_omitted
+UNDER EDITS: reports/L0/a2/review-mutants/inconclusive_omitted.toml (sha256 b49590e3f7e46253339dc422301e5f2a4dd2aa118eceaf46a63237f5d77844a0)
+registry harness: 8 pins, 9 mutants; phase=all; child_timeout_s=30.0 (../../../home/g/git/assize/reports/L0/a2/review-mutants/config.toml)
+[clean ] P0: observed pass -> ok (0.939s)
+[clean ] P0b: observed pass -> ok (0.088s)
+[clean ] P0c: observed pass -> ok (0.338s)
+[clean ] P0d: observed fail -> FAILED (3.642s)
+CLEAN FAILED: P0d (observed fail)
+[clean ] P0e: observed pass -> ok (0.388s)
+[clean ] P0f: observed pass -> ok (0.439s)
+[clean ] P0g: observed pass -> ok (0.588s)
+[clean ] P0h: observed pass -> ok (3.492s)
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.945s + 0.946s)
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.094s + 0.095s)
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.345s + 0.345s)
+[mutant] P0d/inconclusive_dropped: mutant fail, twin fail -> NON-CAUSAL (3.649s + 3.649s)
+MUTANT NON-CAUSAL: P0d/inconclusive_dropped
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.945s + 0.397s)
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.448s + 0.444s)
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.694s + 0.594s)
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (13.514s + 3.498s)
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.498s + 3.498s)
+clean: 7/8 passed, 1/8 failed
+mutants: 8/9 killed, 0/9 survived, 0/9 inconclusive, 0/9 stale, 1/9 non-causal
+twins: 8/9 passed
+PINS FAILED
+[exit 1]
+
+## applied_to_original_tree
+$ uv run --frozen python -m harness run --under-edits reports/L0/a2/review-mutants/applied_to_original_tree.toml --config reports/L0/a2/review-mutants/config.toml --out out/a3-witness/review/applied_to_original_tree
+UNDER EDITS: reports/L0/a2/review-mutants/applied_to_original_tree.toml (sha256 e6abac22556f4847d2a4e9e8d6f57c0bdf45baad5ec4f6157e45d079f66346f6)
+registry harness: 8 pins, 9 mutants; phase=all; child_timeout_s=30.0 (../../../home/g/git/assize/reports/L0/a2/review-mutants/config.toml)
+[clean ] P0: observed fail -> FAILED (0.838s)
+CLEAN FAILED: P0 (observed fail)
+[clean ] P0b: observed pass -> ok (0.087s)
+[clean ] P0c: observed fail -> FAILED (0.338s)
+CLEAN FAILED: P0c (observed fail)
+[clean ] P0d: observed fail -> FAILED (3.592s)
+CLEAN FAILED: P0d (observed fail)
+[clean ] P0e: observed timeout -> FAILED (30.025s)
+CLEAN FAILED: P0e (observed timeout)
+[clean ] P0f: observed fail -> FAILED (0.337s)
+CLEAN FAILED: P0f (observed fail)
+[clean ] P0g: observed timeout -> FAILED (30.026s)
+CLEAN FAILED: P0g (observed timeout)
+[clean ] P0h: observed fail -> FAILED (9.299s)
+CLEAN FAILED: P0h (observed fail)
+[mutant] P0/survivors_ignored: mutant timeout, twin timeout -> NON-CAUSAL (30.034s + 30.035s)
+MUTANT NON-CAUSAL: P0/survivors_ignored
+[mutant] P0b/env_switch: mutant pass, twin fail -> NON-CAUSAL (0.094s + 0.094s)
+MUTANT NON-CAUSAL: P0b/env_switch
+[mutant] P0c/clean_failures_ignored: mutant timeout, twin timeout -> NON-CAUSAL (30.032s + 30.032s)
+MUTANT NON-CAUSAL: P0c/clean_failures_ignored
+[mutant] P0d/inconclusive_dropped: mutant fail, twin fail -> NON-CAUSAL (9.459s + 9.457s)
+MUTANT NON-CAUSAL: P0d/inconclusive_dropped
+[mutant] P0e/validation_off: mutant timeout, twin timeout -> NON-CAUSAL (30.031s + 30.031s)
+MUTANT NON-CAUSAL: P0e/validation_off
+[mutant] P0f/twin_ignored: mutant fail, twin fail -> NON-CAUSAL (0.343s + 0.344s)
+MUTANT NON-CAUSAL: P0f/twin_ignored
+[mutant] P0g/stale_ignored: mutant timeout, twin timeout -> NON-CAUSAL (30.032s + 30.032s)
+MUTANT NON-CAUSAL: P0g/stale_ignored
+[mutant] P0h/death_signal_reverted: mutant fail, twin timeout -> NON-CAUSAL (12.312s + 35.024s)
+MUTANT NON-CAUSAL: P0h/death_signal_reverted
+[mutant] P0h/scratch_kept: mutant timeout, twin timeout -> NON-CAUSAL (35.039s + 35.033s)
+MUTANT NON-CAUSAL: P0h/scratch_kept
+clean: 1/8 passed, 7/8 failed
+mutants: 0/9 killed, 0/9 survived, 0/9 inconclusive, 0/9 stale, 9/9 non-causal
+twins: 0/9 passed
+PINS FAILED
+[exit 1]
+
+## clean_failures_ignored
+$ uv run --frozen python -m harness run --under-edits reports/L0/a2/review-mutants/clean_failures_ignored.toml --config reports/L0/a2/review-mutants/config.toml --out out/a3-witness/review/clean_failures_ignored
+UNDER EDITS: reports/L0/a2/review-mutants/clean_failures_ignored.toml (sha256 9d94c83f2a8cbf8d26a97aac30f07551633c790a2da058824b61ca839e9e14de)
+registry harness: 8 pins, 9 mutants; phase=all; child_timeout_s=30.0 (../../../home/g/git/assize/reports/L0/a2/review-mutants/config.toml)
+[clean ] P0: observed pass -> ok (0.94s)
+[clean ] P0b: observed pass -> ok (0.088s)
+[clean ] P0c: observed fail -> ok (0.339s)
+[clean ] P0d: observed pass -> ok (3.643s)
+[clean ] P0e: observed pass -> ok (0.389s)
+[clean ] P0f: observed pass -> ok (0.439s)
+[clean ] P0g: observed pass -> ok (0.589s)
+[clean ] P0h: observed pass -> ok (3.493s)
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.947s + 0.946s)
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.095s + 0.095s)
+[mutant] P0c/clean_failures_ignored: mutant stale, twin fail -> STALE (0.028s + 0.344s)
+MUTANT STALE: P0c/clean_failures_ignored
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.649s + 3.649s)
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.9s + 0.394s)
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.446s + 0.445s)
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.747s + 0.595s)
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (13.465s + 3.498s)
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.5s + 3.498s)
+clean: 8/8 passed, 0/8 failed
+mutants: 8/9 killed, 0/9 survived, 0/9 inconclusive, 1/9 stale, 0/9 non-causal
+twins: 8/9 passed
+PINS FAILED
+[exit 1]
+
+harness/ digest of the invocation tree after:  4328bce9a12ada73
+temporary directories /tmp/assize-*: 0; harness processes: 0

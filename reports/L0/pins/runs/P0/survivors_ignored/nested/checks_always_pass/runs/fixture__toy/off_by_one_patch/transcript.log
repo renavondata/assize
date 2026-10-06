@@ -1,0 +1,10 @@
+patch copy: /tmp/assize-patch-r0h_ckkx/repo
+$ git apply --verbose /home/user/assize/harness/fixtures/patches/toy_off_by_one.diff
+Checking patch harness/fixtures/toy.py...
+Applied patch harness/fixtures/toy.py cleanly.
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      mutant off_by_one_patch
+flags:     P0/checks_always_pass,P0/survivors_ignored
+cwd:       /tmp/assize-patch-r0h_ckkx/repo
+result:    PASS (seeded mutant P0/checks_always_pass: check not consulted)

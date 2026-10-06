@@ -1,0 +1,5 @@
+# P0's mutant: a surviving mutant is reported as killed.
+[[edit]]
+path = "harness/runner.py"
+old = "        return \"SURVIVED\"\n"
+new = "        return \"KILLED\"\n"

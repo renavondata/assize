@@ -1,0 +1,58 @@
+# 2026-10-05T18:45:40Z Linux 7.2.6-arch2-1 x86_64 commit=cea5957 dirty=0
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0
+## R1 at 47af530
+probe markers alive before: 0
+registry probe: 1 pins, 1 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] probe/r1: observed pass -> ok (5.08s)
+clean: 1/1 passed, 0/1 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal
+twins: 0/0 passed
+report: ../../../home/g/git/assize/out/a4-witness/probes/r1-47af530/pins.jsonl
+PINS PASSED
+[exit 0]
+  row: pin=probe/r1 observed=pass scratch_quiescent=False scratch_removed=True verdict=ok
+  summary: clean_ok=1 clean_failed=0 leaked=(field absent at this revision) exit_code=0
+  grandchild 751285 alive right after the run: yes
+  grandchild 751285 alive after waiting up to HOLD=10s for it to exit on its own: no
+probe markers alive after: 0
+
+## R1 at HEAD (cea5957)
+probe markers alive before: 0
+cp: cannot stat 'reports/L0/a4/probes-runs.tar.xz': No such file or directory
+registry probe: 1 pins, 1 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] probe/r1: observed pass -> LEAKED (5.069s)
+CLEAN FAILED: probe/r1 (observed pass)
+clean: 0/1 passed, 1/1 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 1 leaked (clean and mutant)
+twins: 0/0 passed
+report: ../../../home/g/git/assize/out/a4-witness/probes/r1-head/pins.jsonl
+PINS FAILED
+[exit 1]
+  row: pin=probe/r1 observed=pass scratch_quiescent=False scratch_removed=True verdict=LEAKED
+  summary: clean_ok=0 clean_failed=1 leaked=1 exit_code=1
+  grandchild 755810 alive right after the run: yes
+  grandchild 755810 alive after waiting up to HOLD=10s for it to exit on its own: no
+probe markers alive after: 0
+
+## N6 at HEAD (cea5957): double-forked daemon from a clean check
+probe markers alive before: 0
+cp: cannot stat 'reports/L0/a4/probes-runs.tar.xz': No such file or directory
+registry probe: 1 pins, 1 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] probe/n6: observed pass -> ok (0.14s)
+clean: 1/1 passed, 0/1 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 0 leaked (clean and mutant)
+twins: 0/0 passed
+report: ../../../home/g/git/assize/out/a4-witness/probes/n6-head/pins.jsonl
+PINS PASSED
+[exit 0]
+  row: pin=probe/n6 observed=pass scratch_quiescent=True scratch_removed=True verdict=ok
+  summary: clean_ok=1 clean_failed=0 leaked=0 exit_code=0
+  daemon pid (from PID file): 760440
+  daemon alive after the suite finished: yes
+  daemon: ppid=1 sid=760439 cwd=/
+$ kill -9 760440   # by PID file
+[exit 0]
+  daemon alive after the probe's kill: no
+probe markers alive after: 0
+[exit 0]
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0

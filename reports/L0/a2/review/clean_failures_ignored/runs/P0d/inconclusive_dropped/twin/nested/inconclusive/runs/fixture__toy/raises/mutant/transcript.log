@@ -1,0 +1,16 @@
+copy of /tmp/assize-copy-yjaemhy_/repo
+  at /tmp/assize-copy-amphqa_w/repo
+applied 1 edit(s) from harness/fixtures/edits/toy_raises.toml
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      mutant
+tree:      /tmp/assize-copy-amphqa_w/repo
+invoked:   /tmp/assize-copy-yjaemhy_/repo
+Traceback (most recent call last):
+  File "/tmp/assize-copy-amphqa_w/repo/harness/runner.py", line 53, in check
+    ok = bool(pin.check())
+              ^^^^^^^^^^^
+  File "/tmp/assize-copy-amphqa_w/repo/harness/fixtures/toy.py", line 13, in check_toy
+    raise RuntimeError("seeded mutant fixture/toy/raises")
+RuntimeError: seeded mutant fixture/toy/raises
+result:    ERROR (check raised)

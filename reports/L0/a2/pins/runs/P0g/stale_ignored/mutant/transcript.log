@@ -1,0 +1,17 @@
+copy of /home/g/git/assize
+  at /tmp/assize-copy-fn3nc45_/repo
+applied 1 edit(s) from harness/edits/P0g_stale_ignored.toml
+pin:       P0g
+protects:  an anchor that does not occur exactly once is STALE and fails the suite
+role:      mutant
+tree:      /tmp/assize-copy-fn3nc45_/repo
+invoked:   /home/g/git/assize
+nested stale: registry=fixture.stale phase=mutants edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0g/stale_ignored/mutant/nested/stale/pins.jsonl
+  [ok] stale: seeded edits applied (anchors unique)
+  [ok] stale: summary row exit_code equals process exit code
+  [FAIL] stale: absent anchor: STALE (0 occurrences)
+  [FAIL] stale: duplicated anchor: STALE (2 occurrences)
+  [ok] stale: control mutant KILLED
+  [FAIL] stale: denominator: 3 mutants, 2 stale, 1 killed
+  [ok] stale: suite exits non-zero
+result:    FAIL

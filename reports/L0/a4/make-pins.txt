@@ -1,0 +1,30 @@
+# 2026-10-05T18:43:32Z Linux 7.2.6-arch2-1 x86_64 commit=cea5957 dirty=0
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0
+$ make pins PINS_OUT=out/a4-witness/pins
+uv run --frozen python -m harness run --registry harness --phase all --out out/a4-witness/pins
+registry harness: 8 pins, 10 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (0.939s) out/a4-witness/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.188s) out/a4-witness/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (0.338s) out/a4-witness/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (3.643s) out/a4-witness/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (0.388s) out/a4-witness/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (0.437s) out/a4-witness/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (0.589s) out/a4-witness/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (15.562s) out/a4-witness/pins/runs/P0h/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.995s + 0.945s) out/a4-witness/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.094s + 0.094s) out/a4-witness/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.345s + 0.345s) out/a4-witness/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.65s + 3.649s) out/a4-witness/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.897s + 0.395s) out/a4-witness/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.445s + 0.444s) out/a4-witness/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.745s + 0.595s) out/a4-witness/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (10.51s + 15.566s) out/a4-witness/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.502s + 15.565s) out/a4-witness/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (15.617s + 15.615s) out/a4-witness/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+clean: 8/8 passed, 0/8 failed
+mutants: 10/10 killed, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal, 0 leaked (clean and mutant)
+twins: 10/10 passed
+report: out/a4-witness/pins/pins.jsonl
+PINS PASSED
+[exit 0]
+leftovers: /tmp/assize-* dirs=0; harness processes=0; marker processes (assize-* grandchildren/daemons)=0

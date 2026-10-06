@@ -1,0 +1,6 @@
+2026-10-06T04:24:54Z
+$ rm -rf <scratchpad>/rev-e7038a7ccae560d70c674fdee510b16ab8f2f1f2
+total 0
+drwx------ 2 g g 40 Oct  6 07:24 .
+drwx------ 4 g g 80 Oct  6 07:21 ..
+end

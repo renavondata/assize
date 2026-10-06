@@ -1,0 +1,5 @@
+# Seeded defect: the anchor does not occur in the file.
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "    return a - b\n"
+new = "    return a + b + 1\n"

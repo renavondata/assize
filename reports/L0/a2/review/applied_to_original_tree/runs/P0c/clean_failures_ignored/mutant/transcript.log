@@ -1,0 +1,8 @@
+copy of /tmp/assize-copy-44efyxaa/repo
+  at /tmp/assize-copy-u5dtuo3t/repo
+applied 1 edit(s) from harness/edits/P0c_clean_failures_ignored.toml
+pin:       P0c
+protects:  a failing clean check is recorded and fails the suite
+role:      mutant
+tree:      /tmp/assize-copy-u5dtuo3t/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

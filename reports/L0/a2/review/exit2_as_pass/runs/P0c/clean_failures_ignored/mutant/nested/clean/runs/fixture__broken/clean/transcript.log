@@ -1,0 +1,6 @@
+pin:       fixture/broken
+protects:  a clean check that fails (seeded defect)
+role:      clean
+tree:      /tmp/assize-copy-1s7bwzq8/repo
+invoked:   /tmp/assize-copy-1s7bwzq8/repo
+result:    FAIL

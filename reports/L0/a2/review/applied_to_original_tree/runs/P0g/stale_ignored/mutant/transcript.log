@@ -1,0 +1,8 @@
+copy of /tmp/assize-copy-44efyxaa/repo
+  at /tmp/assize-copy-2w5pmqs1/repo
+applied 1 edit(s) from harness/edits/P0g_stale_ignored.toml
+pin:       P0g
+protects:  an anchor that does not occur exactly once is STALE and fails the suite
+role:      mutant
+tree:      /tmp/assize-copy-2w5pmqs1/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

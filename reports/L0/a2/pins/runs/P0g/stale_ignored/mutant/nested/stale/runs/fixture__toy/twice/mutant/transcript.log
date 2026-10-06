@@ -1,0 +1,17 @@
+copy of /tmp/assize-copy-fn3nc45_/repo
+  at /tmp/assize-copy-k8xsl2hr/repo
+applied 1 edit(s) from harness/fixtures/edits/stale_twice.toml
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      mutant
+tree:      /tmp/assize-copy-k8xsl2hr/repo
+invoked:   /tmp/assize-copy-fn3nc45_/repo
+Traceback (most recent call last):
+  File "/tmp/assize-copy-k8xsl2hr/repo/harness/runner.py", line 53, in check
+    ok = bool(pin.check())
+              ^^^^^^^^^^^
+  File "/tmp/assize-copy-k8xsl2hr/repo/harness/fixtures/toy.py", line 13, in check_toy
+    return add(2, 2) == 4
+           ^^^
+NameError: name 'add' is not defined
+result:    ERROR (check raised)

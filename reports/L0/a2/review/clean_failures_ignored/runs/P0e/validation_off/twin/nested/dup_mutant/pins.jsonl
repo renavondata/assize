@@ -1,0 +1,2 @@
+{"child_timeout_s": 120.0, "code": "duplicate_mutant", "config": "harness/config.toml", "detail": "fixture/toy/off_by_one", "invocation_root": "/tmp/assize-copy-9_z9gxex/repo", "kind": "registry", "phase": "all", "python": "3.11.11", "registry": "fixture.dup_mutant", "status": "refused"}
+{"exit_code": 4, "kind": "summary", "registry": "fixture.dup_mutant"}

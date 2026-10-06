@@ -1,0 +1,5 @@
+# P0g's mutant: anchor counts are not checked; absent anchors apply nothing, duplicated ones apply to the first.
+[[edit]]
+path = "harness/edits.py"
+old = "        if count != 1:\n"
+new = "        if False:\n"

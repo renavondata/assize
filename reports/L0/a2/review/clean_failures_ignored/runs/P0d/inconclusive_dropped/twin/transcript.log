@@ -1,0 +1,19 @@
+copy of /tmp/assize-copy-3pfgi_eu/repo
+  at /tmp/assize-copy-yjaemhy_/repo
+twin: no edits applied
+pin:       P0d
+protects:  errors and timeouts are INCONCLUSIVE, counted in the denominator, and fail the suite
+role:      twin
+tree:      /tmp/assize-copy-yjaemhy_/repo
+invoked:   /tmp/assize-copy-3pfgi_eu/repo
+nested inconclusive: registry=fixture.inconclusive phase=mutants edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/review/clean_failures_ignored/runs/P0d/inconclusive_dropped/twin/nested/inconclusive/pins.jsonl
+  [ok] inconclusive: seeded edits applied (anchors unique)
+  [ok] inconclusive: summary row exit_code equals process exit code
+  [ok] inconclusive: raises: observed error, INCONCLUSIVE
+  [ok] inconclusive: hangs: observed timeout, INCONCLUSIVE
+  [ok] inconclusive: both twins passed
+  [ok] inconclusive: timeout taken from committed config
+  [ok] inconclusive: hang ran at least the configured timeout
+  [ok] inconclusive: denominator: 3 mutants, 2 inconclusive, 1 killed
+  [ok] inconclusive: suite exits non-zero
+result:    PASS

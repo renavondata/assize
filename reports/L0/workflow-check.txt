@@ -1,0 +1,23 @@
+# 2026-10-04T02:15:21Z Linux 6.18.44-fc-v64 x86_64 commit=efb4281 dirty=0
+$ uvx --from actionlint-py actionlint --version
+1.7.12
+$ cat <actionlint config>
+self-hosted-runner:
+  labels:
+    - measure
+$ actionlint -config-file <config> .github/workflows/pins.yml .github/workflows/measure.yml
+[exit 0]
+$ grep -n -E "runs-on|^on:|types:|if:|ASSIZE_HOST|uses:" .github/workflows/*.yml
+.github/workflows/measure.yml:3:on:
+.github/workflows/measure.yml:6:    types: [labeled]
+.github/workflows/measure.yml:13:    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'measure'
+.github/workflows/measure.yml:14:    runs-on: [self-hosted, measure]
+.github/workflows/measure.yml:17:      ASSIZE_HOST: measure
+.github/workflows/measure.yml:19:      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+.github/workflows/measure.yml:29:        if: always()
+.github/workflows/measure.yml:30:        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+.github/workflows/pins.yml:3:on:
+.github/workflows/pins.yml:11:    runs-on: ubuntu-latest
+.github/workflows/pins.yml:14:      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+.github/workflows/pins.yml:24:        if: always()
+.github/workflows/pins.yml:25:        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

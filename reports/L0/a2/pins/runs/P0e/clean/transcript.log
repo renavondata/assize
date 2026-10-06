@@ -1,0 +1,34 @@
+pin:       P0e
+protects:  a registry with a mutant-less pin, a duplicated name or a malformed edit is refused
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+nested no_mutants: registry=fixture.no_mutants phase=all edits=(none) exit=4 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0e/clean/nested/no_mutants/pins.jsonl
+  [ok] no_mutants: seeded edits applied (anchors unique)
+  [ok] no_mutants: summary row exit_code equals process exit code
+  [ok] no_mutants: fixture.no_mutants refused with no_mutants
+  [ok] no_mutants: no pin was run
+  [ok] no_mutants: suite exits non-zero
+nested dup_pin: registry=fixture.dup_pin phase=all edits=(none) exit=4 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0e/clean/nested/dup_pin/pins.jsonl
+  [ok] dup_pin: seeded edits applied (anchors unique)
+  [ok] dup_pin: summary row exit_code equals process exit code
+  [ok] dup_pin: fixture.dup_pin refused with duplicate_pin
+  [ok] dup_pin: no pin was run
+  [ok] dup_pin: suite exits non-zero
+nested dup_mutant: registry=fixture.dup_mutant phase=all edits=(none) exit=4 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0e/clean/nested/dup_mutant/pins.jsonl
+  [ok] dup_mutant: seeded edits applied (anchors unique)
+  [ok] dup_mutant: summary row exit_code equals process exit code
+  [ok] dup_mutant: fixture.dup_mutant refused with duplicate_mutant
+  [ok] dup_mutant: no pin was run
+  [ok] dup_mutant: suite exits non-zero
+nested malformed_edit: registry=fixture.malformed_edit phase=all edits=(none) exit=4 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0e/clean/nested/malformed_edit/pins.jsonl
+  [ok] malformed_edit: seeded edits applied (anchors unique)
+  [ok] malformed_edit: summary row exit_code equals process exit code
+  [ok] malformed_edit: fixture.malformed_edit refused with malformed_edit
+  [ok] malformed_edit: no pin was run
+  [ok] malformed_edit: suite exits non-zero
+nested accepted: registry=fixture.basic phase=clean edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0e/clean/nested/accepted/pins.jsonl
+  [ok] accepted: seeded edits applied (anchors unique)
+  [ok] accepted: summary row exit_code equals process exit code
+  [ok] accepted: control: fixture.basic accepted
+result:    PASS

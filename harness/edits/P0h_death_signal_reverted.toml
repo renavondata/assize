@@ -1,0 +1,5 @@
+# P0h's first mutant: revert the process-death fix; spawned processes no longer die with their parent.
+[[edit]]
+path = "harness/proc.py"
+old = "        _libc.prctl(_PR_SET_PDEATHSIG, signal.SIGKILL)\n"
+new = "        pass\n"

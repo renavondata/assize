@@ -1,0 +1,17 @@
+copy of /home/g/git/assize
+  at /tmp/assize-copy-msw_m4z4/repo
+twin: no edits applied
+pin:       P0g
+protects:  an anchor that does not occur exactly once is STALE and fails the suite
+role:      twin
+tree:      /tmp/assize-copy-msw_m4z4/repo
+invoked:   /home/g/git/assize
+nested stale: registry=fixture.stale phase=mutants edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/pins/runs/P0g/stale_ignored/twin/nested/stale/pins.jsonl
+  [ok] stale: seeded edits applied (anchors unique)
+  [ok] stale: summary row exit_code equals process exit code
+  [ok] stale: absent anchor: STALE (0 occurrences)
+  [ok] stale: duplicated anchor: STALE (2 occurrences)
+  [ok] stale: control mutant KILLED
+  [ok] stale: denominator: 3 mutants, 2 stale, 1 killed
+  [ok] stale: suite exits non-zero
+result:    PASS

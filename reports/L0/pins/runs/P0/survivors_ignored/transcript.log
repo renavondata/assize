@@ -1,0 +1,18 @@
+pin:       P0
+protects:  the harness reports surviving mutants and exits non-zero when every check returns success
+mode:      mutant survivors_ignored
+flags:     P0/survivors_ignored
+cwd:       /home/user/assize
+nested control: registry=fixture.basic phase=mutants extra_flags=(none) exit=0 rows=/home/user/assize/reports/L0/pins/runs/P0/survivors_ignored/nested/control/pins.jsonl
+  [ok] control: summary row exit_code equals process exit code
+  [ok] control: control exits 0
+  [ok] control: control: 2 mutant rows in denominator
+  [ok] control: control covers env and patch selectors
+  [ok] control: control: every mutant killed
+  [ok] control: patch mutant killed and its repository copy discarded
+nested checks_always_pass: registry=fixture.basic phase=mutants extra_flags=['P0/checks_always_pass'] exit=0 rows=/home/user/assize/reports/L0/pins/runs/P0/survivors_ignored/nested/checks_always_pass/pins.jsonl
+  [ok] checks_always_pass: summary row exit_code equals process exit code
+  [FAIL] checks_always_pass: seeded all-pass mutant: suite exits non-zero
+  [FAIL] checks_always_pass: seeded all-pass mutant: 2/2 mutants reported SURVIVED
+  [FAIL] checks_always_pass: every row verdict SURVIVED, observed pass
+result:    FAIL

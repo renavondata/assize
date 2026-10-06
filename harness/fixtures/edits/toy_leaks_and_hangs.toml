@@ -1,0 +1,9 @@
+# Fixture mutant for P0h: the check leaves a grandchild and a nested copy behind, then hangs past the timeout.
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "def check_toy() -> bool:\n"
+new = """def check_toy() -> bool:
+    from harness.fixtures.leaky import leak_and_hang
+
+    leak_and_hang()
+"""

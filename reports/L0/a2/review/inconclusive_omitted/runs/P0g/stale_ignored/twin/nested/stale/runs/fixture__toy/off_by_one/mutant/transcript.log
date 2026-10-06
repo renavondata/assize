@@ -1,0 +1,9 @@
+copy of /tmp/assize-copy-mb029ga7/repo
+  at /tmp/assize-copy-k70wdfrt/repo
+applied 1 edit(s) from harness/fixtures/edits/toy_off_by_one.toml
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      mutant
+tree:      /tmp/assize-copy-k70wdfrt/repo
+invoked:   /tmp/assize-copy-mb029ga7/repo
+result:    FAIL

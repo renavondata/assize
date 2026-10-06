@@ -1,0 +1,9 @@
+registry fixture.broken: 2 pins, 2 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/pins/runs/P0c/clean_failures_ignored/twin/nested/clean/runs/fixture__toy/clean/transcript.log
+[clean ] fixture/broken: observed fail -> FAILED (0.065s) ../../../home/g/git/assize/reports/L0/a2/pins/runs/P0c/clean_failures_ignored/twin/nested/clean/runs/fixture__broken/clean/transcript.log
+CLEAN FAILED: fixture/broken (observed fail)
+clean: 1/2 passed, 1/2 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal
+twins: 0/0 passed
+report: ../../../home/g/git/assize/reports/L0/a2/pins/runs/P0c/clean_failures_ignored/twin/nested/clean/pins.jsonl
+PINS FAILED

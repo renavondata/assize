@@ -1,0 +1,2 @@
+{"child_timeout_s": 120.0, "code": "duplicate_pin", "config": "harness/config.toml", "detail": "fixture/toy", "invocation_root": "/home/g/git/assize", "kind": "registry", "phase": "all", "python": "3.11.11", "registry": "fixture.dup_pin", "status": "refused"}
+{"exit_code": 4, "kind": "summary", "registry": "fixture.dup_pin"}

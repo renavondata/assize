@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      mutant off_by_one
+flags:     P0/survivors_ignored,fixture/toy/off_by_one
+cwd:       /home/user/assize
+result:    FAIL

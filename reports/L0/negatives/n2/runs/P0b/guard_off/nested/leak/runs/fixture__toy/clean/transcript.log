@@ -1,0 +1,6 @@
+pin:       fixture/toy
+protects:  toy addition is correct
+mode:      clean
+flags:     P0b/guard_off,P0b/leak_probe
+cwd:       /home/user/assize
+result:    PASS

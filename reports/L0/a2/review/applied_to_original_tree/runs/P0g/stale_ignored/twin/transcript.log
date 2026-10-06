@@ -1,0 +1,8 @@
+copy of /tmp/assize-copy-44efyxaa/repo
+  at /tmp/assize-copy-428_7xh5/repo
+twin: no edits applied
+pin:       P0g
+protects:  an anchor that does not occur exactly once is STALE and fails the suite
+role:      twin
+tree:      /tmp/assize-copy-428_7xh5/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

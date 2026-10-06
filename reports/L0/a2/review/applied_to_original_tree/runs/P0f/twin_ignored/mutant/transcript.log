@@ -1,0 +1,17 @@
+copy of /tmp/assize-copy-44efyxaa/repo
+  at /tmp/assize-copy-9mjhn18o/repo
+applied 1 edit(s) from harness/edits/P0f_twin_ignored.toml
+pin:       P0f
+protects:  a mutant whose twin fails is NON-CAUSAL and fails the suite
+role:      mutant
+tree:      /tmp/assize-copy-9mjhn18o/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo
+nested noncausal: registry=fixture.noncausal phase=all edits=(none) exit=1 rows=/home/g/git/assize/reports/L0/a2/review/applied_to_original_tree/runs/P0f/twin_ignored/mutant/nested/noncausal/pins.jsonl
+  [ok] noncausal: seeded edits applied (anchors unique)
+  [ok] noncausal: summary row exit_code equals process exit code
+  [ok] noncausal: clean run in the invocation tree passes
+  [FAIL] noncausal: mutant run and its twin both fail in their copies
+  [FAIL] noncausal: mutant recorded NON-CAUSAL, not KILLED
+  [FAIL] noncausal: denominator: 1/1 non-causal
+  [ok] noncausal: suite exits non-zero
+result:    FAIL

@@ -1,0 +1,9 @@
+# cleanup, 2026-10-06T03:32:08Z
+$ ls -A /tmp/claude-1000/-home-g-git-assize/ce3bf17c-d538-4769-90a2-2f5a3f05a696/scratchpad
+(end)
+## processes whose cwd or cmdline mention review-copy, assize-copy-, assize-scratch:
+1867009 cwd=/home/g/git/assize cmd=/usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791233108164-jhil8d.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'W=reports/L0/review/$(git rev-parse HEAD); SP=/tmp/claude-1000/-home-g-git-assize/ce3bf17c-d538-4769-90a2-2f5a3f05a696/scratchpad; rm -rf $SP/review-copy $SP/ci.sh; { echo "# cleanup, $(date -u +%FT%TZ)"; echo "\$ ls -A $SP"; ls -A $SP; echo "(end)"; echo "## processes whose cwd or cmdline mention review-copy, assize-copy-, assize-scratch:"; for p in /proc/[0-9]*; do c=$(readlink $p/cwd 2>/dev/null); m=$(tr '"'"'\0'"'"' '"'"' '"'"' < $p/cmdline 2>/dev/null); case "$c $m" in *review-copy*|*assize-copy-*|*assize-scratch*) echo "${p#/proc/} cwd=$c cmd=$m";; esac; done; echo "(end)"; echo "## assize-* under /tmp:"; find /tmp -maxdepth 4 -name '"'"'assize-*'"'"' 2>/dev/null; echo "(end)"; } > $W/cleanup.txt; cat $W/cleanup.txt; ls $W' && pwd -P >| /tmp/claude-d7f6-cwd 
+(end)
+## assize-* under /tmp:
+(end)
+# note: the single process listed above (pid 1867009) is this audit command's own shell, whose command line contains the search strings; it exited with the command. No other match.

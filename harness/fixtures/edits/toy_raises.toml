@@ -1,0 +1,6 @@
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "def check_toy() -> bool:\n"
+new = """def check_toy() -> bool:
+    raise RuntimeError("seeded mutant fixture/toy/raises")
+"""

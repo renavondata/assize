@@ -1,0 +1,5 @@
+# P0f's mutant: the twin's result is ignored, so a failing twin cannot make a kill NON-CAUSAL.
+[[edit]]
+path = "harness/runner.py"
+old = "    if twin_obs != \"pass\":\n"
+new = "    if False:\n"

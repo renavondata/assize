@@ -1,0 +1,9 @@
+registry fixture.noncausal: 1 pins, 1 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/outside: observed pass -> ok (0.065s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0f/twin_ignored/twin/nested/noncausal/runs/fixture__outside/clean/transcript.log
+[mutant] fixture/outside/off_by_one: mutant fail, twin fail -> NON-CAUSAL (0.071s + 0.071s) ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0f/twin_ignored/twin/nested/noncausal/runs/fixture__outside/off_by_one/mutant/transcript.log
+MUTANT NON-CAUSAL: fixture/outside/off_by_one
+clean: 1/1 passed, 0/1 failed
+mutants: 0/1 killed, 0/1 survived, 0/1 inconclusive, 0/1 stale, 1/1 non-causal
+twins: 0/1 passed
+report: ../../../home/g/git/assize/reports/L0/a2/review/exit2_as_pass/runs/P0f/twin_ignored/twin/nested/noncausal/pins.jsonl
+PINS FAILED

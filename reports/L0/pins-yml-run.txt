@@ -1,0 +1,27 @@
+# pins.yml witness: PR #2, head cd5cddbbefe82072cc27f196a80bf797a35d9f49
+# run   https://github.com/gfrmin/assize/actions/runs/37202929460
+# job   https://github.com/gfrmin/assize/actions/runs/37202929460/job/111438131029
+# check "pins": completed, conclusion success, 2026-10-04T12:40:45Z – 12:41:05Z, GitHub-hosted ubuntu-latest
+# artefact pins-report (ID 11303626590, 82 files, zip SHA-256 5be2ab07005fb0fef254cc048408d9e32e098909931671e809a78e377bec4487)
+# Excerpt of the job log (make pins step), verbatim:
+Using CPython 3.11.13
+Creating virtual environment at: .venv
+Audited in 0.00ms
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 5 pins, 5 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: expected pass, observed pass -> ok (0.465s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: expected pass, observed pass -> ok (0.366s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: expected pass, observed pass -> ok (0.265s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: expected pass, observed pass -> ok (3.273s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: expected pass, observed pass -> ok (0.365s) out/pins/runs/P0e/clean/transcript.log
+[mutant] P0/survivors_ignored: expected fail, observed fail -> killed (0.465s) out/pins/runs/P0/survivors_ignored/transcript.log
+[mutant] P0b/guard_off: expected fail, observed fail -> killed (0.315s) out/pins/runs/P0b/guard_off/transcript.log
+[mutant] P0c/clean_failures_ignored: expected fail, observed fail -> killed (0.265s) out/pins/runs/P0c/clean_failures_ignored/transcript.log
+[mutant] P0d/inconclusive_dropped: expected fail, observed fail -> killed (3.272s) out/pins/runs/P0d/inconclusive_dropped/transcript.log
+[mutant] P0e/validation_off: expected fail, observed fail -> killed (1.122s) out/pins/runs/P0e/validation_off/transcript.log
+clean: 5/5 passed, 0/5 failed
+mutants: 5/5 killed, 0/5 survived, 0/5 inconclusive
+report: out/pins/pins.jsonl
+PINS PASSED
+# Runner warning (verbatim): Node.js 20 is deprecated. The following actions target Node.js 20 but are being
+# forced to run on Node.js 24: actions/checkout@11bd719..., actions/upload-artifact@ea165f8....

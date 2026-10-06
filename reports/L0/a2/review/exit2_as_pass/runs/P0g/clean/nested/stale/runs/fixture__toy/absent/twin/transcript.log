@@ -1,0 +1,9 @@
+copy of /tmp/assize-copy-ie5v5mmm/repo
+  at /tmp/assize-copy-uhfharrh/repo
+twin: no edits applied
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      twin
+tree:      /tmp/assize-copy-uhfharrh/repo
+invoked:   /tmp/assize-copy-ie5v5mmm/repo
+result:    PASS

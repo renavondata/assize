@@ -1,0 +1,21 @@
+2026-10-06T04:25:05Z
+$ gh api repos/renavondata/assize/actions/runs?branch=ccr-019a6604-4sjnsn  (id name head event status conclusion attempt created)
+37412990895 pins e7038a7ccae560d70c674fdee510b16ab8f2f1f2 pull_request completed success 1 2026-10-06T04:17:17Z
+37370261211 pins 5e81d054f56ccbc59f0c1799f9438368ab80d086 pull_request completed success 3 2026-10-05T20:31:23Z
+37370237085 pins 7697a05a931bd3b5ebe46718d86c15bfc67ab556 pull_request completed failure 1 2026-10-05T20:31:09Z
+37369883675 measure 744868f955293a72d5bf7cb1ccd52be4d429137b pull_request completed success 1 2026-10-05T20:27:48Z
+37359026815 pins 744868f955293a72d5bf7cb1ccd52be4d429137b pull_request completed success 1 2026-10-05T18:50:46Z
+37358542927 pins f07330a03d1191dcc445afae9ce5f7c8a003cd69 pull_request completed success 1 2026-10-05T18:46:55Z
+$ gh api repos/renavondata/assize/actions/runs/37412990895/jobs
+37412990895 attempt=1 head=e7038a7ccae560d70c674fdee510b16ab8f2f1f2 pins success runner=GitHub Actions 1000000033 labels=ubuntu-latest 2026-10-06T04:17:21Z->2026-10-06T04:19:27Z
+  steps: Set up job=success; Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success; Install uv=success; Sync environment=success; make pins=success; Upload pins report=success; Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success; Complete job=success
+$ gh api repos/renavondata/assize/actions/runs/37370261211/jobs
+37370261211 attempt=3 head=5e81d054f56ccbc59f0c1799f9438368ab80d086 pins success runner=GitHub Actions 1000000032 labels=ubuntu-latest 2026-10-06T04:00:33Z->2026-10-06T04:02:36Z
+  steps: Set up job=success; Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success; Install uv=success; Sync environment=success; make pins=success; Upload pins report=success; Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success; Complete job=success
+$ gh run view 37412990895 --log (make pins step, summary lines)
+2026-10-06T04:17:23.2482052Z   clean: true
+2026-10-06T04:19:22.4160631Z registry harness: 8 pins, 10 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+2026-10-06T04:19:22.4297403Z clean: 8/8 passed, 0/8 failed
+2026-10-06T04:19:22.4298643Z mutants: 10/10 killed, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal, 0 leaked (clean and mutant)
+2026-10-06T04:19:22.4300343Z twins: 10/10 passed
+2026-10-06T04:19:22.4301816Z PINS PASSED

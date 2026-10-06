@@ -1,0 +1,13 @@
+pin:       P0c
+protects:  a failing clean check is recorded and fails the suite
+role:      clean
+tree:      /tmp/assize-copy-3pfgi_eu/repo
+invoked:   /tmp/assize-copy-3pfgi_eu/repo
+nested clean: registry=fixture.broken phase=clean edits=(none) exit=0 rows=/home/g/git/assize/reports/L0/a2/review/clean_failures_ignored/runs/P0c/clean/nested/clean/pins.jsonl
+  [ok] clean: seeded edits applied (anchors unique)
+  [ok] clean: summary row exit_code equals process exit code
+  [FAIL] clean: fixture/broken recorded FAILED
+  [ok] clean: fixture/toy recorded ok
+  [FAIL] clean: denominator: 1/2 failed
+  [FAIL] clean: suite exits non-zero
+result:    FAIL

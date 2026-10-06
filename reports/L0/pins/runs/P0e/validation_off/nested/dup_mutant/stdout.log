@@ -1,0 +1,9 @@
+registry fixture.dup_mutant: 1 pins, 2 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] fixture/toy: expected pass, observed leak -> FAILED (0.064s) reports/L0/pins/runs/P0e/validation_off/nested/dup_mutant/runs/fixture__toy/clean/transcript.log
+CLEAN FAILED: fixture/toy (observed leak)
+[mutant] fixture/toy/off_by_one: expected fail, observed fail -> killed (0.065s) reports/L0/pins/runs/P0e/validation_off/nested/dup_mutant/runs/fixture__toy/off_by_one/transcript.log
+[mutant] fixture/toy/off_by_one: expected fail, observed fail -> killed (0.064s) reports/L0/pins/runs/P0e/validation_off/nested/dup_mutant/runs/fixture__toy/off_by_one/transcript.log
+clean: 0/1 passed, 1/1 failed
+mutants: 2/2 killed, 0/2 survived, 0/2 inconclusive
+report: reports/L0/pins/runs/P0e/validation_off/nested/dup_mutant/pins.jsonl
+PINS FAILED

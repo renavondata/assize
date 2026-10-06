@@ -1,0 +1,6 @@
+pin:       fixture/bare
+protects:  declares no mutants (seeded defect)
+role:      clean
+tree:      /tmp/assize-copy-hnlv0w_4/repo
+invoked:   /tmp/assize-copy-hnlv0w_4/repo
+result:    PASS

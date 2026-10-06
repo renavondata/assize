@@ -1,0 +1,5 @@
+# Review mutant 1 (unregistered): a child exiting 2 (error) is treated as a pass.
+[[edit]]
+path = "harness/runner.py"
+old = "OBSERVED = {EXIT_PASS: \"pass\", EXIT_FAIL: \"fail\"}\n"
+new = "OBSERVED = {EXIT_PASS: \"pass\", EXIT_FAIL: \"fail\", EXIT_ERROR: \"pass\"}\n"

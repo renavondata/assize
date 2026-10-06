@@ -1,0 +1,10 @@
+# P0b's mutant: reintroduce an environment mutant switch.
+[[edit]]
+path = "harness/config.py"
+old = "from harness.pin import ROOT\n"
+new = """from harness.pin import ROOT
+
+import os
+
+_SWITCH = os.environ.get("ASSIZE_MUTANT")
+"""

@@ -1,0 +1,5 @@
+pin:       P0g
+protects:  an anchor that does not occur exactly once is STALE and fails the suite
+role:      clean
+tree:      /tmp/assize-copy-44efyxaa/repo
+invoked:   /tmp/assize-copy-44efyxaa/repo

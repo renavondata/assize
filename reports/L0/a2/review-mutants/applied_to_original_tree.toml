@@ -1,0 +1,5 @@
+# Review mutant 3 (unregistered): mutant edits are applied to the invocation tree instead of the disposable copy.
+[[edit]]
+path = "harness/runner.py"
+old = "                edits.apply(copy, mutant_edits)\n"
+new = "                edits.apply(ROOT, mutant_edits)\n"

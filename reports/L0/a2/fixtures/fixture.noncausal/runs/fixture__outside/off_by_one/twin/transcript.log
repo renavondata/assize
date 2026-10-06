@@ -1,0 +1,9 @@
+copy of /home/g/git/assize
+  at /tmp/assize-copy-ynmqikzp/repo
+twin: no edits applied
+pin:       fixture/outside
+protects:  fails outside the invocation tree
+role:      twin
+tree:      /tmp/assize-copy-ynmqikzp/repo
+invoked:   /home/g/git/assize
+result:    FAIL
