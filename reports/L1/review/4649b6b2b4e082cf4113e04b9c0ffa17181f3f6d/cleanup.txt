@@ -1,0 +1,22 @@
+2026-10-06T10:33:18Z
+baseline before probe (not this session's):
+ 955013       1    14:19:06 /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+ 955067  955048    14:19:06 /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service
+2920394 2901263       02:21 tail -f /home/g/.claude/projects/-home-g-git-assize/baad25ab-e705-41ae-9590-0b21274a5ea7.jsonl
+2924859     791       00:39 bash /home/g/bin/assize-loop.sh
+2925036 2924859       00:38 bash /home/g/bin/assize-loop.sh
+-rw-r--r-- 1 g g 2937 Oct  6 13:30 /tmp/assize-mkpins.txt
+
+2026-10-06T10:36:23Z
+after probe: scratch worktree removed (git worktree remove --force; rm -rf /tmp/review-826e; prune)
+/home/g/git/assize        4649b6b [l1-harness-hygiene]
+/home/g/git/assize-review 4649b6b (detached HEAD)
+processes matching harness|assize|make pins:
+ 955013       1    14:22:11 /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+ 955067  955048    14:22:11 /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service
+2920394 2901263       05:26 tail -f /home/g/.claude/projects/-home-g-git-assize/baad25ab-e705-41ae-9590-0b21274a5ea7.jsonl
+2924859     791       03:45 bash /home/g/bin/assize-loop.sh
+2925036 2924859       03:43 bash /home/g/bin/assize-loop.sh
+/tmp/assize-* and /tmp/review-826e:
+ls: cannot access '/tmp/review-826e': No such file or directory
+-rw-r--r-- 1 g g 2937 Oct  6 13:30 /tmp/assize-mkpins.txt

@@ -1,0 +1,54 @@
+== P0h/subreaper_not_set mutant: FAIL lines
+  [FAIL] escapee: grandchild dead when the nested run returns (killed by the sweep)
+  [FAIL] escapee: leaked_processes >= 1 (0)
+  [FAIL] daemon: dead when the nested run returns (reparented to the subreaper and swept)
+  [FAIL] daemon: leaked_processes >= 1 (0)
+  [FAIL] daemon: verdict LEAKED
+  [FAIL] daemon: summary leaked = 1, clean_failed = 1
+  [FAIL] daemon: suite exits non-zero
+result:    FAIL
+== P0h/subreaper_not_set twin: FAIL count 0
+== P0h/sweep_skipped mutant: FAIL lines
+  [FAIL] escapee: grandchild dead when the nested run returns (killed by the sweep)
+  [FAIL] escapee: leaked_processes >= 1 (0)
+  [FAIL] daemon: dead when the nested run returns (reparented to the subreaper and swept)
+  [FAIL] daemon: leaked_processes >= 1 (0)
+  [FAIL] daemon: verdict LEAKED
+  [FAIL] daemon: summary leaked = 1, clean_failed = 1
+  [FAIL] daemon: suite exits non-zero
+result:    FAIL
+== P0h/sweep_skipped twin: FAIL count 0
+== P0h/death_signal_reverted mutant: FAIL lines
+  [FAIL] leaks: cooperating grandchild: observed timeout, INCONCLUSIVE
+  [FAIL] leaks: cooperating grandchild: died by the death signal, leaked_processes 0
+result:    FAIL
+== P0h/death_signal_reverted twin: FAIL count 0
+== P0h/scratch_kept mutant: FAIL lines
+  [FAIL] leaks: nested copy /tmp/assize-scratch-qe_mc6w8/assize-scratch-rd98f97f/assize-copy-czzcooto/repo removed
+  [FAIL] leaks: scratch root /tmp/assize-scratch-qe_mc6w8/assize-scratch-rd98f97f removed
+  [FAIL] escapee: scratch root /tmp/assize-scratch-qe_mc6w8/assize-scratch-wlxdd1cl removed
+result:    FAIL
+== P0h/scratch_kept twin: FAIL count 0
+== P0h/leaked_not_counted mutant: FAIL lines
+  [FAIL] escapee: verdict LEAKED
+  [FAIL] escapee: summary leaked = 1
+  [FAIL] daemon: verdict LEAKED
+  [FAIL] daemon: summary leaked = 1, clean_failed = 1
+  [FAIL] daemon: suite exits non-zero
+result:    FAIL
+== P0h/leaked_not_counted twin: FAIL count 0
+== P0i/pycache_top_level_only mutant: FAIL lines
+  [FAIL] disposable copy holds no __pycache__ at any depth (['pkg/__pycache__'])
+  [FAIL] disposable copy runs the edited source, child writes no bytecode ('4 1', want '5 1')
+result:    FAIL
+== P0i/pycache_top_level_only twin: FAIL count 0
+== P0i clean
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache reads stale bytecode ('4 1', want '4 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+== registry row
+{"child_timeout_s": 120.0, "config": "harness/config.toml", "invocation_root": "/tmp/review-826e/copy", "kind": "registry", "mutants": ["P0/survivors_ignored", "P0b/env_switch", "P0c/clean_failures_ignored", "P0d/inconclusive_dropped", "P0e/validation_off", "P0f/twin_ignored", "P0g/stale_ignored", "P0h/death_signal_reverted", "P0h/scratch_kept", "P0h/leaked_not_counted", "P0h/subreaper_not_set", "P0h/sweep_skipped", "P0i/pycache_top_level_only"], "phase": "all", "pins": ["P0", "P0b", "P0c", "P0d", "P0e", "P0f", "P0g", "P0h", "P0i"], "proposer": {"kind": "builder", "model": "claude-opus-5-5", "session": "baad25ab-e705-41ae-9590-0b21274a5ea7"}, "python": "3.11.11", "reap_grace_s": 5.0, "registry": "harness", "status": "accepted"}
+{"clean_failed": 0, "clean_ok": 9, "clean_total": 9, "exit_code": 0, "inconclusive": 0, "killed": 13, "kind": "summary", "leaked": 0, "mutants_total": 13, "non_causal": 0, "phase": "all", "registry": "harness", "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 13, "twins_total": 13}
+== sum leaked_processes over run rows
+35 run rows; sum leaked_processes 0 ; rows missing leaked_processes 0
