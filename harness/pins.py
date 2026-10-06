@@ -8,8 +8,8 @@ import py_compile
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
-from importlib.util import cache_from_source
 from pathlib import Path
 
 from harness import config, context, edits, proc, scan, tree
@@ -234,10 +234,14 @@ STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
 
-def _stamp_import(tree_root: Path) -> str:
-    out = subprocess.run(proc.python("-c", STAMP_READ), cwd=tree_root, env=proc.child_env(),
+def _stamp_import(tree_root: Path, env: dict[str, str]) -> str:
+    out = subprocess.run(proc.python("-c", STAMP_READ), cwd=tree_root, env=env,
                          capture_output=True, text=True, preexec_fn=proc.setup(False))
     return out.stdout.strip() or out.stderr.strip()
+
+
+def _without_prefix(env: dict[str, str]) -> dict[str, str]:
+    return {k: v for k, v in env.items() if k != "PYTHONPYCACHEPREFIX"}
 
 
 def _same_second_edit(tree_root: Path, stamp_s: int) -> None:
@@ -248,7 +252,9 @@ def _same_second_edit(tree_root: Path, stamp_s: int) -> None:
 
 def p0i_no_stale_bytecode() -> bool:
     """A mutant edit that keeps the source's byte length and lands in the second recorded by a bytecode cache
-    takes effect in a disposable copy: no `__pycache__` is copied at any depth (brief 1 A5)."""
+    takes effect in a disposable copy: no `__pycache__` is copied at any depth (brief 1 A5), and a copy that keeps
+    the stale in-tree `__pycache__` still runs the edited source because child Pythons read bytecode only under
+    PYTHONPYCACHEPREFIX (brief 1 A6)."""
     work = Path(tempfile.mkdtemp(prefix="assize-p0i-", dir=context.scratch))
     src_root = work / "src"
     src = src_root / "pkg" / "stamp.py"
@@ -256,7 +262,9 @@ def p0i_no_stale_bytecode() -> bool:
     src.write_text(STAMP_OLD)
     stamp_s = int(src.stat().st_mtime)
     os.utime(src, (stamp_s, stamp_s))
-    pyc = Path(cache_from_source(str(src)))
+    # The in-tree cache path, built by hand: this check itself runs under PYTHONPYCACHEPREFIX, which
+    # importlib.util.cache_from_source would honour.
+    pyc = src.parent / "__pycache__" / f"stamp.{sys.implementation.cache_tag}.pyc"
     py_compile.compile(str(src), cfile=str(pyc), doraise=True,
                        invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP)
     ok = True
@@ -271,13 +279,20 @@ def p0i_no_stale_bytecode() -> bool:
     control = work / "control"
     shutil.copytree(src_root, control)
     _same_second_edit(control, stamp_s)
-    expect(_stamp_import(control) == "4 1",
-           f"control: a plain copy keeping the cache reads stale bytecode ({_stamp_import(control)!r}, want '4 1')")
+    got = _stamp_import(control, _without_prefix(proc.child_env(work)))
+    expect(got == "4 1", f"control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode "
+                         f"({got!r}, want '4 1')")
+    env = proc.child_env(work)
+    stale_kept = (control / "pkg" / "__pycache__").is_dir()
+    got = _stamp_import(control, env)
+    expect(stale_kept and got == "5 1",
+           f"prefix: the same copy, stale __pycache__ kept ({stale_kept}), run by child_env "
+           f"(PYTHONPYCACHEPREFIX={env.get('PYTHONPYCACHEPREFIX')}), runs the edited source ({got!r}, want '5 1')")
     with tree.disposable_copy(src_root, under=work) as copy:
         caches = sorted(str(c.relative_to(copy)) for c in copy.rglob("__pycache__"))
         expect(not caches, f"disposable copy holds no __pycache__ at any depth ({caches})")
         _same_second_edit(copy, stamp_s)
-        got = _stamp_import(copy)
+        got = _stamp_import(copy, proc.child_env(work))
         expect(got == "5 1", f"disposable copy runs the edited source, child writes no bytecode ({got!r}, want '5 1')")
     shutil.rmtree(work, ignore_errors=True)
     return ok
@@ -363,7 +378,8 @@ PINS = [
                                      Mutant("subreaper_not_set", _edits("P0h_subreaper_not_set")),
                                      Mutant("sweep_skipped", _edits("P0h_sweep_skipped")))),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
-        p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),)),
+        p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
+                                 Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset")))),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),)),
 ]

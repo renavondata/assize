@@ -6,8 +6,10 @@ reach. Tying every process's life to its parent's (Linux PR_SET_PDEATHSIG)
 makes a kill cascade down the whole tree. A descendant that escapes both
 (new session, no death signal, or double-forked) is reparented to the
 orchestrator, a child subreaper (PR_SET_CHILD_SUBREAPER), whose sweep kills
-and counts it. Every child Python runs without reading or writing bytecode
-caches it did not compile itself (`-B`, PYTHONDONTWRITEBYTECODE=1; brief 1 A5).
+and counts it. Every child Python runs without writing bytecode (`-B`,
+PYTHONDONTWRITEBYTECODE=1; brief 1 A5) and reads cached bytecode only under a
+fresh PYTHONPYCACHEPREFIX beneath the scratch root, never from an in-tree
+`__pycache__` (brief 1 A6).
 """
 
 from __future__ import annotations
@@ -16,9 +18,12 @@ import ctypes
 import os
 import signal
 import sys
+import tempfile
 import time
 from collections.abc import Callable
 from pathlib import Path
+
+from harness import context
 
 _PR_SET_PDEATHSIG = 1
 _PR_SET_CHILD_SUBREAPER = 36
@@ -30,8 +35,15 @@ def python(*args: str) -> list[str]:
     return [sys.executable, "-B", *args]
 
 
-def child_env() -> dict[str, str]:
-    return os.environ | {"PYTHONDONTWRITEBYTECODE": "1"}
+def child_env(scratch: Path | None = None) -> dict[str, str]:
+    """Environment for a child Python: bytecode writing disabled, and the bytecode cache moved to a fresh directory
+    under `scratch` (default: the scratch root this process was given), so an in-tree `__pycache__` is never read."""
+    under = scratch or context.scratch
+    if under is None:
+        raise ValueError("child_env: no scratch root to hold the bytecode cache prefix")
+    prefix = tempfile.mkdtemp(prefix="pycache-", dir=under)
+    inherited = {k: v for k, v in os.environ.items() if k != "PYTHONPYCACHEPREFIX"}
+    return inherited | {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONPYCACHEPREFIX": prefix}
 
 
 def set_subreaper() -> None:
