@@ -1,0 +1,77 @@
+===== out/pins/runs/P0i/clean/transcript.log
+pin:       P0i
+protects:  a same-length edit landing in the second a bytecode cache recorded takes effect in a copy
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-qqw7kldc
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-qqw7kldc/assize-p0i-us6nwyfp/pycache-35rn0oxg), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS
+===== out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-vmqq3fx3/assize-copy-bfzfoma0/repo
+applied 1 edit(s) from harness/edits/P0i_pycache_prefix_unset.toml
+pin:       P0i
+protects:  a same-length edit landing in the second a bytecode cache recorded takes effect in a copy
+role:      mutant
+tree:      /tmp/assize-scratch-vmqq3fx3/assize-copy-bfzfoma0/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-vmqq3fx3
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [FAIL] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=None), runs the edited source ('4 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    FAIL
+===== out/pins/runs/P0i/pycache_prefix_unset/twin/transcript.log
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-t0qh442u/assize-copy-t886aorq/repo
+twin: no edits applied
+pin:       P0i
+protects:  a same-length edit landing in the second a bytecode cache recorded takes effect in a copy
+role:      twin
+tree:      /tmp/assize-scratch-t0qh442u/assize-copy-t886aorq/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-t0qh442u
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-t0qh442u/assize-p0i-zta2w7zt/pycache-8hhtjsn3), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS
+===== out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-v4icmk6a/assize-copy-ywsv4zzy/repo
+applied 1 edit(s) from harness/edits/P0i_pycache_top_level_only.toml
+pin:       P0i
+protects:  a same-length edit landing in the second a bytecode cache recorded takes effect in a copy
+role:      mutant
+tree:      /tmp/assize-scratch-v4icmk6a/assize-copy-ywsv4zzy/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-v4icmk6a
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-v4icmk6a/assize-p0i-bksnivc2/pycache-rfg_anqx), runs the edited source ('5 1', want '5 1')
+  [FAIL] disposable copy holds no __pycache__ at any depth (['pkg/__pycache__'])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    FAIL
+===== out/pins/runs/P0i/pycache_top_level_only/twin/transcript.log
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-d2u414c1/assize-copy-hs152h3q/repo
+twin: no edits applied
+pin:       P0i
+protects:  a same-length edit landing in the second a bytecode cache recorded takes effect in a copy
+role:      twin
+tree:      /tmp/assize-scratch-d2u414c1/assize-copy-hs152h3q/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-d2u414c1
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-d2u414c1/assize-p0i-w7ank0we/pycache-f08my30r), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS

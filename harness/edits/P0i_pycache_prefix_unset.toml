@@ -1,0 +1,5 @@
+# P0i's second mutant (brief 1 A6): child Pythons run without PYTHONPYCACHEPREFIX, so a copied in-tree __pycache__ is read again.
+[[edit]]
+path = "harness/proc.py"
+old = "    return inherited | {\"PYTHONDONTWRITEBYTECODE\": \"1\", \"PYTHONPYCACHEPREFIX\": prefix}\n"
+new = "    return inherited | {\"PYTHONDONTWRITEBYTECODE\": \"1\"}\n"

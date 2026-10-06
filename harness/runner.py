@@ -76,13 +76,13 @@ class Overlap(RuntimeError):
     """A child was about to start while a descendant of an earlier one was still alive."""
 
 
-def _spawn(cmd: list[str], cwd: Path, timeout: float, log) -> tuple[str, int | None]:
+def _spawn(cmd: list[str], cwd: Path, scratch: Path, timeout: float, log) -> tuple[str, int | None]:
     # Children run one at a time (brief 1 A4 item 5): nothing of an earlier run may still be alive.
     live = proc.descendants()
     if any(state not in "ZX" for state in live.values()):
         raise Overlap(f"descendants still alive before spawning a child: {sorted(live)}")
     child = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(True),
-                             env=proc.child_env())
+                             env=proc.child_env(scratch))
     try:
         code = child.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
@@ -98,7 +98,7 @@ def _child(registry: str, pin: Pin, role: str, tree: Path, run_dir: Path, scratc
            "--role", role, "--invocation-root", str(ROOT), "--run-dir", str(run_dir.resolve()),
            "--scratch", str(scratch))
     log.flush()
-    return _spawn(cmd, tree, cfg.child_timeout_s, log)
+    return _spawn(cmd, tree, scratch, cfg.child_timeout_s, log)
 
 
 @contextmanager
@@ -317,4 +317,5 @@ def run_under_edits(edits_file: str, registry: str, phase: str, out: Path, confi
                           "--out", str(out.resolve()))
         if config_path is not None:
             cmd += ["--config", str(config_path.resolve())]
-        return subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False), env=proc.child_env()).returncode
+        return subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False),
+                              env=proc.child_env(copy.parent)).returncode

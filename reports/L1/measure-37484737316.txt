@@ -1,0 +1,151 @@
+measure run 37484737316 (label 'measure' on PR #10), head 3210f7ee790d2eabcf5562bbff54bbc3d213623e, conclusion success
+artefact measure-host downloaded by the Builder; facts.txt sha256 b4af0f169ae841a39c3f27c27cd8084fa74bdc0609cd23d40f6ae971dde046a9
+
+===== facts.txt
+### date
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-06T15:07:43Z
+[exit 0]
+
+### whoami
+$ whoami
+assize-runner
+[exit 0]
+
+### lscpu
+$ lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  12
+On-line CPU(s) list:                     0-11
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD Ryzen 5 5600X 6-Core Processor
+CPU family:                              25
+Model:                                   33
+Thread(s) per core:                      2
+Core(s) per socket:                      6
+Socket(s):                               1
+Stepping:                                2
+Microcode version:                       0xa201211
+Frequency boost:                         enabled
+CPU(s) scaling MHz:                      80%
+CPU max MHz:                             4654.2881
+CPU min MHz:                             560.7580
+BogoMIPS:                                7386.74
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 invpcid cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor smca debug_swap
+Virtualization:                          AMD-V
+L1d cache:                               192 KiB (6 instances)
+L1i cache:                               192 KiB (6 instances)
+L2 cache:                                3 MiB (6 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-11
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Ghostwrite:                Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Old microcode:             Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Mitigation; Safe RET
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Mitigation; Clear CPU buffers
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+[exit 0]
+
+### free
+$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:            31Gi        11Gi       7.2Gi       265Mi        13Gi        19Gi
+Swap:           23Gi       9.8Gi        14Gi
+[exit 0]
+
+### uname
+$ uname -a
+Linux steel-legend 7.2.6-arch2-1 #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 22:41:30 +0000 x86_64 GNU/Linux
+[exit 0]
+
+### uv
+$ uv --version
+uv 0.12.17 (635500036 2026-09-18 x86_64-unknown-linux-gnu)
+[exit 0]
+
+### python3
+$ python3 --version
+Python 3.14.7
+[exit 0]
+
+### docker
+$ docker --version
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+podman version 6.1.2
+[exit 0]
+
+### podman
+$ podman --version
+podman version 6.1.2
+[exit 0]
+
+### own-cgroup
+$ cat /proc/self/cgroup
+0::/system.slice/actions.runner.renavondata-assize.steel-legend.service
+[exit 0]
+
+### uptime
+$ uptime
+ 18:07:43 up 7 days,  7:53,  9 users,  load average: 0.34, 0.46, 0.36
+[exit 0]
+
+### cpuset
+$ cat /sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective
+3-5,9-11
+[exit 0]
+
+### runner-version
+$ runner_version /home/assize-runner/actions-runner
+﻿{
+  "agentId": 21,
+  "agentName": "steel-legend",
+  "poolId": 1,
+  "poolName": "Default",
+  "disableUpdate": true,
+  "serverUrl": "https://pipelinesghubeus4.actions.githubusercontent.com/vFQcHRKZtC4BungGYGfu6JMitGhnHlvTwWJrEtU0n2cYYwoKuU/",
+  "gitHubUrl": "https://github.com/renavondata/assize",
+  "workFolder": "_work",
+  "useV2Flow": true,
+  "serverUrlV2": "https://broker.actions.githubusercontent.com/"
+}
+ldd: ./bin/libcoreclr.so: No such file or directory
+ldd: ./bin/libSystem.Security.Cryptography.Native.OpenSsl.so: No such file or directory
+ldd: ./bin/libSystem.IO.Compression.Native.so: No such file or directory
+2.337.0
+[exit 0]
+
+### podman-info
+$ podman info --format {{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}
+crun v2 systemd rootless=true
+[exit 0]
+
+
+===== pins.jsonl summary row
+{"clean_failed": 0, "clean_ok": 10, "clean_total": 10, "exit_code": 0, "inconclusive": 0, "killed": 15, "kind": "summary", "leaked": 0, "mutants_total": 15, "non_causal": 0, "phase": "all", "registry": "harness", "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 15, "twins_total": 15}
+
+===== run log (pins totals)
+measure	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-06T15:07:42.7245569Z   clean: true
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9944378Z [clean ] P0i: observed pass -> ok (0.323s) out/host/pins/runs/P0i/clean/transcript.log
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9955467Z [mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.33s + 0.33s) out/host/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9956154Z [mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.278s + 0.329s) out/host/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9957429Z clean: 10/10 passed, 0/10 failed
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9957996Z mutants: 15/15 killed, 0/15 survived, 0/15 inconclusive, 0/15 stale, 0/15 non-causal, 0 leaked (clean and mutant)
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9958571Z twins: 15/15 passed
+measure	make measure (host facts, then make pins)	2026-10-06T15:10:40.9959136Z PINS PASSED

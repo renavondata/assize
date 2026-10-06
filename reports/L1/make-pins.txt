@@ -1,36 +1,36 @@
 uv run --frozen python -m harness run --registry harness --phase all --out out/pins
-registry harness: 10 pins, 14 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
-[clean ] P0: observed pass -> ok (1.388s) out/pins/runs/P0/clean/transcript.log
-[clean ] P0b: observed pass -> ok (0.283s) out/pins/runs/P0b/clean/transcript.log
-[clean ] P0c: observed pass -> ok (0.48s) out/pins/runs/P0c/clean/transcript.log
-[clean ] P0d: observed pass -> ok (3.936s) out/pins/runs/P0d/clean/transcript.log
-[clean ] P0e: observed pass -> ok (0.483s) out/pins/runs/P0e/clean/transcript.log
-[clean ] P0f: observed pass -> ok (0.58s) out/pins/runs/P0f/clean/transcript.log
-[clean ] P0g: observed pass -> ok (0.882s) out/pins/runs/P0g/clean/transcript.log
-[clean ] P0h: observed pass -> ok (11.147s) out/pins/runs/P0h/clean/transcript.log
-[clean ] P0i: observed pass -> ok (0.18s) out/pins/runs/P0i/clean/transcript.log
-[clean ] P0j: observed pass -> ok (0.432s) out/pins/runs/P0j/clean/transcript.log
-[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (1.391s + 1.389s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
-[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.139s + 0.137s) out/pins/runs/P0b/env_switch/mutant/transcript.log
-[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.49s + 0.488s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
-[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.991s + 3.992s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
-[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (2.74s + 0.537s) out/pins/runs/P0e/validation_off/mutant/transcript.log
-[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.64s + 0.639s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
-[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (1.038s + 0.888s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
-[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (13.254s + 11.152s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
-[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (11.199s + 11.203s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
-[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (11.155s + 11.151s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
-[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (9.049s + 11.154s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
-[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (8.849s + 11.153s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
-[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.187s + 0.189s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
-[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.44s + 0.439s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+registry harness: 10 pins, 15 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (2.936s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.382s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.029s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (4.94s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.435s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.284s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.682s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.251s) out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.333s) out/pins/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.583s) out/pins/runs/P0j/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (2.942s + 2.937s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.284s + 0.292s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.039s + 1.039s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (4.994s + 4.943s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.045s + 1.437s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.287s + 1.339s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.19s + 1.738s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.356s + 12.259s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.255s + 12.256s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.26s + 12.305s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (10.15s + 12.254s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (9.954s + 12.207s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.337s + 0.338s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.285s + 0.337s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.589s + 0.586s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
 clean: 10/10 passed, 0/10 failed
-mutants: 14/14 killed, 0/14 survived, 0/14 inconclusive, 0/14 stale, 0/14 non-causal, 0 leaked (clean and mutant)
-twins: 14/14 passed
+mutants: 15/15 killed, 0/15 survived, 0/15 inconclusive, 0/15 stale, 0/15 non-causal, 0 leaked (clean and mutant)
+twins: 15/15 passed
 report: out/pins/pins.jsonl
 PINS PASSED
 
-real	2m28.935s
-user	0m25.441s
-sys	0m13.263s
-exit 0
+real	3m2.185s
+user	0m57.009s
+sys	0m14.764s

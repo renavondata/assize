@@ -1,0 +1,60 @@
+measure-host artefact of run 37484737316 (head 3210f7e), downloaded by this review
+b4af0f169ae841a39c3f27c27cd8084fa74bdc0609cd23d40f6ae971dde046a9  facts.txt
+cd5de4ae152ee0dc1f64d3d49002d9bcb6abd34e55face6ca365bbbb4fefcd53  pins/pins.jsonl
+
+### date
+### whoami
+### lscpu
+### free
+### uname
+### uv
+### python3
+### docker
+### podman
+### own-cgroup
+### uptime
+ 18:07:43 up 7 days,  7:53,  9 users,  load average: 0.34, 0.46, 0.36
+### cpuset
+3-5,9-11
+### runner-version
+2.337.0
+### podman-info
+crun v2 systemd rootless=true
+
+{"clean_failed": 0, "clean_ok": 10, "clean_total": 10, "exit_code": 0, "inconclusive": 0, "killed": 15, "kind": "summary", "leaked": 0, "mutants_total": 15, "non_causal": 0, "phase": "all", "registry": "harness", "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 15, "twins_total": 15}
+{"child_timeout_s": 120.0, "config": "harness/config.toml", "invocation_root": "/home/assize-runner/actions-runner/_work/assize/assize", "kind": "registry", "mutants": ["P0/survivors_ignored", "P0b/env_switch", "P0c/clean_failures_ignored", "P0d/inconclusive_dropped", "P0e/validation_off", "P0f/twin_ignored", "P0g/stale_ignored", "P0h/death_signal_reverted", "P0h/scratch_kept", "P0h/leaked_not_counted", "P0h/subreaper_not_set", "P0h/sweep_skipped", "P0i/pycache_top_level_only", "P0i/pycache_prefix_unset", "P0j/incomplete_facts_accepted"], "phase": "all", "pins": ["P0", "P0b", "P0c", "P0d", "P0
+== pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [FAIL] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=None), runs the edited source ('4 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    FAIL
+== pins/runs/P0i/pycache_prefix_unset/twin/transcript.log
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-axjmm4ur/assize-p0i-9telhdap/pycache-a17ydyp5), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS
+== pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-6qfx70lh/assize-p0i-7cy4faci/pycache-cogf1m8e), runs the edited source ('5 1', want '5 1')
+  [FAIL] disposable copy holds no __pycache__ at any depth (['pkg/__pycache__'])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    FAIL
+== pins/runs/P0i/pycache_top_level_only/twin/transcript.log
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-914cm0ax/assize-p0i-731l6nie/pycache-_x4p25sw), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS
+== pins/runs/P0i/clean/transcript.log
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-hi404kix/assize-p0i-uoqnutq_/pycache-g76w1iwe), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS

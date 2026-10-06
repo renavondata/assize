@@ -1,0 +1,3 @@
+files: ['reports/L0/forecasts.jsonl', 'reports/L1/forecasts.jsonl']
+claims 26; resolved 17; open 9; id-less outcome rows 2
+log-loss 3.654 vs constant 0.5 11.784 over 17

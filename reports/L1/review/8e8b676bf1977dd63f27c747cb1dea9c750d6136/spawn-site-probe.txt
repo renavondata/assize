@@ -1,0 +1,42 @@
+probe: unregistered edit (scratch copy only) in harness/runner.py _spawn: env=proc.child_env(scratch) -> env=dict(os.environ); clean phase of registry harness under --under-edits
+# Review probe (unregistered): the orchestrator spawns pin children with the plain environment, no cache prefix.
+[[edit]]
+path = "harness/runner.py"
+old = "                             env=proc.child_env(scratch))\n"
+new = "                             env=dict(os.environ))\n"
+
+UNDER EDITS: harness/edits/zz_probe_spawn_env.toml (sha256 9c85eb444d126de3fd0d6dac88f2e2341a9ec57cb8398d8c815f102640a46fec)
+copy: /tmp/assize-copy-i7_mk5w7/repo
+registry harness: 10 pins, 15 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (2.936s) ../../review-10-probe-out/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.283s) ../../review-10-probe-out/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.035s) ../../review-10-probe-out/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (4.939s) ../../review-10-probe-out/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.383s) ../../review-10-probe-out/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.284s) ../../review-10-probe-out/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.681s) ../../review-10-probe-out/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.252s) ../../review-10-probe-out/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.333s) ../../review-10-probe-out/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.584s) ../../review-10-probe-out/runs/P0j/clean/transcript.log
+clean: 10/10 passed, 0/10 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 0 leaked (clean and mutant)
+twins: 0/0 passed
+report: ../../review-10-probe-out/pins.jsonl
+PINS PASSED
+real	0m26.972s
+user	0m11.237s
+sys	0m2.607s
+exit=0
+--- P0i clean transcript under the edit
+pin:       P0i
+protects:  a same-length edit landing in the second a bytecode cache recorded takes effect in a copy
+role:      clean
+tree:      /tmp/assize-copy-i7_mk5w7/repo
+invoked:   /tmp/assize-copy-i7_mk5w7/repo
+scratch:   /tmp/assize-scratch-30ntd0wi
+  [ok] fixture: compiled src/pkg/__pycache__/stamp.cpython-311.pyc; edit keeps byte length 10
+  [ok] control: a plain copy keeping the cache, run without a cache prefix, reads stale bytecode ('4 1', want '4 1')
+  [ok] prefix: the same copy, stale __pycache__ kept (True), run by child_env (PYTHONPYCACHEPREFIX=/tmp/assize-scratch-30ntd0wi/assize-p0i-uqvqib5o/pycache-kqh50rwj), runs the edited source ('5 1', want '5 1')
+  [ok] disposable copy holds no __pycache__ at any depth ([])
+  [ok] disposable copy runs the edited source, child writes no bytecode ('5 1', want '5 1')
+result:    PASS
