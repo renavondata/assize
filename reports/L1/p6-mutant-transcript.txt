@@ -1,0 +1,28 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-y80zptb0/assize-copy-197h859h/repo
+applied 1 edit(s) from harness/edits/P6_crafter_field_in_schema.toml
+pin:       P6
+protects:  no manifest vocabulary token appears in an interface schema file
+role:      mutant
+tree:      /tmp/assize-scratch-y80zptb0/assize-copy-197h859h/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-y80zptb0
+  [ok] fixture token clean: found [], want []
+  [ok] fixture token as a key: found ['semantic'], want ['semantic']
+  [ok] fixture token as a value: found ['pickaxe', 'wood', 'wood_pickaxe'], want ['pickaxe', 'wood', 'wood_pickaxe']
+  [ok] fixture token inside a description: found ['wood'], want ['wood']
+  [ok] fixture token as an underscore part: found ['wood'], want ['wood']
+  [ok] schema files: ['manifest.schema.json', 'rpc.schema.json']
+  [ok] manifests: ['crafter/manifest.json']
+  [ok] manifest.schema.json: valid 2020-12 schema, schema_version 1.0.0
+  [ok] rpc.schema.json: valid 2020-12 schema, schema_version 1.0.0
+  [ok] crafter/manifest.json conforms to manifest.schema.json ([])
+  [ok] manifest.schema.json rejects a categorical field with no vocabulary
+  [ok] rpc.schema.json accepts begin_episode with the manifest
+  [ok] rpc.schema.json accepts step
+  [ok] rpc.schema.json rejects step carrying a seed
+  [ok] rpc.schema.json rejects begin_episode carrying a seed
+  [ok] rpc.schema.json accepts reply with a prediction
+  [ok] rpc.schema.json accepts end_episode
+  [FAIL] real schemas: 75 vocabulary tokens from ['crafter/manifest.json']; found in schemas: [('rpc.schema.json', 'semantic')]
+result:    FAIL
