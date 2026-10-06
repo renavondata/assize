@@ -17,7 +17,7 @@ Each layer is built on the one below. A layer starts only after the previous lay
 | L5 | agent repo | Adoption by sequential EU; provenance ledger | Adoption decisions made without Guy |
 | L6 | agent repo | Agent-authored coding briefs; coding agent proposes, judge disposes | Guy's role reduced to budget and weekly report |
 
-**Current layer: L0**
+**Current layer: L1** (L0 PASSED; PR #2 merged 2026-10-06)
 
 ## Standing rules
 - Every pin must demonstrate that it can fail by killing a named, seeded mutant. A green that cannot fail is a defect.
@@ -64,16 +64,19 @@ Lead with the verdict. Be terse and use Bayesian decision-theoretic vocabulary. 
 The court has been faster than the king. L0 met its pre-stated criteria four times and merged zero times, because every rung required Guy's attention, which is the one resource this file never priced. This amendment prices it.
 
 ### A1.1 Entrenched paths
-`CLAUDE.md`, `CODEOWNERS`, `.github/`, `judge/` and `worlds/spec/` are entrenched: a pull request touching any of them requires Guy's review, enforced by `CODEOWNERS`. Every other path merges without him. "Never modify this file" now reads: sessions never edit `CLAUDE.md` directly; they may propose an amendment by a pull request labelled `constitution`, which only Guy merges.
+`CLAUDE.md`, `CODEOWNERS`, `.github/` and `.claude/` are entrenched: a pull request touching any of them requires Guy's review, enforced by `CODEOWNERS`, and is opened by the reviewer account so that Guy can give that review. `judge/` and `worlds/spec/` become entrenched, and enter `CODEOWNERS`, when the judge image is first sealed at the end of L2; until then they are ordinary paths under the brief that names them. "Never modify this file" now reads: sessions never edit `CLAUDE.md` directly; they may propose an amendment by a pull request labelled `constitution`, which only Guy merges.
 
 ### A1.2 Two roles, two sessions
 - **Builder.** A session that does the next unfinished item of the current brief, runs the pins, writes `STATUS.md` and opens or updates one pull request. It never merges.
 - **Reviewer.** A separate session with fresh context that reads the repository and the pull request, may run `make pins` and probes on a scratch copy, writes one review file, resolves forecasts, and either approves the pull request (as `assize-reviewer`) or records a blocking finding. It never edits the pull request's code and never adds criteria.
+
+The reviewer account holds a fine-grained token with Actions: read, Commit statuses: read, Contents: read and write, Metadata: read, Pull requests: read and write. Checks cannot be granted to such tokens, so a run's result is read through the Actions API, never `gh pr checks`. Pull requests touching an entrenched path are opened by the reviewer account, so that Guy can approve them as code owner.
+
 The same session never plays both roles. A Builder reads the latest review file before doing anything else.
 
 ### A1.3 Merging
-- A pull request touching no entrenched path merges by auto-merge once `pins` is green and the Reviewer has approved. The Builder enables auto-merge on its own pull request; the merge is performed by GitHub, not by a session.
-- A pull request touching an entrenched path, and every layer-boundary pull request (one that records a layer verdict in the root `REPORT.md`), is merged by Guy and by no one else.
+- The Reviewer's approval is mechanical: it is given on every ACCEPT, after the review file is pushed and `pins` is green on the resulting head, except on a pull request the reviewer account itself authored. A pull request that touches no entrenched path and is not a layer boundary then merges by auto-merge, enabled by the Builder and performed by GitHub.
+- A pull request touching an entrenched path is approved and merged by Guy. A layer-boundary pull request is merged by Guy. No session merges.
 
 ### A1.4 Prospectivity of review
 Criteria are committed before the run; a review does not add them afterwards. A review finding is **blocking** only if it demonstrates that a pre-stated criterion of the brief, or a standing rule of this file, is not met, and it must name that criterion or rule verbatim. Any other finding, however good, is recorded as an **obligation on the next layer**, where it gets its own pin. Standing-rule violations (a green that cannot fail, a silent drop, an unwitnessed claim, an unstated denominator) are always blocking, because those rules pre-date every brief. A review that writes "Required" or "Do not merge" has exceeded its authority; it recommends, Guy disposes.
@@ -84,7 +87,7 @@ Criteria are committed before the run; a review does not add them afterwards. A 
 - Guy reads, by default, only layer-boundary `STATUS.md` files and `DISPUTE` entries. He may sample anything else.
 
 ### A1.6 Forecasts
-Every Builder session, before its first `make pins`, appends to `reports/L<n>/forecasts.jsonl` one record per claim: `{"id", "ts", "proposer": {"kind", "model", "session"}, "sha_before", "claim", "p", "resolves_by"}`, with `id` the first 12 hex characters of the SHA-256 of `claim + ts`. Minimum claims: `pins` green on the first CI run of the pull request head; Reviewer verdict ACCEPT with no blocking finding; on a layer with host measurement, the host verdict (FIT, MARGINAL or UNFIT). The Reviewer appends a resolution record `{"id", "ts", "proposer", "outcome"}` for every open forecast it can resolve. `STATUS.md` reports cumulative log-loss against the base rate (the empirical frequency of that claim type to date; 0.5 before any resolution). Forecasts are never edited; a wrong forecast is data.
+Every Builder session, before its first `make pins`, appends to `reports/L<n>/forecasts.jsonl` one record per claim: `{"id", "ts", "proposer": {"kind", "model", "session"}, "sha_before", "claim", "p", "resolves_by"}`, with `id` the first 12 hex characters of the SHA-256 of `claim + ts`. Minimum claims: `pins` green on the first CI run of the pull request head; Reviewer verdict ACCEPT with no blocking finding; on a layer with host measurement, the host verdict (FIT, MARGINAL or UNFIT). The Reviewer appends a resolution record `{"id", "ts", "proposer", "outcome"}` for every open forecast it can resolve. `STATUS.md` reports cumulative log-loss against the base rate (the empirical frequency of that claim type to date; 0.5 before any resolution). Forecasts are never edited; a wrong forecast is data. Resolutions are appended, never edited; a resolution that later looks wrong is answered by a further record, not a change.
 
 ### A1.7 Proposer
 Every `pins.jsonl` registry row, every review file, every forecast and, from L1, every judge record carries `proposer: {kind: builder | reviewer | guy | counsel, model, session}`. The court will later weigh proposers by their record; it cannot do so for records that never said who proposed them.
