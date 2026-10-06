@@ -1,0 +1,5 @@
+# P0h's fourth mutant: the orchestrator is not a child subreaper; orphaned descendants escape past it.
+[[edit]]
+path = "harness/runner.py"
+old = "    proc.set_subreaper()\n"
+new = "    pass\n"

@@ -1,0 +1,5 @@
+# P0h's fifth mutant: the parent skips sweeping a run's remaining descendants.
+[[edit]]
+path = "harness/runner.py"
+old = "        row[\"leaked_processes\"] = proc.sweep(cfg.reap_grace_s, cfg.poll_step_s)\n"
+new = "        row[\"leaked_processes\"] = 0\n"

@@ -72,8 +72,17 @@ def _slug(s: str) -> str:
     return s.replace("/", "__")
 
 
+class Overlap(RuntimeError):
+    """A child was about to start while a descendant of an earlier one was still alive."""
+
+
 def _spawn(cmd: list[str], cwd: Path, timeout: float, log) -> tuple[str, int | None]:
-    child = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(True))
+    # Children run one at a time (brief 1 A4 item 5): nothing of an earlier run may still be alive.
+    live = proc.descendants()
+    if any(state not in "ZX" for state in live.values()):
+        raise Overlap(f"descendants still alive before spawning a child: {sorted(live)}")
+    child = subprocess.Popen(cmd, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(True),
+                             env=proc.child_env())
     try:
         code = child.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
@@ -85,23 +94,25 @@ def _spawn(cmd: list[str], cwd: Path, timeout: float, log) -> tuple[str, int | N
 
 def _child(registry: str, pin: Pin, role: str, tree: Path, run_dir: Path, scratch: Path, cfg, log
            ) -> tuple[str, int | None]:
-    cmd = [sys.executable, "-m", "harness", "check", "--registry", registry, "--pin", pin.name,
+    cmd = proc.python("-m", "harness", "check", "--registry", registry, "--pin", pin.name,
            "--role", role, "--invocation-root", str(ROOT), "--run-dir", str(run_dir.resolve()),
-           "--scratch", str(scratch)]
+           "--scratch", str(scratch))
     log.flush()
     return _spawn(cmd, tree, cfg.child_timeout_s, log)
 
 
 @contextmanager
 def _scratch(scratch_root: Path | None, cfg, row: dict) -> Iterator[Path]:
-    """A scratch root owned by this parent for one child run. After the child exits or is killed, wait
-    (up to reap_grace_s) until no live process holds it, then delete it: a killed child cannot clean up
-    after itself, so the parent does."""
+    """A scratch root owned by this parent for one child run. After the child exits or is killed, sweep this
+    orchestrator's remaining descendants (recording how many were killed as `leaked_processes`), wait (up to
+    reap_grace_s) until no live process holds the root, then delete it: a killed child cannot clean up after
+    itself, so the parent does."""
     scratch = Path(tempfile.mkdtemp(prefix="assize-scratch-", dir=scratch_root))
     row["scratch"] = str(scratch)
     try:
         yield scratch
     finally:
+        row["leaked_processes"] = proc.sweep(cfg.reap_grace_s, cfg.poll_step_s)
         row["scratch_quiescent"] = proc.wait_until(lambda: not proc.holders(scratch), cfg.reap_grace_s,
                                                    cfg.poll_step_s)
         shutil.rmtree(scratch, ignore_errors=True)
@@ -167,8 +178,9 @@ def _run_in_copy(registry: str, pin: Pin, mutant: Mutant, role: str, out: Path, 
 
 
 def _leak_override(verdict: str, *rows: dict) -> str:
-    """A run whose scratch root was still held after reap_grace_s is LEAKED, whatever was observed (brief 0 A3)."""
-    if any(r.get("scratch_quiescent") is False for r in rows):
+    """A run that left a live descendant for the sweep, or whose scratch root was still held after the sweep and
+    reap_grace_s, is LEAKED, whatever was observed (brief 0 A3, brief 1 A4 item 5)."""
+    if any(r.get("leaked_processes", 0) > 0 or r.get("scratch_quiescent") is False for r in rows):
         return "LEAKED"
     return verdict
 
@@ -206,6 +218,7 @@ def _proposer() -> dict:
 
 
 def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_root: Path | None = None) -> int:
+    proc.set_subreaper()
     cfg = config_mod.load(config_path)
     out.mkdir(parents=True, exist_ok=True)
     rows_path = out / "pins.jsonl"
@@ -300,8 +313,8 @@ def run_under_edits(edits_file: str, registry: str, phase: str, out: Path, confi
             return EXIT_ERROR
         print(f"copy: {copy}")
         sys.stdout.flush()
-        cmd = [sys.executable, "-m", "harness", "run", "--registry", registry, "--phase", phase,
-               "--out", str(out.resolve())]
+        cmd = proc.python("-m", "harness", "run", "--registry", registry, "--phase", phase,
+                          "--out", str(out.resolve()))
         if config_path is not None:
             cmd += ["--config", str(config_path.resolve())]
-        return subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False)).returncode
+        return subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False), env=proc.child_env()).returncode

@@ -2,10 +2,6 @@
 [harness]
 # Short child timeout so hanging fixtures time out quickly.
 child_timeout_s = 3
-# How long the parent waits for a run's scratch root to go quiet before deleting it regardless.
+# How long the parent waits for a run's descendants to die before killing them, and for its scratch root to go
+# quiet before deleting it regardless.
 reap_grace_s = 2
-# fixture.escapee: how long its detached grandchild holds the scratch root before exiting on its own.
-# Must exceed child_timeout_s + reap_grace_s (brief 0 A3 item 2). Margin chosen: 12 - (3 + 2) = 7 s, far above
-# scheduler jitter (milliseconds to a few hundred ms on shared runners); the grandchild starts after the child,
-# so its exit is at least escape_hold_s after the child's start while the parent stops waiting at about 5 s.
-escape_hold_s = 12

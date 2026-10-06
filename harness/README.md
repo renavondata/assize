@@ -1,1 +1,1 @@
-L0 — pin harness: every pin proves it can fail by killing a named, seeded mutant (`make pins`).
+L0 — pin harness: every pin proves it can fail by killing a named, seeded mutant (`make pins`). L1 (brief 1 A4 item 5, A5): the orchestrator is a child subreaper and sweeps every descendant after each child run (`leaked_processes`); copies carry no `__pycache__` at any depth; child Pythons run with `-B`.

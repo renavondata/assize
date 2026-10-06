@@ -8,7 +8,6 @@ Its PID and the nested copy's path are recorded in the run directory, outside ev
 from __future__ import annotations
 
 import subprocess
-import sys
 import time
 
 from harness import config, context, proc
@@ -28,7 +27,7 @@ COPY_FILE = "nested_copy.path"
 
 def leak_and_hang() -> None:
     pid_file = context.run_dir / PID_FILE
-    subprocess.Popen([sys.executable, "-c", GRANDCHILD, str(pid_file), MARKER],
+    subprocess.Popen(proc.python("-c", GRANDCHILD, str(pid_file), MARKER), env=proc.child_env(),
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=proc.setup(True))
     step = config.load().poll_step_s
     while not pid_file.exists():

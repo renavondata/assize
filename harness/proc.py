@@ -1,9 +1,13 @@
-"""Child-process setup: a spawned process dies with its parent (Linux PR_SET_PDEATHSIG).
+"""Child-process setup and sweeping (brief 1 A4 item 5).
 
 Each child runs in its own session so a timeout can kill its process group;
 nested orchestrators start further sessions, which a group kill does not
-reach. Tying every process's life to its parent's makes a kill cascade down
-the whole tree, so no descendant outlives a timed-out child.
+reach. Tying every process's life to its parent's (Linux PR_SET_PDEATHSIG)
+makes a kill cascade down the whole tree. A descendant that escapes both
+(new session, no death signal, or double-forked) is reparented to the
+orchestrator, a child subreaper (PR_SET_CHILD_SUBREAPER), whose sweep kills
+and counts it. Every child Python runs without reading or writing bytecode
+caches it did not compile itself (`-B`, PYTHONDONTWRITEBYTECODE=1; brief 1 A5).
 """
 
 from __future__ import annotations
@@ -11,12 +15,29 @@ from __future__ import annotations
 import ctypes
 import os
 import signal
+import sys
 import time
 from collections.abc import Callable
 from pathlib import Path
 
 _PR_SET_PDEATHSIG = 1
+_PR_SET_CHILD_SUBREAPER = 36
 _libc = ctypes.CDLL(None, use_errno=True)
+
+
+def python(*args: str) -> list[str]:
+    """Command line for a child Python: bytecode writing disabled."""
+    return [sys.executable, "-B", *args]
+
+
+def child_env() -> dict[str, str]:
+    return os.environ | {"PYTHONDONTWRITEBYTECODE": "1"}
+
+
+def set_subreaper() -> None:
+    """Orphaned descendants of this process are reparented to it, not to init, so its sweep can reach them."""
+    if _libc.prctl(_PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0) != 0:
+        raise OSError(ctypes.get_errno(), "prctl(PR_SET_CHILD_SUBREAPER) failed")
 
 
 def setup(new_session: bool) -> Callable[[], None]:
@@ -35,6 +56,74 @@ def setup(new_session: bool) -> Callable[[], None]:
 def _state(proc_dir: Path) -> str:
     stat = (proc_dir / "stat").read_text()
     return stat[stat.rindex(")") + 2]
+
+
+def _ppids() -> dict[int, tuple[int, str]]:
+    """pid -> (ppid, state) for every process visible in /proc."""
+    table = {}
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit():
+            continue
+        try:
+            stat = (d / "stat").read_text()
+        except OSError:
+            continue
+        fields = stat[stat.rindex(")") + 2:].split()
+        table[int(d.name)] = (int(fields[1]), fields[0])
+    return table
+
+
+def descendants(root: int | None = None) -> dict[int, str]:
+    """pid -> state for every descendant of `root` (default: this process), zombies included."""
+    root = os.getpid() if root is None else root
+    table = _ppids()
+    children: dict[int, list[int]] = {}
+    for pid, (ppid, _) in table.items():
+        children.setdefault(ppid, []).append(pid)
+    found, frontier = {}, [root]
+    while frontier:
+        for c in children.get(frontier.pop(), []):
+            if c not in found:
+                found[c] = table[c][1]
+                frontier.append(c)
+    return found
+
+
+def _live(found: dict[int, str]) -> list[int]:
+    return [pid for pid, state in found.items() if state not in "ZX"]
+
+
+def _reap() -> None:
+    """Collect every exited child of this process (reparented orphans included)."""
+    while True:
+        try:
+            pid, _ = os.waitpid(-1, os.WNOHANG)
+        except ChildProcessError:
+            return
+        if pid == 0:
+            return
+
+
+def sweep(grace: float, step: float) -> int:
+    """After a child run: wait up to `grace` for every descendant to die on its own, then SIGKILL every one still
+    alive, repeating until none remain. Returns the number of distinct processes killed (`leaked_processes`)."""
+    def settled() -> bool:
+        _reap()
+        return not _live(descendants())
+
+    wait_until(settled, grace, step)
+    killed: set[int] = set()
+    while live := _live(descendants()):
+        for pid in live:
+            try:
+                os.kill(pid, signal.SIGKILL)
+                killed.add(pid)
+            except ProcessLookupError:
+                pass
+        time.sleep(step)
+        _reap()
+    _reap()
+    return len(killed)
 
 
 def holders(path: Path) -> list[int]:
