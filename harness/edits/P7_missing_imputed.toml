@@ -1,0 +1,5 @@
+# P7's mutant `missing_imputed` (brief 1 section 2): a target the reply omits is scored as if predicted uniformly.
+[[edit]]
+path = "judge/scoring.py"
+old = "                        if t[\"name\"] in prediction else None)"
+new = "                        if t[\"name\"] in prediction else math.log(len(t[\"support\"])))"

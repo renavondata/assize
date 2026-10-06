@@ -1,0 +1,6 @@
+# P7's mutant `clipped` (brief 1 section 2): zero probability on the realised value is clipped to a floor, so the
+# recorded log-loss is finite where it must be +inf.
+[[edit]]
+path = "judge/scoring.py"
+old = "    return math.inf if q == 0 else -math.log(q)"
+new = "    return -math.log(max(q, 1e-12))"

@@ -681,14 +681,19 @@ TRAJECTORY_STEPS = 400
 TRAJECTORY_GOLDEN = "f65aed28a596149bb27abda1e82bd2416adb5b22c9131ac7c73a692f3e5f7785"
 
 
-def _trajectories(hash_seed: str) -> dict:
-    """TRAJECTORY_RUN in a fresh interpreter whose string hashing is salted by `hash_seed`."""
-    out = subprocess.run(proc.python("-c", TRAJECTORY_RUN, json.dumps(TRAJECTORY_SEEDS), str(TRAJECTORY_STEPS)),
-                         cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": hash_seed}, capture_output=True,
-                         text=True, preexec_fn=proc.setup(False))
-    if out.returncode:
-        raise RuntimeError(f"trajectory child exited {out.returncode}: {out.stderr.strip()[-500:]}")
-    return json.loads(out.stdout)
+def _trajectories(*hash_seeds: str) -> list[dict]:
+    """TRAJECTORY_RUN in one fresh interpreter per `hash_seeds`, each salting string hashing by its seed. The
+    interpreters run concurrently, which halves P11's wall time (L1 STATUS obligation: `make pins` near 10 minutes);
+    they share nothing but the tree."""
+    children = [subprocess.Popen(proc.python("-c", TRAJECTORY_RUN, json.dumps(TRAJECTORY_SEEDS), str(TRAJECTORY_STEPS)),
+                                 cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": h}, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, text=True, preexec_fn=proc.setup(False))
+                for h in hash_seeds]
+    outs = [(c, *c.communicate()) for c in children]
+    for c, _, err in outs:
+        if c.returncode:
+            raise RuntimeError(f"trajectory child exited {c.returncode}: {err.strip()[-500:]}")
+    return [json.loads(out) for _, out, _ in outs]
 
 
 def p11_crafter_determinism() -> bool:
@@ -700,7 +705,7 @@ def p11_crafter_determinism() -> bool:
     from worlds.crafter import binding
 
     expect, ok = _expecter()
-    a, b = _trajectories("1"), _trajectories("2")
+    a, b = _trajectories("1", "2")
     components = binding.manifest()["utility"]["components"]
     for seed in map(str, TRAJECTORY_SEEDS):
         expect(a[seed]["violations"] == [], f"seed {seed}: observations conform to the manifest "
@@ -961,6 +966,76 @@ def p10_container_teardown() -> bool:
     return ok()
 
 
+# P7's malformed predictors (brief 1 section 2): each must end its episode invalid_reply at its first step, unscored.
+MALFORMED = ("undeclared", "short", "zeros", "nan")
+
+
+def _forecaster_summary(targets) -> dict:
+    """What the judge must record for the `forecaster` fixture over one short episode, derived here by replaying the
+    same seed and actions in the binding and scoring each step by definition, independently of `judge/scoring.py`."""
+    ep = next(_short_crafter(1))
+    obs = [ep.observation]
+    while not ep.done:
+        obs.append(ep.step(ep.legal_actions[0]))
+
+    def predicted(i: int, s: list, v) -> list[float]:
+        return [[float(x == v) for x in s], [0.0 if x == v else 1 / (len(s) - 1) for x in s], [1 / len(s)] * len(s)][i % 3]
+
+    def one(i: int, tg: dict) -> dict:
+        steps = len(obs) - 1
+        if i == len(targets) - 1:
+            return {"scored": 0, "missing": steps, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}
+        s, f = tg["support"], tg["field"]
+        qs = [predicted(i, s, a[f])[s.index(b[f])] for a, b in zip(obs, obs[1:])]
+        finite = math.fsum(-math.log(q) for q in qs if q > 0)
+        inf = sum(q == 0 for q in qs)
+        return {"scored": steps, "missing": 0, "infinite": inf, "finite_sum": finite,
+                "log_loss": "+inf" if inf else finite}
+
+    return {tg["name"]: one(i, tg) for i, tg in enumerate(targets)}
+
+
+def p7_infinite_loss() -> bool:
+    """Under every usable runtime, a candidate's predictions are scored per declared target per step against the
+    World's next observation: zero mass on the realised value is recorded +inf and counted, never clipped; an omitted
+    target is recorded missing, never imputed; every record equals the one derived independently by replaying the
+    episode. A prediction naming an undeclared target, of the wrong length, not summing to one, or carrying NaN ends
+    its episode invalid_reply before the World advances (brief 1 section 2)."""
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    want = _forecaster_summary(m["targets"])
+    print(f"  derived: {json.dumps(want)}")
+    expect(any(w["infinite"] == w["scored"] > 0 for w in want.values()),
+           "non-vacuous: some target puts zero mass on the realised value at every scored step")
+    expect(any(w["infinite"] == 0 and w["finite_sum"] > 0 for w in want.values()),
+           "non-vacuous: some target has a positive finite log-loss")
+    expect(any(w["missing"] == LOOP_STEPS for w in want.values()), "non-vacuous: some target is missing at every step")
+    usable, image = _usable_runtimes(expect)
+    for rt in usable:
+        before = _candidates(rt)
+        records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command("forecaster"))
+        print(f"  {rt.name} forecaster: {json.dumps(records)}")
+        expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)],
+               f"{rt.name} forecaster: one episode of {LOOP_STEPS} steps, ended by the World")
+        got = records[0].get("prediction", {}) if records else {}
+        for name, w in want.items():
+            expect(got.get(name) == w, f"{rt.name} forecaster {name}: recorded {got.get(name)}, derived {w}")
+        for behaviour in MALFORMED:
+            records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            print(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            expect([(r["termination"], r["steps"]) for r in records] == [("invalid_reply", 0)],
+                   f"{rt.name} {behaviour}: invalid_reply at the first step, before the World advances")
+            expect(all(v["scored"] == 0 for r in records for v in r["prediction"].values()),
+                   f"{rt.name} {behaviour}: nothing scored")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -1001,6 +1076,10 @@ PINS = [
                   Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped")))),
     Pin("P3", "every requested episode is recorded with its termination code, failures included",
         p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),)),
+    Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
+        p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
+                           Mutant("missing_imputed", _edits("P7_missing_imputed")),
+                           Mutant("sum_unchecked", _edits("P7_sum_unchecked")))),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

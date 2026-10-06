@@ -1,0 +1,6 @@
+# P7's mutant `sum_unchecked` (brief 1 section 2): a prediction is not checked to sum to one, so a list of zeros is
+# scored instead of ending the episode invalid_reply.
+[[edit]]
+path = "judge/scoring.py"
+old = "        if not abs(math.fsum(p) - 1) <= tolerance(n):\n            return f\"{name}: probabilities sum to {math.fsum(p)!r}\"\n"
+new = ""
