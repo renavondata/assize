@@ -1,0 +1,2 @@
+pins pull_request 4d34943d50378e16b920cea414032c112013dd61 completed success 37517467306 attempt=1 2026-10-06T19:14:30Z https://github.com/renavondata/assize/actions/runs/37517467306
+pins pull_request 430d9e5a98393fc6167a8f0d6be2c86d926b3595 completed success 37516361527 attempt=1 2026-10-06T19:05:44Z https://github.com/renavondata/assize/actions/runs/37516361527
