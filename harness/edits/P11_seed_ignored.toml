@@ -1,0 +1,5 @@
+# P11's first mutant (brief 1 section 3): the binding drops the episode seed, so Crafter draws its own.
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "self._env = crafter.Env(seed=seed)"
+new = "self._env = crafter.Env(seed=None)"

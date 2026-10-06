@@ -4,6 +4,7 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 from __future__ import annotations
 
 import json
+import math
 import os
 import py_compile
 import shutil
@@ -633,6 +634,70 @@ def p6_schema_purity() -> bool:
     return ok()
 
 
+# P11's child (brief 1 section 3): for each seed, play the committed action stream twice and print the trajectory
+# hashes, the utility, the unlocked set and every manifest departure of every emitted observation.
+TRAJECTORY_RUN = """
+import json, random, sys
+from worlds.crafter import binding
+m = binding.manifest()
+out = {}
+for seed in json.loads(sys.argv[1]):
+    rng = random.Random(seed)
+    actions = [rng.randrange(len(m["actions"])) for _ in range(int(sys.argv[2]))]
+    hashes = [binding.trajectory(seed, actions, m)[0] for _ in range(2)]
+    ep = binding.Episode(seed, m)
+    seen = binding.violations(ep.observation, m["observation"])
+    for a in actions:
+        if ep.done:
+            break
+        seen += binding.violations(ep.step(a), m["observation"])
+    out[seed] = {"hashes": hashes, "steps": ep.t, "utility": ep.utility, "achievements": ep.achievements,
+                 "violations": sorted(set(seen))}
+print(json.dumps(out))
+"""
+TRAJECTORY_SEEDS = (1, 2, 3)
+TRAJECTORY_STEPS = 400
+
+
+def _trajectories(hash_seed: str) -> dict:
+    """TRAJECTORY_RUN in a fresh interpreter whose string hashing is salted by `hash_seed`."""
+    out = subprocess.run(proc.python("-c", TRAJECTORY_RUN, json.dumps(TRAJECTORY_SEEDS), str(TRAJECTORY_STEPS)),
+                         cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": hash_seed}, capture_output=True,
+                         text=True, preexec_fn=proc.setup(False))
+    if out.returncode:
+        raise RuntimeError(f"trajectory child exited {out.returncode}: {out.stderr.strip()[-500:]}")
+    return json.loads(out.stdout)
+
+
+def p11_crafter_determinism() -> bool:
+    """The same seed and action sequence give an identical trajectory hash, twice in one process and across two
+    processes with differently salted string hashing; distinct seeds give distinct hashes, so the hash is not
+    constant; every observation the binding emits conforms to the manifest; utility is the count of distinct
+    achievements (brief 1 section 3)."""
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    a, b = _trajectories("1"), _trajectories("2")
+    components = binding.manifest()["utility"]["components"]
+    for seed in map(str, TRAJECTORY_SEEDS):
+        hashes = a[seed]["hashes"] + b[seed]["hashes"]
+        expect(len(set(hashes)) == 1, f"seed {seed}: 4 trajectory hashes, 2 per process, {len(set(hashes))} distinct "
+                                      f"({a[seed]['steps']} steps; {hashes[0][:16]})")
+        expect(a[seed]["violations"] == [], f"seed {seed}: observations conform to the manifest "
+                                            f"({a[seed]['violations'][:3]})")
+        ach = a[seed]["achievements"]
+        expect(a[seed]["utility"] == len(ach) and set(ach) <= set(components),
+               f"seed {seed}: utility {a[seed]['utility']} = |{ach}|, each a declared component")
+    firsts = {a[str(s)]["hashes"][0] for s in TRAJECTORY_SEEDS}
+    expect(len(firsts) == len(TRAJECTORY_SEEDS), f"{len(TRAJECTORY_SEEDS)} seeds give {len(firsts)} distinct hashes")
+    hafner = (([set()], 0.0), ([set(components)] * 2, 100.0),
+              ([{components[0]}, set()], math.exp(math.log(51) / len(components)) - 1))
+    for sets, want in hafner:
+        got = binding.hafner_score(sets, components)
+        expect(math.isclose(got, want, abs_tol=1e-9), f"Hafner score of {len(sets)} episodes: {got:.6f}, want {want:.6f}")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -668,4 +733,8 @@ PINS = [
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
         p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),)),
+    Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",
+        p11_crafter_determinism, (Mutant("seed_ignored", _edits("P11_seed_ignored")),
+                                  Mutant("hash_constant", _edits("P11_hash_constant")),
+                                  Mutant("field_dropped", _edits("P11_field_dropped")))),
 ]

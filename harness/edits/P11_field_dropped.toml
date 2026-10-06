@@ -1,0 +1,5 @@
+# P11's third mutant: the binding emits observations lacking the manifest's first field (the semantic map).
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "            for f in fields}"
+new = "            for f in fields[1:]}"
