@@ -1,17 +1,21 @@
-# STATUS — L1 — 2026-10-06 — 401f616 — PR #none (opened by assize-review; entrenched paths)
+# STATUS — L1 — 2026-10-06 — ff4a7c6 — PR #7
 VERDICT: SESSION DONE
-LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; amends the current layer's brief, opens no new one)
-pins: clean 8/8; mutants 10/10 KILLED; twins 10/10; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: .claude/settings.json; CLAUDE.md (A1.3, A1.7, A1.8); docs/briefs/brief-1-judge-and-crafter.md (A5 appended); harness/proposer.toml (session); reports/L1/{forecasts.jsonl,make-pins.txt,STATUS.md}
-did: on Guy's instruction 2026-10-06 (Proposer: guy): permissions.allow += Bash(gh:*), Bash(make:*), Bash(podman:*); no --dangerously-skip-permissions anywhere
-did: CLAUDE.md A1.3 layer-boundary definition, A1.7 one-Proposer-line-per-party, A1.8 LAYER BOUNDARY line, each text as supplied
-did: brief 1 Amendment A5 appended as supplied; no item of brief 1 or A4 started
-did: make pins at 401f616 (master 715e0d2 merged in; transcript reports/L1/make-pins.txt): PINS PASSED; registry proposer session d1c31c5a-…; no assize process or /tmp/assize-* left after
-decided (not asked): after PR #5 merged, merged master into the branch (no force-push): brief keeps A4 then A5, forecasts.jsonl keeps master's rows then this session's three — p(stands on review)=0.85
-decided (not asked): Proposer lines placed in the final trailer paragraph (git parses only that), "on Guy's instruction, 2026-10-06" ends the body, as in a402309 — p(stands on review)=0.8
-decided (not asked): commits: builder bookkeeping (596e226), Guy-instructed text (37712ae), merge (401f616), each with only its own parties' trailers — p(stands on review)=0.85
-decided (not asked): host-FIT forecast re-made at p=0.6 per A1.6 minimum; earlier open FIT forecasts stand unedited — p(stands on review)=0.85
-forecasts: made 3; resolved 0 this session; ledger L0+L1 on this branch: 14 claims, 9 resolved, 5 open; cumulative log-loss 2.088 vs base rate 6.238 (0.5) over 9
-obligations added: L2: a pin derives STATUS's LAYER BOUNDARY from the diff (root REPORT.md verdict line or a new layer's brief); seeded mutant: a hardcoded "no"
-NEEDS YOU (at most 1): approve and merge the constitution-3 PR (entrenched: CLAUDE.md, .claude/) once the Reviewer has accepted
-next: assize-review constitution-3
+LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; adds or opens no brief)
+pins: clean 9/9; mutants 13/13 KILLED; twins 13/13; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
+changed: harness/{proc,runner,nested,tree,pins,config,registries}.py; harness/fixtures/{escapee,daemon,leaky}.py; harness/{config,fixtures/fast}.toml; harness/edits/{P0h_subreaper_not_set,P0h_sweep_skipped,P0i_pycache_top_level_only}.toml; harness/{README.md,proposer.toml}; reports/L1/{forecasts.jsonl,make-pins.txt,STATUS.md}
+did: brief 1 A4 item 5 (harness half): orchestrator is a child subreaper; one child at a time, asserted (Overlap) before each spawn; after each run, sweep kills descendants until none remain, count = leaked_processes; >0 or scratch held after the sweep -> LEAKED
+did: fixtures: cooperating grandchild (leaky, leaked_processes 0), non-cooperating grandchild (escapee: new session, no death signal, SIGTERM ignored, hangs), double-forked daemon from a clean check returning True (daemon)
+did: P0h mutants subreaper_not_set, sweep_skipped added and KILLED; death_signal_reverted, scratch_kept, leaked_not_counted still KILLED with passing twins
+did: A5 F1: copies exclude __pycache__ at every depth; child Pythons run with -B and PYTHONDONTWRITEBYTECODE=1; P0i (same-length edit in the second the .pyc recorded) KILLS pycache_top_level_only
+did: make pins at ff4a7c6 (reports/L1/make-pins.txt): PINS PASSED; registry proposer session baad25ab-…; afterwards no harness process and no /tmp/assize-scratch-* or /tmp/assize-copy-* left
+decided (not asked): A5 F1 grouped with A4 item 5, as A5 says it is "done within" that item — p(stands on review)=0.9
+decided (not asked): sweep first waits reap_grace_s for descendants to die on their own (the death-signal path), then kills and counts the rest; without the wait a dying cooperating grandchild would be counted as leaked — p(stands on review)=0.8
+decided (not asked): death signal kept; death_signal_reverted is still KILLED (the cooperating grandchild becomes a swept leak, LEAKED not INCONCLUSIVE), so A4's retire clause does not apply — p(stands on review)=0.85
+decided (not asked): -B and PYTHONDONTWRITEBYTECODE=1 only disable writing; reading a stale .pyc is prevented by the every-depth exclusion, which is why the seeded mutant is killable. P0i makes "same second" deterministic with os.utime, plus a control showing a plain copy reads stale bytecode — p(stands on review)=0.75
+decided (not asked): fixture.escapee repurposed as the non-cooperating grandchild (hangs until swept); escape_hold_s removed from config; no scored run exists — p(stands on review)=0.8
+decided (not asked): measure.yml not triggered by this session (brief 1 A1.3 gives the trigger to Guy); A4 item 8 host facts must land first anyway, or the host run "is not a measurement" — p(stands on review)=0.75
+forecasts: made 3; resolved 0 this session; ledger L0+L1: 17 claims, 11 resolved, 6 open; cumulative log-loss 2.416 vs base rate 7.625 (0.5) over 11
+obligations added: L2: the one-child-at-a-time assertion (runner.Overlap) gets its own pin; seeded mutant: the descendant check before spawn removed
+obligations added: L2: P0i tests the copy mechanism directly; a nested-harness variant should show the fixture mutant KILLED through the verdict path
+NEEDS YOU (at most 1): none
+next: brief 1 A4 item 8 (host_facts.sh: uptime, cpuset, runner version, podman info), then the host witness of the harness half via measure.yml (A4 §6)
