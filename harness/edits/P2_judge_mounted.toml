@@ -1,0 +1,5 @@
+# P2's mutant `judge_mounted` (brief 1 section 2): the judge's directory is mounted read-only into the candidate container.
+[[edit]]
+path = "judge/runtime.py"
+old = "        \"--read-only\",\n"
+new = "        \"--read-only\",\n        f\"--volume={CONFIG.parent}:{CONFIG.parent}:ro\",\n"

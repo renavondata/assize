@@ -1,0 +1,5 @@
+# P2's mutant `memory_limit_dropped` (brief 1 section 2): the committed memory limit is not passed to the runtime.
+[[edit]]
+path = "judge/runtime.py"
+old = "        f\"--memory={lim.memory_mib}m\",\n        f\"--memory-swap={lim.memory_mib}m\",\n"
+new = "        # memory: unlimited\n"

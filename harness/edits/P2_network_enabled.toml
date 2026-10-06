@@ -1,0 +1,5 @@
+# P2's mutant `network_enabled` (brief 1 section 2): the candidate container is left on the runtime's default network.
+[[edit]]
+path = "judge/runtime.py"
+old = "        \"--network=none\",\n"
+new = "        # network: the runtime's default\n"
