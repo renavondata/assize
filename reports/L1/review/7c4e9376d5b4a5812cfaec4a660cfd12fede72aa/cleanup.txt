@@ -1,0 +1,14 @@
+# cleanup after the scratch run, 2026-10-06T09:54:27Z; scratch worktree removed with 'git worktree remove --force' + 'git worktree prune'
+$ git worktree list
+/home/g/git/assize        7c4e937 [constitution-3]
+/home/g/git/assize-review 7c4e937 [review-constitution-3]
+$ ls -A <scratchpad>
+(empty)
+$ ls -d /tmp/assize-*
+ls: cannot access '/tmp/assize-*': No such file or directory
+$ processes whose args contain '-m harness' or 'make pins'
+(none)
+$ podman ps -a --filter name=assize; docker ps -a --filter name=assize
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES

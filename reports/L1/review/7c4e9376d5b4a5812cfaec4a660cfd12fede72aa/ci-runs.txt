@@ -1,0 +1,8 @@
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=7c4e9376d5b4a5812cfaec4a660cfd12fede72aa"
+measure pull_request completed skipped 37445779465 attempt 1 2026-10-06T09:50:56Z https://github.com/renavondata/assize/actions/runs/37445779465
+pins pull_request completed success 37445779806 attempt 1 2026-10-06T09:50:56Z https://github.com/renavondata/assize/actions/runs/37445779806
+PR #6 dynamic completed success 37445776839 attempt 1 2026-10-06T09:50:54Z https://github.com/renavondata/assize/actions/runs/37445776839
+$ gh api "repos/renavondata/assize/actions/runs?branch=constitution-3"
+measure pull_request 7c4e937 skipped 37445779465 2026-10-06T09:50:56Z
+pins pull_request 7c4e937 success 37445779806 2026-10-06T09:50:56Z
+# PR #6 opened by assize-reviewer at 2026-10-06T09:50:5xZ; no earlier run on any constitution-3 head

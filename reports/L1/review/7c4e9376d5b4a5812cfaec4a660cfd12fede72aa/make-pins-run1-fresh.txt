@@ -1,0 +1,35 @@
+# make pins on a fresh 'git worktree add --detach' scratch copy of 7c4e937 (steel-legend, reviewer session 19f2f6c7), started 2026-10-06T09:51:10Z immediately after checkout
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+registry harness: 8 pins, 10 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (0.991s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.14s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (0.34s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (3.645s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (0.39s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (0.44s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (0.59s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (15.562s) out/pins/runs/P0h/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (0.998s + 0.997s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.096s + 0.097s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.347s + 0.346s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.651s + 3.652s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (1.949s + 0.396s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.446s + 0.446s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (0.747s + 0.597s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (10.509s + 15.617s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (3.501s + 15.616s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (15.616s + 15.618s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+clean: 8/8 passed, 0/8 failed
+mutants: 10/10 killed, 0/10 survived, 0/10 inconclusive, 0/10 stale, 0/10 non-causal, 0 leaked (clean and mutant)
+twins: 10/10 passed
+report: out/pins/pins.jsonl
+PINS PASSED
+
+real	1m53.415s
+user	0m11.772s
+sys	0m5.801s
+exit 0
+# registry proposer:
+{"kind": "builder", "model": "claude-opus-5-5", "session": "d1c31c5a-40d9-4dec-8bff-6ae707a2785c"}
