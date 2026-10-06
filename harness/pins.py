@@ -885,6 +885,43 @@ def _removing_strays(rt, before: set[str]) -> list[str]:
     return strays
 
 
+def _each_runtime(usable, case, expect) -> None:
+    """Run `case(rt, expect, say)` for every usable runtime at once, each in its own thread, and print each runtime's
+    transcript whole, in runtime order. Distinct runtimes are distinct engines with their own containers (`_docker`
+    admits only a Docker server), so the cases cannot see each other's containers; CPU time measured from a cgroup does
+    not depend on what else runs. Running them together keeps `pins` CI, where Docker and Podman are both usable,
+    within its job timeout. An exception in a case is re-raised after every transcript is printed."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(rt):
+        lines: list[str] = []
+        failures: list[str] = []
+
+        def say(*parts) -> None:
+            lines.append(" ".join(str(x) for x in parts))
+
+        def exp(cond: bool, what: str) -> None:
+            say(f"  [{'ok' if cond else 'FAIL'}] {what}")
+            if not cond:
+                failures.append(what)
+
+        try:
+            case(rt, exp, say)
+            return lines, failures, None
+        except BaseException as e:  # noqa: BLE001 - re-raised below, after the transcripts
+            return lines, failures, e
+
+    with ThreadPoolExecutor(max_workers=max(len(usable), 1)) as pool:
+        results = list(pool.map(one, usable))
+    for rt, (lines, failures, raised) in zip(usable, results):
+        for line in lines:
+            print(line)
+        expect(not failures and raised is None, f"{rt.name}: every assertion above held ({len(failures)} failed)")
+    for _, _, raised in results:
+        if raised is not None:
+            raise raised
+
+
 def p3_survivorship() -> bool:
     """Every episode is recorded with its termination code, failures included: under every usable runtime, a fixture
     candidate that crashes, garbles its reply, plays an illegal action, stalls a step or overruns the episode yields
@@ -906,12 +943,12 @@ def p3_survivorship() -> bool:
              ("illegal", 2, t, "illegal_action"), ("slow", 2, dataclasses.replace(t, episode_s=1.2), "episode_timeout"),
              ("stubborn", 2, dataclasses.replace(t, step_s=2.0), "step_timeout"))
     usable, image = _usable_runtimes(expect)
-    for rt in usable:
+    def case(rt, expect, say):
         before = _candidates(rt)
         for behaviour, n, tt, want in cases:
             records = episodes.run(rt, image, _short_crafter(n), binding.manifest(),
                                    command=candidates.command(behaviour), t=tt)
-            print(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
             expect(len(records) == n and [r["episode"] for r in records] == list(range(n)),
                    f"{rt.name} {behaviour}: {len(records)} of {n} requested episodes recorded, in order")
             expect(all(r["termination"] == want for r in records),
@@ -921,6 +958,8 @@ def p3_survivorship() -> bool:
                        f"{rt.name} {behaviour}: every episode ran its {LOOP_STEPS} steps")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
     return ok()
 
 
@@ -942,10 +981,10 @@ def p4_measured_compute() -> bool:
     print(f"  known: {known} CPU s per busy episode ({LOOP_STEPS} steps of {candidates.BUSY_S} s); "
           f"{block} bytes filled and freed per step; limits {lim}")
     usable, image = _usable_runtimes(expect)
-    for rt in usable:
+    def case(rt, expect, say):
         before = _candidates(rt)
         records = episodes.run(rt, image, _short_crafter(2), binding.manifest(), command=candidates.command("busy"))
-        print(f"  {rt.name} busy: {json.dumps(records)}")
+        say(f"  {rt.name} busy: {json.dumps(records)}")
         expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)] * 2,
                f"{rt.name} busy: two episodes of {LOOP_STEPS} steps, ended by the World")
         for r in records:
@@ -959,7 +998,7 @@ def p4_measured_compute() -> bool:
             expect(used.get("unmeasured_s") == 0, f"{n}: nothing unmeasured ({used.get('unmeasured_s')} s)")
         records = episodes.run(rt, image, _short_crafter(1), binding.manifest(),
                                command=candidates.command("busy_crash"))
-        print(f"  {rt.name} busy_crash: {json.dumps(records)}")
+        say(f"  {rt.name} busy_crash: {json.dumps(records)}")
         used = records[0].get("compute", {}) if records else {}
         expect([r["termination"] for r in records] == ["crash"], f"{rt.name} busy_crash: recorded crash")
         expect(used.get("cpu_s", -1) + lim.cpus * used.get("unmeasured_s", -1) >= candidates.BUSY_S,
@@ -967,6 +1006,8 @@ def p4_measured_compute() -> bool:
                f"{used.get('unmeasured_s')} s covers the known {candidates.BUSY_S} s")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
     return ok()
 
 
@@ -985,7 +1026,7 @@ def p10_container_teardown() -> bool:
     # The pin's own bound on how long teardown may take, so that a mutant that never removes fails in seconds.
     t = dataclasses.replace(episodes.timeouts(), step_s=2.0, teardown_s=5.0)
     usable, image = _usable_runtimes(expect)
-    for rt in usable:
+    def case(rt, expect, say):
         before = _candidates(rt)
         c = episodes.Container(rt, image, runtime.limits(), candidates.command("stubborn"))
         try:
@@ -1004,11 +1045,13 @@ def p10_container_teardown() -> bool:
         expect(gone and not episodes.listed(rt, c.name), f"{rt.name}: torn down directly, {c.name} is not listed")
         records = episodes.run(rt, image, _short_crafter(1), binding.manifest(), command=candidates.command("stubborn"),
                                t=t)
-        print(f"  {rt.name} stubborn: {json.dumps(records)}")
+        say(f"  {rt.name} stubborn: {json.dumps(records)}")
         expect([r["termination"] for r in records] == ["step_timeout"],
                f"{rt.name}: the stalled episode is recorded step_timeout ({[r['termination'] for r in records]})")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: the runtime lists no candidate container afterwards ({strays})")
+
+    _each_runtime(usable, case, expect)
     return ok()
 
 
@@ -1061,10 +1104,10 @@ def p7_infinite_loss() -> bool:
            "non-vacuous: some target has a positive finite log-loss")
     expect(any(w["missing"] == LOOP_STEPS for w in want.values()), "non-vacuous: some target is missing at every step")
     usable, image = _usable_runtimes(expect)
-    for rt in usable:
+    def case(rt, expect, say):
         before = _candidates(rt)
         records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command("forecaster"))
-        print(f"  {rt.name} forecaster: {json.dumps(records)}")
+        say(f"  {rt.name} forecaster: {json.dumps(records)}")
         expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)],
                f"{rt.name} forecaster: one episode of {LOOP_STEPS} steps, ended by the World")
         got = records[0].get("prediction", {}) if records else {}
@@ -1072,13 +1115,15 @@ def p7_infinite_loss() -> bool:
             expect(got.get(name) == w, f"{rt.name} forecaster {name}: recorded {got.get(name)}, derived {w}")
         for behaviour in MALFORMED:
             records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
-            print(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
             expect([(r["termination"], r["steps"]) for r in records] == [("invalid_reply", 0)],
                    f"{rt.name} {behaviour}: invalid_reply at the first step, before the World advances")
             expect(all(v["scored"] == 0 for r in records for v in r["prediction"].values()),
                    f"{rt.name} {behaviour}: nothing scored")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
     return ok()
 
 
