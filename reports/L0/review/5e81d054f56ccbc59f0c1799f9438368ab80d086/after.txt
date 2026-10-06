@@ -1,0 +1,8 @@
+# after make pins, 2026-10-06T03:23:13Z
+## processes matching harness|review-copy|assize (runner service pre-existed, see ps-before.txt):
+ 955013       1   25741 /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+ 955067  955048   25741 /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service
+## processes whose cwd is under the scratch copy or an assize-* dir:
+(end)
+## assize-* temp dirs under /tmp, $TMPDIR and the scratch copy:
+(end)
