@@ -1,0 +1,3 @@
+pins completed success 37453068658 1 2026-10-06T10:56:11Z https://github.com/renavondata/assize/actions/runs/37453068658
+pins 7498b94a completed success 37453068658 2026-10-06T10:56:11Z
+pins fc2c51e1 completed success 37453043446 2026-10-06T10:55:57Z

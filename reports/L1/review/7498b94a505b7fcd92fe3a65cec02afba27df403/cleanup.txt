@@ -1,0 +1,120 @@
+# cleanup after review make pins, 2026-10-06T11:19:13Z
+## git worktree list
+/home/g/git/assize        7498b94 [brief-1-a6]
+/home/g/git/assize-review 7498b94 (detached HEAD)
+## ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-*
+ls: cannot access '/tmp/review-*': No such file or directory
+ls: cannot access '/tmp/assize-copy-*': No such file or directory
+/tmp/assize-scratch-ebt5lcbq
+## pgrep -af 'harness|fixture|make pins'
+3025775 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791285342932-s05dzq.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'R=reports/L1/review/7498b94a505b7fcd92fe3a65cec02afba27df403 && S=/tmp/review-S7Qu && grep -c '"'"'"proposer"'"'"' $S/out/pins/pins.jsonl; grep '"'"'"registry"'"'"' $S/out/pins/pins.jsonl | head -c 600; echo; git worktree remove --force $S && git worktree prune && rm -f /tmp/assize-review-scratch-path && { echo "# cleanup after review make pins, $(date -u +%FT%TZ)"; echo "## git worktree list"; git worktree list; echo "## ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-*"; ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* 2>&1; echo "## pgrep -af '"'"'harness|fixture|make pins'"'"'"; pgrep -af '"'"'python -m harness|fixtures|make pins'"'"' || echo "(none)"; } > $R/cleanup.txt; cat $R/cleanup.txt; gh api "repos/renavondata/assize/actions/runs?head_sha=7498b94a505b7fcd92fe3a65cec02afba27df403&event=pull_request" -q '"'"'.workflow_runs[] | "\(.name) \(.status) \(.conclusion) \(.id) \(.run_attempt) \(.created_at) \(.html_url)"'"'"' | tee $R/ci-runs.txt; gh api "repos/renavondata/assize/actions/runs?branch=brief-1-a6&event=pull_request" -q '"'"'.workflow_runs[] | "\(.name) \(.head_sha[0:8]) \(.status) \(.conclusion) \(.id) \(.created_at)"'"'"' | tee -a $R/ci-runs.txt' < /dev/null && pwd -P >| /tmp/claude-bac9-cwd
+
+## leftover found: /tmp/assize-scratch-ebt5lcbq, mtime 2026-10-06 14:15:31 +0300 (11:15:31Z)
+## it predates this review's make pins (start in make-pins.txt); it is from an earlier, interrupted attempt of this review whose make pins received SIGTERM (make: Error 143) at ~11:15:5xZ; its scratch worktree /tmp/review-f840 was removed before this run.
+/tmp/assize-scratch-ebt5lcbq
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.claude
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.github
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.gitignore
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.python-version
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/CLAUDE.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/CODEOWNERS
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/Makefile
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/REPORT.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/docs
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/incumbents
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/judge
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/pyproject.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/scripts
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/uv.lock
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.claude/commands
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.claude/settings.json
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.github/workflows
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/docs/briefs
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/README.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/__init__.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/__main__.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/config.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/config.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/context.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/nested.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/pin.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/pins.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/proc.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/proposer.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/registries.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/runner.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/scan.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/tree.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/incumbents/README.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/judge/README.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/scripts/bootstrap.sh
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/scripts/host_facts.sh
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds/crafter
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds/nethack
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds/spec
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds/crafter/README.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds/nethack/README.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/worlds/spec/README.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.claude/commands/build.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.claude/commands/review.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.github/workflows/measure.yml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/.github/workflows/pins.yml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/docs/briefs/brief-0-scaffold.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/docs/briefs/brief-1-judge-and-crafter.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/docs/briefs/brief-2-nethack.md
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0_checks_always_pass.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0_survivors_ignored.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0b_env_switch.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0c_clean_failures_ignored.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0d_inconclusive_dropped.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0e_validation_off.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0f_twin_ignored.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0g_stale_ignored.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0h_death_signal_reverted.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0h_leaked_not_counted.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0h_scratch_kept.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0h_subreaper_not_set.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0h_sweep_skipped.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/edits/P0i_pycache_top_level_only.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/__init__.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/basic.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/broken.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/daemon.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/dup_mutant.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/dup_pin.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/escapee.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/fast.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/inconclusive.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/leaks.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/leaky.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/malformed_edit.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/no_mutants.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/noncausal.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/stale.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/toy.py
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/malformed.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/stale_absent.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/stale_twice.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/toy_hangs.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/toy_inverted.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/toy_leaks_and_hangs.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/toy_off_by_one.toml
+/tmp/assize-scratch-ebt5lcbq/assize-scratch-e48i31la/assize-copy-atnhut80/repo/harness/fixtures/edits/toy_raises.toml
+## after rm, 2026-10-06T11:19:26Z
+ls: cannot access '/tmp/review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+ls: cannot access '/tmp/assize-copy-*': No such file or directory
+## harness/fixture processes
+3026179 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791285342932-s05dzq.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'R=reports/L1/review/7498b94a505b7fcd92fe3a65cec02afba27df403 && { echo; echo "## leftover found: /tmp/assize-scratch-ebt5lcbq, mtime 2026-10-06 14:15:31 +0300 (11:15:31Z)"; echo "## it predates this review'"'"'s make pins (start in make-pins.txt); it is from an earlier, interrupted attempt of this review whose make pins received SIGTERM (make: Error 143) at ~11:15:5xZ; its scratch worktree /tmp/review-f840 was removed before this run."; find /tmp/assize-scratch-ebt5lcbq; rm -rf /tmp/assize-scratch-ebt5lcbq; echo "## after rm, $(date -u +%FT%TZ)"; ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* 2>&1; echo "## harness/fixture processes"; ps -eo pid,cmd | grep -E '"'"'[p]ython -m harness|[h]arness/fixtures|[m]ake pins'"'"' || echo "(none)"; } >> $R/cleanup.txt; tail -12 $R/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-fb4d-cwd
+3026192 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791285342932-s05dzq.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'R=reports/L1/review/7498b94a505b7fcd92fe3a65cec02afba27df403 && { echo; echo "## leftover found: /tmp/assize-scratch-ebt5lcbq, mtime 2026-10-06 14:15:31 +0300 (11:15:31Z)"; echo "## it predates this review'"'"'s make pins (start in make-pins.txt); it is from an earlier, interrupted attempt of this review whose make pins received SIGTERM (make: Error 143) at ~11:15:5xZ; its scratch worktree /tmp/review-f840 was removed before this run."; find /tmp/assize-scratch-ebt5lcbq; rm -rf /tmp/assize-scratch-ebt5lcbq; echo "## after rm, $(date -u +%FT%TZ)"; ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* 2>&1; echo "## harness/fixture processes"; ps -eo pid,cmd | grep -E '"'"'[p]ython -m harness|[h]arness/fixtures|[m]ake pins'"'"' || echo "(none)"; } >> $R/cleanup.txt; tail -12 $R/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-fb4d-cwd
+## final process check (ps comm/args, excluding this shell): python processes with 'harness' in args
+(end of list)

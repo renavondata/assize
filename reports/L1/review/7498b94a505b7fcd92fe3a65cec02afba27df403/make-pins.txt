@@ -1,0 +1,38 @@
+# make pins on scratch worktree /tmp/review-S7Qu at 7498b94a505b7fcd92fe3a65cec02afba27df403, host steel-legend, start 2026-10-06T11:16:33Z
+## pre-state: harness processes / scratch dirs
+3019893 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791285342932-s05dzq.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cd /tmp/review-S7Qu && T=/home/g/git/assize-review/reports/L1/review/7498b94a505b7fcd92fe3a65cec02afba27df403/make-pins.txt && { echo "## pre-state: harness processes / scratch dirs"; pgrep -af '"'"'python -m harness|fixture'"'"' || echo "(no harness process)"; ls -d /tmp/assize-scratch-* /tmp/assize-copy-* 2>/dev/null || echo "(no /tmp/assize-scratch-* or /tmp/assize-copy-*)"; echo "## make pins"; } >> $T && make pins >> $T 2>&1; echo "## exit $? end $(date -u +%FT%TZ)" >> $T; tail -30 $T' < /dev/null && pwd -P >| /tmp/claude-4b23-cwd
+/tmp/assize-scratch-ebt5lcbq
+(no /tmp/assize-scratch-* or /tmp/assize-copy-*)
+## make pins
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+registry harness: 9 pins, 13 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (1.386s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.184s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (0.433s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (3.936s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (0.482s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (0.581s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (0.832s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (11.149s) out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.182s) out/pins/runs/P0i/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (1.389s + 1.389s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.138s + 0.146s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.491s + 0.492s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (3.996s + 3.994s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (2.739s + 0.539s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (0.588s + 0.637s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (1.037s + 0.888s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (13.252s + 11.152s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (11.205s + 11.155s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (11.155s + 11.158s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (9.0s + 11.152s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (8.848s + 11.203s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.189s + 0.189s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+clean: 9/9 passed, 0/9 failed
+mutants: 13/13 killed, 0/13 survived, 0/13 inconclusive, 0/13 stale, 0/13 non-causal, 0 leaked (clean and mutant)
+twins: 13/13 passed
+report: out/pins/pins.jsonl
+PINS PASSED
+## exit 0 end 2026-10-06T11:19:06Z
