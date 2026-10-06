@@ -1,0 +1,2 @@
+L0+L1 ledger at 4649b6b: claims 17 ; resolution rows 13 (distinct ids 11 ; L0 rows keyed resolves, not id) ; open ['11503575a841', '1608ce8c1b56', '7eff9e8b7183', '954b5ff2ee57', 'b6a19fb797b3', 'd2c4349bd09f'] ; ids not recomputing [] ; cumulative log-loss 2.745 vs 0.5-base 9.011 over 13
+over distinct resolved ids (last resolution per id): 11 resolved; cumulative log-loss 2.416 vs 0.5-base 7.625; duplicates are the L0 Builder self-resolutions re-resolved by the L0 Reviewer, same outcome: True

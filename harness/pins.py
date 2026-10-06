@@ -4,12 +4,16 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 from __future__ import annotations
 
 import os
+import py_compile
 import shutil
 import signal
+import subprocess
+import tempfile
+from importlib.util import cache_from_source
 from pathlib import Path
 
-from harness import config, proc, scan, tree
-from harness.fixtures import escapee, leaky
+from harness import config, context, edits, proc, scan, tree
+from harness.fixtures import daemon, escapee, leaky
 from harness.nested import run_nested
 from harness.pin import ROOT, Mutant, Pin
 
@@ -140,24 +144,37 @@ def p0g_stale() -> bool:
     return n.ok
 
 
-P0H_SCOPE = ("a timed-out child, and every descendant that either carries the parent-death signal or holds the run's "
-             "scratch root, is dead or recorded LEAKED before the scratch root is deleted. Out of scope at L0: a "
-             "descendant detached from both (new session, no death signal, not holding the scratch root), and the "
-             "outermost orchestrator being SIGKILLed.")
+P0H_SCOPE = ("after every child run, before its scratch root is deleted, every descendant of the orchestrator (a "
+             "child subreaper) is dead: a cooperating grandchild dies by the parent-death signal and is not counted; "
+             "a non-cooperating grandchild and a double-forked daemon are killed by the sweep, counted in "
+             "leaked_processes, and make the run LEAKED. Out of scope: a process that never descends from the "
+             "orchestrator (e.g. a container under the runtime's own shim; P10), and the outermost orchestrator "
+             "being SIGKILLed.")
+
+
+def _kill(pid: int | None, marker: str) -> None:
+    """Leave the machine clean whatever the verdict."""
+    if pid is not None and proc.alive(pid, marker):
+        os.kill(pid, signal.SIGKILL)
+
+
+def _pid(path: Path) -> int | None:
+    return int(path.read_text()) if path.is_file() else None
 
 
 def p0h_timeouts_leave_nothing() -> bool:
-    """Witnessed scope: see P0H_SCOPE (brief 0 A3 item 3)."""
+    """Witnessed scope: see P0H_SCOPE (brief 0 A3 item 3, brief 1 A4 item 5)."""
     cfg = config.load()
     n = run_nested("leaks", "fixture.leaks", "mutants", config=ROOT / "harness" / "fixtures" / "fast.toml")
     row = n.run("fixture/toy", "fixture/toy/leaks_and_hangs", "mutant")
     n.expect(row.get("observed") == "timeout" and row.get("verdict") == "INCONCLUSIVE",
-             "leaking mutant: observed timeout, INCONCLUSIVE")
+             "cooperating grandchild: observed timeout, INCONCLUSIVE")
+    n.expect(row.get("leaked_processes") == 0, "cooperating grandchild: died by the death signal, leaked_processes 0")
     n.expect(row.get("twin_observed") == "pass", "its twin passed")
     run_dir = Path(row.get("run_dir", "/nonexistent"))
-    pid_file, copy_file = run_dir / leaky.PID_FILE, run_dir / leaky.COPY_FILE
-    n.expect(pid_file.is_file() and copy_file.is_file(), "the check recorded its grandchild PID and nested copy")
-    pid = int(pid_file.read_text()) if pid_file.is_file() else None
+    pid = _pid(run_dir / leaky.PID_FILE)
+    copy_file = run_dir / leaky.COPY_FILE
+    n.expect(pid is not None and copy_file.is_file(), "the check recorded its grandchild PID and nested copy")
     nested_copy = Path(copy_file.read_text()) if copy_file.is_file() else None
     scratch = Path(row.get("scratch", "/nonexistent"))
 
@@ -168,38 +185,102 @@ def p0h_timeouts_leave_nothing() -> bool:
     n.expect(row.get("scratch_quiescent") is True, "parent saw the scratch root quiescent before deleting it")
     n.expect(nested_copy is not None and not nested_copy.exists(), f"nested copy {nested_copy} removed")
     n.expect(row.get("scratch_removed") is True and not scratch.exists(), f"scratch root {scratch} removed")
-
-    # Leave the machine clean whatever the verdict.
-    if pid is not None and proc.alive(pid, leaky.MARKER):
-        os.kill(pid, signal.SIGKILL)
+    _kill(pid, leaky.MARKER)
     shutil.rmtree(scratch, ignore_errors=True)
-    return n.ok and p0h_escapee()
+    return all((n.ok, p0h_escapee(), p0h_daemon()))
 
 
 def p0h_escapee() -> bool:
-    """A descendant that escapes both kill paths but holds the scratch root makes the run LEAKED."""
-    fast = config.load(escapee.FAST)
+    """A non-cooperating grandchild (new session, no death signal, SIGTERM ignored, hanging) is swept and LEAKED."""
     e = run_nested("escapee", "fixture.escapee", "clean", config=escapee.FAST)
     row = e.run("fixture/escapee")
-    e.expect(row.get("observed") == "timeout", "escapee: child observed timeout")
-    e.expect(row.get("scratch_quiescent") is False, "escapee: scratch_quiescent false")
-    e.expect(row.get("verdict") == "LEAKED", "escapee: verdict LEAKED")
-    e.expect(e.summary.get("leaked") == 1, "escapee: summary leaked = 1")
+    pid = _pid(Path(row.get("run_dir", "/nonexistent")) / escapee.PID_FILE)
+    alive_after = pid is not None and proc.alive(pid, escapee.MARKER)
+    e.expect(pid is not None, f"grandchild PID recorded ({pid})")
+    e.expect(not alive_after, "grandchild dead when the nested run returns (killed by the sweep)")
+    e.expect(row.get("observed") == "timeout", "child observed timeout")
+    e.expect(row.get("leaked_processes", 0) >= 1, f"leaked_processes >= 1 ({row.get('leaked_processes')})")
+    e.expect(row.get("verdict") == "LEAKED", "verdict LEAKED")
+    e.expect(e.summary.get("leaked") == 1, "summary leaked = 1")
     e.expect(e.exit_code not in (0, None) and e.exit_code == e.summary.get("exit_code"),
-             "escapee: exit non-zero and equal to the summary's")
-    pid_file = Path(row.get("run_dir", "/nonexistent")) / escapee.PID_FILE
-    pid = int(pid_file.read_text()) if pid_file.is_file() else None
-    e.expect(pid is not None, f"escapee: grandchild PID recorded ({pid})")
-    # The grandchild exits on its own after escape_hold_s; wait for it so this pin leaves nothing behind.
-    gone = pid is not None and proc.wait_until(lambda: not proc.alive(pid, escapee.MARKER),
-                                                fast.escape_hold_s + fast.poll_step_s, fast.poll_step_s)
-    e.expect(gone, "escapee: grandchild gone by the end (exited on its own)")
+             "exit non-zero and equal to the summary's")
     scratch = Path(row.get("scratch", "/nonexistent"))
-    e.expect(row.get("scratch_removed") is True and not scratch.exists(), f"escapee: scratch root {scratch} removed")
-    if pid is not None and proc.alive(pid, escapee.MARKER):
-        os.kill(pid, signal.SIGKILL)
+    e.expect(row.get("scratch_removed") is True and not scratch.exists(), f"scratch root {scratch} removed")
+    _kill(pid, escapee.MARKER)
     shutil.rmtree(scratch, ignore_errors=True)
     return e.ok
+
+
+def p0h_daemon() -> bool:
+    """A double-forked daemon left by a clean check that returns True is reparented to the orchestrator, swept and
+    LEAKED."""
+    d = run_nested("daemon", "fixture.daemon", "clean", config=escapee.FAST)
+    row = d.run("fixture/daemon")
+    pid = _pid(Path(row.get("run_dir", "/nonexistent")) / daemon.PID_FILE)
+    alive_after = pid is not None and proc.alive(pid, daemon.MARKER)
+    d.expect(pid is not None, f"PID recorded ({pid})")
+    d.expect(not alive_after, "dead when the nested run returns (reparented to the subreaper and swept)")
+    d.expect(row.get("observed") == "pass", "the check itself returned True")
+    d.expect(row.get("leaked_processes", 0) >= 1, f"leaked_processes >= 1 ({row.get('leaked_processes')})")
+    d.expect(row.get("verdict") == "LEAKED", "verdict LEAKED")
+    d.expect(d.summary.get("leaked") == 1 and d.summary.get("clean_failed") == 1,
+             "summary leaked = 1, clean_failed = 1")
+    d.expect(d.exit_code not in (0, None), "suite exits non-zero")
+    _kill(pid, daemon.MARKER)
+    return d.ok
+
+
+STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
+STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
+
+
+def _stamp_import(tree_root: Path) -> str:
+    out = subprocess.run(proc.python("-c", STAMP_READ), cwd=tree_root, env=proc.child_env(),
+                         capture_output=True, text=True, preexec_fn=proc.setup(False))
+    return out.stdout.strip() or out.stderr.strip()
+
+
+def _same_second_edit(tree_root: Path, stamp_s: int) -> None:
+    """A same-length edit to pkg/stamp.py that lands in the second the cached bytecode recorded."""
+    edits.apply(tree_root, (edits.Edit("pkg/stamp.py", STAMP_OLD, STAMP_NEW),))
+    os.utime(tree_root / "pkg" / "stamp.py", (stamp_s, stamp_s))
+
+
+def p0i_no_stale_bytecode() -> bool:
+    """A mutant edit that keeps the source's byte length and lands in the second recorded by a bytecode cache
+    takes effect in a disposable copy: no `__pycache__` is copied at any depth (brief 1 A5)."""
+    work = Path(tempfile.mkdtemp(prefix="assize-p0i-", dir=context.scratch))
+    src_root = work / "src"
+    src = src_root / "pkg" / "stamp.py"
+    src.parent.mkdir(parents=True)
+    src.write_text(STAMP_OLD)
+    stamp_s = int(src.stat().st_mtime)
+    os.utime(src, (stamp_s, stamp_s))
+    pyc = Path(cache_from_source(str(src)))
+    py_compile.compile(str(src), cfile=str(pyc), doraise=True,
+                       invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP)
+    ok = True
+
+    def expect(cond: bool, what: str) -> None:
+        nonlocal ok
+        print(f"  [{'ok' if cond else 'FAIL'}] {what}")
+        ok = ok and cond
+
+    expect(pyc.is_file() and len(STAMP_OLD) == len(STAMP_NEW),
+           f"fixture: compiled {pyc.relative_to(work)}; edit keeps byte length {len(STAMP_OLD)}")
+    control = work / "control"
+    shutil.copytree(src_root, control)
+    _same_second_edit(control, stamp_s)
+    expect(_stamp_import(control) == "4 1",
+           f"control: a plain copy keeping the cache reads stale bytecode ({_stamp_import(control)!r}, want '4 1')")
+    with tree.disposable_copy(src_root, under=work) as copy:
+        caches = sorted(str(c.relative_to(copy)) for c in copy.rglob("__pycache__"))
+        expect(not caches, f"disposable copy holds no __pycache__ at any depth ({caches})")
+        _same_second_edit(copy, stamp_s)
+        got = _stamp_import(copy)
+        expect(got == "5 1", f"disposable copy runs the edited source, child writes no bytecode ({got!r}, want '5 1')")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok
 
 
 PINS = [
@@ -220,5 +301,9 @@ PINS = [
     Pin("P0h", P0H_SCOPE,
         p0h_timeouts_leave_nothing, (Mutant("death_signal_reverted", _edits("P0h_death_signal_reverted")),
                                      Mutant("scratch_kept", _edits("P0h_scratch_kept")),
-                                     Mutant("leaked_not_counted", _edits("P0h_leaked_not_counted")))),
+                                     Mutant("leaked_not_counted", _edits("P0h_leaked_not_counted")),
+                                     Mutant("subreaper_not_set", _edits("P0h_subreaper_not_set")),
+                                     Mutant("sweep_skipped", _edits("P0h_sweep_skipped")))),
+    Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
+        p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),)),
 ]

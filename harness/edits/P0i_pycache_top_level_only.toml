@@ -1,0 +1,5 @@
+# P0i's mutant: restore the top-level-only exclude; nested __pycache__ directories are copied again.
+[[edit]]
+path = "harness/tree.py"
+old = "EVERY_DEPTH_EXCLUDE = frozenset({\"__pycache__\"})\n"
+new = "EVERY_DEPTH_EXCLUDE = frozenset()\n"

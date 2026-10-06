@@ -12,9 +12,11 @@ from pathlib import Path
 from harness import context
 from harness.pin import ROOT
 
-# Excluded from copies, at the top level only.
+# Excluded from copies, at the top level.
 TOP_LEVEL_EXCLUDE = frozenset({".git", ".venv", "out", "reports",
                                "__pycache__", ".pytest_cache", ".ruff_cache", ".mypy_cache"})
+# Excluded from copies at every depth: a copied bytecode cache can stand in for an edited source (brief 1 A5).
+EVERY_DEPTH_EXCLUDE = frozenset({"__pycache__"})
 
 
 @contextmanager
@@ -25,7 +27,8 @@ def disposable_copy(root: Path = ROOT, under: Path | None = None) -> Iterator[Pa
     tmp = Path(tempfile.mkdtemp(prefix="assize-copy-", dir=under or context.scratch))
     copy = tmp / "repo"
     shutil.copytree(root, copy, symlinks=True,
-                    ignore=lambda d, names: set(names) & TOP_LEVEL_EXCLUDE if Path(d) == root else set())
+                    ignore=lambda d, names: set(names) & (TOP_LEVEL_EXCLUDE | EVERY_DEPTH_EXCLUDE if Path(d) == root
+                                                          else EVERY_DEPTH_EXCLUDE))
     try:
         yield copy
     finally:

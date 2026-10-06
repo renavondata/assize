@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -64,7 +63,7 @@ def run_nested(label: str, registry: str, phase: str, *,
     out = base / "nested" / label
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
-    cmd = [sys.executable, "-m", "harness", "run", "--registry", registry, "--phase", phase, "--out", str(out)]
+    cmd = proc.python("-m", "harness", "run", "--registry", registry, "--phase", phase, "--out", str(out))
     if config is not None:
         cmd += ["--config", str(config)]
     if context.scratch is not None:
@@ -72,14 +71,16 @@ def run_nested(label: str, registry: str, phase: str, *,
     stale = None
     with (out / "stdout.log").open("w") as log:
         if edits is None:
-            code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False)).returncode
+            code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False),
+                                  env=proc.child_env()).returncode
         else:
             with disposable_copy(ROOT) as copy:
                 try:
                     edits_mod.apply(copy, edits_mod.load(edits))
                     log.write(f"nested run in copy {copy} carrying {edits}\n")
                     log.flush()
-                    code = subprocess.run(cmd, cwd=copy, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False)).returncode
+                    code = subprocess.run(cmd, cwd=copy, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False),
+                                  env=proc.child_env()).returncode
                 except edits_mod.Stale as e:
                     stale, code = str(e), None
     rows_path = out / "pins.jsonl"
