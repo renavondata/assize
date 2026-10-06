@@ -1,0 +1,5 @@
+# gh api actions/runs?branch=brief-1-a4 (all pins runs on the PR branch), 2026-10-06T08:38:41Z
+37436204449 attempt=1 event=pull_request head=705cc471f0782552f2ec48a4429370bff5664668 completed success created=2026-10-06T08:27:17Z https://github.com/renavondata/assize/actions/runs/37436204449
+37436171128 attempt=1 event=pull_request head=57a5a049b07525126d82b75e49622bbbd3c8e73f completed success created=2026-10-06T08:26:59Z https://github.com/renavondata/assize/actions/runs/37436171128
+# head_sha=705cc471f0782552f2ec48a4429370bff5664668 event=pull_request
+completed success 37436204449 https://github.com/renavondata/assize/actions/runs/37436204449

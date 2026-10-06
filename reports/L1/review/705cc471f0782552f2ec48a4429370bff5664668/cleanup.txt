@@ -1,0 +1,9 @@
+# leftovers check 2026-10-06T08:46:08Z
+worktrees:
+/home/g/git/assize        705cc47 [brief-1-a4]
+/home/g/git/assize-review 705cc47 (detached HEAD)
+scratch dirs:
+ls: cannot access '/tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+processes (assize|harness|make pins):
+none

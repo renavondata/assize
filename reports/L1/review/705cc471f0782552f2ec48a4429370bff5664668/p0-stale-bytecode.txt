@@ -1,0 +1,64 @@
+# run2 P0 clean transcript (same tree re-run, sources aged; run1 out/ was overwritten by run2 — run1 failure is in make-pins-run1-fresh.txt, and the failing transcript is reproduced by run3 below)
+pin:       P0
+protects:  surviving mutants are reported and fail the suite
+role:      clean
+tree:      /tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-705cc471f0782552f2ec48a4429370bff5664668
+invoked:   /tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-705cc471f0782552f2ec48a4429370bff5664668
+scratch:   /tmp/assize-scratch-2xm5q8v1
+nested control: registry=fixture.basic phase=mutants edits=(none) exit=0 rows=/tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-705cc471f0782552f2ec48a4429370bff5664668/out/pins/runs/P0/clean/nested/control/pins.jsonl
+  [ok] control: seeded edits applied (anchors unique)
+  [ok] control: summary row exit_code equals process exit code
+  [ok] control: invocation tree's harness/ unchanged by the mutant runs (trusted base)
+  [ok] control: control exits 0
+  [ok] control: control: 2 mutants, 2 twins
+  [ok] control: control: every mutant KILLED
+  [ok] control: control: every twin passed
+  [ok] control: control: every mutant and twin ran in a discarded copy, not the invocation tree
+nested checks_always_pass: registry=fixture.basic phase=mutants edits=harness/edits/P0_checks_always_pass.toml exit=1 rows=/tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-705cc471f0782552f2ec48a4429370bff5664668/out/pins/runs/P0/clean/nested/checks_always_pass/pins.jsonl
+  [ok] checks_always_pass: seeded edits applied (anchors unique)
+  [ok] checks_always_pass: summary row exit_code equals process exit code
+  [ok] checks_always_pass: every check forced to succeed: suite exits non-zero
+  [ok] checks_always_pass: every fixture mutant reported SURVIVED (2/2)
+  [ok] checks_always_pass: every mutant row: observed pass, verdict SURVIVED
+result:    PASS
+
+# run3 P0 clean transcript
+pin:       P0
+protects:  surviving mutants are reported and fail the suite
+role:      clean
+tree:      /tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-fresh2
+invoked:   /tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-fresh2
+scratch:   /tmp/assize-scratch-on8xcx8q
+nested control: registry=fixture.basic phase=mutants edits=(none) exit=1 rows=/tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-fresh2/out/pins/runs/P0/clean/nested/control/pins.jsonl
+  [ok] control: seeded edits applied (anchors unique)
+  [ok] control: summary row exit_code equals process exit code
+  [ok] control: invocation tree's harness/ unchanged by the mutant runs (trusted base)
+  [FAIL] control: control exits 0
+  [ok] control: control: 2 mutants, 2 twins
+  [FAIL] control: control: every mutant KILLED
+  [ok] control: control: every twin passed
+  [ok] control: control: every mutant and twin ran in a discarded copy, not the invocation tree
+nested checks_always_pass: registry=fixture.basic phase=mutants edits=harness/edits/P0_checks_always_pass.toml exit=1 rows=/tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-fresh2/out/pins/runs/P0/clean/nested/checks_always_pass/pins.jsonl
+  [ok] checks_always_pass: seeded edits applied (anchors unique)
+  [ok] checks_always_pass: summary row exit_code equals process exit code
+  [ok] checks_always_pass: every check forced to succeed: suite exits non-zero
+  [ok] checks_always_pass: every fixture mutant reported SURVIVED (2/2)
+  [ok] checks_always_pass: every mutant row: observed pass, verdict SURVIVED
+result:    FAIL
+
+# run3 nested control: fixture/toy/inverted mutant transcript
+copy of /tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-fresh2
+  at /tmp/assize-scratch-on8xcx8q/assize-scratch-nobfvh9q/assize-copy-m7acnpcb/repo
+applied 1 edit(s) from harness/fixtures/edits/toy_inverted.toml
+pin:       fixture/toy
+protects:  toy addition is correct
+role:      mutant
+tree:      /tmp/assize-scratch-on8xcx8q/assize-scratch-nobfvh9q/assize-copy-m7acnpcb/repo
+invoked:   /tmp/claude-1000/-home-g-git-assize-review/f0daf899-3d51-4a4f-8404-85936ae734c6/scratchpad/pins-fresh2
+scratch:   /tmp/assize-scratch-on8xcx8q/assize-scratch-nobfvh9q
+result:    PASS
+
+# mechanism: pyc header vs source (run3 tree)
+pyc flags 0 recorded src mtime 1791276224 size 874 | src mtime 1791276224 size 874
+edit harness/fixtures/edits/toy_inverted.toml: '== 4' -> '!= 4' (same byte length)
+harness/tree.py:15-17: __pycache__ excluded at the top level only; nested harness/fixtures/__pycache__ is copied with copy2 (mtime kept)
