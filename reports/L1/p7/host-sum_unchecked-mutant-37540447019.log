@@ -1,0 +1,38 @@
+copy of /home/assize-runner/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-zd7_mxtn/assize-copy-soc4l6a1/repo
+applied 1 edit(s) from harness/edits/P7_sum_unchecked.toml
+pin:       P7
+protects:  zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed
+role:      mutant
+tree:      /tmp/assize-scratch-zd7_mxtn/assize-copy-soc4l6a1/repo
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-zd7_mxtn
+  derived: {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman forecaster: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}}]
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  podman undeclared: [{"episode": 0, "termination": "invalid_reply", "detail": "t=0: prediction: undeclared target 'undeclared'", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}}]
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  podman short: [{"episode": 0, "termination": "invalid_reply", "detail": "t=0: prediction: health: 9 probabilities for a support of 10", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}}]
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  podman zeros: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}}]
+  [FAIL] podman zeros: invalid_reply at the first step, before the World advances
+  [FAIL] podman zeros: nothing scored
+  podman nan: [{"episode": 0, "termination": "invalid_reply", "detail": "step: not JSON (NaN is not a JSON number)", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}}]
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+result:    FAIL
