@@ -1,0 +1,5 @@
+# before make pins, 2026-10-06T22:37:34Z
+$ pgrep -af "harness run|assize-candidate|assize-review-17"
+none
+$ podman ps -a --filter name=assize --format {{.Names}}
+(end; empty = none)

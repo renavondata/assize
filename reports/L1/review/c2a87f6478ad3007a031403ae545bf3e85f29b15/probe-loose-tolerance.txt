@@ -1,0 +1,37 @@
+# probe at c2a87f6 in /tmp/assize-rev17-probe on steel-legend, 2026-10-06T22:45:38Z: judge/scoring.py tolerance() returns 0.5 (loose) instead of len(support)*eps
+diff --git a/judge/scoring.py b/judge/scoring.py
+index 712470d..5764dd8 100644
+--- a/judge/scoring.py
++++ b/judge/scoring.py
+@@ -21,7 +21,7 @@ INFINITE = "+inf"
+ 
+ 
+ def tolerance(n: int) -> float:
+-    return n * sys.float_info.epsilon
++    return 0.5
+ 
+ 
+ def invalid(prediction: Mapping[str, Sequence[float]], targets: Sequence[Mapping]) -> str | None:
+$ uv run --frozen python -B -c "from harness import pins; print(pins.p7_infinite_loss())"
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  [ok] podman zeros: invalid_reply at the first step, before the World advances
+  [ok] podman zeros: nothing scored
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+P7 returned True
+# end 2026-10-06T22:45:45Z

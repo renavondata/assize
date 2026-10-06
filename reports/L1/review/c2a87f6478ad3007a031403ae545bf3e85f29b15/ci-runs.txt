@@ -1,0 +1,5 @@
+# Actions API, 2026-10-06T22:51:07Z
+$ gh api "repos/renavondata/assize/actions/runs?branch=l1-s2-p7-logloss&per_page=50" (name event status conclusion id attempt head_sha created_at)
+pins pull_request completed success 37541615687 1 c2a87f6478ad3007a031403ae545bf3e85f29b15 2026-10-06T22:36:09Z
+measure pull_request completed success 37540447019 1 36d2a1f1e0aaa9fd9d50587b5605a2b8423e4a60 2026-10-06T22:25:07Z
+pins pull_request completed success 37540444218 1 36d2a1f1e0aaa9fd9d50587b5605a2b8423e4a60 2026-10-06T22:25:06Z

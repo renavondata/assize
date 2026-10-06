@@ -1,0 +1,36 @@
+# pins-report artefact 11449140734 of run 37540444218 (36d2a1f), downloaded by the reviewer 2026-10-06T22:51:19Z
+$ grep -E "^  (docker|podman) (forecaster|zeros)|result:" clean/transcript.log (cut to 220)
+  [ok] docker forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] docker forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] docker forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+result:    PASS
+== clipped mutant: FAIL lines, then result
+  [FAIL] docker forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 138.15510557964274, 'log_loss': 138.15510557964274}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0
+  [FAIL] docker forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 138.15510557964274, 'log_loss': 138.15510557964274}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0
+  [FAIL] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 138.15510557964274, 'log_loss': 138.15510557964274}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0
+  [FAIL] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 138.15510557964274, 'log_loss': 138.15510557964274}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0
+result:    FAIL
+== clipped twin
+result:    PASS
+== missing_imputed mutant: FAIL lines, then result
+  [FAIL] docker forecaster stone: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.51292546497023, 'log_loss': 11.51292546497023}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0,
+  [FAIL] podman forecaster stone: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.51292546497023, 'log_loss': 11.51292546497023}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0,
+result:    FAIL
+== missing_imputed twin
+result:    PASS
+== sum_unchecked mutant: FAIL lines, then result
+  [FAIL] docker zeros: invalid_reply at the first step, before the World advances
+  [FAIL] docker zeros: nothing scored
+  [FAIL] podman zeros: invalid_reply at the first step, before the World advances
+  [FAIL] podman zeros: nothing scored
+result:    FAIL
+== sum_unchecked twin
+result:    PASS
+$ diff against the Builder-committed reports/L1/p7/ci-*-37540444218.log
+clean: identical
+clipped-mutant: identical
+missing_imputed-mutant: identical
+sum_unchecked-mutant: identical
