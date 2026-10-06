@@ -1,0 +1,20 @@
+# probe: /tmp/assize-review-14-scripts/probe.py at 4d34943d50378e16b920cea414032c112013dd61, seeds 21-26, actions random.Random(1000+seed) x300, two runs per process, two fresh processes PYTHONHASHSEED=7 and 99; golden_seed1 recomputes seed 1 under P11's committed 400-step stream
+import json, random, sys
+from worlds.crafter import binding
+m = binding.manifest()
+out = {}
+for seed in json.loads(sys.argv[1]):
+    rng = random.Random(1000 + seed)
+    actions = [rng.randrange(len(m["actions"])) for _ in range(300)]
+    h, ep = binding.trajectory(seed, actions, m)
+    h2, _ = binding.trajectory(seed, actions, m)
+    out[seed] = [h, h2, ep.t, binding.chunk_departures(ep._env)[:2]]
+g_rng = random.Random(1)
+g = [g_rng.randrange(len(m["actions"])) for _ in range(400)]
+out["golden_seed1"] = binding.trajectory(1, g, m)[0]
+print(json.dumps(out))
+# output (hashseed 7, then 99)
+{"21": ["73f3c003f5703d154950a09d3e82bb5bb6c459ef3961c0ad11acdf503e5faa53", "73f3c003f5703d154950a09d3e82bb5bb6c459ef3961c0ad11acdf503e5faa53", 215, []], "22": ["d642f9c7faa06a0badc66ad7dcb840aebe5663224bb0c0befbd0d2256456e3ff", "d642f9c7faa06a0badc66ad7dcb840aebe5663224bb0c0befbd0d2256456e3ff", 179, []], "23": ["0262c0462f3411fa9ed3f36d0531a5dc2c7b4057005554ccb2804bf56409e45c", "0262c0462f3411fa9ed3f36d0531a5dc2c7b4057005554ccb2804bf56409e45c", 184, []], "24": ["56a194847535cea79b181fcdcbe4beebdbe8c3c73acd02bfff3c85c5e91dc778", "56a194847535cea79b181fcdcbe4beebdbe8c3c73acd02bfff3c85c5e91dc778", 234, []], "25": ["ca89adf954d536be4e93928cd5f0721efb4d14a82f0dec86b8754e01e9fe0313", "ca89adf954d536be4e93928cd5f0721efb4d14a82f0dec86b8754e01e9fe0313", 212, []], "26": ["3869373ba5785894f17a60e399d9c7532a69b44fd80fe12f361e39054772a8bd", "3869373ba5785894f17a60e399d9c7532a69b44fd80fe12f361e39054772a8bd", 143, []], "golden_seed1": "f65aed28a596149bb27abda1e82bd2416adb5b22c9131ac7c73a692f3e5f7785"}
+{"21": ["73f3c003f5703d154950a09d3e82bb5bb6c459ef3961c0ad11acdf503e5faa53", "73f3c003f5703d154950a09d3e82bb5bb6c459ef3961c0ad11acdf503e5faa53", 215, []], "22": ["d642f9c7faa06a0badc66ad7dcb840aebe5663224bb0c0befbd0d2256456e3ff", "d642f9c7faa06a0badc66ad7dcb840aebe5663224bb0c0befbd0d2256456e3ff", 179, []], "23": ["0262c0462f3411fa9ed3f36d0531a5dc2c7b4057005554ccb2804bf56409e45c", "0262c0462f3411fa9ed3f36d0531a5dc2c7b4057005554ccb2804bf56409e45c", 184, []], "24": ["56a194847535cea79b181fcdcbe4beebdbe8c3c73acd02bfff3c85c5e91dc778", "56a194847535cea79b181fcdcbe4beebdbe8c3c73acd02bfff3c85c5e91dc778", 234, []], "25": ["ca89adf954d536be4e93928cd5f0721efb4d14a82f0dec86b8754e01e9fe0313", "ca89adf954d536be4e93928cd5f0721efb4d14a82f0dec86b8754e01e9fe0313", 212, []], "26": ["3869373ba5785894f17a60e399d9c7532a69b44fd80fe12f361e39054772a8bd", "3869373ba5785894f17a60e399d9c7532a69b44fd80fe12f361e39054772a8bd", 143, []], "golden_seed1": "f65aed28a596149bb27abda1e82bd2416adb5b22c9131ac7c73a692f3e5f7785"}
+# unseeded mutant: OrderedChunk.remove -> pass (dead objects kept in chunks); seeds 21,22, PYTHONHASHSEED=7; field 4 = chunk_departures at episode end
+{"21": ["cdd7059ea47106f460ed869d9b4de423e15df64f7e66e8cad233b678635152e9", "cdd7059ea47106f460ed869d9b4de423e15df64f7e66e8cad233b678635152e9", 216, ["chunk (np.int64(0), np.int64(12), np.int64(0), np.int64(12)): 4 held, 3 live", "chunk (np.int64(0), np.int64(12), np.int64(12), np.int64(24)): 2 held, 1 live"]], "22": ["b8de411212a0757d796ba69c5ba5fcf6ca2b0485e68e598a5feb0ddd356b643c", "b8de411212a0757d796ba69c5ba5fcf6ca2b0485e68e598a5feb0ddd356b643c", 164, ["chunk (np.int64(0), np.int64(12), np.int64(24), np.int64(36)): 4 held, 1 live", "chunk (np.int64(0), np.int64(12), np.int64(48), np.int64(60)): 2 held, 1 live"]], "golden_seed1": "a7ecba64c4a5902211bba3b7773b02c8e4c3b6bfcc5a28e84267e3656c9baf76"}

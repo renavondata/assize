@@ -1,0 +1,5 @@
+# P11's mutant `set_order_restored` (brief 1 A7 item 3): the item-1 change removed, so chunk containers are Crafter's sets.
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "        world._chunks = collections.defaultdict(OrderedChunk)"
+new = "        pass"

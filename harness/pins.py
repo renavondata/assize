@@ -4,6 +4,7 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 from __future__ import annotations
 
 import json
+import math
 import os
 import py_compile
 import shutil
@@ -633,6 +634,103 @@ def p6_schema_purity() -> bool:
     return ok()
 
 
+# P11's child (brief 1 section 3, A7): for each seed, play the committed action stream twice and print the trajectory
+# hashes, the utility, the unlocked set, every manifest departure of every emitted observation, and every step at
+# which a chunk container departs from the package's own object list (after reset and after every step). A World that
+# raises is reported per seed as data, with what was checked before the raise, so P11 fails on it rather than erroring.
+TRAJECTORY_RUN = """
+import json, random, sys
+from worlds.crafter import binding
+m = binding.manifest()
+
+def play(seed, rec):
+    rng = random.Random(seed)
+    actions = [rng.randrange(len(m["actions"])) for _ in range(int(sys.argv[2]))]
+    rec.update(violations=[], chunk_departures=[], chunk_departure_count=0)
+
+    def check(ep):
+        rec["violations"] = sorted(set(rec["violations"]) | set(binding.violations(ep.observation, m["observation"])))
+        found = binding.chunk_departures(ep._env)
+        rec["chunk_departures"] = (rec["chunk_departures"] + [(ep.t, d) for d in found])[:5]
+        rec["chunk_departure_count"] += len(found)
+
+    ep = binding.Episode(seed, m)
+    check(ep)
+    for a in actions:
+        if ep.done:
+            break
+        ep.step(a)
+        check(ep)
+    rec.update(steps=ep.t, utility=ep.utility, achievements=ep.achievements)
+    rec["hashes"] = [binding.trajectory(seed, actions, m)[0] for _ in range(2)]
+
+def attempt(seed):
+    rec = {}
+    try:
+        play(seed, rec)
+    except Exception as e:
+        rec["error"] = f"{type(e).__name__}: {e}"
+    return rec
+
+print(json.dumps({seed: attempt(seed) for seed in json.loads(sys.argv[1])}))
+"""
+TRAJECTORY_SEEDS = (1, 2, 3)
+TRAJECTORY_STEPS = 400
+# The trajectory hash of seed TRAJECTORY_SEEDS[0] under its committed action stream, recorded before any scored run
+# (L1 review a814d28 F4): a different interpreter, numpy or crafter that changes the World fails P11.
+TRAJECTORY_GOLDEN = "f65aed28a596149bb27abda1e82bd2416adb5b22c9131ac7c73a692f3e5f7785"
+
+
+def _trajectories(hash_seed: str) -> dict:
+    """TRAJECTORY_RUN in a fresh interpreter whose string hashing is salted by `hash_seed`."""
+    out = subprocess.run(proc.python("-c", TRAJECTORY_RUN, json.dumps(TRAJECTORY_SEEDS), str(TRAJECTORY_STEPS)),
+                         cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": hash_seed}, capture_output=True,
+                         text=True, preexec_fn=proc.setup(False))
+    if out.returncode:
+        raise RuntimeError(f"trajectory child exited {out.returncode}: {out.stderr.strip()[-500:]}")
+    return json.loads(out.stdout)
+
+
+def p11_crafter_determinism() -> bool:
+    """The same seed and action sequence give an identical trajectory hash, twice in one process and across two
+    processes with differently salted string hashing, equal for the first seed to the committed golden hash; distinct
+    seeds give distinct hashes, so the hash is not constant; every observation the binding emits conforms to the
+    manifest; every chunk container holds exactly its live objects; utility is the count of distinct achievements
+    (brief 1 section 3, A7)."""
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    a, b = _trajectories("1"), _trajectories("2")
+    components = binding.manifest()["utility"]["components"]
+    for seed in map(str, TRAJECTORY_SEEDS):
+        expect(a[seed]["violations"] == [], f"seed {seed}: observations conform to the manifest "
+                                            f"({a[seed]['violations'][:3]})")
+        expect(a[seed]["chunk_departure_count"] == 0,
+               f"seed {seed}: every chunk container holds exactly its live objects after reset and every step "
+               f"({a[seed]['chunk_departure_count']} departures; first {a[seed]['chunk_departures'][:2]})")
+        errors = [r[seed]["error"] for r in (a, b) if "error" in r[seed]]
+        expect(not errors, f"seed {seed}: the World plays the action stream without raising ({errors[:1]})")
+        if errors:
+            continue
+        hashes = a[seed]["hashes"] + b[seed]["hashes"]
+        expect(len(set(hashes)) == 1, f"seed {seed}: 4 trajectory hashes, 2 per process, {len(set(hashes))} distinct "
+                                      f"({a[seed]['steps']} steps; {hashes[0][:16]})")
+        ach = a[seed]["achievements"]
+        expect(a[seed]["utility"] == len(ach) and set(ach) <= set(components),
+               f"seed {seed}: utility {a[seed]['utility']} = |{ach}|, each a declared component")
+    golden = a[str(TRAJECTORY_SEEDS[0])].get("hashes", [""])[0]
+    expect(golden == TRAJECTORY_GOLDEN, f"seed {TRAJECTORY_SEEDS[0]}: trajectory hash {golden[:16]} is the committed "
+                                        f"golden {TRAJECTORY_GOLDEN[:16]}")
+    firsts = {a[str(s)].get("hashes", [""])[0] for s in TRAJECTORY_SEEDS}
+    expect(len(firsts) == len(TRAJECTORY_SEEDS), f"{len(TRAJECTORY_SEEDS)} seeds give {len(firsts)} distinct hashes")
+    hafner = (([set()], 0.0), ([set(components)] * 2, 100.0),
+              ([{components[0]}, set()], math.exp(math.log(51) / len(components)) - 1))
+    for sets, want in hafner:
+        got = binding.hafner_score(sets, components)
+        expect(math.isclose(got, want, abs_tol=1e-9), f"Hafner score of {len(sets)} episodes: {got:.6f}, want {want:.6f}")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -668,4 +766,11 @@ PINS = [
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
         p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),)),
+    Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",
+        p11_crafter_determinism, (Mutant("set_order_restored", _edits("P11_set_order_restored")),
+                                  Mutant("seed_ignored", _edits("P11_seed_ignored")),
+                                  Mutant("hash_constant", _edits("P11_hash_constant")),
+                                  Mutant("field_dropped", _edits("P11_field_dropped")),
+                                  Mutant("chunks_replaced_after_worldgen", _edits("P11_chunks_replaced_after_worldgen")),
+                                  Mutant("golden_hash_altered", _edits("P11_golden_hash_altered")))),
 ]

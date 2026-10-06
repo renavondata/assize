@@ -1,0 +1,10 @@
+# P11's mutant `chunks_replaced_after_worldgen` (L1 review a814d28 F3): the binding swaps in empty ordered containers
+# after `Env.reset` returns instead of at `World.reset`, so the world-generated objects drop out of chunk balancing.
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "        world._chunks = collections.defaultdict(OrderedChunk)"
+new = "        pass"
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "        self._env.reset()\n"
+new = "        self._env.reset()\n        self._env._world._chunks = collections.defaultdict(OrderedChunk)\n"
