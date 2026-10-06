@@ -1,0 +1,59 @@
+# probe leaked_not_recorded at 2402ed7 in /tmp/assize-review-16-probe; start 2026-10-06T21:42:03Z
+# edit:
+diff --git a/judge/episodes.py b/judge/episodes.py
+index 31570fe..6a0d6f4 100644
+--- a/judge/episodes.py
++++ b/judge/episodes.py
+@@ -183,10 +183,10 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
+         code, detail = _play(c, world, manifest, t)
+         if code not in WORLD_ENDINGS:
+             if not c.teardown(t):
+-                code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
++                pass
+             c = None
+         records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
+                         "utility": world.utility})
+     if c is not None and not c.teardown(t):
+-        records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
++        pass
+     return records
+# P3 and P10 clean checks under the edit:
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+Installed 12 packages in 71ms
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-2f77532556eb4d30'])
+  [ok] podman: torn down directly, assize-candidate-2f77532556eb4d30 is not listed
+  podman stubborn: [{"episode": 0, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}]
+  [ok] podman: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+P10 -> True
+  timeouts from judge/config.toml: Timeouts(step_s=10.0, episode_s=600.0, teardown_s=30.0, reply_bytes=1048576)
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman polite: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}]
+  [ok] podman polite: 2 of 2 requested episodes recorded, in order
+  [ok] podman polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] podman polite: every episode ran its 5 steps
+  podman crash: [{"episode": 0, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0}, {"episode": 1, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0}, {"episode": 2, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0}]
+  [ok] podman crash: 3 of 3 requested episodes recorded, in order
+  [ok] podman crash: every termination is crash (['crash', 'crash', 'crash'])
+  podman garbled: [{"episode": 0, "termination": "invalid_reply", "detail": "step: not JSON (Expecting value: line 1 column 1 (char 0))", "steps": 0, "utility": 0}, {"episode": 1, "termination": "invalid_reply", "detail": "step: not JSON (Expecting value: line 1 column 1 (char 0))", "steps": 0, "utility": 0}]
+  [ok] podman garbled: 2 of 2 requested episodes recorded, in order
+  [ok] podman garbled: every termination is invalid_reply (['invalid_reply', 'invalid_reply'])
+  podman illegal: [{"episode": 0, "termination": "illegal_action", "detail": "t=0: action 17 not legal", "steps": 0, "utility": 0}, {"episode": 1, "termination": "illegal_action", "detail": "t=0: action 17 not legal", "steps": 0, "utility": 0}]
+  [ok] podman illegal: 2 of 2 requested episodes recorded, in order
+  [ok] podman illegal: every termination is illegal_action (['illegal_action', 'illegal_action'])
+  podman slow: [{"episode": 0, "termination": "episode_timeout", "detail": "no reply before the deadline", "steps": 2, "utility": 0}, {"episode": 1, "termination": "episode_timeout", "detail": "no reply before the deadline", "steps": 2, "utility": 0}]
+  [ok] podman slow: 2 of 2 requested episodes recorded, in order
+  [ok] podman slow: every termination is episode_timeout (['episode_timeout', 'episode_timeout'])
+  podman stubborn: [{"episode": 0, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}, {"episode": 1, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}]
+  [ok] podman stubborn: 2 of 2 requested episodes recorded, in order
+  [ok] podman stubborn: every termination is step_timeout (['step_timeout', 'step_timeout'])
+  [ok] podman: no candidate container listed after the cases ([])
+P3 -> True
+exit 0
+# end 2026-10-06T21:42:30Z

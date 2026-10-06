@@ -1,0 +1,8 @@
+# cleanup after review of 2402ed7, 2026-10-06T21:42:45Z
+$ ls -d /tmp/assize-review-16* /tmp/assize-rev16*
+ls: cannot access '/tmp/assize-review-16*': No such file or directory
+ls: cannot access '/tmp/assize-rev16*': No such file or directory
+$ podman ps -a --filter name=assize --format {{.Names}}
+(end; empty = none)
+$ pgrep -af 'harness run|assize-candidate|assize-review-16'
+none
