@@ -110,6 +110,11 @@ class Episode:
         return self.observation
 
     @property
+    def termination(self) -> str:
+        """How the World ended the episode: `terminal` if the player died, else `truncated` at the episode length."""
+        return "terminal" if self._env._player.health <= 0 else "truncated"
+
+    @property
     def achievements(self) -> list[str]:
         return sorted(unlocked(self._env))
 

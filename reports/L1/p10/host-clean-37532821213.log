@@ -1,0 +1,15 @@
+pin:       P10
+protects:  a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing
+role:      clean
+tree:      /home/assize-runner/actions-runner/_work/assize/assize
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-ufgr2030
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-e2bfb223142a4a1d'])
+  [ok] podman: torn down directly, assize-candidate-e2bfb223142a4a1d is not listed
+  podman stubborn: [{"episode": 0, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}]
+  [ok] podman: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+result:    PASS

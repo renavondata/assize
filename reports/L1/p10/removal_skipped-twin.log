@@ -1,0 +1,18 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-ppsrq6u6/assize-copy-he7461su/repo
+twin: no edits applied
+pin:       P10
+protects:  a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing
+role:      twin
+tree:      /tmp/assize-scratch-ppsrq6u6/assize-copy-he7461su/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-ppsrq6u6
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-634ec1b9adf04cef'])
+  [ok] podman: torn down directly, assize-candidate-634ec1b9adf04cef is not listed
+  podman stubborn: [{"episode": 0, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}]
+  [ok] podman: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+result:    PASS

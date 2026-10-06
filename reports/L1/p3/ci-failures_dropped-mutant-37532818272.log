@@ -1,0 +1,54 @@
+copy of /home/runner/work/assize/assize
+  at /tmp/assize-scratch-k9xyqrts/assize-copy-p75x2wpu/repo
+applied 1 edit(s) from harness/edits/P3_failures_dropped.toml
+pin:       P3
+protects:  every requested episode is recorded with its termination code, failures included
+role:      mutant
+tree:      /tmp/assize-scratch-k9xyqrts/assize-copy-p75x2wpu/repo
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-k9xyqrts
+  timeouts from judge/config.toml: Timeouts(step_s=10.0, episode_s=600.0, teardown_s=30.0, reply_bytes=1048576)
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  docker polite: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}]
+  [ok] docker polite: 2 of 2 requested episodes recorded, in order
+  [ok] docker polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] docker polite: every episode ran its 5 steps
+  docker crash: []
+  [FAIL] docker crash: 0 of 3 requested episodes recorded, in order
+  [ok] docker crash: every termination is crash ([])
+  docker garbled: []
+  [FAIL] docker garbled: 0 of 2 requested episodes recorded, in order
+  [ok] docker garbled: every termination is invalid_reply ([])
+  docker illegal: []
+  [FAIL] docker illegal: 0 of 2 requested episodes recorded, in order
+  [ok] docker illegal: every termination is illegal_action ([])
+  docker slow: []
+  [FAIL] docker slow: 0 of 2 requested episodes recorded, in order
+  [ok] docker slow: every termination is episode_timeout ([])
+  docker stubborn: []
+  [FAIL] docker stubborn: 0 of 2 requested episodes recorded, in order
+  [ok] docker stubborn: every termination is step_timeout ([])
+  [ok] docker: no candidate container listed after the cases ([])
+  podman polite: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}]
+  [ok] podman polite: 2 of 2 requested episodes recorded, in order
+  [ok] podman polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] podman polite: every episode ran its 5 steps
+  podman crash: []
+  [FAIL] podman crash: 0 of 3 requested episodes recorded, in order
+  [ok] podman crash: every termination is crash ([])
+  podman garbled: []
+  [FAIL] podman garbled: 0 of 2 requested episodes recorded, in order
+  [ok] podman garbled: every termination is invalid_reply ([])
+  podman illegal: []
+  [FAIL] podman illegal: 0 of 2 requested episodes recorded, in order
+  [ok] podman illegal: every termination is illegal_action ([])
+  podman slow: []
+  [FAIL] podman slow: 0 of 2 requested episodes recorded, in order
+  [ok] podman slow: every termination is episode_timeout ([])
+  podman stubborn: []
+  [FAIL] podman stubborn: 0 of 2 requested episodes recorded, in order
+  [ok] podman stubborn: every termination is step_timeout ([])
+  [ok] podman: no candidate container listed after the cases ([])
+result:    FAIL

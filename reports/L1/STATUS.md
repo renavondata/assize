@@ -1,19 +1,18 @@
-# STATUS — L1 — 2026-10-06 — 6ef8006 — PR #15
+# STATUS — L1 — 2026-10-07 — 0a9da74 — PR #16
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; opens no layer's brief)
-pins: clean 16/16; mutants 30/30 KILLED; twins 30/30; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: judge/{__init__.py,runtime.py,config.toml,README.md}; harness/pins.py (P2); harness/edits/P2_*.toml (4); harness/{proposer.toml,README.md}; Makefile; reports/L1/{forecasts.jsonl,make-pins.txt,p2/,ci/,measure-*.txt,STATUS.md}
-did: brief 1 §2 first item: judge/runtime.py builds the one candidate command line (--network=none, --read-only, caps dropped, no-new-privileges, no mounts, cpu/memory/pids limits from judge/config.toml) for Docker or rootless Podman, each admitted only on its own report
-did: P2 probes inside the container under every usable runtime: judge paths ENOENT, IPv4/IPv6 TCP/UDP ENETUNREACH, loopback only, root EROFS, cgroup limits = config; mutants network_enabled, judge_mounted, rootfs_writable, memory_limit_dropped each KILLED with a passing twin (reports/L1/p2/*.log)
-did: Docker witness: pins CI run 37525906600 on 6ef8006: success; Docker 28.0.4 and rootless Podman 4.9.3 both witnessed, 0 leaked (reports/L1/p2/ci-clean-37525906600.log). Host witness: measure run 37525910249 on 6ef8006, rootless Podman 6.1.2, P2 4/4 KILLED, 0 leaked (reports/L1/measure-37525910249.txt, p2/host-clean-37525910249.log)
-did: the PR's first pins run, 37523381746 at 7bbadbf, failed: every P2 run LEAKED 1 process on ubuntu-latest; reproduced as rootless Podman's pause process (catatonit -P) reparented to the harness subreaper; fixed by starting it in `make pins` before the harness (6ef8006); witness reports/L1/p2/ci-leak.txt, ci/37523381746.json
-did: make pins at 6ef8006 on steel-legend, 20:14:31Z–20:21:41Z, PINS PASSED (reports/L1/make-pins.txt); also passed at 7bbadbf (19:54:25Z–20:01:34Z)
-decided (not asked): P2 runs under every usable runtime and fails if none is usable; Podman's Docker emulation is not Docker, and a rootless Podman without cpu/memory/pids delegated is not usable. Which runtime each context witnessed is named in its transcript — p(stands on review)=0.7
-decided (not asked): Podman's per-user pause process is runtime infrastructure like dockerd, so `make pins` starts it outside the harness rather than the sweep exempting it; any process a container leaves is still counted — p=0.65
-decided (not asked): P2 also pins the read-only root and the configured cgroup limits (§2 isolation), each with its own mutant — p=0.85
-decided (not asked): candidate base image python:3.11-slim by index digest 0dd364ba…; limits 1 CPU, 1024 MiB (swap 0), 64 pids, committed before any scored run — p=0.75
-decided (not asked): Podman gets --read-only-tmpfs=false so both runtimes give one root with no writable tmpfs; a candidate has no scratch disk — p=0.7
-forecasts: made 4; resolved 0 this session; ledger L0+L1: 42 claims, 27 resolved; cumulative log-loss 6.118 vs base rate 18.715 (0.5) over 27
-obligations added: none
+pins: clean 18/18; mutants 32/32 KILLED; twins 32/32; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
+changed: judge/{episodes.py,runtime.py,config.toml,README.md}; worlds/crafter/binding.py; harness/{pins.py (P2 removal, P3, P10),fixtures/candidates.py,edits/P3_*,edits/P10_*,proposer.toml,README.md}; reports/L1/{forecasts.jsonl,make-pins*.txt,p3/,p10/,ci/,measure-37532821213.txt,STATUS.md}
+did: brief 1 §2: judge/episodes.py, JSON-RPC over the candidate container's stdio; [timeouts] step_s 10, episode_s 600, teardown_s 30, reply_bytes 1 MiB in judge/config.toml; every episode recorded with a termination code; a failed episode's container is torn down, the next episode gets a fresh one
+did: teardown is `rm -f` (Podman `--time=0`), then the runtime's listing must be empty, else termination `leaked`; run_argv drops `--rm` so removal is the judge's act; P2 now removes its probe container explicitly
+did: P3 (mutant failures_dropped: 0 of n failed episodes recorded) and P10 (mutant removal_skipped: `leaked`, containers listed) KILLED with passing twins under Docker 28.0.4 and rootless Podman 4.9.3 in pins CI run 37532818272 on 0a9da74: success (reports/L1/p3/ci-*, p10/ci-*); host: measure run 37532821213 on 0a9da74, rootless Podman 6.1.2, 32/32 KILLED, 0 leaked (reports/L1/measure-37532821213.txt, p3/host-*, p10/host-*)
+did: make pins at 0a9da74 on steel-legend 21:08:22Z–21:17:09Z, PINS PASSED (reports/L1/make-pins.txt). An earlier run at 5a8ded8 (same tree, unpushed) failed P0m clean: the Proposer trailer sat outside the final trailer block; message amended, nothing else changed (reports/L1/make-pins-5a8ded8-failed.txt)
+decided (not asked): one container serves successive episodes until one fails, then is replaced, so a candidate may learn across episodes and no episode inherits a broken one — p(stands on review)=0.7
+decided (not asked): a failed episode records the World's utility at the failing step, its termination code and steps; it stays in every denominator; how failures are priced is left to the scoring item — p=0.6
+decided (not asked): end_episode is sent only when the World ends the episode; after a candidate failure the container is torn down without it — p=0.7
+decided (not asked): step_s bounds begin_episode/end_episode replies too (so it covers container start); timeout values committed before any scored run — p=0.65
+decided (not asked): P3/P10 tighten step_s/episode_s/teardown_s per case (dataclasses.replace, stated in the pin) to bound pin wall time; the config's values are the judge's — p=0.7
+forecasts: made 4; resolved 0 this session; ledger L0+L1: 46 claims, 30 resolved; cumulative log-loss 7.553 vs base rate 20.794 (0.5) over 30
+obligations added: L2: `make pins` took 8m47s on steel-legend, near the 10-minute session limit; a later item must split or speed the suite before P1/P4/P5/P7/P9 are added
 NEEDS YOU (at most 1): none
-next: brief 1 §2 continued: the judge process and JSON-RPC stdio loop over runtime.run_argv, with per-step and per-episode timeouts in judge/config.toml, termination codes (P3) and container teardown (P10); add judge-private storage to P2's probed paths when it exists
+next: brief 1 §2 continued: prediction validation against the manifest and log-loss scoring with +∞ recorded (P7), then measured compute from cgroup accounting per episode (P4)

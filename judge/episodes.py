@@ -1,0 +1,192 @@
+"""The judge's episode loop (brief 1 section 2): JSON-RPC 2.0 over a candidate container's stdio, one message per line.
+
+The judge owns the World. Per step it sends `{t, observation, legal_actions}` and advances the World only on the
+candidate's reply. Every episode ends with a termination code (`rpc.schema.json`) and is recorded, whatever happened:
+the World's own ending (`terminal`, `truncated`) or a failure of the candidate (`crash`, `step_timeout`,
+`episode_timeout`, `invalid_reply`, `illegal_action`), never dropped (P3). After a failure the container is torn down
+and the next episode starts in a fresh one, so no episode inherits a broken candidate.
+
+Teardown force-removes the container by name and then asks the runtime whether anything of that name is left. A
+container still listed is an episode with termination `leaked`, counted, never dropped (brief 1 A4 item 5, P10)."""
+
+from __future__ import annotations
+
+import json
+import os
+import selectors
+import subprocess
+import time
+import tomllib
+import uuid
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+
+import jsonschema
+import referencing
+
+from judge import runtime
+
+SPEC = Path(__file__).resolve().parent.parent / "worlds" / "spec"
+SCHEMA_VERSION = "1.0.0"
+WORLD_ENDINGS = frozenset({"terminal", "truncated"})
+
+
+@dataclass(frozen=True)
+class Timeouts:
+    step_s: float
+    episode_s: float
+    teardown_s: float
+    reply_bytes: int
+
+
+def timeouts(path: Path = runtime.CONFIG) -> Timeouts:
+    c = tomllib.loads(path.read_text())["timeouts"]
+    return Timeouts(float(c["step_s"]), float(c["episode_s"]), float(c["teardown_s"]), int(c["reply_bytes"]))
+
+
+def _validator(definition: str) -> jsonschema.Draft202012Validator:
+    schemas = [json.loads(p.read_text()) for p in sorted(SPEC.glob("*.schema.json"))]
+    registry = referencing.Registry().with_resources(
+        (s["$id"], referencing.Resource.from_contents(s)) for s in schemas)
+    rpc = next(s for s in schemas if s["$id"].endswith("/rpc.schema.json"))
+    return jsonschema.Draft202012Validator({"$ref": f"{rpc['$id']}#/$defs/{definition}"}, registry=registry)
+
+
+REPLY = _validator("response")
+
+
+class Failure(Exception):
+    """The candidate failed: `code` is the episode's termination code."""
+
+    def __init__(self, code: str, detail: str):
+        super().__init__(f"{code}: {detail}")
+        self.code = code
+        self.detail = detail
+
+
+class Container:
+    """One candidate container attached to the judge by stdio. Its stderr is discarded: the judge reads nothing
+    from the candidate but its replies."""
+
+    def __init__(self, rt: runtime.Runtime, image: str, lim: runtime.Limits, command: Sequence[str] = ()):
+        self.rt = rt
+        self.name = f"assize-candidate-{uuid.uuid4().hex[:16]}"
+        self.proc = subprocess.Popen(runtime.run_argv(rt, image, lim, self.name, command), stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0)
+        self._buffer = b""
+        self._next_id = 0
+
+    def _send(self, method: str, params: Mapping) -> int:
+        rid, self._next_id = self._next_id, self._next_id + 1
+        line = json.dumps({"jsonrpc": "2.0", "id": rid, "method": method, "params": params}).encode() + b"\n"
+        try:
+            self.proc.stdin.write(line)
+            self.proc.stdin.flush()
+        except (BrokenPipeError, OSError) as e:
+            raise Failure("crash", f"{method}: candidate closed its input ({e})") from e
+        return rid
+
+    def _line(self, step_deadline: float, episode_deadline: float, limit: int) -> bytes:
+        fd = self.proc.stdout.fileno()
+        with selectors.DefaultSelector() as sel:
+            sel.register(fd, selectors.EVENT_READ)
+            while b"\n" not in self._buffer:
+                if len(self._buffer) > limit:
+                    raise Failure("invalid_reply", f"reply exceeds {limit} bytes")
+                now = time.monotonic()
+                deadline = min(step_deadline, episode_deadline)
+                if now >= deadline:
+                    raise Failure("episode_timeout" if episode_deadline <= step_deadline else "step_timeout",
+                                  "no reply before the deadline")
+                if not sel.select(deadline - now):
+                    continue
+                chunk = os.read(fd, 65536)
+                if not chunk:
+                    raise Failure("crash", f"candidate closed its output (exit {self.proc.poll()})")
+                self._buffer += chunk
+        line, self._buffer = self._buffer.split(b"\n", 1)
+        if len(line) > limit:
+            raise Failure("invalid_reply", f"reply exceeds {limit} bytes")
+        return line
+
+    def call(self, method: str, params: Mapping, t: Timeouts, episode_deadline: float) -> dict:
+        """Send one request and return the result of its one reply, or raise the Failure that ends the episode."""
+        rid = self._send(method, params)
+        line = self._line(time.monotonic() + t.step_s, episode_deadline, t.reply_bytes)
+        try:
+            reply = json.loads(line)
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            raise Failure("invalid_reply", f"{method}: not JSON ({e})") from e
+        errors = [e.message for e in REPLY.iter_errors(reply)]
+        if errors or reply["id"] != rid or "result" not in reply:
+            raise Failure("invalid_reply", f"{method}: {errors[:1] or 'wrong id or an error reply'}")
+        return reply["result"]
+
+    def teardown(self, t: Timeouts) -> bool:
+        """Force-remove the container and wait for its client; True only if the runtime lists nothing of its name."""
+        try:
+            subprocess.run(runtime.remove_argv(self.rt, self.name), capture_output=True, timeout=t.teardown_s)
+        except subprocess.TimeoutExpired:
+            pass
+        try:
+            self.proc.wait(timeout=t.teardown_s)
+        except subprocess.TimeoutExpired:
+            self.proc.kill()
+            self.proc.wait()
+        return not listed(self.rt, self.name)
+
+
+def _names(rt: runtime.Runtime, *filters: str) -> list[str]:
+    out = subprocess.run([rt.binary, "ps", "-a", *(f"--filter={f}" for f in filters), "--format", "{{.Names}}"],
+                         capture_output=True, text=True, check=True)
+    return out.stdout.split()
+
+
+def listed(rt: runtime.Runtime, name: str, running: bool = False) -> list[str]:
+    """Every container, in any state or only running ones, that the runtime lists under exactly `name`."""
+    return [n for n in _names(rt, f"name=^{name}$", *(["status=running"] if running else [])) if n == name]
+
+
+def listed_prefix(rt: runtime.Runtime, prefix: str) -> list[str]:
+    """Every container, in any state, whose name starts with `prefix`."""
+    return [n for n in _names(rt, f"name=^{prefix}") if n.startswith(prefix)]
+
+
+def _play(c: Container, world, manifest: Mapping, t: Timeouts) -> tuple[str, str]:
+    """One episode on `world` with `c`; returns its termination code and detail."""
+    deadline = time.monotonic() + t.episode_s
+    try:
+        c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest}, t, deadline)
+        while not world.done:
+            legal = world.legal_actions
+            result = c.call("step", {"t": world.t, "observation": world.observation, "legal_actions": legal},
+                            t, deadline)
+            if result.get("action") not in legal:
+                raise Failure("illegal_action", f"t={world.t}: action {result.get('action')!r} not legal")
+            world.step(result["action"])
+        c.call("end_episode", {"termination": world.termination, "utility": world.utility}, t, deadline)
+        return world.termination, ""
+    except Failure as f:
+        return f.code, f.detail
+
+
+def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *, command: Sequence[str] = (),
+        lim: runtime.Limits | None = None, t: Timeouts | None = None) -> list[dict]:
+    """Play every World of `worlds` with the candidate `image`, one record per World, in order. A container serves
+    episodes until one fails; it is then torn down, and the next episode starts in a fresh container."""
+    lim, t = lim or runtime.limits(), t or timeouts()
+    records: list[dict] = []
+    c: Container | None = None
+    for i, world in enumerate(worlds):
+        c = c or Container(rt, image, lim, command)
+        code, detail = _play(c, world, manifest, t)
+        if code not in WORLD_ENDINGS:
+            if not c.teardown(t):
+                code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
+            c = None
+        records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
+                        "utility": world.utility})
+    if c is not None and not c.teardown(t):
+        records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
+    return records

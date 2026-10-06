@@ -8,3 +8,16 @@ base_image = "docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f
 cpus = 1.0
 memory_mib = 1024
 pids = 64
+
+[timeouts]
+# Wall-clock limits on the candidate, in seconds (brief 1 section 2). step_s bounds each reply, begin_episode and
+# end_episode included, from the moment its request is sent, so the first reply also covers the container's start.
+# episode_s bounds a whole episode: a Crafter episode is at most 10000 steps, and the 2-hour pilot cap over 200
+# episodes allows 36 s each on average; 600 s lets a slow candidate finish while bounding a stalled one.
+step_s = 10.0
+episode_s = 600.0
+# How long the judge waits for the runtime to force-remove a container, and then for its client process to exit.
+teardown_s = 30.0
+# The longest reply line the judge reads; a longer one is invalid_reply. A step reply is an action and at most one
+# probability list per target, a few kilobytes; 1 MiB bounds the judge's memory against a candidate that never ends a line.
+reply_bytes = 1048576

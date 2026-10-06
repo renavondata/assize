@@ -1,0 +1,139 @@
+# pins-report artefact 11445408344 of pins run 37532818272 on 0a9da74; [ok]/[FAIL] lines per runtime
+=== P3/clean
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker polite: 2 of 2 requested episodes recorded, in order
+  [ok] docker polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] docker polite: every episode ran its 5 steps
+  [ok] docker crash: 3 of 3 requested episodes recorded, in order
+  [ok] docker crash: every termination is crash (['crash', 'crash', 'crash'])
+  [ok] docker garbled: 2 of 2 requested episodes recorded, in order
+  [ok] docker garbled: every termination is invalid_reply (['invalid_reply', 'invalid_reply'])
+  [ok] docker illegal: 2 of 2 requested episodes recorded, in order
+  [ok] docker illegal: every termination is illegal_action (['illegal_action', 'illegal_action'])
+  [ok] docker slow: 2 of 2 requested episodes recorded, in order
+  [ok] docker slow: every termination is episode_timeout (['episode_timeout', 'episode_timeout'])
+  [ok] docker stubborn: 2 of 2 requested episodes recorded, in order
+  [ok] docker stubborn: every termination is step_timeout (['step_timeout', 'step_timeout'])
+  [ok] docker: no candidate container listed after the cases ([])
+  [ok] podman polite: 2 of 2 requested episodes recorded, in order
+  [ok] podman polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] podman polite: every episode ran its 5 steps
+  [ok] podman crash: 3 of 3 requested episodes recorded, in order
+  [ok] podman crash: every termination is crash (['crash', 'crash', 'crash'])
+  [ok] podman garbled: 2 of 2 requested episodes recorded, in order
+  [ok] podman garbled: every termination is invalid_reply (['invalid_reply', 'invalid_reply'])
+  [ok] podman illegal: 2 of 2 requested episodes recorded, in order
+  [ok] podman illegal: every termination is illegal_action (['illegal_action', 'illegal_action'])
+  [ok] podman slow: 2 of 2 requested episodes recorded, in order
+  [ok] podman slow: every termination is episode_timeout (['episode_timeout', 'episode_timeout'])
+  [ok] podman stubborn: 2 of 2 requested episodes recorded, in order
+  [ok] podman stubborn: every termination is step_timeout (['step_timeout', 'step_timeout'])
+  [ok] podman: no candidate container listed after the cases ([])
+result:    PASS
+=== P3/failures_dropped/mutant
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker polite: 2 of 2 requested episodes recorded, in order
+  [ok] docker polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] docker polite: every episode ran its 5 steps
+  [FAIL] docker crash: 0 of 3 requested episodes recorded, in order
+  [ok] docker crash: every termination is crash ([])
+  [FAIL] docker garbled: 0 of 2 requested episodes recorded, in order
+  [ok] docker garbled: every termination is invalid_reply ([])
+  [FAIL] docker illegal: 0 of 2 requested episodes recorded, in order
+  [ok] docker illegal: every termination is illegal_action ([])
+  [FAIL] docker slow: 0 of 2 requested episodes recorded, in order
+  [ok] docker slow: every termination is episode_timeout ([])
+  [FAIL] docker stubborn: 0 of 2 requested episodes recorded, in order
+  [ok] docker stubborn: every termination is step_timeout ([])
+  [ok] docker: no candidate container listed after the cases ([])
+  [ok] podman polite: 2 of 2 requested episodes recorded, in order
+  [ok] podman polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] podman polite: every episode ran its 5 steps
+  [FAIL] podman crash: 0 of 3 requested episodes recorded, in order
+  [ok] podman crash: every termination is crash ([])
+  [FAIL] podman garbled: 0 of 2 requested episodes recorded, in order
+  [ok] podman garbled: every termination is invalid_reply ([])
+  [FAIL] podman illegal: 0 of 2 requested episodes recorded, in order
+  [ok] podman illegal: every termination is illegal_action ([])
+  [FAIL] podman slow: 0 of 2 requested episodes recorded, in order
+  [ok] podman slow: every termination is episode_timeout ([])
+  [FAIL] podman stubborn: 0 of 2 requested episodes recorded, in order
+  [ok] podman stubborn: every termination is step_timeout ([])
+  [ok] podman: no candidate container listed after the cases ([])
+result:    FAIL
+=== P3/failures_dropped/twin
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker polite: 2 of 2 requested episodes recorded, in order
+  [ok] docker polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] docker polite: every episode ran its 5 steps
+  [ok] docker crash: 3 of 3 requested episodes recorded, in order
+  [ok] docker crash: every termination is crash (['crash', 'crash', 'crash'])
+  [ok] docker garbled: 2 of 2 requested episodes recorded, in order
+  [ok] docker garbled: every termination is invalid_reply (['invalid_reply', 'invalid_reply'])
+  [ok] docker illegal: 2 of 2 requested episodes recorded, in order
+  [ok] docker illegal: every termination is illegal_action (['illegal_action', 'illegal_action'])
+  [ok] docker slow: 2 of 2 requested episodes recorded, in order
+  [ok] docker slow: every termination is episode_timeout (['episode_timeout', 'episode_timeout'])
+  [ok] docker stubborn: 2 of 2 requested episodes recorded, in order
+  [ok] docker stubborn: every termination is step_timeout (['step_timeout', 'step_timeout'])
+  [ok] docker: no candidate container listed after the cases ([])
+  [ok] podman polite: 2 of 2 requested episodes recorded, in order
+  [ok] podman polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] podman polite: every episode ran its 5 steps
+  [ok] podman crash: 3 of 3 requested episodes recorded, in order
+  [ok] podman crash: every termination is crash (['crash', 'crash', 'crash'])
+  [ok] podman garbled: 2 of 2 requested episodes recorded, in order
+  [ok] podman garbled: every termination is invalid_reply (['invalid_reply', 'invalid_reply'])
+  [ok] podman illegal: 2 of 2 requested episodes recorded, in order
+  [ok] podman illegal: every termination is illegal_action (['illegal_action', 'illegal_action'])
+  [ok] podman slow: 2 of 2 requested episodes recorded, in order
+  [ok] podman slow: every termination is episode_timeout (['episode_timeout', 'episode_timeout'])
+  [ok] podman stubborn: 2 of 2 requested episodes recorded, in order
+  [ok] podman stubborn: every termination is step_timeout (['step_timeout', 'step_timeout'])
+  [ok] podman: no candidate container listed after the cases ([])
+result:    PASS
+=== P10/clean
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-898048d1eab54b7c'])
+  [ok] docker: torn down directly, assize-candidate-898048d1eab54b7c is not listed
+  [ok] docker: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] docker: the runtime lists no candidate container afterwards ([])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-f828db5acf6b4d3d'])
+  [ok] podman: torn down directly, assize-candidate-f828db5acf6b4d3d is not listed
+  [ok] podman: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+result:    PASS
+=== P10/removal_skipped/mutant
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-7f78492259384d53'])
+  [FAIL] docker: torn down directly, assize-candidate-7f78492259384d53 is not listed
+  [FAIL] docker: the stalled episode is recorded step_timeout (['leaked'])
+  [FAIL] docker: the runtime lists no candidate container afterwards (['assize-candidate-629376e805eb4807', 'assize-candidate-7f78492259384d53'])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-15a76e0dd1e64862'])
+  [FAIL] podman: torn down directly, assize-candidate-15a76e0dd1e64862 is not listed
+  [FAIL] podman: the stalled episode is recorded step_timeout (['leaked'])
+  [FAIL] podman: the runtime lists no candidate container afterwards (['assize-candidate-15a76e0dd1e64862', 'assize-candidate-da0aaedc17334e3f'])
+result:    FAIL
+=== P10/removal_skipped/twin
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-220acd5ce68248f9'])
+  [ok] docker: torn down directly, assize-candidate-220acd5ce68248f9 is not listed
+  [ok] docker: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] docker: the runtime lists no candidate container afterwards ([])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-537be8b88d254314'])
+  [ok] podman: torn down directly, assize-candidate-537be8b88d254314 is not listed
+  [ok] podman: the stalled episode is recorded step_timeout (['step_timeout'])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+result:    PASS
