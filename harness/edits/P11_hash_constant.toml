@@ -1,0 +1,5 @@
+# P11's mutant `hash_constant` (brief 1 A7 item 3): the trajectory hash ignores the trajectory, so every determinism comparison holds vacuously.
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "    return h.hexdigest(), ep"
+new = "    return hashlib.sha256().hexdigest(), ep"

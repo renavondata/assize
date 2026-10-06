@@ -4,6 +4,7 @@ version = "0.0.0"
 description = "The court: World bindings, interface, sealed judge and reference incumbents."
 requires-python = ">=3.11"
 dependencies = [
+    "crafter==1.8.3",
     "jsonschema>=4.23",
 ]
 

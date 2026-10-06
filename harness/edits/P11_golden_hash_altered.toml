@@ -1,0 +1,6 @@
+# P11's mutant `golden_hash_altered` (L1 review a814d28 F4): the committed golden differs from the World's trajectory
+# hash, as it would if a different interpreter, numpy or crafter changed the World.
+[[edit]]
+path = "harness/pins.py"
+old = 'TRAJECTORY_GOLDEN = "f65aed28'
+new = 'TRAJECTORY_GOLDEN = "065aed28'

@@ -1,0 +1,5 @@
+# P11's mutant `seed_ignored` (brief 1 A7 item 3): the binding constructs the Env without the seed, so Crafter draws its own.
+[[edit]]
+path = "worlds/crafter/binding.py"
+old = "    env = crafter.Env(seed=seed)"
+new = "    env = crafter.Env(seed=None)"
