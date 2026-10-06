@@ -283,6 +283,64 @@ def p0i_no_stale_bytecode() -> bool:
     return ok
 
 
+HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
+REQUIRED_FACTS = ("uptime", "cpuset", "runner-version", "podman-info")
+STUB = "#!/bin/sh\n{body}\n"
+STUB_OK = {"uptime": 'echo " 12:00:00 up 1 day,  load average: 0.10, 0.20, 0.30"',
+           "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"'}
+STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo "podman version 5.0.0"'}
+
+
+def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
+    """Run host_facts.sh against stubbed probes, with the one fact named by `lacking` failing."""
+    root = work / case
+    stubs, runner, out = root / "bin", root / "runner", root / "out"
+    for d in (stubs, runner):
+        d.mkdir(parents=True)
+    for name in STUB_OK:
+        stub = stubs / name
+        fails = (lacking, name) in (("uptime", "uptime"), ("podman-info", "podman"))
+        stub.write_text(STUB.format(body=(STUB_FAIL if fails else STUB_OK)[name]))
+        stub.chmod(0o755)
+    cpuset = root / "cpuset.cpus.effective"
+    if lacking != "cpuset":
+        cpuset.write_text("0-3\n")
+    if lacking != "runner-version":
+        (runner / ".runner").write_text('{"agentName": "stub"}')
+    env = os.environ | {"PATH": f"{stubs}:{os.environ['PATH']}"}
+    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner)], env=env,
+                       capture_output=True, text=True, timeout=60, preexec_fn=proc.setup(False))
+    facts = out / "facts.txt"
+    return r.returncode, facts.read_text() if facts.is_file() else ""
+
+
+def p0j_host_facts_complete() -> bool:
+    """host_facts.sh records load averages, the runner's cpuset, the runner version and the podman runtime line,
+    and exits non-zero naming the fact when any one of them is missing: such facts are not a measurement
+    (brief 1 A4 item 8)."""
+    work = Path(tempfile.mkdtemp(prefix="assize-p0j-", dir=context.scratch))
+    ok = True
+
+    def expect(cond: bool, what: str) -> None:
+        nonlocal ok
+        print(f"  [{'ok' if cond else 'FAIL'}] {what}")
+        ok = ok and cond
+
+    code, facts = _host_facts(work, "complete", None)
+    expect(code == 0, f"every fact present: exit 0 (got {code})")
+    expect(all(f"### {name}\n" in facts for name in REQUIRED_FACTS), f"facts record {REQUIRED_FACTS}")
+    expect("load average: 0.10" in facts and "0-3" in facts and "agentName" in facts
+           and "crun 2 systemd rootless=true" in facts, "facts carry each probe's output")
+    expect("NOT A MEASUREMENT" not in facts, "complete facts are not refused")
+    for name in REQUIRED_FACTS:
+        code, facts = _host_facts(work, f"lacks-{name}", name)
+        refusal = next((line for line in facts.splitlines() if line.startswith("NOT A MEASUREMENT")), "")
+        expect(code not in (0, None), f"{name} missing: exit non-zero (got {code})")
+        expect(name in refusal.split(), f"{name} missing: refusal names it ({refusal!r})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -306,4 +364,6 @@ PINS = [
                                      Mutant("sweep_skipped", _edits("P0h_sweep_skipped")))),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),)),
+    Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
+        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),)),
 ]

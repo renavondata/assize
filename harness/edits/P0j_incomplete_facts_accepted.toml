@@ -1,0 +1,5 @@
+# P0j's mutant: host_facts.sh exits 0 whatever facts are missing; an incomplete record passes as a measurement.
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "[ \"${#missing[@]}\" -eq 0 ]\n"
+new = "true\n"
