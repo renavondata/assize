@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)",
+      "Bash(make:*)",
+      "Bash(podman:*)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

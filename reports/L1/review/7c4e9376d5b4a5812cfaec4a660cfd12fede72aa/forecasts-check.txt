@@ -1,0 +1,21 @@
+# ledger at 7c4e937 before this review's resolutions: reports/L0/forecasts.jsonl + reports/L1/forecasts.jsonl
+legacy L0 resolution rows keyed 'resolves' (pre-A1.6 form, frozen L0): ['876d1d05c550', 'a30e37db1152']
+claims 14 ; ids not recomputing as sha256(claim+ts)[:12]: []
+resolved 9 ; resolved more than once: []
+cumulative log-loss 2.088 vs base 6.238 (= N ln 2, base rate 0.5) over N=9
+open 11503575a841 p= 0.85 session unknown | L1 host verdict for Crafter is FIT
+open 1608ce8c1b56 p= 0.6 session e264099a-f5f5-4fea-aa42-71dbb076e3e3 | L1 host verdict for Crafter is FIT
+open bac95e050e0d p= 0.9 session d1c31c5a-40d9-4dec-8bff-6ae707a2785c | pins green on the first CI run of the constitution-3 PR head
+open f01921f37bce p= 0.8 session d1c31c5a-40d9-4dec-8bff-6ae707a2785c | reviewer verdict ACCEPT with no blocking finding on constitution-3
+open d2c4349bd09f p= 0.6 session d1c31c5a-40d9-4dec-8bff-6ae707a2785c | L1 host verdict for Crafter is FIT
+# prequential Laplace base rate per claim type, (k+1)/(n+2) over earlier resolutions of the same type, resolutions in ts order
+876d1d05c550 2026-10-06T03:32:44Z pins outcome True base p 0.5
+a30e37db1152 2026-10-06T03:32:44Z other:fixture.escapee recorded leaked with lea outcome True base p 0.5
+ed89fc300206 2026-10-06T03:32:44Z review outcome False base p 0.5
+f10042c28c01 2026-10-06T05:28:40Z pins outcome True base p 0.667
+39c7566f41c1 2026-10-06T05:28:40Z review outcome True base p 0.333
+1d42825b59cd 2026-10-06T06:44:16Z pins outcome True base p 0.75
+8bb9cda2bc61 2026-10-06T06:44:16Z review outcome True base p 0.5
+dd537e267ba5 2026-10-06T08:47:27Z pins outcome True base p 0.8
+c0834181919c 2026-10-06T08:47:27Z review outcome True base p 0.6
+prequential Laplace base log-loss 5.298 over 9 (STATUS states 6.238 at constant 0.5)

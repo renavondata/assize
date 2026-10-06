@@ -1,0 +1,19 @@
+$ git diff --stat 401f616 7c4e937
+ reports/L1/STATUS.md     | 10 +++++-----
+ reports/L1/make-pins.txt | 32 ++++++++++++++++----------------
+ 2 files changed, 21 insertions(+), 21 deletions(-)
+$ gh pr view 6 --json author,labels,files
+author assize-reviewer; labels ["constitution"]
+.claude/settings.json
+CLAUDE.md
+docs/briefs/brief-1-judge-and-crafter.md
+harness/proposer.toml
+reports/L1/STATUS.md
+reports/L1/forecasts.jsonl
+reports/L1/make-pins.txt
+$ trailers
+7c4e937: Proposer: builder claude-opus-5-5 d1c31c5a-40d9-4dec-8bff-6ae707a2785c
+401f616: Proposer: builder claude-opus-5-5 d1c31c5a-40d9-4dec-8bff-6ae707a2785c
+20428b0: Proposer: builder claude-opus-5-5 d1c31c5a-40d9-4dec-8bff-6ae707a2785c
+37712ae: Proposer: guy | Proposer: builder claude-opus-5-5 d1c31c5a-40d9-4dec-8bff-6ae707a2785c
+596e226: Proposer: builder claude-opus-5-5 d1c31c5a-40d9-4dec-8bff-6ae707a2785c

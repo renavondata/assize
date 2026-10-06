@@ -175,3 +175,11 @@ Copy, word for word, the three OBLIGATION findings F2, F3 and F4 from `reports/L
 
 ### 9. Pre-stated criteria added by A4
 P9 and P10 KILLED with passing twins; the harness half of item 5 witnessed on the host before the first pilot; the compute price committed before the first scored run; every judge record carrying `proposer` taken from the registering credential; the three item-7 pins present with their mutants KILLED. These join brief 1's existing criteria; none replaces one.
+
+---
+
+## Amendment A5: PR #5 review obligations brought into L1 (appended; overrides earlier text where they conflict)
+- F1 (stale bytecode): done within A4 item 5's harness work, before any pilot. The harness copy excludes `__pycache__` at every depth, and every child Python process runs with bytecode reading and writing disabled (`-B` and `PYTHONDONTWRITEBYTECODE=1`). Pin: a mutant whose edit preserves byte length and lands in the same second as the source's recorded mtime is KILLED. Seeded mutant: restore the top-level-only exclude; the pin KILLS it with a fixture that compiles a module, then applies a same-length edit within the same second.
+- F4 (§1 chaining): the first record of a request has `prev_sha256` equal to the SHA-256 of the request's `request_id` as UTF-8 bytes. P9's verifier rejects a first record chaining from the empty string; seeded mutant: a first record with `prev_sha256` of "" must fail verification.
+- F2 (trailers): the item-7c checker reads every `Proposer:` line of a commit, one party per line, per CLAUDE.md A1.7 as amended; seeded mutant: a checker that reads only the first line, KILLED by a fixture commit with two parties whose second party must be reported.
+- F3 is discharged by CLAUDE.md A1.3 as amended; no brief text.
