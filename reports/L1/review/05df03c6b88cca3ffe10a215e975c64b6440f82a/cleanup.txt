@@ -1,0 +1,14 @@
+2026-10-06T17:33:48Z
+worktrees:
+/home/g/git/assize        05df03c [l1-item7-checkers]
+/home/g/git/assize-review 05df03c (detached HEAD)
+scratch dir exists?
+ls: cannot access '/home/g/git/worktrees/assize/review-scratch-05df03c': No such file or directory
+ls: cannot access '/tmp/rv-probe-05df03c': No such file or directory
+/tmp assize-scratch/copy/p0i/p0m:
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+ls: cannot access '/tmp/assize-copy-*': No such file or directory
+ls: cannot access '/tmp/assize-p0i-*': No such file or directory
+ls: cannot access '/tmp/assize-p0m-*': No such file or directory
+harness processes:
+none

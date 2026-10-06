@@ -1,0 +1,4 @@
+a) valid citation + uncited stale CI claim: []
+b) self-asserted guy trailer on CLAUDE.md: []
+c) duplicate forecast id + two resolutions with opposite outcomes: []
+ls: cannot access '/tmp/rv-probe-05df03c': No such file or directory

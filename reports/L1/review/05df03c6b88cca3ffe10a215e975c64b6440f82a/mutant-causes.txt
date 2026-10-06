@@ -1,0 +1,72 @@
+=== P0k/clean
+pin:       P0k
+role:      clean
+tree:      /home/g/git/worktrees/assize/review-scratch-05df03c
+  [ok] well-formed forecast and Reviewer resolution accepted ([])
+  [ok] resolution lacking id rejected (['row 2: missing_key: resolution lacks id'])
+  [ok] resolution lacking ts rejected (['row 2: missing_key: resolution lacks ts'])
+  [ok] resolution lacking proposer rejected (['row 2: missing_key: resolution lacks proposer'])
+  [ok] resolution lacking outcome rejected (['row 2: missing_key: resolution lacks outcome'])
+  [ok] orphan resolution rejected with orphan (["row 2: orphan: id '000000000000' matches no earlier forecast"])
+  [ok] builder-proposed resolution rejected with not_reviewer (['row 2: not_reviewer: A1.6 assigns resolutions to the Reviewer'])
+  [ok] L0 shape (resolves, evidence) resolution rejected with missing_key (['row 2: missing_key: resolution lacks id', 'row 2: missing_key: resolution lacks proposer'])
+  [ok] a resolution before its forecast matches no earlier forecast
+  [ok] a forecast whose id is not sha256(claim + ts)[:12] rejected
+  [ok] real ledgers found: ['reports/L0/forecasts.jsonl', 'reports/L1/forecasts.jsonl']
+    L0: row 4: missing_key: resolution lacks id
+    L0: row 4: missing_key: resolution lacks proposer
+    L0: row 5: missing_key: resolution lacks id
+    L0: row 5: missing_key: resolution lacks proposer
+  [ok] reports/L0/forecasts.jsonl: 8 rows, 4 findings; expected exactly [('row 4', 'missing_key'), ('row 5', 'missing_key')]
+  [ok] reports/L1/forecasts.jsonl: 42 rows, 0 findings; expected exactly none
+result:    PASS
+=== P0l/clean
+pin:       P0l
+role:      clean
+tree:      /home/g/git/worktrees/assize/review-scratch-05df03c
+  [ok] STATUS cites a successful pins run on its own sha: findings [], want []
+  [ok] STATUS cites a run on an older sha: findings ['head_mismatch'], want ['head_mismatch']
+  [ok] STATUS cites a failed run: findings ['not_success'], want ['not_success']
+  [ok] STATUS STOPPED, cites a failed run on its own sha: findings [], want []
+  [ok] STATUS cites no run: findings ['uncited'], want ['uncited']
+  [ok] STATUS cites an unrecorded run: findings ['unrecorded'], want ['unrecorded']
+  [ok] STATUS cites a measure run: findings ['not_pins'], want ['not_pins']
+  [ok] STATUS cites a run under the wrong sha: findings ['citation_mismatch'], want ['citation_mismatch']
+  [ok] REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({('REPORT:4', 'uncited'), ('REPORT:3', 'head_mismatch'), ('REPORT:3', 'citation_mismatch')})
+  [ok] real STATUS files from L1: ['reports/L1/STATUS.md']; 2 committed run records
+  [ok] reports/L1/STATUS.md: cites [('37503259981', '89b9d1c')]; findings []
+  [ok] REPORT.md: 0 verdict lines from L1; findings []
+result:    PASS
+=== P0m/clean
+pin:       P0m
+role:      clean
+tree:      /home/g/git/worktrees/assize/review-scratch-05df03c
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: 6 branch commits read, want 6
+  [ok] builder, ordinary path: parties reported ['builder m s'], findings []; want ['builder m s'], []
+  [ok] no trailer: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s'], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], findings []; want ['guy', 'builder m s'], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], findings []; want ['builder m s', 'guy'], []
+  [ok] malformed party: parties reported ['builder m'], findings ['bad_party']; want ['builder m'], ['bad_party']
+  [ok] real branch: base resolved (9e48ab47978441327b5f895d12dd96210f360dac)
+    89b9d1c721f0 parties ['builder claude-opus-5-5 23f06d9c-5fc6-45a1-a066-3c034d8b898b']
+    05df03c6b88c parties ['builder claude-opus-5-5 23f06d9c-5fc6-45a1-a066-3c034d8b898b']
+  [ok] real branch 9e48ab479784..HEAD: 2 commits; findings []
+result:    PASS
+=== P0k/proposer_check_dropped mutant FAIL lines
+  [FAIL] resolution lacking proposer rejected ([])
+--- twin FAIL count: 0
+=== P0l/sha_comparison_skipped mutant FAIL lines
+  [FAIL] STATUS cites a run on an older sha: findings [], want ['head_mismatch']
+  [FAIL] REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({('REPORT:4', 'uncited'), ('REPORT:3', 'citation_mismatch')})
+--- twin FAIL count: 0
+=== P0m/trailer_check_disabled mutant FAIL lines
+  [FAIL] builder only, CLAUDE.md: parties reported ['builder m s'], findings []; want ['builder m s'], ['entrenched_without_guy']
+--- twin FAIL count: 0
+=== P0m/first_proposer_only mutant FAIL lines
+  [FAIL] guy then builder, CLAUDE.md: parties reported ['guy'], findings []; want ['guy', 'builder m s'], []
+  [FAIL] builder then guy, .github/: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s', 'guy'], []
+--- twin FAIL count: 0
+=== registry
+{'kind': 'builder', 'model': 'claude-opus-5-5', 'session': '23f06d9c-5fc6-45a1-a066-3c034d8b898b'}

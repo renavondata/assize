@@ -1,0 +1,7 @@
+89b9d1c721f0dcadd1cf9550708096c1b800474b completed success 37503259981 attempt=1 2026-10-06T17:24:08Z https://github.com/renavondata/assize/actions/runs/37503259981
+05df03c6b88cca3ffe10a215e975c64b6440f82a completed success 37503843412 attempt=1 2026-10-06T17:28:43Z https://github.com/renavondata/assize/actions/runs/37503843412
+--- committed records vs API (id head_sha path conclusion)
+record 37485211229: 37485211229 3210f7ee790d2eabcf5562bbff54bbc3d213623e .github/workflows/pins.yml success
+api    37485211229: 37485211229 3210f7ee790d2eabcf5562bbff54bbc3d213623e .github/workflows/pins.yml success
+record 37503259981: 37503259981 89b9d1c721f0dcadd1cf9550708096c1b800474b .github/workflows/pins.yml success
+api    37503259981: 37503259981 89b9d1c721f0dcadd1cf9550708096c1b800474b .github/workflows/pins.yml success

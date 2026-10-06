@@ -1,0 +1,6 @@
+ 955013 /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+ 955067 /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service
+3766550 bash /home/g/bin/assize-loop.sh
+3766866 bash /home/g/bin/assize-loop.sh
+assize-make-pins.txt
+assize-mkpins.txt
