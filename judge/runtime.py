@@ -94,7 +94,8 @@ def pull(rt: Runtime, image: str) -> None:
 
 
 def run_argv(rt: Runtime, image: str, lim: Limits, name: str, command: Sequence[str]) -> list[str]:
-    """The command line that runs `command` in a fresh candidate container of `image` named `name`, attached to stdio."""
+    """The command line that runs `command` in a fresh candidate container of `image` named `name`, attached to stdio.
+    There is no `--rm`: removal is the judge's explicit act, witnessed by the runtime's listing (P10)."""
     isolation = [
         "--network=none",
         "--read-only",
@@ -107,4 +108,10 @@ def run_argv(rt: Runtime, image: str, lim: Limits, name: str, command: Sequence[
     ]
     # Podman mounts writable tmpfs on /tmp, /var/tmp and /run under --read-only unless told not to; Docker does not.
     uniform = ["--read-only-tmpfs=false"] if rt.name == "podman" else []
-    return [rt.binary, "run", "--rm", "-i", "--pull=never", f"--name={name}", *isolation, *uniform, image, *command]
+    return [rt.binary, "run", "-i", "--pull=never", f"--name={name}", *isolation, *uniform, image, *command]
+
+
+def remove_argv(rt: Runtime, name: str) -> list[str]:
+    """The command line that kills the container `name` at once with SIGKILL, whatever it ignores, and removes it.
+    Docker's `rm -f` kills with SIGKILL; Podman's sends SIGTERM and waits `--time` seconds first, so that is 0."""
+    return [rt.binary, "rm", "-f", *(["--time=0"] if rt.name == "podman" else []), name]

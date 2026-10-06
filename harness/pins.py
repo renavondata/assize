@@ -808,10 +808,13 @@ def p2_peek() -> bool:
     for e in usable:
         rt = e.runtime
         runtime.pull(rt, image)
-        argv = runtime.run_argv(rt, image, lim, f"assize-p2-{os.getpid()}-{rt.name}",
-                                ["python", "-I", "-c", PEEK, json.dumps(paths)])
+        name = f"assize-p2-{os.getpid()}-{rt.name}"
+        argv = runtime.run_argv(rt, image, lim, name, ["python", "-I", "-c", PEEK, json.dumps(paths)])
         print(f"  {rt.name}$ {' '.join(argv[:-2])} <PEEK> <paths>")
-        out = subprocess.run(argv, capture_output=True, text=True)
+        try:
+            out = subprocess.run(argv, capture_output=True, text=True)
+        finally:
+            subprocess.run(runtime.remove_argv(rt, name), capture_output=True)
         try:
             r = json.loads(out.stdout)
         except json.JSONDecodeError:
@@ -830,6 +833,133 @@ def p2_peek() -> bool:
         for k, v in want_cgroup.items():
             expect(r["cgroup"][k] == v, f"{n}: {k} is {r['cgroup'][k]!r}, from config {v!r}")
     return ok()
+
+# P3 and P10 play the Crafter World cut to a few steps, so that each case costs seconds: the loop is the judge's own,
+# and the World's length is the only thing the fixture changes (brief 1 section 2).
+LOOP_STEPS = 5
+
+
+def _short_crafter(n: int):
+    from worlds.crafter import binding
+
+    for seed in range(1, n + 1):
+        ep = binding.Episode(seed)
+        ep._env._length = LOOP_STEPS
+        yield ep
+
+
+def _candidates(rt) -> set[str]:
+    from judge import episodes
+
+    return set(episodes.listed_prefix(rt, "assize-candidate-"))
+
+
+def _usable_runtimes(expect):
+    """Every usable runtime, each named in the transcript, with the base image present; at least one is required."""
+    from judge import runtime
+
+    engines = [runtime.engine(rt) for rt in runtime.RUNTIMES]
+    for e in engines:
+        print(f"  runtime {e.runtime.name}: {'USABLE' if e.usable else 'not usable'}: {e.identity}")
+    usable = [e.runtime for e in engines if e.usable]
+    expect(bool(usable), f"at least one runtime witnessed ({[rt.name for rt in usable]})")
+    image = runtime.candidate_config()["base_image"]
+    for rt in usable:
+        runtime.pull(rt, image)
+    return usable, image
+
+
+def _removing_strays(rt, before: set[str]) -> list[str]:
+    """Force-remove every candidate container that appeared since `before`, so that a failing case leaves nothing
+    behind, and return their names."""
+    from judge import runtime
+
+    strays = sorted(_candidates(rt) - before)
+    for name in strays:
+        subprocess.run(runtime.remove_argv(rt, name), capture_output=True)
+    return strays
+
+
+def p3_survivorship() -> bool:
+    """Every episode is recorded with its termination code, failures included: under every usable runtime, a fixture
+    candidate that crashes, garbles its reply, plays an illegal action, stalls a step or overruns the episode yields
+    exactly one record per requested episode, in order, each with that failure's code; a polite candidate's episodes
+    end as the World ends them. No candidate container is left listed (brief 1 section 2)."""
+    import dataclasses
+
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    t = episodes.timeouts()
+    print(f"  timeouts from judge/config.toml: {t}")
+    # Each failure ends its episode on the first step except `slow`, whose every reply takes 0.5 s: an episode deadline
+    # of 1.2 s ends it at step 2 or 3 while each step stays within step_s. `stubborn` never replies; a 2 s step
+    # deadline bounds the pin's wall time, and step_s from config is the judge's, untouched.
+    cases = (("polite", 2, t, "truncated"), ("crash", 3, t, "crash"), ("garbled", 2, t, "invalid_reply"),
+             ("illegal", 2, t, "illegal_action"), ("slow", 2, dataclasses.replace(t, episode_s=1.2), "episode_timeout"),
+             ("stubborn", 2, dataclasses.replace(t, step_s=2.0), "step_timeout"))
+    usable, image = _usable_runtimes(expect)
+    for rt in usable:
+        before = _candidates(rt)
+        for behaviour, n, tt, want in cases:
+            records = episodes.run(rt, image, _short_crafter(n), binding.manifest(),
+                                   command=candidates.command(behaviour), t=tt)
+            print(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            expect(len(records) == n and [r["episode"] for r in records] == list(range(n)),
+                   f"{rt.name} {behaviour}: {len(records)} of {n} requested episodes recorded, in order")
+            expect(all(r["termination"] == want for r in records),
+                   f"{rt.name} {behaviour}: every termination is {want} ({[r['termination'] for r in records]})")
+            if want == "truncated":
+                expect(all(r["steps"] == LOOP_STEPS for r in records),
+                       f"{rt.name} {behaviour}: every episode ran its {LOOP_STEPS} steps")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+    return ok()
+
+
+def p10_container_teardown() -> bool:
+    """Under every usable runtime, a candidate container whose processes ignore SIGTERM, a child in its own session
+    among them, is killed and removed: the runtime lists nothing of it afterwards, both when torn down directly and
+    when its stalled step times out, which is then recorded step_timeout, not leaked (brief 1 A4 item 5)."""
+    import dataclasses
+    import time
+
+    from harness.fixtures import candidates
+    from judge import episodes, runtime
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    # The pin's own bound on how long teardown may take, so that a mutant that never removes fails in seconds.
+    t = dataclasses.replace(episodes.timeouts(), step_s=2.0, teardown_s=5.0)
+    usable, image = _usable_runtimes(expect)
+    for rt in usable:
+        before = _candidates(rt)
+        c = episodes.Container(rt, image, runtime.limits(), candidates.command("stubborn"))
+        try:
+            c.call("begin_episode", {"schema_version": episodes.SCHEMA_VERSION, "manifest": binding.manifest()}, t,
+                   time.monotonic() + t.episode_s)
+            c._send("step", {"t": 0, "observation": {}, "legal_actions": [0]})
+            time.sleep(1.0)
+            term = subprocess.run([rt.binary, "kill", "--signal=TERM", c.name], capture_output=True, text=True)
+            time.sleep(2.0)
+            running = episodes.listed(rt, c.name, running=True)
+            expect(term.returncode == 0 and running == [c.name],
+                   f"{rt.name}: control: the stubborn container survives SIGTERM (kill exit {term.returncode}; "
+                   f"running {running})")
+        finally:
+            gone = c.teardown(t)
+        expect(gone and not episodes.listed(rt, c.name), f"{rt.name}: torn down directly, {c.name} is not listed")
+        records = episodes.run(rt, image, _short_crafter(1), binding.manifest(), command=candidates.command("stubborn"),
+                               t=t)
+        print(f"  {rt.name} stubborn: {json.dumps(records)}")
+        expect([r["termination"] for r in records] == ["step_timeout"],
+               f"{rt.name}: the stalled episode is recorded step_timeout ({[r['termination'] for r in records]})")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: the runtime lists no candidate container afterwards ({strays})")
+    return ok()
+
 
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
@@ -869,6 +999,10 @@ PINS = [
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
                   Mutant("rootfs_writable", _edits("P2_rootfs_writable")),
                   Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped")))),
+    Pin("P3", "every requested episode is recorded with its termination code, failures included",
+        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),)),
+    Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
+        p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
         p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),)),
     Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",

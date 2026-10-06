@@ -1,0 +1,5 @@
+# P3's mutant `failures_dropped` (brief 1 section 2): an episode the candidate failed is not recorded.
+[[edit]]
+path = "judge/episodes.py"
+old = "        records.append({\"episode\": i,"
+new = "        (records.append if code in WORLD_ENDINGS else (lambda r: None))({\"episode\": i,"

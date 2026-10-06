@@ -1,0 +1,5 @@
+# P10's mutant `removal_skipped` (brief 1 A4 item 5): teardown never asks the runtime to remove the container.
+[[edit]]
+path = "judge/episodes.py"
+old = "            subprocess.run(runtime.remove_argv(self.rt, self.name), capture_output=True, timeout=t.teardown_s)\n"
+new = "            pass\n"
