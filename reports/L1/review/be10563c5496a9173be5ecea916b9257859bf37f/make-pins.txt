@@ -1,0 +1,61 @@
+# make pins at be10563 in scratch clone /tmp/assize-review-15 on steel-legend; start 2026-10-06T20:32:54Z, end 2026-10-06T20:40:05Z
+uv run --frozen python -m harness run --registry harness --phase all --out /home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 130ms
+registry harness: 16 pins, 30 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (2.939s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.335s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.034s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (4.99s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.437s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.334s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.737s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.252s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.336s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.583s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.285s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.284s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.336s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0m/clean/transcript.log
+[clean ] P2: observed pass -> ok (0.836s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P2/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.383s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (18.758s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (2.942s + 2.943s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.289s + 0.286s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.042s + 1.04s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (4.997s + 4.993s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.046s + 1.441s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.291s + 1.341s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.243s + 1.744s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.362s + 12.258s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.308s + 12.307s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.258s + 12.255s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (10.205s + 12.259s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (9.954s + 12.256s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.34s + 0.34s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.343s + 0.338s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.592s + 0.597s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.293s + 0.287s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.291s + 0.289s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.343s + 0.341s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0m/trailer_check_disabled/mutant/transcript.log
+[mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.339s + 0.337s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P0m/first_proposer_only/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (4.947s + 0.893s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (0.894s + 0.948s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (0.89s + 0.891s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (0.892s + 0.892s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.391s + 0.392s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (18.715s + 18.765s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (19.12s + 18.767s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (18.764s + 18.763s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (17.564s + 18.718s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (6.048s + 18.815s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (18.716s + 19.014s) ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 16/16 passed, 0/16 failed
+mutants: 30/30 killed, 0/30 survived, 0/30 inconclusive, 0/30 stale, 0/30 non-causal, 0 leaked (clean and mutant)
+twins: 30/30 passed
+report: ../../home/g/git/assize-review/reports/L1/review/be10563c5496a9173be5ecea916b9257859bf37f/pins.jsonl/pins.jsonl
+PINS PASSED
+exit 0

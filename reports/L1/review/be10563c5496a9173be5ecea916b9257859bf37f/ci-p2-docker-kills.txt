@@ -1,0 +1,44 @@
+# pins CI run 37525906600 on 6ef8006, artefact pins-report (id 11442263886): P2 mutant transcripts, FAIL lines per runtime
+== network_enabled/mutant: 7 FAIL; docker FAIL 3; podman FAIL 4; result:    FAIL
+  [FAIL] docker: udp4 connect has no route (ok)
+  [FAIL] docker: tcp4 connect has no route (timeout)
+  [FAIL] docker: the only network interface is loopback (['eth0', 'lo'])
+  [FAIL] podman: udp4 connect has no route (ok)
+  [FAIL] podman: tcp4 connect has no route (timeout)
+  [FAIL] podman: udp6 connect has no route (ok)
+  [FAIL] podman: the only network interface is loopback (['lo', 'tap0'])
+== network_enabled/twin: 0 FAIL; docker FAIL 0; podman FAIL 0; result:    PASS
+== judge_mounted/mutant: 10 FAIL; docker FAIL 5; podman FAIL 5; result:    FAIL
+  [FAIL] docker: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo denied by the OS (ok)
+  [FAIL] docker: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo/judge denied by the OS (ok)
+  [FAIL] docker: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo/judge/config.toml denied by the OS (ok)
+  [FAIL] docker: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo/judge/runtime.py denied by the OS (ok)
+  [FAIL] docker: reading /tmp/assize-scratch-5c_i6ruf denied by the OS (ok)
+  [FAIL] podman: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo denied by the OS (ok)
+  [FAIL] podman: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo/judge denied by the OS (ok)
+  [FAIL] podman: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo/judge/config.toml denied by the OS (ok)
+  [FAIL] podman: reading /tmp/assize-scratch-5c_i6ruf/assize-copy-95x10t8l/repo/judge/runtime.py denied by the OS (ok)
+  [FAIL] podman: reading /tmp/assize-scratch-5c_i6ruf denied by the OS (ok)
+== judge_mounted/twin: 0 FAIL; docker FAIL 0; podman FAIL 0; result:    PASS
+== rootfs_writable/mutant: 2 FAIL; docker FAIL 1; podman FAIL 1; result:    FAIL
+  [FAIL] docker: writing the root file system is refused read-only (ok)
+  [FAIL] podman: writing the root file system is refused read-only (EACCES)
+== rootfs_writable/twin: 0 FAIL; docker FAIL 0; podman FAIL 0; result:    PASS
+== memory_limit_dropped/mutant: 4 FAIL; docker FAIL 2; podman FAIL 2; result:    FAIL
+  [FAIL] docker: memory.max is 'max', from config '1073741824'
+  [FAIL] docker: memory.swap.max is 'max', from config '0'
+  [FAIL] podman: memory.max is 'max', from config '1073741824'
+  [FAIL] podman: memory.swap.max is 'max', from config '0'
+== memory_limit_dropped/twin: 0 FAIL; docker FAIL 0; podman FAIL 0; result:    PASS
+
+# P2 rows of pins.jsonl
+None None None None
+clean None ok 0
+mutant P2/network_enabled KILLED 0
+twin P2/network_enabled ok 0
+mutant P2/judge_mounted KILLED 0
+twin P2/judge_mounted ok 0
+mutant P2/rootfs_writable KILLED 0
+twin P2/rootfs_writable ok 0
+mutant P2/memory_limit_dropped KILLED 0
+twin P2/memory_limit_dropped ok 0
