@@ -1,0 +1,8 @@
+# cleanup after review of be10563, 2026-10-06T20:40:25Z
+$ ls -d /tmp/assize-review-15 /tmp/assize-rev15*
+ls: cannot access '/tmp/assize-review-15': No such file or directory
+ls: cannot access '/tmp/assize-rev15*': No such file or directory
+$ podman ps -a --filter name=assize
+(end; empty = none)
+$ pgrep -af 'harness|assize-p2|assize-review-15'
+none

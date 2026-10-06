@@ -1,0 +1,30 @@
+pin:       P2
+protects:  a candidate container cannot read judge paths or reach the network; root read-only; config limits
+role:      clean
+tree:      /home/assize-runner/actions-runner/_work/assize/assize
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-w7_qjyvk
+  [ok] every probed judge path exists on the judge's side: ['/home/assize-runner/actions-runner/_work/assize/assize', '/home/assize-runner/actions-runner/_work/assize/assize/judge', '/home/assize-runner/actions-runner/_work/assize/assize/judge/config.toml', '/home/assize-runner/actions-runner/_work/assize/assize/judge/runtime.py', '/tmp/assize-scratch-w7_qjyvk']
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman$ podman run --rm -i --pull=never --name=assize-p2-4138821-podman --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges --cpus=1.0 --memory=1024m --memory-swap=1024m --pids-limit=64 --read-only-tmpfs=false docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce python -I -c <PEEK> <paths>
+  podman probe: {"read": {"/home/assize-runner/actions-runner/_work/assize/assize": "ENOENT", "/home/assize-runner/actions-runner/_work/assize/assize/judge": "ENOENT", "/home/assize-runner/actions-runner/_work/assize/assize/judge/config.toml": "ENOENT", "/home/assize-runner/actions-runner/_work/assize/assize/judge/runtime.py": "ENOENT", "/tmp/assize-scratch-w7_qjyvk": "ENOENT"}, "read_control": "ok", "net": {"udp4": "ENETUNREACH", "tcp4": "ENETUNREACH", "udp6": "ENETUNREACH", "tcp6": "ENETUNREACH"}, "interfaces": ["lo"], "write_root": "EROFS", "cgroup": {"cpu.max": "100000 100000", "memory.max": "1073741824", "memory.swap.max": "0", "pids.max": "64"}}
+  [ok] podman: probe exited 0 (0)
+  [ok] podman: reading /home/assize-runner/actions-runner/_work/assize/assize denied by the OS (ENOENT)
+  [ok] podman: reading /home/assize-runner/actions-runner/_work/assize/assize/judge denied by the OS (ENOENT)
+  [ok] podman: reading /home/assize-runner/actions-runner/_work/assize/assize/judge/config.toml denied by the OS (ENOENT)
+  [ok] podman: reading /home/assize-runner/actions-runner/_work/assize/assize/judge/runtime.py denied by the OS (ENOENT)
+  [ok] podman: reading /tmp/assize-scratch-w7_qjyvk denied by the OS (ENOENT)
+  [ok] podman: control: a file of the image is readable (ok)
+  [ok] podman: udp4 connect has no route (ENETUNREACH)
+  [ok] podman: tcp4 connect has no route (ENETUNREACH)
+  [ok] podman: udp6 connect has no route (ENETUNREACH)
+  [ok] podman: tcp6 connect has no route (ENETUNREACH)
+  [ok] podman: the only network interface is loopback (['lo'])
+  [ok] podman: writing the root file system is refused read-only (EROFS)
+  [ok] podman: cpu.max is '100000 100000', from config '100000 100000'
+  [ok] podman: memory.max is '1073741824', from config '1073741824'
+  [ok] podman: memory.swap.max is '0', from config '0'
+  [ok] podman: pids.max is '64', from config '64'
+result:    PASS

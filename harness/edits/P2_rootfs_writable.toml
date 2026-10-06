@@ -1,0 +1,5 @@
+# P2's mutant `rootfs_writable` (brief 1 section 2): the candidate container's root file system is writable.
+[[edit]]
+path = "judge/runtime.py"
+old = "        \"--read-only\",\n"
+new = "        # root file system: writable\n"

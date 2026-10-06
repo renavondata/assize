@@ -1,0 +1,10 @@
+# Judge configuration (brief 1 section 2). Committed before the first scored run; never tuned after seeing scores.
+
+[candidate]
+# Base image of every candidate container: python:3.11-slim, pinned by its multi-platform index digest.
+base_image = "docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce"
+# cgroup limits of one candidate container: CPUs (cpu.max quota over period), memory in MiB (swap equal to it, so
+# none), and the process count. One CPU is the share a candidate gets on the 12-thread host with room for the judge.
+cpus = 1.0
+memory_mib = 1024
+pids = 64

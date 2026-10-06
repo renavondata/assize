@@ -731,6 +731,106 @@ def p11_crafter_determinism() -> bool:
     return ok()
 
 
+
+# P2's probe, run inside a candidate container (brief 1 section 2, P2): it tries to read each judge path it is given,
+# to reach the network over IPv4 and IPv6, TCP and UDP, and to write the root file system, and reports each OS errno.
+# A control shows the probe is not failing blindly: a file of the image is readable. EROFS and ENETUNREACH name their
+# cause, so they need none. It also reports the network interfaces and the cgroup limits the container sees.
+PEEK = """
+import errno, json, os, socket, sys
+
+def attempt(f):
+    try:
+        f()
+        return "ok"
+    except OSError as e:
+        return errno.errorcode.get(e.errno, "timeout" if isinstance(e, TimeoutError) else str(e))
+
+def read(p):
+    if os.path.isdir(p):
+        os.listdir(p)
+    else:
+        open(p, "rb").read(1)
+
+def write(p):
+    with open(p, "w") as f:
+        f.write("peek")
+
+def connect(family, kind, addr):
+    def go():
+        with socket.socket(family, kind) as s:
+            s.settimeout(2)
+            s.connect(addr)
+    return go
+
+def cgroup(name):
+    try:
+        return open("/sys/fs/cgroup/" + name).read().strip()
+    except OSError as e:
+        return errno.errorcode.get(e.errno, str(e))
+
+print(json.dumps({
+    "read": {p: attempt(lambda p=p: read(p)) for p in json.loads(sys.argv[1])},
+    "read_control": attempt(lambda: read("/etc/os-release")),
+    "net": {"udp4": attempt(connect(socket.AF_INET, socket.SOCK_DGRAM, ("192.0.2.1", 9))),
+            "tcp4": attempt(connect(socket.AF_INET, socket.SOCK_STREAM, ("192.0.2.1", 9))),
+            "udp6": attempt(connect(socket.AF_INET6, socket.SOCK_DGRAM, ("2001:db8::1", 9))),
+            "tcp6": attempt(connect(socket.AF_INET6, socket.SOCK_STREAM, ("2001:db8::1", 9)))},
+    "interfaces": sorted(os.listdir("/sys/class/net")),
+    "write_root": attempt(lambda: write("/assize-peek")),
+    "cgroup": {n: cgroup(n) for n in ("cpu.max", "memory.max", "memory.swap.max", "pids.max")},
+}))
+"""
+# The errnos by which the OS denies a path: absent from the container's mount namespace, or not permitted.
+PATH_DENIALS = frozenset({"ENOENT", "EACCES", "EPERM"})
+
+
+def p2_peek() -> bool:
+    """Under every genuine OCI runtime present (Docker, or rootless Podman with the cpu, memory and pids controllers
+    delegated), a candidate container cannot read the judge's paths, has no network interface but loopback and cannot
+    reach any address, cannot write its root file system, and sees the cgroup limits of the judge's committed config.
+    Each denial is an errno from the OS, not a refusal by convention. At least one runtime must be witnessed; the
+    transcript names which (brief 1 section 2, A1 item 2)."""
+    from judge import runtime
+
+    expect, ok = _expecter()
+    lim = runtime.limits()
+    image = runtime.candidate_config()["base_image"]
+    paths = [str(p) for p in (ROOT, runtime.CONFIG.parent, runtime.CONFIG, Path(runtime.__file__), context.scratch)]
+    expect(all(Path(p).exists() for p in paths), f"every probed judge path exists on the judge's side: {paths}")
+    engines = [runtime.engine(rt) for rt in runtime.RUNTIMES]
+    for e in engines:
+        print(f"  runtime {e.runtime.name}: {'USABLE' if e.usable else 'not usable'}: {e.identity}")
+    usable = [e for e in engines if e.usable]
+    expect(bool(usable), f"at least one runtime witnessed ({[e.runtime.name for e in usable]})")
+    want_cgroup = {"cpu.max": f"{round(lim.cpus * 100000)} 100000", "memory.max": str(lim.memory_mib * 2**20),
+                   "memory.swap.max": "0", "pids.max": str(lim.pids)}
+    for e in usable:
+        rt = e.runtime
+        runtime.pull(rt, image)
+        argv = runtime.run_argv(rt, image, lim, f"assize-p2-{os.getpid()}-{rt.name}",
+                                ["python", "-I", "-c", PEEK, json.dumps(paths)])
+        print(f"  {rt.name}$ {' '.join(argv[:-2])} <PEEK> <paths>")
+        out = subprocess.run(argv, capture_output=True, text=True)
+        try:
+            r = json.loads(out.stdout)
+        except json.JSONDecodeError:
+            expect(False, f"{rt.name}: the probe ran and reported (exit {out.returncode}; {out.stderr.strip()[-300:]})")
+            continue
+        print(f"  {rt.name} probe: {json.dumps(r)}")
+        n = rt.name
+        expect(out.returncode == 0, f"{n}: probe exited 0 ({out.returncode})")
+        for p, got in r["read"].items():
+            expect(got in PATH_DENIALS, f"{n}: reading {p} denied by the OS ({got})")
+        expect(r["read_control"] == "ok", f"{n}: control: a file of the image is readable ({r['read_control']})")
+        for kind, got in r["net"].items():
+            expect(got == "ENETUNREACH", f"{n}: {kind} connect has no route ({got})")
+        expect(r["interfaces"] == ["lo"], f"{n}: the only network interface is loopback ({r['interfaces']})")
+        expect(r["write_root"] == "EROFS", f"{n}: writing the root file system is refused read-only ({r['write_root']})")
+        for k, v in want_cgroup.items():
+            expect(r["cgroup"][k] == v, f"{n}: {k} is {r['cgroup'][k]!r}, from config {v!r}")
+    return ok()
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -764,6 +864,11 @@ PINS = [
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
+    Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
+        p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
+                  Mutant("judge_mounted", _edits("P2_judge_mounted")),
+                  Mutant("rootfs_writable", _edits("P2_rootfs_writable")),
+                  Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped")))),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
         p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),)),
     Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",

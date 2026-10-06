@@ -1,0 +1,41 @@
+# P2 LEAKED on ubuntu-latest, pins CI run 37523381746 on 7bbadbf (conclusion failure), and its cause
+
+## P2 rows of the run's pins.jsonl (artefact pins-report): role, mutant, verdict, leaked_processes, duration_s
+clean None LEAKED 1 17.607
+mutant P2/network_enabled LEAKED 1 10.823
+twin P2/network_enabled LEAKED 1 6.666
+mutant P2/judge_mounted LEAKED 1 6.713
+twin P2/judge_mounted LEAKED 1 6.759
+mutant P2/rootfs_writable LEAKED 1 6.709
+twin P2/rootfs_writable LEAKED 1 6.672
+mutant P2/memory_limit_dropped LEAKED 1 6.725
+twin P2/memory_limit_dropped LEAKED 1 6.662
+
+## runtimes in that run (runs/P2/clean/transcript.log)
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+result:    PASS
+
+## reproduction on steel-legend, 2026-10-06: a Python subreaper runs rootless Podman with a fresh XDG_RUNTIME_DIR, --root,
+## --runroot and --tmpdir under /tmp (so no pause process exists), twice; after each run it lists its own children
+## (iteration, pid, cmdline). Empty cmdlines are unreaped zombies.
+0 4117751 catatonit -P
+0 4118066
+1 4117751 catatonit -P
+1 4118066
+1 4118139
+
+## the same pin on the host (measure run 37523385036 on 7bbadbf, user assize-runner): P2 rows
+clean None ok 0
+mutant P2/network_enabled KILLED 0
+twin P2/network_enabled ok 0
+mutant P2/judge_mounted KILLED 0
+twin P2/judge_mounted ok 0
+mutant P2/rootfs_writable KILLED 0
+twin P2/rootfs_writable ok 0
+mutant P2/memory_limit_dropped KILLED 0
+twin P2/memory_limit_dropped ok 0
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
