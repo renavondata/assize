@@ -1,0 +1,33 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo
+applied 1 edit(s) from harness/edits/P2_network_enabled.toml
+pin:       P2
+protects:  a candidate container cannot read judge paths or reach the network; root read-only; config limits
+role:      mutant
+tree:      /tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-z8sa7dft
+  [ok] every probed judge path exists on the judge's side: ['/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo', '/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge', '/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge/config.toml', '/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge/runtime.py', '/tmp/assize-scratch-z8sa7dft']
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman$ podman run --rm -i --pull=never --name=assize-p2-4127468-podman --read-only --cap-drop=ALL --security-opt=no-new-privileges --cpus=1.0 --memory=1024m --memory-swap=1024m --pids-limit=64 --read-only-tmpfs=false docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce python -I -c <PEEK> <paths>
+  podman probe: {"read": {"/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo": "ENOENT", "/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge": "ENOENT", "/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge/config.toml": "ENOENT", "/tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge/runtime.py": "ENOENT", "/tmp/assize-scratch-z8sa7dft": "ENOENT"}, "read_control": "ok", "net": {"udp4": "ok", "tcp4": "timeout", "udp6": "ok", "tcp6": "timeout"}, "interfaces": ["enp4s0", "lo"], "write_root": "EROFS", "cgroup": {"cpu.max": "100000 100000", "memory.max": "1073741824", "memory.swap.max": "0", "pids.max": "64"}}
+  [ok] podman: probe exited 0 (0)
+  [ok] podman: reading /tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo denied by the OS (ENOENT)
+  [ok] podman: reading /tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge denied by the OS (ENOENT)
+  [ok] podman: reading /tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge/config.toml denied by the OS (ENOENT)
+  [ok] podman: reading /tmp/assize-scratch-z8sa7dft/assize-copy-0j3o7rhy/repo/judge/runtime.py denied by the OS (ENOENT)
+  [ok] podman: reading /tmp/assize-scratch-z8sa7dft denied by the OS (ENOENT)
+  [ok] podman: control: a file of the image is readable (ok)
+  [FAIL] podman: udp4 connect has no route (ok)
+  [FAIL] podman: tcp4 connect has no route (timeout)
+  [FAIL] podman: udp6 connect has no route (ok)
+  [FAIL] podman: tcp6 connect has no route (timeout)
+  [FAIL] podman: the only network interface is loopback (['enp4s0', 'lo'])
+  [ok] podman: writing the root file system is refused read-only (EROFS)
+  [ok] podman: cpu.max is '100000 100000', from config '100000 100000'
+  [ok] podman: memory.max is '1073741824', from config '1073741824'
+  [ok] podman: memory.swap.max is '0', from config '0'
+  [ok] podman: pids.max is '64', from config '64'
+result:    FAIL
