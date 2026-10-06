@@ -1,0 +1,12 @@
+after: git worktree list
+/home/g/git/assize        8e8b676 [l1-pycache-prefix]
+/home/g/git/assize-review 8e8b676 (detached HEAD)
+after: /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* /tmp/assize-p0i-* /tmp/assize-nested-*
+ls: cannot access '/tmp/review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+ls: cannot access '/tmp/assize-copy-*': No such file or directory
+ls: cannot access '/tmp/assize-p0i-*': No such file or directory
+ls: cannot access '/tmp/assize-nested-*': No such file or directory
+after: harness processes
+3535799 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791300535422-dsaaqj.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'R=reports/L1/review/8e8b676bf1977dd63f27c747cb1dea9c750d6136; git worktree remove --force /tmp/review-10-8e8b676 && rm -rf /tmp/review-10-probe-out /tmp/review-10-probe.txt /tmp/review-10-pins.jsonl /tmp/review-art-VVE3; git worktree prune; { echo "after: git worktree list"; git worktree list; echo "after: /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* /tmp/assize-p0i-* /tmp/assize-nested-*"; ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* /tmp/assize-p0i-* /tmp/assize-nested-* 2>&1; echo "after: harness processes"; pgrep -af "python.*-m harness" || echo none; } > $R/cleanup.txt; cat $R/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-5a4d-cwd
+note: the single pgrep match above is the cleanup shell itself (its command line contains the pattern); no python -m harness process remains.
