@@ -1,19 +1,19 @@
-# STATUS — L1 — 2026-10-06 — 89b9d1c — PR #11
+# STATUS — L1 — 2026-10-06 — ea19ca6 — PR #12
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; adds or opens no layer's brief)
-pins: clean 13/13; mutants 19/19 KILLED; twins 19/19; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: harness/{claims.py,pins.py,README.md,proposer.toml,edits/P0k_*,P0l_*,P0m_*}; reports/L1/{ci/37485211229.json,ci/37503259981.json,forecasts.jsonl,make-pins.txt,STATUS.md}
-did: brief 1 A4 item 7 as one group. harness/claims.py has three pure checkers. 7a: forecast ledgers against A1.6. 7b: `pins CI run <id> on <sha>` citations against committed run records reports/L<n>/ci/<id>.json. 7c + A5 F2: `Proposer:` trailers, every party line read
-did: P0k: fixtures cover each missing key, orphan, builder-resolved and L0-shaped rows; real ledgers: L1 0 findings, L0 exactly rows 4–5 (pre-rule). P0l: 8 STATUS fixtures, REPORT fixture; real L1 STATUS clean. P0m: 6-commit fixture repo; real branch 9e48ab4..HEAD clean
-did: KILLED with passing twins: P0k/proposer_check_dropped (proposer-less resolution), P0l/sha_comparison_skipped (STATUS citing a run on an older sha), P0m/trailer_check_disabled (CLAUDE.md commit, builder trailer), P0m/first_proposer_only (two-party commits; second party reported)
-did: make pins at 89b9d1c on steel-legend: PINS PASSED, 3m06s (reports/L1/make-pins.txt); no harness process or /tmp/assize-* scratch left. First pins CI run 37503259981 on 89b9d1c: success (record reports/L1/ci/37503259981.json)
-decided (not asked): a commit touching a CODEOWNERS path passes 7c if any party is `guy` (Guy co-signing, as in 37712ae), not only if all are; a builder-only commit still fails — p(stands on review)=0.7
-decided (not asked): in a shallow clone with no master (pins.yml's depth-1 checkout), P0m prints [skip] for the real branch, still runs every fixture case, and fails on any other unresolvable base. Making CI check the branch needs `fetch-depth: 0` in .github/, which this brief does not name — p=0.6
-decided (not asked): P0k allows exactly L0 rows 4–5 (the rows named in 7a's witness): ledgers are never edited; any other L0 finding fails — p(stands on review)=0.8
-decided (not asked): 7b/7a scope is L1 onward for STATUS and REPORT.md verdict lines (L0 is frozen and pre-rule); a STOPPED STATUS may cite a red run; run records are projections of the Actions API run object, which the Reviewer cross-checks via the API — p=0.75
-decided (not asked): P0k also rejects resolutions not proposed by the Reviewer (A1.6 assigns them) and forecasts whose id is not sha256(claim+ts)[:12]; every existing row satisfies both — p(stands on review)=0.8
-decided (not asked): a merge commit "touches" only paths that differ from every parent (`git diff-tree -c`), so content merged in from master is attributed to its authoring commit — p(stands on review)=0.75
-forecasts: made 3; resolved 0 this session; ledger L0+L1: 29 claims, 19 resolved, 10 open; cumulative log-loss 4.039 vs base rate 13.170 (0.5) over 19 (the 2 id-less L0 rows are not counted)
-obligations added: L2: pins.yml checks out full history so that P0m's real-branch check runs in CI, not only in local and reviewer make pins
+pins: clean 14/14; mutants 20/20 KILLED; twins 20/20; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
+changed: worlds/{__init__.py,spec/{__init__.py,rpc.schema.json,manifest.schema.json,purity.py,README.md},crafter/{manifest.json,README.md}}; harness/{pins.py,README.md,proposer.toml,edits/P6_*}; pyproject.toml; uv.lock; reports/L1/{forecasts.jsonl,make-pins.txt,p6-mutant-transcript.txt,ci/37506834948.json,STATUS.md}
+did: brief 1 §1. worlds/spec/rpc.schema.json (JSON-RPC 2.0: begin_episode {schema_version, manifest}; step {t, observation, legal_actions} → {action, prediction?}; end_episode {termination, utility}; no seed in any message) and manifest.schema.json, both schema_version 1.0.0
+did: worlds/crafter/manifest.json generated from crafter 1.8.3 data.yaml: semantic 64×64 categorical (19 ids), 16 inventory integers 0–9, 17 actions, 6 targets with rationale, 22 achievements as utility components
+did: P6: no manifest token (whole name or underscore part) as any key or string value of a *.schema.json; also schemas valid 2020-12, manifest conforms, seed-carrying messages rejected. KILLED crafter_field_in_schema (adds "semantic" to the step schema) with passing twin: reports/L1/p6-mutant-transcript.txt
+did: make pins at ea19ca6 on steel-legend: PINS PASSED, 3m07s (reports/L1/make-pins.txt); no /tmp/assize-* scratch left. First pins CI run 37506834948 on ea19ca6: success (reports/L1/ci/37506834948.json)
+decided (not asked): observation is info['semantic'] (whole 64×64 map) plus info['inventory'], no facing or position field, as §3 words it — p(stands on review)=0.75
+decided (not asked): targets are health, food, drink, energy, wood, stone at t+1 (support 0–9), rationale in the manifest; committed before any run, revisable until the first scored run — p=0.7
+decided (not asked): categoricals and actions travel as integer indices; a prediction is a probability list aligned with the declared support; begin_episode carries the manifest — p=0.8
+decided (not asked): termination codes (terminal, truncated, crash, step_timeout, episode_timeout, invalid_reply, illegal_action, leaked) are judge vocabulary and live in the schema, not the manifest — p=0.75
+decided (not asked): P6 tokens include descriptions and underscore parts (strict side); manifest prose (rationale, description) is not vocabulary — p=0.8
+decided (not asked): jsonschema (Draft 2020-12) added as the validator dependency rather than a hand-written one — p=0.8
+forecasts: made 3; resolved 0 this session; ledger L0+L1: 32 claims, 21 resolved; cumulative log-loss 4.619 vs base rate 14.556 (0.5) over 21; empirical-frequency base rate is +∞ (a review BLOCK followed only ACCEPTs)
+obligations added: none
 NEEDS YOU (at most 1): none
-next: brief 1 §1 Interface (worlds/spec/: JSON-RPC 2.0 schema with schema_version, per-World manifest) with P6 schema purity and its mutant
+next: brief 1 §3 Crafter binding: worlds/crafter/ adapter emitting manifest-conformant observations; determinism pin (same seed and actions twice → identical trajectory hash) with a mutant

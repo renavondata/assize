@@ -1,0 +1,73 @@
+# probes on scratch clone /tmp/assize-rv12-probe/repo at 1247b4d; scripts in /tmp/assize-rv12-scripts
+## probes.py
+import json, copy, sys
+from pathlib import Path
+import jsonschema, referencing
+from worlds.spec import purity
+schemas = purity.load(purity.schema_files()); manifests = purity.load(purity.manifest_files())
+vocab = purity.vocabulary(manifests.values())
+m = manifests["crafter/manifest.json"]
+reg = referencing.Registry().with_resources((s["$id"], referencing.Resource.from_contents(s)) for s in schemas.values())
+rpc = lambda s: jsonschema.Draft202012Validator(s, registry=reg)
+def viol(mut): return purity.violations({"rpc.schema.json": mut}, vocab)
+base = schemas["rpc.schema.json"]
+print("(a) Crafter-native names absent from the manifest, as step param keys:")
+for word in ["inventory", "achievements", "facing", "daylight", "local_view"]:
+    s = copy.deepcopy(base); s["$defs"]["step_request"]["properties"]["params"]["properties"]["observation"]["required"] = [word]
+    print(f"    {word!r}: P6 violations {viol(s)}")
+print("(b) vocabulary hidden in a regex pattern:")
+s = copy.deepcopy(base); s["$defs"]["step_request"]["properties"]["params"]["properties"]["observation"]["propertyNames"] = {"pattern": "^(sem|inv)"}
+print(f"    pattern '^(sem|inv)': P6 violations {viol(s)}")
+v = rpc(base)
+print("(c) a step reply with no action is valid as an ack:", v.is_valid({"jsonrpc": "2.0", "id": 1, "result": {}}))
+print("(d) prediction length/sum not checked by schema:",
+      v.is_valid({"jsonrpc": "2.0", "id": 1, "result": {"action": 0, "prediction": {"health": [0.9, 0.9], "nonexistent": [0, 0]}}}))
+print("(e) observation names/values not checked against manifest:",
+      v.is_valid({"jsonrpc":"2.0","id":1,"method":"step","params":{"t":0,"observation":{"zz":1.5},"legal_actions":[99]}}))
+## output
+(a) Crafter-native names absent from the manifest, as step param keys:
+    'inventory': P6 violations []
+    'achievements': P6 violations []
+    'facing': P6 violations []
+    'daylight': P6 violations []
+    'local_view': P6 violations []
+(b) vocabulary hidden in a regex pattern:
+    pattern '^(sem|inv)': P6 violations []
+(c) a step reply with no action is valid as an ack: True
+(d) prediction length/sum not checked by schema: True
+(e) observation names/values not checked against manifest: True
+
+## (f) seed allowed in step params (in-file edit, then reverted): P6
+  [FAIL] rpc.schema.json rejects step carrying a seed
+P6 result: False
+tree clean after revert: []
+
+## (g) manifest vs crafter 1.8.3 (throwaway venv /tmp/assize-rv12-probe/venv)
+import json, sys
+import crafter
+from crafter import constants, engine, objects
+m = json.load(open(sys.argv[1]))
+env = crafter.Env(seed=0)
+env.reset()
+_, _, _, info = env.step(0)
+sem = info["semantic"]; inv = info["inventory"]
+print("semantic shape", sem.shape, "dtype", sem.dtype, "max id seen", sem.max())
+sv = env._sem_view
+ids = {**{k: v for k, v in sv._mat_ids.items()}, **{c.__name__.lower(): v for c, v in sv._obj_ids.items()}}
+order = [n for n, _ in sorted(ids.items(), key=lambda kv: kv[1])]
+order = ["none" if n is None else n for n in order]
+vocab = m["observation"][0]["vocabulary"]
+print("semantic vocab matches id order:", order == vocab, len(order), len(vocab))
+print("inventory keys match:", list(inv) == [f["name"] for f in m["observation"][1:]], list(inv))
+print("actions match:", list(constants.actions) == m["actions"], len(constants.actions))
+print("achievements match:", sorted(constants.achievements) == m["utility"]["components"], len(constants.achievements))
+print("default length:", env._length, "manifest:", m["episode_length"])
+print("inventory max in data.yaml:", set(constants.items[k].get("max", None) for k in constants.items) if hasattr(constants, "items") else "n/a")
+## output
+semantic shape (64, 64) dtype uint8 max id seen 16
+semantic vocab matches id order: True 19 19
+inventory keys match: True ['health', 'food', 'drink', 'energy', 'sapling', 'wood', 'stone', 'coal', 'iron', 'diamond', 'wood_pickaxe', 'stone_pickaxe', 'iron_pickaxe', 'wood_sword', 'stone_sword', 'iron_sword']
+actions match: True 17
+achievements match: True 22
+default length: 10000 manifest: 10000
+inventory max in data.yaml: {9}

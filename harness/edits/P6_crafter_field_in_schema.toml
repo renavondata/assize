@@ -1,0 +1,5 @@
+# P6's mutant (brief 1 section 1): the step schema names a Crafter observation field, which belongs in the manifest.
+[[edit]]
+path = "worlds/spec/rpc.schema.json"
+old = "\"description\": \"Maps each manifest observation field to its value.\","
+new = "\"description\": \"Maps each manifest observation field to its value.\",\n              \"required\": [\"semantic\"],"
