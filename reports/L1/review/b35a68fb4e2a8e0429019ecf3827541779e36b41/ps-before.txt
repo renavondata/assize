@@ -1,0 +1,441 @@
+USER         PID    PPID CMD
+root           1       0 /usr/lib/systemd/systemd --switched-root --system --deserialize=51
+root         342       1 /usr/lib/systemd/systemd-journald
+root         370       1 /usr/lib/systemd/systemd-userdbd
+systemd+     397       1 /usr/lib/systemd/systemd-resolved
+systemd+     398       1 /usr/lib/systemd/systemd-timesyncd
+root         413       1 /usr/lib/systemd/systemd-udevd
+systemd+     436       1 /usr/lib/systemd/systemd-networkd
+systemd+     501       1 /usr/lib/systemd/systemd-oomd
+dbus         600       1 /usr/bin/dbus-broker-launch --scope system --audit
+dbus         601     600 dbus-broker --log 10 --controller 9 --machine-id 11446a29a68740949b11611623554df4 --max-bytes 536870912 --max-fds 4096 --max-matches 131072 --audit
+root         603       1 /usr/lib/bluetooth/bluetoothd
+clickho+     604       1 clickhouse-watchdog        --config=/etc/clickhouse-server/config.xml --pid-file=/run/clickhouse-server/clickhouse-server.pid
+root         605       1 /usr/bin/cupsd -l
+plex         611       1 /usr/lib/plexmediaserver/Plex Media Server
+nvidia-+     616       1 /usr/bin/nvidia-persistenced --user nvidia-persistenced
+root         624       1 /usr/lib/systemd/systemd-logind
+root         630       1 /usr/sbin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/run/tailscale/tailscaled.sock --port=41641
+valkey       639       1 /usr/bin/valkey-server 127.0.0.1:6379
+g            661       1 /usr/bin/syncthing serve --no-browser --no-restart
+root         662       1 /usr/sbin/crond -n
+colord       702       1 /usr/lib/colord
+postgres     710       1 /usr/bin/postgres -D /var/lib/postgres/data
+root         717       1 /usr/bin/sddm
+root         719       1 bash /usr/local/bin/psu-telemetry.sh
+g            791       1 /usr/lib/systemd/systemd --user
+g            832     791 (sd-pam)
+g            846     661 /usr/bin/syncthing serve --no-browser --no-restart
+root         865     717 /usr/lib/Xorg -nolisten tcp -background none -seat seat0 vt2 -auth /run/sddm/xauth_WEvJYs -noreset -displayfd 16
+ollama       912       1 /usr/bin/ollama serve
+g            929     791 bash /home/g/git/ops/garmin/watch-and-sync.sh
+g            930     791 /usr/bin/python3 /home/g/git/hbo-il-tracker/server.py
+g            936     791 /usr/bin/python3 /home/g/git/ops/tailnet-ports/server.py
+g            940     929 udevadm monitor --udev --subsystem-match=block --property
+postgres     950     710 postgres: io worker 0
+postgres     951     710 postgres: io worker 1
+postgres     952     710 postgres: io worker 2
+postgres     953     710 postgres: checkpointer 
+postgres     954     710 postgres: background writer 
+clickho+     998     604 /usr/bin/clickhouse-server --config=/etc/clickhouse-server/config.xml --pid-file=/run/clickhouse-server/clickhouse-server.pid
+g           1026     791 catatonit -P
+root        1088     630 sudo -n -u g /usr/bin/tailscaled serve-taildrive home /home/g
+g           1090    1088 /usr/bin/tailscaled serve-taildrive home /home/g
+root        1108     717 /usr/lib/sddm/sddm-helper --socket /tmp/sddm-auth-4e7dca4c-58f6-4752-9905-738c65c5b6fa --id 1 --start /usr/lib/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland --user g --autologin
+g           1111     791 /usr/bin/gnome-keyring-daemon --foreground --components=pkcs11,secrets --control-directory=/run/user/1000/keyring
+g           1116     791 /usr/bin/dbus-broker-launch --scope user
+g           1119    1116 dbus-broker --log 11 --controller 10 --machine-id 11446a29a68740949b11611623554df4 --max-bytes 100000000000000 --max-fds 25000000000000 --max-matches 5000000000
+g           1120    1108 /usr/bin/startplasma-wayland
+g           1196     791 /usr/bin/pasta --config-net -t 127.0.0.1/5417-5417:5432-5432 --dns-forward 169.254.1.1 -u none -T none -U none --no-map-gw --quiet --map-guest-addr 169.254.1.2 --netns /run/user/1000/netns/netns-9efc3838-7d3b-7a6d-1748-5bfe7a4f53bd
+g           1241     791 /usr/bin/pasta --config-net --pid /run/user/1000/containers/networks/rootless-netns/rootless-netns-conn.pid --map-guest-addr 169.254.1.2 --map-guest-addr fc00::2 --address fc00::3 --gateway fc00::1 --dns-forward 169.254.1.1 -t none -u none -T none -U none --no-map-gw --quiet --netns /run/user/1000/containers/networks/rootless-netns/rootless-netns
+g           1259     791 /usr/bin/conmon --api-version 1 -c 05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642 -u 05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642/userdata -p /run/user/1000/containers/overlay-containers/05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642/userdata/pidfile -n renavon-test-pg17 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642 --full-attach -l journald --log-level warning --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg --rm --exit-command-arg 05381121a18c491992afe4458d882db8d412869ff70b3d62aad293a728c43642
+plex        1273     611 /usr/lib/plexmediaserver/Plex DLNA Server
+plex        1280     611 /usr/lib/plexmediaserver/Plex Tuner Service /usr/lib/plexmediaserver/Resources/Tuner/Private /usr/lib/plexmediaserver/Resources/Tuner/Shared 1.43.3.10828-00f62d37d 32600
+100069      1341    1259 postgres
+g           1353     791 /usr/bin/kwin_wayland_wrapper --xwayland
+g           1359    1353 /usr/bin/kwin_wayland --wayland-fd 7 --socket wayland-0 --xwayland-fd 8 --xwayland-fd 9 --xwayland-display :1 --xwayland-xauthority /run/user/1000/xauth_RvmwdP --xwayland
+g           1467     791 /usr/lib/podman/aardvark-dns --config /run/user/1000/containers/networks/aardvark-dns -p 53 run
+g           1485     791 /usr/bin/conmon --api-version 1 -c edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e -u edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e/userdata -p /run/user/1000/containers/overlay-containers/edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e/userdata/pidfile -n invidious_invidious-db_1 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e --full-attach -l journald --log-level warning --syslog --log-size-max 1000000000 --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg --rm --exit-command-arg edaa1f71b30e1bf49ddb30faea5bffc2e6c616efd051e62e0c9613b61da3ee5e
+100998      1498    1485 postgres
+100069      1904    1341 postgres: checkpointer 
+100069      1905    1341 postgres: background writer 
+postgres    1928     710 postgres: walwriter 
+postgres    1929     710 postgres: autovacuum launcher 
+postgres    1930     710 postgres: logical replication launcher 
+polkitd     1964       1 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+g           2665     791 /usr/bin/pipewire
+g           2666     791 /usr/bin/wireplumber
+g           2667     791 /usr/lib/knighttimed
+rtkit       2670       1 /usr/lib/rtkit-daemon
+100998      2696    1498 postgres: checkpointer 
+100998      2697    1498 postgres: background writer 
+100998      2698    1498 postgres: walwriter 
+100998      2699    1498 postgres: autovacuum launcher 
+100998      2700    1498 postgres: stats collector 
+100998      2701    1498 postgres: logical replication launcher 
+g           2856    1359 /usr/bin/Xwayland :1 -auth /run/user/1000/xauth_RvmwdP -listenfd 8 -listenfd 9 -displayfd 115 -wm 117 -rootless
+g           2874     791 /usr/lib/at-spi-bus-launcher
+g           2887    2874 /usr/bin/dbus-broker-launch --config-file=/usr/share/defaults/at-spi2/accessibility.conf --scope user
+g           2892    2887 dbus-broker --log 10 --controller 9 --machine-id 11446a29a68740949b11611623554df4 --max-bytes 100000000000000 --max-fds 6400000 --max-matches 5000000000
+g           2900     791 /usr/lib/gvfsd
+g           2906     791 /usr/lib/gvfsd-fuse /run/user/1000/gvfs -f
+g           2914     791 /usr/bin/ksmserver
+g           2916     791 /usr/bin/kded6
+g           2923     791 /usr/bin/plasmashell --no-respawn
+g           2924     791 /usr/lib/at-spi2-registryd --use-gnome-session
+g           2975     791 /usr/lib/kactivitymanagerd
+g           2976     791 /usr/bin/pipewire-pulse
+g           2989     791 /usr/bin/gmenudbusmenuproxy
+g           2991     791 /usr/bin/kaccess
+g           2992     791 /usr/lib/polkit-kde-authentication-agent-1
+g           2993     791 /usr/lib/org_kde_powerdevil
+g           2994     791 /usr/bin/xembedsniproxy
+100069      3006    1341 postgres: walwriter 
+100069      3009    1341 postgres: autovacuum launcher 
+100069      3010    1341 postgres: logical replication launcher 
+g           3023     791 /usr/lib/dconf-service
+root        3045       1 /usr/lib/upowerd
+g           3160     791 /usr/bin/python /usr/bin/blueman-applet
+g           3174     791 /usr/bin/kclockd
+g           3196     791 /usr/bin/kunifiedpush-distributor
+g           3201     791 /usr/bin/conmon --api-version 1 -c 57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b -u 57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b/userdata -p /run/user/1000/containers/overlay-containers/57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b/userdata/pidfile -n tuwunel --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg 57c59d92dba72c0114ad0407c5af9b8fc5df1f790ed28aa05a2564e6d4d0330b
+g           3208     791 /usr/lib/xdg-desktop-portal
+g           3223     791 /usr/lib/geoclue-2.0/demos/agent
+g           3227     791 /usr/lib/DiscoverNotifier --check-delay 20
+g           3228     791 /usr/bin/kalendarac
+g           3230     791 /usr/bin/kgpg
+g           3260     791 /usr/lib/xdg-permission-store
+g           3263    3201 tuwunel
+g           3277     791 /usr/lib/xdg-document-portal
+root        3285    3277 fusermount3 -o rw,nosuid,nodev,fsname=portal,auto_unmount,subtype=portal -- /run/user/1000/doc
+root        3290       1 /usr/lib/udisks2/udisksd
+g           3293     791 /usr/lib/xdg-desktop-portal-gtk
+g           3342     791 rootlessport
+g           3349    3342 rootlessport-child
+g           3368     791 /usr/bin/conmon --api-version 1 -c ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06 -u ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06/userdata -p /run/user/1000/containers/overlay-containers/ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06/userdata/pidfile -n cinny --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06 --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg ec27a02df10811cf9ce7c99a39a1c7fc676afb621bf367951a90d94705d06e06
+g           3397    3368 nginx: master process nginx -g daemon off;
+g           3474     791 /usr/lib/xdg-desktop-portal-kde
+g           4047     791 /usr/bin/akonadi_control
+g           4094     791 /usr/bin/conmon --api-version 1 -c efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c -u efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c/userdata -p /run/user/1000/containers/overlay-containers/efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c/userdata/pidfile -n mautrix-whatsapp --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg efc91f992834ff7f1632bdf82012776a8b237bac65f52dfc3ad2961943f8c56c
+g           4279     791 /usr/lib/gnupg/keyboxd --supervised
+101336      4360    4094 /usr/bin/mautrix-whatsapp
+g           4437     791 /usr/bin/gpg-agent --supervised
+g           4648    4437 scdaemon --multi-server
+g           4782     791 /usr/bin/xsettingsd
+100100      4783    3397 nginx: worker process
+100100      4784    3397 nginx: worker process
+100100      4785    3397 nginx: worker process
+100100      4786    3397 nginx: worker process
+100100      4787    3397 nginx: worker process
+100100      4788    3397 nginx: worker process
+100100      4789    3397 nginx: worker process
+100100      4790    3397 nginx: worker process
+100100      4791    3397 nginx: worker process
+100100      4792    3397 nginx: worker process
+100100      4793    3397 nginx: worker process
+100100      4794    3397 nginx: worker process
+g           4800    4047 /usr/bin/akonadiserver
+g           5268     791 /usr/bin/conmon --api-version 1 -c df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174 -u df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174/userdata -p /run/user/1000/containers/overlay-containers/df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174/userdata/pidfile -n matrix-archiver --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174 --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg df76d2cb4f13d89929dbaaeb5e5556bd1d61922da333df8fd3c100fcc52f6174
+g           5289    5268 python -u /app/main.py
+g           5301    4800 /usr/bin/mysqld --defaults-file=/home/g/.local/share/akonadi/mysql.conf --datadir=/home/g/.local/share/akonadi/db_data/ --socket=/run/user/1000/akonadi/mysql.socket --pid-file=/run/user/1000/akonadi/mysql.pid
+g           5320     791 /usr/bin/conmon --api-version 1 -c 43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9 -u 43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9/userdata -p /run/user/1000/containers/overlay-containers/43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9/userdata/pidfile -n mautrix-telegram --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9 --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg 43bd7e301b3a3c7b3496746833d041abf37c549f5de578262e1a69375b4862e9
+root        5333       1 /bin/bash /usr/local/bin/thermal-monitor.sh
+101336      5341    5320 /usr/bin/mautrix-telegram
+g           5386     791 /usr/bin/conmon --api-version 1 -c 29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc -u 29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc/userdata -p /run/user/1000/containers/overlay-containers/29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc/userdata/pidfile -n mautrix-discord --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg 29b8ec30afdea31ff76af50696cae54584667da744f8542c7e300bcf0b1ff0cc
+101336      5401    5386 /usr/bin/mautrix-discord
+g           5438     791 /usr/bin/conmon --api-version 1 -c e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8 -u e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8/userdata -p /run/user/1000/containers/overlay-containers/e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8/userdata/pidfile -n mautrix-instagram2 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8 --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg e6fa137f3059fa60ab7cfcc5ddf022f18b0e8232ad332c5614e521aa77044ce8
+101336      5460    5438 /usr/bin/mautrix-meta
+g           5481     791 /usr/bin/conmon --api-version 1 -c 847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12 -u 847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12/userdata -p /run/user/1000/containers/overlay-containers/847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12/userdata/pidfile -n mautrix-signal --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12 --full-attach -s -l journald --log-level info --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg info --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg 847be2bce487b854f41e10363b60e48482fa3496210dae5b8036b956a1903e12
+101336      5508    5481 /usr/bin/mautrix-signal
+g           5540     791 /usr/bin/ksecretd
+g           5558     791 /usr/bin/python /usr/bin/blueman-tray
+g           5608    4047 /usr/bin/akonadi_archivemail_agent --identifier akonadi_archivemail_agent
+g           5609    4047 /usr/bin/akonadi_birthdays_resource --identifier akonadi_birthdays_resource
+g           5610    4047 /usr/bin/akonadi_contacts_resource --identifier akonadi_contacts_resource_0
+g           5611    4047 /usr/bin/akonadi_followupreminder_agent --identifier akonadi_followupreminder_agent
+g           5612    4047 /usr/bin/akonadi_ical_resource --identifier akonadi_ical_resource_0
+g           5613    4047 /usr/bin/akonadi_imap_resource --identifier akonadi_imap_resource_0
+g           5614    4047 /usr/bin/akonadi_indexing_agent --identifier akonadi_indexing_agent
+g           5615    4047 /usr/bin/akonadi_maildir_resource --identifier akonadi_maildir_resource_0
+g           5616    4047 /usr/bin/akonadi_maildispatcher_agent --identifier akonadi_maildispatcher_agent
+g           5617    4047 /usr/bin/akonadi_mailfilter_agent --identifier akonadi_mailfilter_agent
+g           5618    4047 /usr/bin/akonadi_mailmerge_agent --identifier akonadi_mailmerge_agent
+g           5619    4047 /usr/bin/akonadi_migration_agent --identifier akonadi_migration_agent
+g           5620    4047 /usr/bin/akonadi_newmailnotifier_agent --identifier akonadi_newmailnotifier_agent
+g           5621    4047 /usr/bin/akonadi_sendlater_agent --identifier akonadi_sendlater_agent
+g           5622    4047 /usr/bin/akonadi_unifiedmailbox_agent --identifier akonadi_unifiedmailbox_agent
+g          10270       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g          10271   10270 -bash
+g          10677       1 tmux
+g          11301     791 /usr/lib/gvfsd-metadata
+builder   193574       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   193576       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   194055       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   194057       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g         198561       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g         198562  198561 -bash
+builder   205126       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   205128       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g         212736       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g         212737  212736 -bash
+g         213087  212737 tmux a
+builder   225448       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   225450       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   244904       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   244906       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g         246183       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g         246184  246183 -bash
+builder   263677       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   263679       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+root      296241       1 /usr/bin/dirmngr --homedir /etc/pacman.d/gnupg --supervised
+g         343416     791 /usr/lib/drkonqi-coredump-launcher
+g         426639     791 /usr/lib/drkonqi-coredump-launcher
+g         434200     791 /usr/lib/drkonqi-coredump-launcher
+g         510553       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g         510554  510553 -bash
+g         547413     791 /usr/lib/drkonqi-coredump-launcher
+g         608425     791 /usr/lib/drkonqi-coredump-launcher
+g         645826     791 /usr/lib/drkonqi-coredump-launcher
+g         681635       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g         681636  681635 -bash
+g         728062     791 /usr/lib/drkonqi-coredump-launcher
+builder   798578       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   798580       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   798662       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   798664       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   798701       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   798703       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   801378       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   801380       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   801631       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   801633       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   821426       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   821428       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g         823525     791 /usr/lib/drkonqi-coredump-launcher
+g         827836     791 /usr/lib/drkonqi-coredump-launcher
+builder   831224       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   831226       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g         847883     791 /usr/lib/drkonqi-coredump-launcher
+builder   852210       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   852214       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+assize-+  912906       1 /usr/lib/systemd/systemd --user
+assize-+  912908  912906 (sd-pam)
+assize-+  918425       1 catatonit -P
+assize-+  918438  912906 /usr/bin/dbus-broker-launch --scope user
+assize-+  918439  918438 dbus-broker --log 11 --controller 10 --machine-id 11446a29a68740949b11611623554df4 --max-bytes 100000000000000 --max-fds 25000000000000 --max-matches 5000000000
+g         927773     791 /usr/lib/drkonqi-coredump-launcher
+builder   933311       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   933313       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+assize-+  955013       1 /bin/bash /home/assize-runner/actions-runner/runsvc.sh
+assize-+  955048  955013 ./externals/node20/bin/node ./bin/RunnerService.js
+assize-+  955067  955048 /home/assize-runner/actions-runner/bin/Runner.Listener run --startuptype service
+g         955540     791 /usr/lib/drkonqi-coredump-launcher
+builder   972540       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   972542       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder   992284       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder   992286       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        1077052       1 ssh-agent -s
+builder  1098815       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1098817       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1212321       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1212323       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1217120       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1217122       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1220176       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1220178       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1221001       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1221003       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1224064       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1224067       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1224421       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1224423       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1228651       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1228653       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1235909       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1235911       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1238361       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1238363       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1243273       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1243275       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1264668       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1264670       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1269554       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1269556       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1276724       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1276726       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1283110       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1283112       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1306299       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1306301       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1331171       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1331173       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1366513       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1366515       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        1380535     791 /usr/bin/conmon --api-version 1 -c 6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268 -u 6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268/userdata -p /run/user/1000/containers/overlay-containers/6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268/userdata/pidfile -n invidious_companion_1 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268 --full-attach -l journald --log-level warning --syslog --log-size-max 1000000000 --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg --rm --exit-command-arg 6cb8ce59b9d3f321a8ef9b0b23adecbbf2e0fb2abdb35420f48d43782dcbd268
+110000   1380548 1380535 /tini -- /app/invidious_companion
+110000   1380561 1380548 /app/invidious_companion
+g        1381448     791 /usr/bin/conmon --api-version 1 -c 876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66 -u 876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66/userdata -p /run/user/1000/containers/overlay-containers/876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66/userdata/pidfile -n invidious_redlib_1 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66 --full-attach -l journald --log-level warning --syslog --log-size-max 10000000 --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg --rm --exit-command-arg 876e50b4cf1a6eb9c5b1b3a7c655826e8ee348c1c2ecb7aca941e239dfa54d66
+101000   1381461 1381448 redlib
+builder  1399890       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1399892       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1464997       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1464999       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        1485886       1 -bash
+g        1489590 1485886 tmux
+g        1489591   10677 -bash
+g        1492782   10677 -bash
+g        1493604 1492782 claude --resume 44e798e3-a427-49b3-9349-bdd1051fa506
+g        1497153 1489591 claude -c
+builder  1529207       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1529209       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1533202       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1533204       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1544375       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1544377       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1550120       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1550122       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1555878       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1555880       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1590275       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1590277       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1623046       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1623048       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1668142       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1668144       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1706513       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1706515       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1789137       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1789139       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1802386       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1802388       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1808639       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1808641       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1846966       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1846968       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        1870080     791 rootlessport
+g        1870087 1870080 rootlessport-child
+g        1870096     791 /usr/bin/conmon --api-version 1 -c 8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f -u 8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f/userdata -p /run/user/1000/containers/overlay-containers/8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f/userdata/pidfile -n pod_invidious-infra --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f --full-attach -s -l journald --log-level warning --syslog --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f/userdata/oci-log --conmon-pidfile /run/user/1000/pod_invidious-pod.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg 8d1a4ebbbcc4532c871e29ca84c7de387ce94d5c21ffe18e81e8279cadaa191f
+g        1870112 1870096 /catatonit -P
+g        1870145     791 /usr/bin/conmon --api-version 1 -c d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1 -u d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1 -r /usr/bin/runc -b /home/g/.local/share/containers/storage/overlay-containers/d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1/userdata -p /run/user/1000/containers/overlay-containers/d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1/userdata/pidfile -n invidious_ts-mullvad_1 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1 --full-attach -l journald --log-level warning --syslog --log-size-max 1000000000 --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg runc --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg --rm --exit-command-arg d86b8163d5d2d526e0b6c08ee0f637b297a0442eb5491481ed3aab9888c340f1
+g        1870158 1870145 /usr/local/bin/containerboot
+g        1870185 1870158 tailscaled --socket=/tmp/tailscaled.sock --statedir=/var/lib/tailscale
+g        1921102       1 mosh-server new -c 256 -s -l LANG=en_US.UTF-8
+g        1921103 1921102 -bash
+builder  1975063       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1975065       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1975948       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1975950       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1976050       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1976052       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1976082       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1976084       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  1977239       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  1977241       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2035183       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2035185       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        2117791 2874229 claude
+g        2156822  246184 tmux
+g        2156823   10677 -bash
+builder  2157555       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2157557       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        2196392     791 /usr/bin/conmon --api-version 1 -c e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058 -u e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058 -r /usr/bin/crun -b /home/g/.local/share/containers/storage/overlay-containers/e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058/userdata -p /run/user/1000/containers/overlay-containers/e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058/userdata/pidfile -n invidious_invidious_1 --exit-dir /run/user/1000/libpod/tmp/exits --persist-dir /run/user/1000/libpod/tmp/persist/e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058 --full-attach -l journald --log-level warning --syslog --log-size-max 10000000 --runtime-arg --log-format=json --runtime-arg --log --runtime-arg=/run/user/1000/containers/overlay-containers/e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058/userdata/oci-log --conmon-pidfile /run/user/1000/containers/overlay-containers/e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058/userdata/conmon.pid --exit-command /usr/bin/podman --exit-command-arg --root --exit-command-arg /home/g/.local/share/containers/storage --exit-command-arg --runroot --exit-command-arg /run/user/1000/containers --exit-command-arg --log-level --exit-command-arg warning --exit-command-arg --cgroup-manager --exit-command-arg systemd --exit-command-arg --tmpdir --exit-command-arg /run/user/1000/libpod/tmp --exit-command-arg --network-config-dir --exit-command-arg  --exit-command-arg --volumepath --exit-command-arg /home/g/.local/share/containers/storage/volumes --exit-command-arg --transient-store=false --exit-command-arg --hooks-dir --exit-command-arg /usr/share/containers/oci/hooks.d --exit-command-arg --runtime --exit-command-arg crun --exit-command-arg --storage-driver --exit-command-arg overlay --exit-command-arg --storage-opt --exit-command-arg overlay.mountopt=nodev --exit-command-arg --events-backend --exit-command-arg journald --exit-command-arg container --exit-command-arg cleanup --exit-command-arg --stopped-only --exit-command-arg --rm --exit-command-arg e22cbfc973cfb119ea0fa14b266285332da96cf4de48f2121344e1d0730f1058
+100999   2196400 2196392 /sbin/tini -- /invidious/invidious
+100999   2196476 2196400 /invidious/invidious
+100998   2196521    1498 postgres: kemal invidious 10.89.7.5(43186) idle
+100998   2196537    1498 postgres: kemal invidious 10.89.7.5(43208) idle
+builder  2227666       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2227668       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        2262521   10677 -bash
+builder  2264879       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2264881       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+root     2270371     370 systemd-userwork: waiting...
+root     2271866     370 systemd-userwork: waiting...
+g        2273851 2262521 claude /review 4
+root     2274070     370 systemd-userwork: waiting...
+root     2275529    5333 sleep 30
+root     2277003     719 sleep 10
+builder  2325359       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2325361       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2373737       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2373739       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2412598       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2412600       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2456613       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2456615       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2545700       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2545702       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        2693689   10677 -bash
+g        2694311 2693689 claude
+builder  2697473       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2697475       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2701260       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2701262       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2702233       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2702235       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2708128       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2708130       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2727355       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2727357       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2732043       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2732045       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2764238       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2764240       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2782670       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2782672       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  2838707       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2838709       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        2874229   10677 -bash
+builder  2895716       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  2895718       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3016346       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3016348       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3096100     791 /usr/bin/kdeconnectd
+builder  3097069       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3097071       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3123104       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3123106       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3287317    1359 /usr/lib/kscreenlocker_greet --immediateLock --graceTime 300000 --ksldfd 272
+builder  3304293       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3304295       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3339143       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3339145       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3421701   10677 -bash
+g        3422229 3421701 claude
+g        3602817     791 /usr/lib/drkonqi-coredump-launcher
+builder  3675536       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3675538       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3675598       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3675600       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3675614       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3675616       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3678767       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3678769       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3706283       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3706285       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3722611     791 /usr/lib/drkonqi-coredump-launcher
+builder  3736952       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3736955       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3745414 1921103 tmux a
+builder  3750120       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3750122       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3778488     791 /usr/lib/drkonqi-coredump-launcher
+builder  3786107       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3786109       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3819424       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3819426       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  3897533       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  3897535       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        3929079  681636 tmux a
+builder  4038765       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  4038767       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  4047224       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  4047226       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+g        4056133     791 /usr/lib/drkonqi-coredump-launcher
+builder  4060122       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  4060124       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  4092315       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  4092317       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  4121312       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  4121314       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+builder  4140854       1 /usr/bin/dbus-daemon --syslog --fork --print-pid 4 --print-address 6 --session
+builder  4140856       1 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets

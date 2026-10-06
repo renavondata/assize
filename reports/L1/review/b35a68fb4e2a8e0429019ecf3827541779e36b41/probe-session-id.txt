@@ -1,0 +1,7 @@
+$ snippet <<< {"session_id":"abc"}
+abc
+$ snippet <<< {} (no session_id)
+0000000  \n
+0000001
+$ guard line on an empty .session_id file
+0000000

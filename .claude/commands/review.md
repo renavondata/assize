@@ -4,19 +4,21 @@ allowed-tools: Bash(gh:*), Bash(git:*), Bash(grep:*), Bash(ls:*), Bash(cat:*), B
 ---
 Read CLAUDE.md first, including every amendment. It governs this session. Role: REVIEWER.
 
-## Context, gathered now
+## Context, gathered now (from the PR head, not the working tree)
 - Acting as GitHub account: !`gh api user -q .login`
+- Own session id: !`cat .claude/.session_id 2>/dev/null || echo unknown || true`
 - Argument: `$ARGUMENTS`
-- PR for the argument, if one exists: !`gh pr view $ARGUMENTS --json number,title,headRefName,headRefOid,baseRefName,isDraft,author -q '"#\(.number) \(.title) — \(.headRefName)@\(.headRefOid) -> \(.baseRefName) draft=\(.isDraft) author=\(.author.login)"' 2>&1`
-- Files touched: !`gh pr view $ARGUMENTS --json files -q '[.files[].path] | join(", ")' 2>&1`
-- Builder of record (harness/proposer.toml): !`cat harness/proposer.toml 2>&1`
-- Current layer: !`grep -m1 'Current layer' CLAUDE.md`
-- Brief: !`ls docs/briefs/brief-$(grep -oP 'Current layer: L\K[0-9]+' CLAUDE.md)-*.md`
-- Open forecasts: !`f=$(ls reports/L*/forecasts.jsonl 2>/dev/null | tail -1); [ -n "$f" ] && grep -c '"claim"' "$f" || echo none`
+- PR: !`gh pr view $ARGUMENTS --json number,title,headRefName,headRefOid,baseRefName,isDraft,author -q '"#\(.number) \(.title) — \(.headRefName)@\(.headRefOid) -> \(.baseRefName) draft=\(.isDraft) author=\(.author.login)"' 2>&1 || true`
+- Fetched head: !`git fetch -q origin "$(gh pr view $ARGUMENTS --json headRefName -q .headRefName 2>/dev/null)" 2>&1 && git rev-parse --short FETCH_HEAD || true`
+- Files touched: !`gh pr view $ARGUMENTS --json files -q '[.files[].path] | join(", ")' 2>&1 || true`
+- Builder of record at head: !`git show FETCH_HEAD:harness/proposer.toml 2>&1 || true`
+- Current layer at head: !`git show FETCH_HEAD:CLAUDE.md | grep -m1 'Current layer' || true`
+- Brief at head: !`git ls-tree --name-only FETCH_HEAD docs/briefs/ | grep "brief-$(git show FETCH_HEAD:CLAUDE.md | grep -oP 'Current layer: L\K[0-9]+')-" || true`
+- Open forecasts at head (claims with no resolution): !`f=$(git ls-tree -r --name-only FETCH_HEAD | grep 'forecasts.jsonl$' | sort | tail -1); [ -n "$f" ] && git show "FETCH_HEAD:$f" | python3 -c 'import sys,json; r=[json.loads(l) for l in sys.stdin if l.strip()]; c={x["id"] for x in r if "claim" in x}; o={x["id"] for x in r if "outcome" in x}; print(len(c-o))' || echo none || true`
 
 ## Guards
 - If the account above is not `assize-reviewer`, stop and report: wrong credentials; do nothing else.
-- If your own session id equals `session` in `harness/proposer.toml`, stop and report: you are this PR's Builder and cannot review it.
+- If your own session id equals `session` in the Builder-of-record line above, stop and report: you are this PR's Builder and cannot review it. If your own session id is `unknown`, say so in the review file and continue; the guard could not run.
 - If the argument names a branch and no PR exists for it: `gh pr create --base master --head <branch> --fill`, as assize-reviewer, then continue with that PR. This is the only way an entrenched-path PR is opened; its approval will be Guy's.
 - If no PR resolved, stop and report.
 
