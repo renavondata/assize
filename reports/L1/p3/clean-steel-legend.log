@@ -1,0 +1,31 @@
+pin:       P3
+protects:  every requested episode is recorded with its termination code, failures included
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-cbyi34xe
+  timeouts from judge/config.toml: Timeouts(step_s=10.0, episode_s=600.0, teardown_s=30.0, reply_bytes=1048576)
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman polite: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0}]
+  [ok] podman polite: 2 of 2 requested episodes recorded, in order
+  [ok] podman polite: every termination is truncated (['truncated', 'truncated'])
+  [ok] podman polite: every episode ran its 5 steps
+  podman crash: [{"episode": 0, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0}, {"episode": 1, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0}, {"episode": 2, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0}]
+  [ok] podman crash: 3 of 3 requested episodes recorded, in order
+  [ok] podman crash: every termination is crash (['crash', 'crash', 'crash'])
+  podman garbled: [{"episode": 0, "termination": "invalid_reply", "detail": "step: not JSON (Expecting value: line 1 column 1 (char 0))", "steps": 0, "utility": 0}, {"episode": 1, "termination": "invalid_reply", "detail": "step: not JSON (Expecting value: line 1 column 1 (char 0))", "steps": 0, "utility": 0}]
+  [ok] podman garbled: 2 of 2 requested episodes recorded, in order
+  [ok] podman garbled: every termination is invalid_reply (['invalid_reply', 'invalid_reply'])
+  podman illegal: [{"episode": 0, "termination": "illegal_action", "detail": "t=0: action 17 not legal", "steps": 0, "utility": 0}, {"episode": 1, "termination": "illegal_action", "detail": "t=0: action 17 not legal", "steps": 0, "utility": 0}]
+  [ok] podman illegal: 2 of 2 requested episodes recorded, in order
+  [ok] podman illegal: every termination is illegal_action (['illegal_action', 'illegal_action'])
+  podman slow: [{"episode": 0, "termination": "episode_timeout", "detail": "no reply before the deadline", "steps": 2, "utility": 0}, {"episode": 1, "termination": "episode_timeout", "detail": "no reply before the deadline", "steps": 2, "utility": 0}]
+  [ok] podman slow: 2 of 2 requested episodes recorded, in order
+  [ok] podman slow: every termination is episode_timeout (['episode_timeout', 'episode_timeout'])
+  podman stubborn: [{"episode": 0, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}, {"episode": 1, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0}]
+  [ok] podman stubborn: 2 of 2 requested episodes recorded, in order
+  [ok] podman stubborn: every termination is step_timeout (['step_timeout', 'step_timeout'])
+  [ok] podman: no candidate container listed after the cases ([])
+result:    PASS

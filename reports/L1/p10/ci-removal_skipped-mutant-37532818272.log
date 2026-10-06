@@ -1,0 +1,23 @@
+copy of /home/runner/work/assize/assize
+  at /tmp/assize-scratch-2v1ied2p/assize-copy-q4njokll/repo
+applied 1 edit(s) from harness/edits/P10_removal_skipped.toml
+pin:       P10
+protects:  a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing
+role:      mutant
+tree:      /tmp/assize-scratch-2v1ied2p/assize-copy-q4njokll/repo
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-2v1ied2p
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  [ok] docker: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-7f78492259384d53'])
+  [FAIL] docker: torn down directly, assize-candidate-7f78492259384d53 is not listed
+  docker stubborn: [{"episode": 0, "termination": "leaked", "detail": "container assize-candidate-629376e805eb4807 listed after teardown (no reply before the deadline)", "steps": 0, "utility": 0}]
+  [FAIL] docker: the stalled episode is recorded step_timeout (['leaked'])
+  [FAIL] docker: the runtime lists no candidate container afterwards (['assize-candidate-629376e805eb4807', 'assize-candidate-7f78492259384d53'])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-15a76e0dd1e64862'])
+  [FAIL] podman: torn down directly, assize-candidate-15a76e0dd1e64862 is not listed
+  podman stubborn: [{"episode": 0, "termination": "leaked", "detail": "container assize-candidate-da0aaedc17334e3f listed after teardown (no reply before the deadline)", "steps": 0, "utility": 0}]
+  [FAIL] podman: the stalled episode is recorded step_timeout (['leaked'])
+  [FAIL] podman: the runtime lists no candidate container afterwards (['assize-candidate-15a76e0dd1e64862', 'assize-candidate-da0aaedc17334e3f'])
+result:    FAIL
