@@ -1,0 +1,156 @@
+# measure run 37457660562 on 8270085 (PR #9, label measure), step 'make measure', failed-step log
+﻿2026-10-06T11:37:50.8813252Z ##[group]Run make measure HOST_OUT=out/host
+2026-10-06T11:37:50.8813677Z ^[[36;1mmake measure HOST_OUT=out/host^[[0m
+2026-10-06T11:37:50.8825840Z shell: /usr/bin/bash -e {0}
+2026-10-06T11:37:50.8826020Z env:
+2026-10-06T11:37:50.8826160Z   ASSIZE_HOST: measure
+2026-10-06T11:37:50.8826319Z ##[endgroup]
+2026-10-06T11:37:50.8875917Z bash scripts/host_facts.sh out/host
+2026-10-06T11:37:51.6737848Z ### date
+2026-10-06T11:37:51.6738260Z $ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-06T11:37:51.6738614Z 2026-10-06T11:37:50Z
+2026-10-06T11:37:51.6738843Z [exit 0]
+2026-10-06T11:37:51.6738939Z 
+2026-10-06T11:37:51.6739052Z ### whoami
+2026-10-06T11:37:51.6739223Z $ whoami
+2026-10-06T11:37:51.6739377Z assize-runner
+2026-10-06T11:37:51.6739544Z [exit 0]
+2026-10-06T11:37:51.6739626Z 
+2026-10-06T11:37:51.6739695Z ### lscpu
+2026-10-06T11:37:51.6739884Z $ lscpu
+2026-10-06T11:37:51.6740067Z Architecture:                            x86_64
+2026-10-06T11:37:51.6740516Z CPU op-mode(s):                          32-bit, 64-bit
+2026-10-06T11:37:51.6741095Z Address sizes:                           48 bits physical, 48 bits virtual
+2026-10-06T11:37:51.6741422Z Byte Order:                              Little Endian
+2026-10-06T11:37:51.6741696Z CPU(s):                                  12
+2026-10-06T11:37:51.6741943Z On-line CPU(s) list:                     0-11
+2026-10-06T11:37:51.6742209Z Vendor ID:                               AuthenticAMD
+2026-10-06T11:37:51.6742546Z Model name:                              AMD Ryzen 5 5600X 6-Core Processor
+2026-10-06T11:37:51.6742791Z CPU family:                              25
+2026-10-06T11:37:51.6742977Z Model:                                   33
+2026-10-06T11:37:51.6743161Z Thread(s) per core:                      2
+2026-10-06T11:37:51.6743349Z Core(s) per socket:                      6
+2026-10-06T11:37:51.6743534Z Socket(s):                               1
+2026-10-06T11:37:51.6743717Z Stepping:                                2
+2026-10-06T11:37:51.6743924Z Microcode version:                       0xa201211
+2026-10-06T11:37:51.6744292Z Frequency boost:                         enabled
+2026-10-06T11:37:51.6744501Z CPU(s) scaling MHz:                      99%
+2026-10-06T11:37:51.6744717Z CPU max MHz:                             4654.2881
+2026-10-06T11:37:51.6744930Z CPU min MHz:                             560.7580
+2026-10-06T11:37:51.6745131Z BogoMIPS:                                7386.74
+2026-10-06T11:37:51.6747487Z Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 invpcid cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor smca debug_swap
+2026-10-06T11:37:51.6749850Z Virtualization:                          AMD-V
+2026-10-06T11:37:51.6750081Z L1d cache:                               192 KiB (6 instances)
+2026-10-06T11:37:51.6750326Z L1i cache:                               192 KiB (6 instances)
+2026-10-06T11:37:51.6750564Z L2 cache:                                3 MiB (6 instances)
+2026-10-06T11:37:51.6750792Z L3 cache:                                32 MiB (1 instance)
+2026-10-06T11:37:51.6751198Z NUMA node(s):                            1
+2026-10-06T11:37:51.6751394Z NUMA node0 CPU(s):                       0-11
+2026-10-06T11:37:51.6751761Z Vulnerability Gather data sampling:      Not affected
+2026-10-06T11:37:51.6752004Z Vulnerability Ghostwrite:                Not affected
+2026-10-06T11:37:51.6752241Z Vulnerability Indirect target selection: Not affected
+2026-10-06T11:37:51.6752560Z Vulnerability Itlb multihit:             Not affected
+2026-10-06T11:37:51.6752954Z Vulnerability L1tf:                      Not affected
+2026-10-06T11:37:51.6753280Z Vulnerability Mds:                       Not affected
+2026-10-06T11:37:51.6753523Z Vulnerability Meltdown:                  Not affected
+2026-10-06T11:37:51.6753772Z make: *** [Makefile:16: measure] Error 1
+2026-10-06T11:37:51.6753988Z Vulnerability Mmio stale data:           Not affected
+2026-10-06T11:37:51.6754219Z Vulnerability Old microcode:             Not affected
+2026-10-06T11:37:51.6754456Z Vulnerability Reg file data sampling:    Not affected
+2026-10-06T11:37:51.6754699Z Vulnerability Retbleed:                  Not affected
+2026-10-06T11:37:51.6754961Z Vulnerability Spec rstack overflow:      Mitigation; Safe RET
+2026-10-06T11:37:51.6755323Z Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+2026-10-06T11:37:51.6755773Z Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+2026-10-06T11:37:51.6756373Z Vulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+2026-10-06T11:37:51.6756846Z Vulnerability Srbds:                     Not affected
+2026-10-06T11:37:51.6757112Z Vulnerability Tsa:                       Mitigation; Clear CPU buffers
+2026-10-06T11:37:51.6757380Z Vulnerability Tsx async abort:           Not affected
+2026-10-06T11:37:51.6757665Z Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+2026-10-06T11:37:51.6757936Z [exit 0]
+2026-10-06T11:37:51.6758011Z 
+2026-10-06T11:37:51.6758063Z ### free
+2026-10-06T11:37:51.6758183Z $ free -h
+2026-10-06T11:37:51.6758370Z                total        used        free      shared  buff/cache   available
+2026-10-06T11:37:51.6758649Z Mem:            31Gi        11Gi       7.2Gi       266Mi        13Gi        19Gi
+2026-10-06T11:37:51.6758884Z Swap:           23Gi       9.8Gi        14Gi
+2026-10-06T11:37:51.6759060Z [exit 0]
+2026-10-06T11:37:51.6759155Z 
+2026-10-06T11:37:51.6759205Z ### uname
+2026-10-06T11:37:51.6759369Z $ uname -a
+2026-10-06T11:37:51.6759643Z Linux steel-legend 7.2.6-arch2-1 #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 22:41:30 +0000 x86_64 GNU/Linux
+2026-10-06T11:37:51.6759955Z [exit 0]
+2026-10-06T11:37:51.6760028Z 
+2026-10-06T11:37:51.6760084Z ### uv
+2026-10-06T11:37:51.6760210Z $ uv --version
+2026-10-06T11:37:51.6760387Z uv 0.12.17 (635500036 2026-09-18 x86_64-unknown-linux-gnu)
+2026-10-06T11:37:51.6760600Z [exit 0]
+2026-10-06T11:37:51.6760673Z 
+2026-10-06T11:37:51.6760729Z ### python3
+2026-10-06T11:37:51.6760863Z $ python3 --version
+2026-10-06T11:37:51.6761006Z Python 3.14.7
+2026-10-06T11:37:51.6761138Z [exit 0]
+2026-10-06T11:37:51.6761210Z 
+2026-10-06T11:37:51.6761260Z ### docker
+2026-10-06T11:37:51.6761389Z $ docker --version
+2026-10-06T11:37:51.6761624Z Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+2026-10-06T11:37:51.6761907Z podman version 6.1.2
+2026-10-06T11:37:51.6762050Z [exit 0]
+2026-10-06T11:37:51.6762119Z 
+2026-10-06T11:37:51.6762176Z ### podman
+2026-10-06T11:37:51.6762304Z $ podman --version
+2026-10-06T11:37:51.6762490Z podman version 6.1.2
+2026-10-06T11:37:51.6762629Z [exit 0]
+2026-10-06T11:37:51.6762711Z 
+2026-10-06T11:37:51.6762765Z ### own-cgroup
+2026-10-06T11:37:51.6762934Z $ cat /proc/self/cgroup
+2026-10-06T11:37:51.6765533Z 0::/system.slice/actions.runner.renavondata-assize.steel-legend.service
+2026-10-06T11:37:51.6765827Z [exit 0]
+2026-10-06T11:37:51.6765906Z 
+2026-10-06T11:37:51.6766115Z ### uptime
+2026-10-06T11:37:51.6766247Z $ uptime
+2026-10-06T11:37:51.6766429Z  14:37:50 up 7 days,  4:23,  9 users,  load average: 0.48, 0.32, 0.26
+2026-10-06T11:37:51.6766751Z [exit 0]
+2026-10-06T11:37:51.6766819Z 
+2026-10-06T11:37:51.6766874Z ### cpuset
+2026-10-06T11:37:51.6767087Z $ cat /sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective
+2026-10-06T11:37:51.6767467Z cat: /sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective: No such file or directory
+2026-10-06T11:37:51.6767776Z [exit 1]
+2026-10-06T11:37:51.6767850Z 
+2026-10-06T11:37:51.6767913Z ### runner-version
+2026-10-06T11:37:51.6768091Z $ runner_version /home/assize-runner/actions-runner
+2026-10-06T11:37:51.6768437Z ﻿{
+2026-10-06T11:37:51.6768566Z   "agentId": 21,
+2026-10-06T11:37:51.6768715Z   "agentName": "steel-legend",
+2026-10-06T11:37:51.6768880Z   "poolId": 1,
+2026-10-06T11:37:51.6769025Z   "poolName": "Default",
+2026-10-06T11:37:51.6769183Z   "disableUpdate": true,
+2026-10-06T11:37:51.6769585Z   "serverUrl": "https://pipelinesghubeus4.actions.githubusercontent.com/vFQcHRKZtC4BungGYGfu6JMitGhnHlvTwWJrEtU0n2cYYwoKuU/",
+2026-10-06T11:37:51.6770067Z   "gitHubUrl": "https://github.com/renavondata/assize",
+2026-10-06T11:37:51.6770289Z   "workFolder": "_work",
+2026-10-06T11:37:51.6770442Z   "useV2Flow": true,
+2026-10-06T11:37:51.6770663Z   "serverUrlV2": "https://broker.actions.githubusercontent.com/"
+2026-10-06T11:37:51.6770907Z }
+2026-10-06T11:37:51.6771064Z ldd: ./bin/libcoreclr.so: No such file or directory
+2026-10-06T11:37:51.6771397Z ldd: ./bin/libSystem.Security.Cryptography.Native.OpenSsl.so: No such file or directory
+2026-10-06T11:37:51.6771780Z ldd: ./bin/libSystem.IO.Compression.Native.so: No such file or directory
+2026-10-06T11:37:51.6772032Z 2.337.0
+2026-10-06T11:37:51.6772152Z [exit 0]
+2026-10-06T11:37:51.6772226Z 
+2026-10-06T11:37:51.6772282Z ### podman-info
+2026-10-06T11:37:51.6772731Z $ podman info --format {{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}
+2026-10-06T11:37:51.6773150Z crun v2 systemd rootless=true
+2026-10-06T11:37:51.6773310Z [exit 0]
+2026-10-06T11:37:51.6773377Z 
+2026-10-06T11:37:51.6773469Z NOT A MEASUREMENT: required facts missing: cpuset
+2026-10-06T11:37:51.6779737Z ##[error]Process completed with exit code 2.
+
+# read-only probe of the runner's cgroup on steel-legend, 2026-10-06, by this session
+$ cat /sys/fs/cgroup/system.slice/actions.runner.renavondata-assize.steel-legend.service/cgroup.controllers
+memory pids
+$ ls /sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective
+ls: cannot access '/sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective': No such file or directory
+$ systemctl show <runner>.service -p AllowedCPUs -p User
+AllowedCPUs=
+User=assize-runner
+$ systemctl show user-1002.slice -p AllowedCPUs
+AllowedCPUs=

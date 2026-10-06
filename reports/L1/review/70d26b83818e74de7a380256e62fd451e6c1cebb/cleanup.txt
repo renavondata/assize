@@ -1,0 +1,13 @@
+# cleanup after review make pins, 2026-10-06T11:51:31Z
+## git worktree list
+/home/g/git/assize        70d26b8 [l1-host-facts]
+/home/g/git/assize-review 70d26b8 (detached HEAD)
+## ls -d /tmp/review-* /tmp/assize-scratch-* /tmp/assize-copy-* /tmp/assize-p0j-*
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+ls: cannot access '/tmp/assize-copy-*': No such file or directory
+ls: cannot access '/tmp/assize-p0j-*': No such file or directory
+/tmp/review-ll.py
+## harness/fixture processes
+(none)
+## after removing /tmp/review-ll.py (this review's forecast-check script; its text is in forecasts-check.txt), 2026-10-06T11:51:36Z
+ls: cannot access '/tmp/review-*': No such file or directory

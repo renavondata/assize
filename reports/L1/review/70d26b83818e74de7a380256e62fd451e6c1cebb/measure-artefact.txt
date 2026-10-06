@@ -1,0 +1,20 @@
+# measure-host artefact of run 37457660562 (head 8270085), downloaded 2026-10-06T11:49:11Z
+e0de46a9da54f1784f11383f2be346a3bb7457ba69a0d4dc41c77f5b4228b93f  facts.txt
+### uptime
+$ uptime
+ 14:37:50 up 7 days,  4:23,  9 users,  load average: 0.48, 0.32, 0.26
+[exit 0]
+--
+### cpuset
+$ cat /sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective
+cat: /sys/fs/cgroup/user.slice/user-1002.slice/cpuset.cpus.effective: No such file or directory
+[exit 1]
+--
+### podman-info
+$ podman info --format {{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}
+crun v2 systemd rootless=true
+[exit 0]
+--
+NOT A MEASUREMENT: required facts missing: cpuset
+2.337.0
+[exit 0]
