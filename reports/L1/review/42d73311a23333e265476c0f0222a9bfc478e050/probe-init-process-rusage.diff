@@ -1,0 +1,16 @@
+diff --git a/judge/episodes.py b/judge/episodes.py
+index 17b55b8..6bcc55f 100644
+--- a/judge/episodes.py
++++ b/judge/episodes.py
+@@ -102,6 +102,11 @@ class Container:
+         now = time.monotonic()
+         self.cgroup = self.cgroup or compute.cgroup_of(self.rt, self.name)
+         s = compute.sample(self.cgroup) if self.cgroup else None
++        if s:
++            import subprocess as _sp
++            pid = _sp.run([self.rt.binary, "container", "inspect", "--format", "{{.State.Pid}}", self.name], capture_output=True, text=True).stdout.strip()
++            f = open(f"/proc/{pid}/stat").read().rsplit(")", 1)[1].split()[11:15]
++            s = compute.Sample(sum(map(int, f)) * 10**6 // os.sysconf("SC_CLK_TCK"), s.peak_bytes)
+         if s is not None:
+             self.usage, self.measured_at = s, now
+         return now
