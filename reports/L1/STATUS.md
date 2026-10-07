@@ -1,13 +1,19 @@
-# STATUS — L1 — 2026-10-07 — 3f82afb — PR none (branch constitution-4, pushed; PR not opened, on Guy's instruction)
+# STATUS — L1 — 2026-10-07 — 80b7e8f — PR #18
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; opens no layer's brief)
 pins: clean 20/20; mutants 39/39 KILLED; twins 39/39; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: .github/workflows/pins.yml (timeout-minutes 15 -> 30); .github/workflows/measure.yml (timeout-minutes 60 -> 45); reports/L1/{STATUS.md,make-pins-3f82afb.txt}
-did: on Guy's explicit written instruction, 2026-10-07: pins.yml job timeout 15 -> 30 min, measure.yml job timeout 60 -> 45 min; nothing else in .github changed (commit 3f82afb, Proposer: guy)
-did: make pins at 3f82afb on steel-legend 07:22:33Z–07:31:39Z (9m06s): PINS PASSED (reports/L1/make-pins-3f82afb.txt)
-decided (not asked): pins transcript committed as a new file make-pins-3f82afb.txt rather than overwriting make-pins.txt, which witnesses the 80b7e8f claims of the previous STATUS — p(stands on review)=0.8
-decided (not asked): no forecasts appended: this is a Guy-instructed change, not a brief item, and make pins ran before any forecast could precede it (A1.6) — p=0.6
-forecasts: made 0; resolved 0 this session; ledger L0+L1 unchanged from previous STATUS: 54 claims, 36 resolved; cumulative log-loss 9.811 vs base rate 24.953 (0.5) over 36
-obligations added: none (this discharges the L2 obligation "pins CI wall time ... a timeout set under a brief naming .github/workflows/pins.yml" in part: timeout raised by Guy's instruction; a budget pin remains open)
+changed: judge/{compute.py (new),episodes.py,README.md}; harness/{pins.py (P4; _each_runtime),fixtures/candidates.py,edits/P4_*,proposer.toml,README.md}; reports/L1/{forecasts.jsonl,make-pins.txt,p4/,ci/,measure-37552507715.txt,STATUS.md}
+did: brief 1 §2 measured compute: judge/compute.py reads cpu.stat usage_usec and memory.peak from the cgroup the runtime created for the container (init pid via `container inspect`, /proc/<pid>/cgroup cut at the component naming the container id, so child cgroups still count); never a self-report
+did: episodes.py samples after every reply and at episode end; each record carries compute {cpu_s, wall_s, peak_memory_bytes, unmeasured_s}; CPU partitioned over a container's episodes; a crashed container's vanished cgroup leaves unmeasured_s > 0 (CPU there ≤ cpus × it), counted, never dropped
+did: P4: `busy` (0.2 s own CPU + 256 MiB filled and freed per step, self-reports 0 on stderr) over two episodes in one container: each cpu_s ∈ [1.0, 2.0), wall ≥ 1.0, peak ≥ 256 MiB, unmeasured 0; `busy_crash` covered. Mutants self_reported, client_rusage, not_differenced, peak_from_current KILLED under Docker 28.0.4 and Podman 4.9.3 in pins CI run 37549802069 on 80b7e8f: success (reports/L1/p4/ci-*); host: measure run 37552507715 on 80b7e8f, rootless Podman 6.1.2, 39/39 KILLED, 0 leaked (reports/L1/measure-37552507715.txt, p4/host-*)
+did: first pins run on the PR (37547404118 on 6a3e54a) was cancelled at the job's 15-min timeout with P4 passing under both runtimes. CI suite was already 9.5–14.6 min before P4; P3/P4/P7/P10 now run their runtimes concurrently (80b7e8f), CI make pins 11m45s. make pins at 80b7e8f on steel-legend 23:53:13Z–00:02:04Z (8m51s): PINS PASSED (reports/L1/make-pins.txt)
+decided (not asked): self-report mutant opens a stderr channel, since the RPC schema admits no self-report field (ack is additionalProperties:false); the clean judge discards stderr — p(stands on review)=0.7
+decided (not asked): peak_memory_bytes is the container's memory.peak since its start (not reset per episode: reset needs kernel ≥6.12 and write access Docker's root-owned cgroup denies) — an upper bound on the episode's own peak — p=0.6
+decided (not asked): wall_s is the judge's monotonic clock (cgroup has none); CPU after a container's last episode's last sample, before removal, is charged to no episode, stated in episodes.py — p=0.65
+decided (not asked): upper bound cpu_s < 2·known added to P4 (derived: two episodes' known work) so per-episode differencing is pinned; brief states only the lower bound — p=0.75
+decided (not asked): concurrency across runtimes rather than asking for a longer pins.yml timeout (.github is entrenched); assertions unchanged, transcripts printed whole per runtime — p=0.7
+forecasts: made 4; resolved 0 this session; ledger L0+L1: 54 claims, 36 resolved; cumulative log-loss 9.811 vs base rate 24.953 (0.5) over 36. Forecast d6af728ca1cb (pins green on first CI run of the PR head) should resolve false: first run 37547404118 cancelled
+obligations added: L2: pins CI wall time (11m45s of a 15-min job timeout; was 14.6 min at c2a87f6) needs a budget pin or a timeout set under a brief naming .github/workflows/pins.yml
+obligations added: L2: an exception escaping episodes.run() skips teardown (seen once in this session's ad-hoc mutant probe, container removed by hand); a try/finally teardown pin
 NEEDS YOU (at most 1): none
-next: assize-review constitution-4
+next: A4 item 4: compute price (CPU-second, GB-second of peak memory, in achievements per episode) in judge/config.toml with rationale, before any scored run; then A4 item 3 (reliability table, mean entropy; needs per-step probabilities, review c2a87f6 F5)
