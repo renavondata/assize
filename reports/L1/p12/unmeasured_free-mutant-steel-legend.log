@@ -1,0 +1,31 @@
+copy of /home/g/git/assize
+  at /tmp/assize-scratch-b7bzcds_/assize-copy-542r435q/repo
+applied 1 edit(s) from harness/edits/P12_unmeasured_free.toml
+pin:       P12
+protects:  every episode's compute is priced by the committed rule; peak memory's scope is stated and followed
+role:      mutant
+tree:      /tmp/assize-scratch-b7bzcds_/assize-copy-542r435q/repo
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-b7bzcds_
+  committed price {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}; derived {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}
+  [ok] the committed price equals its derivation from FIT's delta and the allowances
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman hog_once: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.191112, "wall_s": 0.34015460195951164, "peak_memory_bytes": 277344256, "peak_memory_scope": "container_since_start", "unmeasured_s": 0.0}, "price": {"cpu": 7.963000000000001e-05, "memory": 3.660870910212277e-05, "total": 0.00011623870910212279}}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.001252, "wall_s": 0.010469487984664738, "peak_memory_bytes": 277344256, "peak_memory_scope": "container_since_start", "unmeasured_s": 0.0}, "price": {"cpu": 5.216666666666667e-07, "memory": 1.1267654115830007e-06, "total": 1.6484320782496675e-06}}]
+  [ok] podman hog_once: two episodes of 5 steps in one container, ended by the World
+  podman busy_crash: [{"episode": 0, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.046211, "wall_s": 0.3817292620660737, "peak_memory_bytes": 8929280, "peak_memory_scope": "container_since_start", "unmeasured_s": 0.2566184700699523}, "price": {"cpu": 1.9254583333333337e-05, "memory": 1.3226982614263545e-06, "total": 2.0577281594759693e-05}}]
+  [ok] podman busy_crash: recorded crash
+  [ok] podman hog_once episode 0: peak memory's scope stated as container_since_start (container_since_start)
+  [ok] podman hog_once episode 0: peak memory 277344256 bytes is at least the 268435456 filled in episode 0
+  [ok] podman hog_once episode 0: measured throughout (0.34015460195951164 s wall, 0.0 s unmeasured)
+  [ok] podman hog_once episode 1: peak memory's scope stated as container_since_start (container_since_start)
+  [ok] podman hog_once episode 1: peak memory 277344256 bytes is at least the 268435456 filled in episode 0
+  [ok] podman hog_once episode 1: measured throughout (0.010469487984664738 s wall, 0.0 s unmeasured)
+  [ok] podman truncated episode 0: price {'cpu': 7.963000000000001e-05, 'memory': 3.660870910212277e-05, 'total': 0.00011623870910212279}, derived {'cpu': 7.963000000000001e-05, 'memory': 3.660870910212277e-05, 'total': 0.00011623870910212279}
+  [ok] podman truncated episode 1: price {'cpu': 5.216666666666667e-07, 'memory': 1.1267654115830007e-06, 'total': 1.6484320782496675e-06}, derived {'cpu': 5.216666666666667e-07, 'memory': 1.1267654115830007e-06, 'total': 1.6484320782496675e-06}
+  [FAIL] podman crash episode 0: price {'cpu': 1.9254583333333337e-05, 'memory': 1.3226982614263545e-06, 'total': 2.0577281594759693e-05}, derived {'cpu': 0.00012617894586248015, 'memory': 0.00010735787351062952, 'total': 0.00023353681937310968}
+  [ok] podman busy_crash: non-vacuous: 0.2566184700699523 s unmeasured after the container's last read
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (1 failed)
+result:    FAIL

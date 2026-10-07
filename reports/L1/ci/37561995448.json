@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-07T02:26:34Z","event":"pull_request","head_branch":"l1-a4-4-compute-price","head_sha":"b6ed5a9e006dcac262815d22727c272e626ea2e9","html_url":"https://github.com/renavondata/assize/actions/runs/37561995448","id":37561995448,"name":"measure","path":".github/workflows/measure.yml","run_attempt":1,"status":"completed"}
