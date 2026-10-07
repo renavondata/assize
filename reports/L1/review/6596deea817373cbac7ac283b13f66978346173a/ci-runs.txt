@@ -1,0 +1,18 @@
+# gh api repos/renavondata/assize/actions/runs?head_sha=6596deea817373cbac7ac283b13f66978346173a&event=pull_request
+completed success 37570910139 2026-10-07T04:19:30Z 2026-10-07T04:32:19Z https://github.com/renavondata/assize/actions/runs/37570910139
+# all pins runs on branch l1-a4-4-compute-price
+6596dee completed success 37570910139
+d553dc5 completed success 37569667610
+0475503 completed cancelled 37567551306
+bb7b387 completed cancelled 37564599883
+c6679c6 completed cancelled 37563244833
+b6ed5a9 completed cancelled 37561989873
+2c70242 completed cancelled 37559856865
+d190bfc completed cancelled 37557831166
+# git diff --name-only d553dc5 6596dee
+reports/L1/review-d553dc5cb7fef4e4f17a8f891d78427223bb3e66.md
+reports/L1/review/d553dc5cb7fef4e4f17a8f891d78427223bb3e66/ci-P0m-clean-37569667610.log
+reports/L1/review/d553dc5cb7fef4e4f17a8f891d78427223bb3e66/ci-runs.txt
+reports/L1/review/d553dc5cb7fef4e4f17a8f891d78427223bb3e66/cleanup.txt
+reports/L1/review/d553dc5cb7fef4e4f17a8f891d78427223bb3e66/make-pins.txt
+reports/L1/review/d553dc5cb7fef4e4f17a8f891d78427223bb3e66/trailers.txt
