@@ -3,5 +3,5 @@
 # scope; an episode in a container whose earlier episode set the mark is charged almost no memory.
 [[edit]]
 path = "judge/episodes.py"
-old = '"price": price.charge(used, lim, rate)'
-new = '"price": price.charge(used | {"peak_memory_bytes": c.usage.peak_bytes - start.peak_bytes}, lim, rate)'
+old = 'charged = price.charge(used, lim, rate)'
+new = 'charged = price.charge(used | {"peak_memory_bytes": c.usage.peak_bytes - start.peak_bytes}, lim, rate)'

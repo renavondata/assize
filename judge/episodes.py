@@ -228,13 +228,14 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
         used = {"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6, "wall_s": ended - began,
                 "peak_memory_bytes": c.usage.peak_bytes, "peak_memory_scope": price.PEAK_SCOPE,
                 "unmeasured_s": ended - c.measured_at}
+        charged = price.charge(used, lim, rate)
         if code not in WORLD_ENDINGS:
             if not c.teardown(t):
                 code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
             c = None
         records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
                         "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"]),
-                        "compute": used, "price": price.charge(used, lim, rate)})
+                        "compute": used, "price": charged})
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
     return records
