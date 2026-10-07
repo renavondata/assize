@@ -12,7 +12,7 @@ jobs:
   measure:
     if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'measure'
     runs-on: [self-hosted, measure]
-    timeout-minutes: 60
+    timeout-minutes: 45
     env:
       ASSIZE_HOST: measure
     steps:
