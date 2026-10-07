@@ -1,0 +1,115 @@
+# f80571a; host steel-legend; podman version 6.1.2
+10:28:19Z
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 22 pins, 46 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (2.988s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.435s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.035s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (5.243s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.436s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.388s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.735s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.299s) out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.337s) out/pins/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.59s) out/pins/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.403s) out/pins/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.287s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.385s) out/pins/runs/P0m/clean/transcript.log
+[clean ] P2: observed pass -> ok (0.885s) out/pins/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (20.616s) out/pins/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (6.394s) out/pins/runs/P4/clean/transcript.log
+[clean ] P7: observed pass -> ok (8.147s) out/pins/runs/P7/clean/transcript.log
+[clean ] P13: observed pass -> ok (2.235s) out/pins/runs/P13/clean/transcript.log
+[clean ] P12: observed pass -> ok (4.439s) out/pins/runs/P12/clean/transcript.log
+[clean ] P10: observed pass -> ok (7.699s) out/pins/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.385s) out/pins/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (9.903s) out/pins/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (3.699s + 3.347s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.294s + 0.293s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.043s + 1.142s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.2s + 5.047s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.602s + 1.444s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.344s + 1.345s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.245s + 1.842s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.553s + 12.312s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.413s + 12.313s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.359s + 13.029s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (11.391s + 13.117s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.36s + 12.709s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.347s + 0.343s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.342s + 0.346s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.6s + 0.597s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.294s + 0.294s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.292s + 0.293s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.394s + 0.396s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+[mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.392s + 0.393s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+[mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.395s + 0.396s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+[mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.394s + 0.445s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.006s + 0.897s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (0.895s + 1.025s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (0.896s + 1.07s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (0.897s + 0.896s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (20.875s + 20.63s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (6.307s + 6.404s) out/pins/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (6.355s + 6.301s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (6.324s + 6.357s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (6.303s + 6.303s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (8.106s + 8.055s) out/pins/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (8.143s + 8.206s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (8.157s + 8.257s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (2.262s + 2.246s) out/pins/runs/P13/infinite_dropped/mutant/transcript.log
+[mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (2.248s + 2.249s) out/pins/runs/P13/realised_row_only/mutant/transcript.log
+[mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (2.245s + 2.244s) out/pins/runs/P13/entropy_missing_imputed/mutant/transcript.log
+[mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (4.399s + 4.454s) out/pins/runs/P12/peak_differenced/mutant/transcript.log
+[mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (4.402s + 4.448s) out/pins/runs/P12/unmeasured_free/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (17.668s + 7.756s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.395s + 0.394s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (9.911s + 9.94s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (10.459s + 9.912s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (10.107s + 9.818s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (9.286s + 9.715s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (3.398s + 9.71s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (9.712s + 9.756s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 22/22 passed, 0/22 failed
+mutants: 46/46 killed, 0/46 survived, 0/46 inconclusive, 0/46 stale, 0/46 non-causal, 0 leaked (clean and mutant)
+twins: 46/46 passed
+report: out/pins/pins.jsonl
+PINS PASSED
+exit 0
+10:37:57Z
+
+# f80571a; P13 clean transcript
+pin:       P13
+protects:  every scored step, +inf included, enters each support value's reliability row; entropy is never imputed
+role:      clean
+tree:      /home/g/git/assize
+invoked:   /home/g/git/assize
+scratch:   /tmp/assize-scratch-fksocfw7
+  bins 10; summary {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_los
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target is missing at every step
+  health: recorded {"entropy_sum": 0.0, "mean_entropy": 0.0, "reliability": {"bins": 10, "n": [[5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0
+  [ok] health: calibration equals its derivation
+  [ok] health: each of the 10 support values' bin counts sums to scored (5): [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  [ok] health: each scored step realises one value: 5 hits
+  food: recorded {"entropy_sum": 10.986122886681098, "mean_entropy": 2.1972245773362196, "reliability": {"bins": 10, "n": [[0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0,
+  [ok] food: calibration equals its derivation
+  [ok] food: each of the 10 support values' bin counts sums to scored (5): [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  [ok] food: each scored step realises one value: 5 hits
+  drink: recorded {"entropy_sum": 11.512925464970227, "mean_entropy": 2.3025850929940455, "reliability": {"bins": 10, "n": [[0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0
+  [ok] drink: calibration equals its derivation
+  [ok] drink: each of the 10 support values' bin counts sums to scored (5): [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  [ok] drink: each scored step realises one value: 5 hits
+  energy: recorded {"entropy_sum": 0.0, "mean_entropy": 0.0, "reliability": {"bins": 10, "n": [[5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0
+  [ok] energy: calibration equals its derivation
+  [ok] energy: each of the 10 support values' bin counts sums to scored (5): [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  [ok] energy: each scored step realises one value: 5 hits
+  wood: recorded {"entropy_sum": 10.986122886681098, "mean_entropy": 2.1972245773362196, "reliability": {"bins": 10, "n": [[5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 5, 0, 0, 0, 0, 0,
+  [ok] wood: calibration equals its derivation
+  [ok] wood: each of the 10 support values' bin counts sums to scored (5): [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  [ok] wood: each scored step realises one value: 5 hits
+  stone: recorded {"entropy_sum": 0.0, "mean_entropy": null, "reliability": {"bins": 10, "n": [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0
+  [ok] stone: calibration equals its derivation
+  [ok] stone: each of the 10 support values' bin counts sums to scored (0): [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  [ok] stone: each scored step realises one value: 0 hits
+result:    PASS
