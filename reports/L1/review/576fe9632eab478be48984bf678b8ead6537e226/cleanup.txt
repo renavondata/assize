@@ -1,0 +1,14 @@
+pre-existing before this review (2026-10-07T09:25:41Z):
+-rw-r--r-- 1 g g 2937 Oct  6 13:30 /tmp/assize-mkpins.txt
+drwx------ 3 g g   60 Oct  7 10:18 /tmp/assize-scratch-2px40nxn
+drwx------ 4 g g   80 Oct  7 11:08 /tmp/assize-scratch-_9b1sc88
+no assize containers
+
+after this review (2026-10-07T09:35:31Z):
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-review-art.*': No such file or directory
+-rw-r--r-- 1 g g 2937 Oct  6 13:30 /tmp/assize-mkpins.txt
+drwx------ 3 g g   60 Oct  7 10:18 /tmp/assize-scratch-2px40nxn
+drwx------ 4 g g   80 Oct  7 11:08 /tmp/assize-scratch-_9b1sc88
+no assize containers
+no make pins / harness process

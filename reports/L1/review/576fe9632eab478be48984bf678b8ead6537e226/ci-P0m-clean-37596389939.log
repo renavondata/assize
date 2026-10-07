@@ -1,0 +1,19 @@
+pin:       P0m
+protects:  a commit touching an entrenched path without a guy Proposer is rejected; every party is read
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-o6vypdyp
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: 9 branch commits read, want 9
+  [ok] builder, ordinary path: parties reported ['builder m s'], findings []; want ['builder m s'], []
+  [ok] no trailer: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s'], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], findings []; want ['guy', 'builder m s'], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], findings []; want ['builder m s', 'guy'], []
+  [ok] malformed party: parties reported ['builder m'], findings ['bad_party']; want ['builder m'], ['bad_party']
+  [ok] body-only Proposer, not exempted: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] body-only Proposer, exempted: parties reported ['reviewer m s'], findings []; want ['reviewer m s'], []
+  [ok] body-only Proposer, another party exempted: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [skip] real branch at /home/runner/work/assize/assize: shallow clone without master, base unresolvable; not checked in this run (checked by every make pins in a full clone)
+result:    PASS
