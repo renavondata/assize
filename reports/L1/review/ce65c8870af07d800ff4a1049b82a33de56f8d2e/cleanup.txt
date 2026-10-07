@@ -1,0 +1,16 @@
+# 2026-10-07T05:06:45Z cleanup
+removed /tmp/assize-review-ce65c88.Gkc4 and /tmp/assize-scratch-*
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ podman ps -a --filter name=assize
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
+$ docker ps -a --filter name=assize
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
+$ pgrep -af "harness|make pins"
+1462667 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791348831079-3xa1tb.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'R=reports/L1/review/ce65c8870af07d800ff4a1049b82a33de56f8d2e && rm -rf /tmp/assize-review-ce65c88.Gkc4 /tmp/assize-scratch-* 2>/dev/null; git worktree prune; { echo "# $(date -u +%FT%TZ) cleanup"; echo "removed /tmp/assize-review-ce65c88.Gkc4 and /tmp/assize-scratch-*"; echo '"'"'$ ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1'"'"'; ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1; echo '"'"'$ podman ps -a --filter name=assize'"'"'; podman ps -a --filter name=assize 2>&1; echo '"'"'$ docker ps -a --filter name=assize'"'"'; docker ps -a --filter name=assize 2>&1; echo '"'"'$ pgrep -af "harness|make pins"'"'"'; pgrep -af "python -m harness|make pins" || echo "(none)"; } > $R/cleanup.txt; cat $R/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-e0a6-cwd
+note: the one pgrep match above is this cleanup command's own shell (pid 1462667). Re-check excluding self:
+$ pgrep -f "python -m harness" ; pgrep -x make
+(no harness process)
+(no make process)
