@@ -64,7 +64,7 @@ Lead with the verdict. Be terse and use Bayesian decision-theoretic vocabulary. 
 The court has been faster than the king. L0 met its pre-stated criteria four times and merged zero times, because every rung required Guy's attention, which is the one resource this file never priced. This amendment prices it.
 
 ### A1.1 Entrenched paths
-`CLAUDE.md`, `CODEOWNERS`, `.github/` and `.claude/` are entrenched: a pull request touching any of them requires Guy's review, enforced by `CODEOWNERS`, and is opened by the reviewer account so that Guy can give that review. `judge/` and `worlds/spec/` become entrenched, and enter `CODEOWNERS`, when the judge image is first sealed at the end of L2; until then they are ordinary paths under the brief that names them. "Never modify this file" now reads: sessions never edit `CLAUDE.md` directly; they may propose an amendment by a pull request labelled `constitution`, which only Guy merges.
+`CLAUDE.md`, `CODEOWNERS`, `.github/` and `.claude/` are entrenched: a pull request touching any of them requires Guy's review, enforced by `CODEOWNERS`. `judge/` and `worlds/spec/` become entrenched, and enter `CODEOWNERS`, when the judge image is first sealed at the end of L2; until then they are ordinary paths under the brief that names them. "Never modify this file" now reads: sessions never edit `CLAUDE.md` directly; they may propose an amendment by a pull request labelled `constitution`, which only Guy merges.
 
 ### A1.2 Two roles, two sessions
 - **Builder.** A session that does the next unfinished item of the current brief, runs the pins, writes `STATUS.md` and opens or updates one pull request. It never merges.
@@ -73,6 +73,8 @@ The court has been faster than the king. L0 met its pre-stated criteria four tim
 The reviewer account holds a fine-grained token with Actions: read, Commit statuses: read, Contents: read and write, Metadata: read, Pull requests: read and write. Checks cannot be granted to such tokens, so a run's result is read through the Actions API, never `gh pr checks`. Pull requests touching an entrenched path are opened by the reviewer account, so that Guy can approve them as code owner.
 
 The same session never plays both roles. A Builder reads the latest review file before doing anything else.
+
+A third account, assize-builder, authors every pull request. Sessions run from GitHub Actions on the agent runner: build on every push to master and on the blocked label; review on the needs-review label. State is carried by labels (needs-review, blocked, awaits-guy); nothing infers it.
 
 ### A1.3 Merging
 - The Reviewer's approval is mechanical: it is given on every ACCEPT, after the review file is pushed and `pins` is green on the resulting head, except on a pull request the reviewer account itself authored. A pull request that touches no entrenched path and is not a layer boundary then merges by auto-merge, enabled by the Builder and performed by GitHub.
@@ -86,6 +88,8 @@ Criteria are committed before the run; a review does not add them afterwards. A 
 - A `STATUS.md` carries at most **one** item under `NEEDS YOU`, and only for an action this file reserves to Guy: credentials, repository settings, runner registration, merging an entrenched or layer-boundary pull request, amending this file.
 - Every other decision the session takes itself and records under `decided (not asked)` with its probability that the decision stands on review. A session that stops for a decision it could have taken and recorded has failed the session.
 - Guy reads, by default, only layer-boundary `STATUS.md` files and `DISPUTE` entries. He may sample anything else.
+
+A NEEDS YOU on master with no pull request to carry it becomes an issue assigned to Guy; closing it and dispatching the build workflow is the acknowledgement. Three review rounds on one branch without approval hand the branch to Guy.
 
 ### A1.6 Forecasts
 Every Builder session, before its first `make pins`, appends to `reports/L<n>/forecasts.jsonl` one record per claim: `{"id", "ts", "proposer": {"kind", "model", "session"}, "sha_before", "claim", "p", "resolves_by"}`, with `id` the first 12 hex characters of the SHA-256 of `claim + ts`. Minimum claims: `pins` green on the first CI run of the pull request head; Reviewer verdict ACCEPT with no blocking finding; on a layer with host measurement, the host verdict (FIT, MARGINAL or UNFIT). The Reviewer appends a resolution record `{"id", "ts", "proposer", "outcome"}` for every open forecast it can resolve. `STATUS.md` reports cumulative log-loss against the base rate (the empirical frequency of that claim type to date; 0.5 before any resolution). Forecasts are never edited; a wrong forecast is data. Resolutions are appended, never edited; a resolution that later looks wrong is answered by a further record, not a change.

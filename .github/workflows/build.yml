@@ -1,0 +1,29 @@
+name: build
+on:
+  push:
+    branches: [master]
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+concurrency:
+  group: build
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.event_name != 'pull_request' || github.event.label.name == 'blocked'
+    runs-on: [self-hosted, agent]
+    timeout-minutes: 150
+    env:
+      GH_TOKEN: ${{ secrets.ASSIZE_BUILDER_TOKEN }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      ASSIZE_ACK: ${{ github.event_name == 'workflow_dispatch' && 'yes' || 'no' }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: master, fetch-depth: 0, persist-credentials: false }
+      - run: gh auth setup-git
+      - if: github.event_name == 'pull_request'
+        run: gh pr checkout ${{ github.event.pull_request.number }}
+      - run: claude -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: build-${{ github.run_id }}, path: build.log, retention-days: 14 }

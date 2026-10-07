@@ -1,0 +1,29 @@
+name: stale
+on:
+  schedule:
+    - cron: '0 6 * * *'        # 09:00 Israel, daily
+  workflow_dispatch:
+permissions:
+  pull-requests: read
+  issues: write
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d '12 hours ago' +%FT%TZ)
+          stuck=$(gh pr list -R "$GITHUB_REPOSITORY" --state open --json number,title,updatedAt,reviewDecision,labels \
+            -q --arg c "$cutoff" '.[] | select(.updatedAt < $c) | "- #\(.number) \(.title) — last activity \(.updatedAt[:16]), review=\(.reviewDecision // "none"), labels=\([.labels[].name]|join(","))"')
+          title="Stuck pull requests (daily sweep)"
+          existing=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number -q '.[0].number')
+          if [ -z "$stuck" ]; then
+            [ -n "$existing" ] && gh issue close "$existing" -R "$GITHUB_REPOSITORY" -c "Nothing stuck as of $(date -u +%FT%TZ)."
+            exit 0
+          fi
+          body=$(printf 'Open pull requests with no activity for 12 hours as of %s:\n\n%s\n\nA stuck PR is one the sessions cannot move; decide, merge, close, or relabel it.' "$(date -u +%FT%TZ)" "$stuck")
+          if [ -n "$existing" ]; then gh issue edit "$existing" -R "$GITHUB_REPOSITORY" --body "$body"
+          else gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee gfrmin --body "$body"; fi

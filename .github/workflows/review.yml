@@ -1,0 +1,26 @@
+name: review
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      pr: { description: "PR number", required: true }
+concurrency:
+  group: review-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: false
+jobs:
+  review:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'needs-review'
+    runs-on: [self-hosted, agent]
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ secrets.ASSIZE_REVIEWER_TOKEN }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: master, fetch-depth: 0, persist-credentials: false }
+      - run: gh auth setup-git
+      - run: claude -p "/review ${{ github.event.pull_request.number || inputs.pr }}" --max-turns 250 --output-format stream-json --verbose > review.log 2>&1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: review-${{ github.run_id }}, path: review.log, retention-days: 14 }
