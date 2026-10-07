@@ -1,19 +1,14 @@
-# STATUS — L1 — 2026-10-07 — 80b7e8f — PR #18
+# STATUS — L1 — 2026-10-07 — d5f8217 — PR #21
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; opens no layer's brief)
 pins: clean 20/20; mutants 39/39 KILLED; twins 39/39; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: judge/{compute.py (new),episodes.py,README.md}; harness/{pins.py (P4; _each_runtime),fixtures/candidates.py,edits/P4_*,proposer.toml,README.md}; reports/L1/{forecasts.jsonl,make-pins.txt,p4/,ci/,measure-37552507715.txt,STATUS.md}
-did: brief 1 §2 measured compute: judge/compute.py reads cpu.stat usage_usec and memory.peak from the cgroup the runtime created for the container (init pid via `container inspect`, /proc/<pid>/cgroup cut at the component naming the container id, so child cgroups still count); never a self-report
-did: episodes.py samples after every reply and at episode end; each record carries compute {cpu_s, wall_s, peak_memory_bytes, unmeasured_s}; CPU partitioned over a container's episodes; a crashed container's vanished cgroup leaves unmeasured_s > 0 (CPU there ≤ cpus × it), counted, never dropped
-did: P4: `busy` (0.2 s own CPU + 256 MiB filled and freed per step, self-reports 0 on stderr) over two episodes in one container: each cpu_s ∈ [1.0, 2.0), wall ≥ 1.0, peak ≥ 256 MiB, unmeasured 0; `busy_crash` covered. Mutants self_reported, client_rusage, not_differenced, peak_from_current KILLED under Docker 28.0.4 and Podman 4.9.3 in pins CI run 37549802069 on 80b7e8f: success (reports/L1/p4/ci-*); host: measure run 37552507715 on 80b7e8f, rootless Podman 6.1.2, 39/39 KILLED, 0 leaked (reports/L1/measure-37552507715.txt, p4/host-*)
-did: first pins run on the PR (37547404118 on 6a3e54a) was cancelled at the job's 15-min timeout with P4 passing under both runtimes. CI suite was already 9.5–14.6 min before P4; P3/P4/P7/P10 now run their runtimes concurrently (80b7e8f), CI make pins 11m45s. make pins at 80b7e8f on steel-legend 23:53:13Z–00:02:04Z (8m51s): PINS PASSED (reports/L1/make-pins.txt)
-decided (not asked): self-report mutant opens a stderr channel, since the RPC schema admits no self-report field (ack is additionalProperties:false); the clean judge discards stderr — p(stands on review)=0.7
-decided (not asked): peak_memory_bytes is the container's memory.peak since its start (not reset per episode: reset needs kernel ≥6.12 and write access Docker's root-owned cgroup denies) — an upper bound on the episode's own peak — p=0.6
-decided (not asked): wall_s is the judge's monotonic clock (cgroup has none); CPU after a container's last episode's last sample, before removal, is charged to no episode, stated in episodes.py — p=0.65
-decided (not asked): upper bound cpu_s < 2·known added to P4 (derived: two episodes' known work) so per-episode differencing is pinned; brief states only the lower bound — p=0.75
-decided (not asked): concurrency across runtimes rather than asking for a longer pins.yml timeout (.github is entrenched); assertions unchanged, transcripts printed whole per runtime — p=0.7
-forecasts: made 4; resolved 0 this session; ledger L0+L1: 54 claims, 36 resolved; cumulative log-loss 9.811 vs base rate 24.953 (0.5) over 36. Forecast d6af728ca1cb (pins green on first CI run of the PR head) should resolve false: first run 37547404118 cancelled
-obligations added: L2: pins CI wall time (11m45s of a 15-min job timeout; was 14.6 min at c2a87f6) needs a budget pin or a timeout set under a brief naming .github/workflows/pins.yml
-obligations added: L2: an exception escaping episodes.run() skips teardown (seen once in this session's ad-hoc mutant probe, container removed by hand); a try/finally teardown pin
+changed: harness/proposer.toml (session); reports/L1/{STATUS.md,forecasts.jsonl,make-pins-d5f8217.txt,ci/37614332392.json}; PR #21 also carries .github/workflows/{pins,measure}.yml timeouts (3f82afb, Proposer: guy)
+did: answered review-f676f59 F1 (BLOCK, P0l no_header/uncited): d5f8217 restored master's STATUS (cites recorded run 37549802069), giving pins a green sha; this commit, its child touching only reports/, regenerates STATUS with a `PR #21` header naming d5f8217
+did: make pins at d5f8217 on steel-legend 11:28:37Z–11:37:24Z: PINS PASSED, P0l clean ok, P0l/sha_comparison_skipped KILLED (reports/L1/make-pins-d5f8217.txt)
+did: pins CI run 37614332392 on d5f8217: success (recorded reports/L1/ci/37614332392.json)
+decided (not asked): two-commit answer to F1 (restore a passing STATUS, then cite the green run on it) rather than citing a run on 3f82afb, on which no pins run exists — p(stands on review)=0.85
+decided (not asked): F2 (Guy's .github edit) left for Guy to dispose; F3, F4 left as L2 obligations as the review records them; forecasts appended this session, answering F4 in fact — p=0.85
+forecasts: made 3 (8e214039842c pins green on this head p=0.85; 74fcea41ee75 reviewer ACCEPT p=0.75; 3a5f0cbb05b4 Crafter host FIT p=0.6); resolved 0; ledger L0+L1: 57 claims, 39 resolved; cumulative log-loss 11.814 vs base rate 27.033 (0.5) over 39
+obligations added: none (review-f676f59 F3, F4 already record theirs on L2)
 NEEDS YOU (at most 1): none
-next: A4 item 4: compute price (CPU-second, GB-second of peak memory, in achievements per episode) in judge/config.toml with rationale, before any scored run; then A4 item 3 (reliability table, mean entropy; needs per-step probabilities, review c2a87f6 F5)
+next: assize-review constitution-4
