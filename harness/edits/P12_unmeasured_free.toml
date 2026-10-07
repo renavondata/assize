@@ -1,0 +1,6 @@
+# P12's mutant `unmeasured_free` (brief 1 A4 item 4): the stretch the judge could not measure, after a crashed
+# container's last read, is charged nothing, so a candidate lowers its price by dying.
+[[edit]]
+path = "judge/price.py"
+old = '    unmeasured = used["unmeasured_s"]'
+new = '    unmeasured = 0.0'

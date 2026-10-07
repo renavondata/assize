@@ -21,7 +21,11 @@ start, to its own last sample. `wall_s` runs from the episode's start to its las
 is the container's high-water mark from its start to the episode's last sample. A container that exits (a crash) takes
 its cgroup with it, so its last stretch cannot be read: `unmeasured_s` is the wall-clock time from the last sample read
 to the episode's end, zero when the last attempt read, and the candidate's CPU in that stretch is at most the configured
-CPUs times it. CPU a candidate spends after its last episode's last sample, before removal, is charged to no episode."""
+CPUs times it. CPU a candidate spends after its last episode's last sample, before removal, is charged to no episode.
+
+Every record carries `price`, its compute in the World's utility at the rates `config.toml` commits (`price.py`): the
+unmeasured stretch is charged at the configured limits, and the peak memory's scope is stated in the record as
+`peak_memory_scope`."""
 
 from __future__ import annotations
 
@@ -39,7 +43,7 @@ from pathlib import Path
 import jsonschema
 import referencing
 
-from judge import compute, runtime, scoring
+from judge import compute, price, runtime, scoring
 
 SPEC = Path(__file__).resolve().parent.parent / "worlds" / "spec"
 SCHEMA_VERSION = "1.0.0"
@@ -212,6 +216,7 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
     """Play every World of `worlds` with the candidate `image`, one record per World, in order. A container serves
     episodes until one fails; it is then torn down, and the next episode starts in a fresh container."""
     lim, t = lim or runtime.limits(), t or timeouts()
+    rate = price.of(manifest["world"])
     records: list[dict] = []
     c: Container | None = None
     for i, world in enumerate(worlds):
@@ -221,14 +226,15 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
         code, detail = _play(c, world, manifest, t, losses)
         ended = c.measure()
         used = {"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6, "wall_s": ended - began,
-                "peak_memory_bytes": c.usage.peak_bytes, "unmeasured_s": ended - c.measured_at}
+                "peak_memory_bytes": c.usage.peak_bytes, "peak_memory_scope": price.PEAK_SCOPE,
+                "unmeasured_s": ended - c.measured_at}
         if code not in WORLD_ENDINGS:
             if not c.teardown(t):
                 code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
             c = None
         records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
                         "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"]),
-                        "compute": used})
+                        "compute": used, "price": price.charge(used, lim, rate)})
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
     return records

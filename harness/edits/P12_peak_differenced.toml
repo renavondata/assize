@@ -1,0 +1,7 @@
+# P12's mutant `peak_differenced` (brief 1 A4 item 4; review 42d7331 F4): an episode is priced on the rise of its
+# container's high-water mark during the episode, as if that were the episode's own peak, against the record's stated
+# scope; an episode in a container whose earlier episode set the mark is charged almost no memory.
+[[edit]]
+path = "judge/episodes.py"
+old = '"price": price.charge(used, lim, rate)'
+new = '"price": price.charge(used | {"peak_memory_bytes": c.usage.peak_bytes - start.peak_bytes}, lim, rate)'

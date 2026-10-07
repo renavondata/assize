@@ -1127,6 +1127,83 @@ def p7_infinite_loss() -> bool:
     return ok()
 
 
+
+# P12's derivation of the committed price (brief 1 A4 item 4): an episode exhausting every allowance is charged the
+# smallest effect brief 1's FIT criterion requires the court to detect, half for CPU and half for memory.
+FIT_DELTA = 0.5
+
+
+def _priced(used: dict, cfg: dict) -> dict:
+    """What the judge must charge for `used`, derived here from `judge/config.toml` and the rule `judge/price.py`
+    states, independently of that module: the unmeasured stretch at the configured CPUs and memory, the peak memory
+    over the rest, in gigabytes of 1e9 bytes."""
+    rate, lim = cfg["price"]["crafter"], cfg["candidate"]
+    unmeasured = used["unmeasured_s"]
+    cpu = rate["cpu_s"] * (used["cpu_s"] + lim["cpus"] * unmeasured)
+    memory = rate["memory_gb_s"] * (used["peak_memory_bytes"] * max(used["wall_s"] - unmeasured, 0.0)
+                                    + lim["memory_mib"] * 2 ** 20 * unmeasured) / 1e9
+    return {"cpu": cpu, "memory": memory, "total": cpu + memory}
+
+
+def _same(a: dict | None, b: dict) -> bool:
+    """`a` equals `b` term by term up to the rounding of a few double-precision operations (a derived bound)."""
+    return isinstance(a, dict) and a.keys() == b.keys() and all(
+        math.isclose(a[k], b[k], rel_tol=8 * sys.float_info.epsilon, abs_tol=0.0) for k in b)
+
+
+def p12_compute_price() -> bool:
+    """Under every usable runtime, every episode record carries its compute priced in Crafter achievements at the
+    rates `judge/config.toml` commits, which equal their stated derivation. The peak memory's scope is stated in the
+    record as the container's since its start, and the price follows that scope: a fixture filling a block in its first
+    episode only is charged that block's high-water mark in its second episode too. What the judge could not measure,
+    the stretch after a crashed container's last read, is charged at the configured CPUs and memory (brief 1 A4 item 4;
+    review 42d7331 F4)."""
+    import tomllib
+
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    cfg = tomllib.loads((ROOT / "judge" / "config.toml").read_text())
+    rate, lim, t = cfg["price"]["crafter"], cfg["candidate"], cfg["timeouts"]
+    derived = {"cpu_s": FIT_DELTA / 2 / (lim["cpus"] * t["episode_s"]),
+               "memory_gb_s": FIT_DELTA / 2 / (lim["memory_mib"] * 2 ** 20 / 1e9 * t["episode_s"])}
+    print(f"  committed price {rate}; derived {derived}")
+    expect(_same(rate, derived), "the committed price equals its derivation from FIT's delta and the allowances")
+    block = candidates.BUSY_MIB << 20
+    usable, image = _usable_runtimes(expect)
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        records = episodes.run(rt, image, _short_crafter(2), binding.manifest(), command=candidates.command("hog_once"))
+        say(f"  {rt.name} hog_once: {json.dumps(records)}")
+        expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)] * 2,
+               f"{rt.name} hog_once: two episodes of {LOOP_STEPS} steps in one container, ended by the World")
+        crashed = episodes.run(rt, image, _short_crafter(1), binding.manifest(),
+                               command=candidates.command("busy_crash"))
+        say(f"  {rt.name} busy_crash: {json.dumps(crashed)}")
+        expect([r["termination"] for r in crashed] == ["crash"], f"{rt.name} busy_crash: recorded crash")
+        for r in records:
+            used, n = r.get("compute", {}), f"{rt.name} hog_once episode {r['episode']}"
+            expect(used.get("peak_memory_scope") == "container_since_start",
+                   f"{n}: peak memory's scope stated as container_since_start ({used.get('peak_memory_scope')})")
+            expect(used.get("peak_memory_bytes", -1) >= block,
+                   f"{n}: peak memory {used.get('peak_memory_bytes')} bytes is at least the {block} filled in episode 0")
+            expect(used.get("wall_s", -1) > used.get("unmeasured_s", 0) == 0,
+                   f"{n}: measured throughout ({used.get('wall_s')} s wall, {used.get('unmeasured_s')} s unmeasured)")
+        for r in records + crashed:
+            want = _priced(r["compute"], cfg) if "peak_memory_bytes" in r.get("compute", {}) else {}
+            expect(_same(r.get("price"), want),
+                   f"{rt.name} {r['termination']} episode {r['episode']}: price {r.get('price')}, derived {want}")
+        used = crashed[0].get("compute", {}) if crashed else {}
+        expect(used.get("unmeasured_s", 0) > 0,
+               f"{rt.name} busy_crash: non-vacuous: {used.get('unmeasured_s')} s unmeasured after the container's last read")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -1176,6 +1253,9 @@ PINS = [
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
                            Mutant("sum_unchecked", _edits("P7_sum_unchecked")))),
+    Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
+        p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
+                            Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
