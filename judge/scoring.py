@@ -79,8 +79,8 @@ def step_predictions(prediction: Mapping[str, Sequence[float]], targets: Sequenc
                      observation: Mapping) -> dict[str, tuple[Sequence[float], int] | None]:
     """Each declared target's predicted distribution and the index in its support of the value `observation`, the
     World's next one, realised; None where the target is missing."""
-    return {t["name"]: ((prediction[t["name"]], t["support"].index(observation[t["field"]]))
-                        if t["name"] in prediction else None)
+    return {t["name"]: None if t["name"] not in prediction
+            else (prediction[t["name"]], t["support"].index(observation[t["field"]]))
             for t in targets}
 
 
