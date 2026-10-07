@@ -1,0 +1,12 @@
+# 2026-10-07T03:54:18Z gh api runs?head_sha=0475503…&event=pull_request
+pins completed cancelled 37567551306 2026-10-07T03:36:42Z 2026-10-07T03:52:08Z https://github.com/renavondata/assize/actions/runs/37567551306
+# all pins runs on branch l1-a4-4-compute-price
+0475503 completed cancelled 37567551306
+bb7b387 completed cancelled 37564599883
+c6679c6 completed cancelled 37563244833
+b6ed5a9 completed cancelled 37561989873
+2c70242 completed cancelled 37559856865
+d190bfc completed cancelled 37557831166
+# timeout-minutes at head and origin/master c8fdf97
+12:    timeout-minutes: 15
+12:    timeout-minutes: 15

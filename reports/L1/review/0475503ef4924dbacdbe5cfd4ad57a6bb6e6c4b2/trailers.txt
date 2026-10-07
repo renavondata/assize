@@ -1,0 +1,14 @@
+# git log --format='%h %(trailers:key=Proposer,valueonly)' c8fdf97..0475503
+0475503 [reviewer claude-opus-5-5 12b96db8-ea35-424e-b2eb-861ec0d56d0e]
+bb7b387 []
+c6679c6 [builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2]
+b6ed5a9 [builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2]
+2c70242 [builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2]
+d190bfc [builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2]
+08856e7 [builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2]
+# raw message of bb7b387
+$
+Proposer: reviewer claude-opus-5-5 fa0fb7b4-c85c-4c89-a70a-8f059dc787cc$
+$
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>$
+$
