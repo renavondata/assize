@@ -28,3 +28,7 @@ Proposer: reviewer claude-opus-5-5 fa0fb7b4-c85c-4c89-a70a-8f059dc787cc$
 $
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>$
 $
+
+# pins on d0ec15e (this review's commit), Actions API, read 2026-10-07T09:52:02Z
+d0ec15e30b05e19c37713d95cf995b023ddc0f6f pins completed cancelled 37601736700 2026-10-07T09:36:06Z 2026-10-07T09:51:30Z https://github.com/renavondata/assize/actions/runs/37601736700
+job pins: Set up job=success, Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success, Install uv=success, Sync environment=success, make pins=cancelled, Upload pins report=success, Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success, Complete job=success
