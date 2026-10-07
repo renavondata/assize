@@ -1,0 +1,6 @@
+# P13's mutant `entropy_missing_imputed` (brief 1 A4 item 3): the mean entropy is taken over every step, so a missing
+# step is imputed zero entropy, and a target never predicted gets a mean of 0.0 instead of none.
+[[edit]]
+path = "judge/scoring.py"
+old = '"mean_entropy": entropy_sum / len(scored) if scored else None,'
+new = '"mean_entropy": entropy_sum / len(steps) if steps else None,'

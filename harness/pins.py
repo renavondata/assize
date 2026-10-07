@@ -1077,16 +1077,25 @@ def p10_container_teardown() -> bool:
 MALFORMED = ("undeclared", "short", "zeros", "nan")
 
 
-def _forecaster_summary(targets) -> dict:
-    """What the judge must record for the `forecaster` fixture over one short episode, derived here by replaying the
-    same seed and actions in the binding and scoring each step by definition, independently of `judge/scoring.py`."""
+def _forecaster_observations() -> list[dict]:
+    """The observations of the `forecaster` fixture's one short episode, replayed with the same seed and actions."""
     ep = next(_short_crafter(1))
     obs = [ep.observation]
     while not ep.done:
         obs.append(ep.step(ep.legal_actions[0]))
+    return obs
 
-    def predicted(i: int, s: list, v) -> list[float]:
-        return [[float(x == v) for x in s], [0.0 if x == v else 1 / (len(s) - 1) for x in s], [1 / len(s)] * len(s)][i % 3]
+
+def _forecaster_predicted(i: int, s: list, v) -> list[float]:
+    """What the `forecaster` fixture predicts for target `i` of support `s` when its field's current value is `v`."""
+    return [[float(x == v) for x in s], [0.0 if x == v else 1 / (len(s) - 1) for x in s], [1 / len(s)] * len(s)][i % 3]
+
+
+def _forecaster_summary(targets) -> dict:
+    """What the judge must record for the `forecaster` fixture over one short episode, derived here by replaying the
+    same seed and actions in the binding and scoring each step by definition, independently of `judge/scoring.py`."""
+    obs = _forecaster_observations()
+    predicted = _forecaster_predicted
 
     def one(i: int, tg: dict) -> dict:
         steps = len(obs) - 1
@@ -1102,6 +1111,70 @@ def _forecaster_summary(targets) -> dict:
     return {tg["name"]: one(i, tg) for i, tg in enumerate(targets)}
 
 
+def _forecaster_calibration(targets, bins: int) -> dict:
+    """The calibration the judge must record for the `forecaster` fixture over one short episode, derived here by
+    definition, independently of `judge/scoring.py`: per target, every scored step adds, for every support value, one
+    count to the bin whose edges enclose the probability it put on that value (the last bin closed at 1), a hit if that
+    value was realised, and that probability; and the entropy in nats of its distribution. The last target is missing."""
+    obs = _forecaster_observations()
+    edges = [b / bins for b in range(1, bins)]
+
+    def one(i: int, tg: dict) -> dict:
+        s, f = tg["support"], tg["field"]
+        steps = [] if i == len(targets) - 1 else [(_forecaster_predicted(i, s, a[f]), b[f]) for a, b in zip(obs, obs[1:])]
+        cells = {(v, b): [] for v in range(len(s)) for b in range(bins)}
+        for p, realised in steps:
+            for v, x in enumerate(s):
+                cells[(v, sum(e <= p[v] for e in edges))].append((p[v], x == realised))
+        h = [-math.fsum(q * math.log(q) for q in p if q > 0) for p, _ in steps]
+        table = {k: [[g(cells[(v, b)]) for b in range(bins)] for v in range(len(s))]
+                 for k, g in (("n", len), ("hits", lambda c: sum(1 for _, r in c if r)),
+                              ("p_sum", lambda c: math.fsum(q for q, _ in c)))}
+        return {"entropy_sum": math.fsum(h), "mean_entropy": math.fsum(h) / len(h) if h else None,
+                "reliability": {"bins": bins} | table}
+
+    return {tg["name"]: one(i, tg) for i, tg in enumerate(targets)}
+
+
+def p13_calibration() -> bool:
+    """Each declared target's calibration (brief 1 A4 item 3; review c2a87f6 F5): the judge's scoring of the
+    `forecaster` fixture's episode, replayed here step by step, equals the calibration derived by definition: the
+    entropies' sum and mean, none where the target is missing, and a reliability table over the declared support in
+    the committed bins, in which every scored step, an infinite-loss step included, enters every support value's row
+    once, so each row's counts sum to `scored`. P7 checks the record of the same episode, played through the judge's
+    loop under every usable runtime, against the same derivation."""
+    from judge import episodes, scoring
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    targets, bins = m["targets"], episodes.calibration_bins()
+    obs = _forecaster_observations()
+    steps = [scoring.step_predictions({tg["name"]: _forecaster_predicted(i, tg["support"], a[tg["field"]])
+                                       for i, tg in enumerate(targets[:-1])}, targets, b)
+             for a, b in zip(obs, obs[1:])]
+    summary = scoring.summary([scoring.step_losses({n: v[0] for n, v in s.items() if v is not None}, targets, b)
+                               for s, b in zip(steps, obs[1:])], targets)
+    got, want = scoring.calibration(steps, targets, bins), _forecaster_calibration(targets, bins)
+    print(f"  bins {bins}; summary {json.dumps(summary)}")
+    expect(any(w["infinite"] == w["scored"] > 0 for w in summary.values()),
+           "non-vacuous: some target puts zero mass on the realised value at every scored step")
+    expect(any(w["missing"] == w["scored"] + w["missing"] > 0 for w in summary.values()),
+           "non-vacuous: some target is missing at every step")
+    for tg in targets:
+        name, g, w = tg["name"], got.get(tg["name"], {}), want[tg["name"]]
+        print(f"  {name}: recorded {json.dumps(g)}")
+        expect(g == w, f"{name}: calibration equals its derivation" + ("" if g == w else f" {json.dumps(w)}"))
+        rows = g.get("reliability", {}).get("n", [])
+        expect(len(rows) == len(tg["support"]) and all(sum(r) == summary[name]["scored"] for r in rows),
+               f"{name}: each of the {len(tg['support'])} support values' bin counts sums to scored "
+               f"({summary[name]['scored']}): {[sum(r) for r in rows]}")
+        hits = g.get("reliability", {}).get("hits", [])
+        expect(sum(map(sum, hits)) == summary[name]["scored"],
+               f"{name}: each scored step realises one value: {sum(map(sum, hits))} hits")
+    return ok()
+
+
 def p7_infinite_loss() -> bool:
     """Under every usable runtime, a candidate's predictions are scored per declared target per step against the
     World's next observation: zero mass on the realised value is recorded +inf and counted, never clipped; an omitted
@@ -1115,6 +1188,7 @@ def p7_infinite_loss() -> bool:
     expect, ok = _expecter()
     m = binding.manifest()
     want = _forecaster_summary(m["targets"])
+    calibration = _forecaster_calibration(m["targets"], episodes.calibration_bins())
     print(f"  derived: {json.dumps(want)}")
     expect(any(w["infinite"] == w["scored"] > 0 for w in want.values()),
            "non-vacuous: some target puts zero mass on the realised value at every scored step")
@@ -1131,6 +1205,8 @@ def p7_infinite_loss() -> bool:
         got = records[0].get("prediction", {}) if records else {}
         for name, w in want.items():
             expect(got.get(name) == w, f"{rt.name} forecaster {name}: recorded {got.get(name)}, derived {w}")
+        cal = records[0].get("calibration") if records else None
+        expect(cal == calibration, f"{rt.name} forecaster: the recorded calibration equals P13's derivation")
         for behaviour in MALFORMED:
             records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
             say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
@@ -1273,6 +1349,10 @@ PINS = [
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
                            Mutant("sum_unchecked", _edits("P7_sum_unchecked")))),
+    Pin("P13", "every scored step, +inf included, enters each support value's reliability row; entropy is never imputed",
+        p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
+                          Mutant("realised_row_only", _edits("P13_realised_row_only")),
+                          Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed")))),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),

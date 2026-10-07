@@ -1,0 +1,14 @@
+2026-10-07T10:53:39Z
+removed /tmp/assize-review-7e18816.SheG: yes
+make pins / harness processes:
+  none
+assize containers (podman):
+  none
+assize containers (docker):
+  none
+other /tmp/assize* (predate this review, left alone):
+/tmp/assize-mkpins.txt
+/tmp/assize-pins-2c5c519.txt
+/tmp/assize-pins-f80571a.txt
+/tmp/assize-scratch-2px40nxn
+/tmp/assize-scratch-_9b1sc88

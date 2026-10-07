@@ -1,0 +1,6 @@
+# P13's mutant `realised_row_only` (brief 1 A4 item 3): a step enters only the realised value's row, with the probability
+# it put on that value, so the table no longer covers the declared support and every row's frequency is one.
+[[edit]]
+path = "judge/scoring.py"
+old = "            for v, q in enumerate(p):"
+new = "            for v, q in [(realised, p[realised])]:"
