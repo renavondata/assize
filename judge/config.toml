@@ -35,3 +35,12 @@ reply_bytes = 1048576
 # The pricing rule is `judge/price.py`'s: what the judge could not measure is charged at the configured limit.
 cpu_s = 0.0004166666666666667
 memory_gb_s = 0.00038805107275644935
+
+[calibration]
+# Bins of predicted probability in each target's reliability table (brief 1 A4 item 3): `bins` equal bins of [0, 1].
+# Committed before the first scored run; never tuned after a score is seen. The table is a report, not a decision: no
+# adoption or verdict reads it. Each bin records its count, its hits and the sum of its probabilities, so its mean
+# predicted probability is exact whatever the width, and tables add across episodes; the width sets only how finely
+# predicted probability is resolved. Ten bins of width 0.1 are the conventional reliability diagram (Niculescu-Mizil and
+# Caruana 2005).
+bins = 10

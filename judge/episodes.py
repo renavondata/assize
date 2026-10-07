@@ -9,7 +9,9 @@ and the next episode starts in a fresh one, so no episode inherits a broken cand
 Every completed step's prediction is validated against the manifest before the World advances, and scored against the
 observation the World then emits (`scoring.py`): log-loss per declared target, +inf counted and never clipped, a
 missing target recorded missing and never imputed. A reply carrying NaN or an infinity is not JSON and is
-`invalid_reply`.
+`invalid_reply`. Beside the log-loss, every record carries `calibration` (brief 1 A4 item 3): per declared target, the
+predicted entropies' sum and mean, and a reliability table over the declared support in the `[calibration] bins` bins
+of predicted probability that `config.toml` commits.
 
 Teardown force-removes the container by name and then asks the runtime whether anything of that name is left. A
 container still listed is an episode with termination `leaked`, counted, never dropped (brief 1 A4 item 5, P10).
@@ -61,6 +63,10 @@ class Timeouts:
 def timeouts(path: Path = runtime.CONFIG) -> Timeouts:
     c = tomllib.loads(path.read_text())["timeouts"]
     return Timeouts(float(c["step_s"]), float(c["episode_s"]), float(c["teardown_s"]), int(c["reply_bytes"]))
+
+
+def calibration_bins(path: Path = runtime.CONFIG) -> int:
+    return int(tomllib.loads(path.read_text())["calibration"]["bins"])
 
 
 def _validator(definition: str) -> jsonschema.Draft202012Validator:
@@ -187,9 +193,9 @@ def listed_prefix(rt: runtime.Runtime, prefix: str) -> list[str]:
     return [n for n in _names(rt, f"name=^{prefix}") if n.startswith(prefix)]
 
 
-def _play(c: Container, world, manifest: Mapping, t: Timeouts, losses: list) -> tuple[str, str]:
+def _play(c: Container, world, manifest: Mapping, t: Timeouts, losses: list, predicted: list) -> tuple[str, str]:
     """One episode on `world` with `c`; returns its termination code and detail, and appends to `losses` each
-    completed step's log-loss per declared target."""
+    completed step's log-loss per declared target, and to `predicted` its predicted distributions and realised values."""
     deadline = time.monotonic() + t.episode_s
     try:
         c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest}, t, deadline)
@@ -205,6 +211,7 @@ def _play(c: Container, world, manifest: Mapping, t: Timeouts, losses: list) -> 
                 raise Failure("invalid_reply", f"t={world.t}: prediction: {why}")
             world.step(result["action"])
             losses.append(scoring.step_losses(prediction, manifest["targets"], world.observation))
+            predicted.append(scoring.step_predictions(prediction, manifest["targets"], world.observation))
         c.call("end_episode", {"termination": world.termination, "utility": world.utility}, t, deadline)
         return world.termination, ""
     except Failure as f:
@@ -216,14 +223,15 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
     """Play every World of `worlds` with the candidate `image`, one record per World, in order. A container serves
     episodes until one fails; it is then torn down, and the next episode starts in a fresh container."""
     lim, t = lim or runtime.limits(), t or timeouts()
-    rate = price.of(manifest["world"])
+    rate, bins = price.of(manifest["world"]), calibration_bins()
     records: list[dict] = []
     c: Container | None = None
     for i, world in enumerate(worlds):
         c = c or Container(rt, image, lim, command)
         losses: list[dict] = []
+        predicted: list[dict] = []
         start, began = c.usage, time.monotonic()
-        code, detail = _play(c, world, manifest, t, losses)
+        code, detail = _play(c, world, manifest, t, losses, predicted)
         ended = c.measure()
         used = {"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6, "wall_s": ended - began,
                 "peak_memory_bytes": c.usage.peak_bytes, "peak_memory_scope": price.PEAK_SCOPE,
@@ -235,6 +243,7 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
             c = None
         records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
                         "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"]),
+                        "calibration": scoring.calibration(predicted, manifest["targets"], bins),
                         "compute": used, "price": charged})
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}

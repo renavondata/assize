@@ -1,0 +1,6 @@
+# P13's mutant `infinite_dropped` (brief 1 A4 item 3; review c2a87f6 F5): a step putting zero mass on the realised
+# value is left out of the calibration, so the reliability table hides the overconfidence it exists to show.
+[[edit]]
+path = "judge/scoring.py"
+old = '        scored = [s[t["name"]] for s in steps if s[t["name"]] is not None]'
+new = '        scored = [s[t["name"]] for s in steps if s[t["name"]] is not None and s[t["name"]][0][s[t["name"]][1]] > 0]'
