@@ -1,0 +1,138 @@
+2026-10-07T07:10:21Z
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 73ms
+registry harness: 21 pins, 41 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (4.273s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.438s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.306s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (6.071s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.794s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.747s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (2.799s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (13.449s) out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.437s) out/pins/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.661s) out/pins/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.437s) out/pins/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.433s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0m: observed fail -> FAILED (0.439s) out/pins/runs/P0m/clean/transcript.log
+CLEAN FAILED: P0m (observed fail)
+[clean ] P2: observed pass -> ok (1.109s) out/pins/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (22.889s) out/pins/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (6.703s) out/pins/runs/P4/clean/transcript.log
+[clean ] P7: observed pass -> ok (8.626s) out/pins/runs/P7/clean/transcript.log
+[clean ] P12: observed pass -> ok (4.867s) out/pins/runs/P12/clean/transcript.log
+[clean ] P10: observed pass -> ok (8.27s) out/pins/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.443s) out/pins/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (10.04s) out/pins/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (4.345s + 4.352s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.435s + 0.438s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.522s + 1.522s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (6.086s + 6.061s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (8.682s + 1.737s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.778s + 1.747s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (3.255s + 2.828s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (15.398s + 13.363s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (13.373s + 13.417s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (13.416s + 13.432s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (11.472s + 13.409s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.867s + 13.422s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.44s + 0.438s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.439s + 0.44s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.663s + 0.662s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.441s + 0.434s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.434s + 0.437s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin fail -> NON-CAUSAL (0.441s + 0.445s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+MUTANT NON-CAUSAL: P0m/trailer_check_disabled
+[mutant] P0m/first_proposer_only: mutant fail, twin fail -> NON-CAUSAL (0.438s + 0.437s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+MUTANT NON-CAUSAL: P0m/first_proposer_only
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.159s + 1.1s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.11s + 1.327s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.329s + 1.101s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.112s + 1.124s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (22.699s + 21.785s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (6.682s + 6.455s) out/pins/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (6.399s + 6.411s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (6.628s + 6.455s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (6.301s + 6.302s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (7.424s + 7.359s) out/pins/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (7.404s + 7.353s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (7.354s + 7.406s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (4.543s + 4.454s) out/pins/runs/P12/peak_differenced/mutant/transcript.log
+[mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (4.407s + 4.408s) out/pins/runs/P12/unmeasured_free/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin fail -> NON-CAUSAL (17.868s + 7.809s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+MUTANT NON-CAUSAL: P10/removal_skipped
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.395s + 0.392s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (9.711s + 9.756s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (10.058s + 9.755s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (9.757s + 9.707s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (9.059s + 9.757s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (3.402s + 9.711s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (9.71s + 9.885s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 20/21 passed, 1/21 failed
+mutants: 38/41 killed, 0/41 survived, 0/41 inconclusive, 0/41 stale, 3/41 non-causal, 0 leaked (clean and mutant)
+twins: 38/41 passed
+report: out/pins/pins.jsonl
+PINS FAILED
+make: *** [Makefile:13: pins] Error 1
+exit 2
+2026-10-07T07:20:09Z
+
+=== P0m clean transcript
+pin:       P0m
+protects:  a commit touching an entrenched path without a guy Proposer is rejected; every party is read
+role:      clean
+tree:      /tmp/assize-review-aa993f4.RrQw/r
+invoked:   /tmp/assize-review-aa993f4.RrQw/r
+scratch:   /tmp/assize-scratch-gif3n6kz
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: 6 branch commits read, want 6
+  [ok] builder, ordinary path: parties reported ['builder m s'], findings []; want ['builder m s'], []
+  [ok] no trailer: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s'], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], findings []; want ['guy', 'builder m s'], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], findings []; want ['builder m s', 'guy'], []
+  [ok] malformed party: parties reported ['builder m'], findings ['bad_party']; want ['builder m'], ['bad_party']
+  [ok] real branch: base resolved (c8fdf97a6a0a04fd241af5456c8e602993cad71a)
+    08856e773541 parties ['builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2']
+    d190bfc5b5e4 parties ['builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2']
+    2c70242b128b parties ['builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2']
+    b6ed5a9e006d parties ['builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2']
+    c6679c6aa83a parties ['builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2']
+    bb7b3875f8f6 parties []
+    0475503ef492 parties ['reviewer claude-opus-5-5 12b96db8-ea35-424e-b2eb-861ec0d56d0e']
+    d553dc5cb7fe parties ['reviewer claude-opus-5-5 db8fe26e-02e1-4ddd-b5c4-5c300e61ea26']
+    6596deea8173 parties ['reviewer claude-opus-5-5 c594d70d-ac15-4067-9dc0-d0b603c32985']
+    e5e86bddd201 parties ['reviewer claude-opus-5-5 7239636f-b7f5-42d8-8959-90d68238ab2d']
+    ce65c8870af0 parties ['reviewer claude-opus-5-5 adcbf54c-343f-45b9-bff8-f97f16c55ada']
+    86343073f6b2 parties ['reviewer claude-opus-5-5 8498fcb4-6792-4687-b692-6bd37e28be3e']
+    ef57c7095573 parties ['reviewer claude-opus-5-5 624f5f44-7796-4b0a-829a-3d357090709e']
+    471d5c78e7d3 parties ['reviewer claude-opus-5-5 e55dd428-5c35-467f-805e-a4bc522ce4ec']
+    c51bbfdfc221 parties ['reviewer claude-opus-5-5 6d086bf1-7467-4b06-81c6-a1fd3bc2d6d7']
+    aa993f415150 parties ['reviewer claude-opus-5-5 87c6baaa-5664-4e04-97ea-34d9a94e2a46']
+  [FAIL] real branch c8fdf97a6a0a..HEAD: 16 commits; findings ['commit bb7b3875f8f6: no_proposer: no `Proposer:` trailer']
+result:    FAIL
+=== P10/removal_skipped twin transcript
+copy of /tmp/assize-review-aa993f4.RrQw/r
+  at /tmp/assize-scratch-3ecf6kpt/assize-copy-vjqj9z9d/repo
+twin: no edits applied
+pin:       P10
+protects:  a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing
+role:      twin
+tree:      /tmp/assize-scratch-3ecf6kpt/assize-copy-vjqj9z9d/repo
+invoked:   /tmp/assize-review-aa993f4.RrQw/r
+scratch:   /tmp/assize-scratch-3ecf6kpt
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman: control: the stubborn container survives SIGTERM (kill exit 0; running ['assize-candidate-1bbc71ebc52e4d97'])
+  [ok] podman: torn down directly, assize-candidate-1bbc71ebc52e4d97 is not listed
+  podman stubborn: [{"episode": 0, "termination": "step_timeout", "detail": "no reply before the deadline", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.04716, "wall_s": 2.1729571339674294, "peak_memory_bytes": 8683520, "peak_memory_scope": "container_since_start", "unmeasured_s": 0.0}, "price": {"cpu": 1.965e-05, "memory": 7.322103379584869e-06, "total": 2.697210337958487e-05}}]
+  [ok] podman: the stalled episode is recorded step_timeout (['step_timeout'])
+  [FAIL] podman: the runtime lists no candidate container afterwards (['assize-candidate-c47dc02f25fa4733'])
+  [FAIL] podman: every assertion above held (1 failed)
+result:    FAIL

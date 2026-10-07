@@ -1,0 +1,12 @@
+# 2026-10-07T07:22:44Z after removing /tmp/assize-review-aa993f4.RrQw and /tmp/assize-review-art.yh87
+# ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+/tmp/assize-scratch-2px40nxn
+/tmp/assize-scratch-p0z9vrap
+# /tmp/assize-scratch-2px40nxn (10:18 IDT) postdates this run's start but is not this run's (its P10 twin scratch was assize-scratch-3ecf6kpt, gone); left: likely the concurrent session's
+# podman ps -a | grep assize
+(none)
+# processes: make pins / harness
+2246355 claude Pull master. Create branch constitution-4 from master. On Guy's explicit written instruction, 2026-10-07, trailer Proposer: guy, commit message ending 'on Guy's instruction, 2026-10-07': in .github/workflows/pins.yml set timeout-minutes to 30; if .github/workflows/measure.yml has a timeout-minutes, set it to 45. Change nothing else. Run make pins. Write reports/L1/STATUS.md with LAYER BOUNDARY: no and next: assize-review constitution-4. Push the branch. Do not open a PR, do not enable auto-merge, do not merge.
+2247521 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791357743810-oir9yd.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'git rev-parse --short HEAD && date -u +%FT%TZ && make pins > /tmp/claude-1000/-home-g-git-assize/cfb349f0-6deb-4625-86b5-c7443972dc9f/scratchpad/make-pins.txt 2>&1; echo "exit $?"; date -u +%FT%TZ; tail -15 /tmp/claude-1000/-home-g-git-assize/cfb349f0-6deb-4625-86b5-c7443972dc9f/scratchpad/make-pins.txt' < /dev/null && pwd -P >| /tmp/claude-244f-cwd
+2247524 make pins

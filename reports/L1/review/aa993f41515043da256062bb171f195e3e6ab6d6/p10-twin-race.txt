@@ -1,0 +1,44 @@
+# podman events, steel-legend, 07:18:05Z-07:18:22Z (UTC ns), assize containers
+1791357490624836014 died assize-candidate-585be77599ce4b33
+1791357490666985308 remove assize-candidate-585be77599ce4b33
+1791357490727164229 died assize-candidate-bf2bdf60392a4773
+1791357490754590235 remove assize-candidate-bf2bdf60392a4773
+1791357492077615659 create assize-candidate-1bbc71ebc52e4d97
+1791357492104355813 init assize-candidate-1bbc71ebc52e4d97
+1791357492108737987 start assize-candidate-1bbc71ebc52e4d97
+1791357492110872211 attach assize-candidate-1bbc71ebc52e4d97
+1791357492873938246 create assize-p2-2232909-podman
+1791357492900578530 init assize-p2-2232909-podman
+1791357492904616500 start assize-p2-2232909-podman
+1791357492906562177 attach assize-p2-2232909-podman
+1791357492957602639 died assize-p2-2232909-podman
+1791357493018908021 cleanup assize-p2-2232909-podman
+1791357493050472218 remove assize-p2-2232909-podman
+1791357493240559163 kill assize-candidate-1bbc71ebc52e4d97
+1791357495146350828 create assize-candidate-c47dc02f25fa4733
+1791357495173428824 init assize-candidate-c47dc02f25fa4733
+1791357495177210848 start assize-candidate-c47dc02f25fa4733
+1791357495179172043 attach assize-candidate-c47dc02f25fa4733
+1791357495339979531 died assize-candidate-1bbc71ebc52e4d97
+1791357495377444718 remove assize-candidate-1bbc71ebc52e4d97
+1791357495543568835 kill assize-candidate-c47dc02f25fa4733
+1791357495550173962 died assize-candidate-c47dc02f25fa4733
+1791357495586217578 died assize-candidate-c47dc02f25fa4733
+1791357495604584275 cleanup assize-candidate-c47dc02f25fa4733
+1791357496330388481 create assize-candidate-e4d42f1483c3423c
+1791357496359767297 init assize-candidate-e4d42f1483c3423c
+1791357496363808614 start assize-candidate-e4d42f1483c3423c
+1791357496365872264 attach assize-candidate-e4d42f1483c3423c
+1791357498520830819 died assize-candidate-e4d42f1483c3423c
+1791357498552989435 remove assize-candidate-e4d42f1483c3423c
+1791357498686625050 remove assize-candidate-c47dc02f25fa4733
+# my run's P2 rows precede P10 (make-pins.txt lines):
+24:[clean ] P2: observed pass -> ok (1.109s) out/pins/runs/P2/clean/transcript.log
+29:[clean ] P10: observed pass -> ok (8.27s) out/pins/runs/P10/clean/transcript.log
+53:[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.159s + 1.1s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+54:[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.11s + 1.327s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+55:[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.329s + 1.101s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+56:[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.112s + 1.124s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+67:[mutant] P10/removal_skipped: mutant fail, twin fail -> NON-CAUSAL (17.868s + 7.809s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+# concurrent local session: /home/g/git/assize HEAD
+3f82afb 2026-10-07T10:17:38+03:00 .github: pins timeout 30 min, measure timeout 45 min

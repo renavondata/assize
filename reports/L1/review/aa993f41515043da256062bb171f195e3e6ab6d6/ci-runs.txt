@@ -1,0 +1,3 @@
+# gh api runs?head_sha=aa993f4…&event=pull_request (pins)
+completed success 37585275837 https://github.com/renavondata/assize/actions/runs/37585275837 2026-10-07T07:06:02Z 2026-10-07T07:20:26Z
+job pins runner=GitHub Actions 1000000841 ["ubuntu-latest"] success
