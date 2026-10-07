@@ -1,0 +1,9 @@
+# cleanup 2026-10-07T02:58:12Z
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ podman ps -a --filter name=assize-candidate
+$ docker ps -a --filter name=assize-candidate
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+$ pgrep -af "harness run|assize-scratch|assize-review-c6679c6"
+(end)
