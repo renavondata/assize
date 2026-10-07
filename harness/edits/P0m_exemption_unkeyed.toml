@@ -1,0 +1,5 @@
+# P0m's third mutant (review aa993f4 F1): the exemption is not keyed by sha; any commit's body-only `Proposer:` counts.
+[[edit]]
+path = "harness/claims.py"
+old = "party = exemptions.get(sha)"
+new = "party = exemptions.get(sha) or next((ln.removeprefix(\"Proposer: \") for ln in message.splitlines() if ln.startswith(\"Proposer: \")), None)"

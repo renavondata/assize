@@ -167,6 +167,22 @@ def parties(trailer_values: str) -> tuple[str, ...]:
     return tuple(v.strip() for v in trailer_values.split(TRAILER_SEP) if v.strip())
 
 
+# A commit whose `Proposer:` line git does not parse as a trailer, read from its message body instead. Keyed by full
+# sha, so the exemption covers that commit only; it names the one party the body must carry, so it cannot supply a
+# party the commit does not state. Each entry cites the review that found it.
+PROPOSER_EXEMPTIONS: Mapping[str, str] = {
+    # review aa993f4 F1 (= bb7b387 F1): a blank line separates `Proposer:` from `Co-Authored-By:`, so git reads no
+    # trailer. A reviewer commit on PR #19's branch, followed by 11 others; rewording it would rewrite all of them.
+    "bb7b3875f8f6b91ee88f89ca964598f5e6c5385b": "reviewer claude-opus-5-5 fa0fb7b4-c85c-4c89-a70a-8f059dc787cc",
+}
+
+
+def exempt_parties(sha: str, message: str, exemptions: Mapping[str, str]) -> tuple[str, ...]:
+    """The exempted party of `sha`, if `exemptions` lists it and its message carries that exact `Proposer:` line."""
+    party = exemptions.get(sha)
+    return (party,) if party is not None and f"Proposer: {party}" in message.splitlines() else ()
+
+
 def codeowners_patterns(text: str) -> tuple[str, ...]:
     return tuple(line.split()[0].lstrip("/") for line in text.splitlines()
                  if line.strip() and not line.lstrip().startswith("#"))
@@ -197,17 +213,18 @@ def _git(repo: Path, *args: str) -> str:
                           env=os.environ | GIT_ENV).stdout
 
 
-def branch_commits(repo: Path, base: str, head: str = "HEAD") -> list[Commit]:
-    """Commits in base..head, oldest first, with their `Proposer:` parties (parsed by git) and the paths each
-    changes itself: for a merge, only paths differing from every parent (`-c`), so content a merge brings in from
-    its other parent is attributed to the commit that authored it."""
-    fmt = "%H%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1d"
+def branch_commits(repo: Path, base: str, head: str = "HEAD",
+                   exemptions: Mapping[str, str] = PROPOSER_EXEMPTIONS) -> list[Commit]:
+    """Commits in base..head, oldest first, with their `Proposer:` parties (parsed by git; for a commit with none,
+    its exempted party, if any) and the paths each changes itself: for a merge, only paths differing from every
+    parent (`-c`), so content a merge brings in from its other parent is attributed to the commit that authored it."""
+    fmt = "%H%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f%B%x1d"
     records = [r.strip("\n") for r in _git(repo, "log", "--reverse", f"--format={fmt}", f"{base}..{head}")
                .split("\x1d") if r.strip()]
 
     def commit(record: str) -> Commit:
-        sha, values = record.split("\x1f", 1)
+        sha, values, message = record.split("\x1f", 2)
         paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", "-c", sha).splitlines()
-        return Commit(sha, parties(values), tuple(paths))
+        return Commit(sha, parties(values) or exempt_parties(sha, message, exemptions), tuple(paths))
 
     return [commit(r) for r in records]

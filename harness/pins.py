@@ -492,30 +492,44 @@ TRAILER_FIXTURE = (  # (label, path written, Proposer trailer lines, finding cod
     ("builder then guy, .github/", ".github/x.yml", ("builder m s", "guy"), set()),
     ("malformed party", "docs/y.md", ("builder m",), {"bad_party"}),
 )
+EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exempted or None, parties, findings wanted)
+    ("body-only Proposer, not exempted", "docs/z.md", "reviewer m s", None, (), {"no_proposer"}),
+    ("body-only Proposer, exempted", "docs/z.md", "reviewer m s", "reviewer m s", ("reviewer m s",), set()),
+    ("body-only Proposer, another party exempted", "docs/z.md", "reviewer m s", "reviewer m t", (), {"no_proposer"}),
+)
 FIXTURE_GIT = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@f", "GIT_COMMITTER_NAME": "f",
                "GIT_COMMITTER_EMAIL": "f@f"}
 
 
-def _trailer_repo(repo: Path) -> list[str]:
-    """A fixture repository: a base commit, then one commit per TRAILER_FIXTURE case. Returns their shas."""
+def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
+    """A fixture repository: a base commit, one commit per TRAILER_FIXTURE case, then one per EXEMPTION_FIXTURE case,
+    whose `Proposer:` line a blank line separates from a following `Co-Authored-By:`, so git parses no trailer.
+    Returns their shas and the exemptions the EXEMPTION_FIXTURE cases name."""
     env = os.environ | claims.GIT_ENV | FIXTURE_GIT
 
     def git(*args: str) -> str:
         return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
                               env=env).stdout.strip()
 
-    def commit(path: str, trailers: tuple[str, ...], n: int) -> str:
+    def commit(path: str, message: str, n: int) -> str:
         target = repo / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(f"{n}\n")
         git("add", "-A")
-        git("commit", "-q", "-m", f"case {n}\n\nbody\n\n" + "".join(f"Proposer: {t}\n" for t in trailers))
+        git("commit", "-q", "-m", f"case {n}\n\nbody\n\n{message}")
         return git("rev-parse", "HEAD")
+
+    def trailered(trailers: tuple[str, ...]) -> str:
+        return "".join(f"Proposer: {t}\n" for t in trailers)
 
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
-    commit("CODEOWNERS", ("guy",), 0)
-    return [commit(path, trailers, n) for n, (_, path, trailers, _) in enumerate(TRAILER_FIXTURE, 1)]
+    commit("CODEOWNERS", trailered(("guy",)), 0)
+    shas = [commit(path, trailered(trailers), n) for n, (_, path, trailers, _) in enumerate(TRAILER_FIXTURE, 1)]
+    unparsed = [commit(path, f"Proposer: {party}\n\nCo-Authored-By: f <f@f>\n", n)
+                for n, (_, path, party, *_) in enumerate(EXEMPTION_FIXTURE, len(shas) + 1)]
+    exemptions = {sha: exempt for sha, (_, _, _, exempt, *_) in zip(unparsed, EXEMPTION_FIXTURE) if exempt}
+    return shas + unparsed, exemptions
 
 
 def _branch_base(root: Path) -> str | None:
@@ -529,15 +543,19 @@ def _branch_base(root: Path) -> str | None:
 
 def p0m_commit_proposers() -> bool:
     """Every commit on the branch carries well-formed `Proposer:` trailers; one touching an entrenched path
-    (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2)."""
+    (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
+    `Proposer:` line counts only for a commit claims.PROPOSER_EXEMPTIONS lists, and only as the party it names
+    (review aa993f4 F1)."""
     expect, ok = _expecter()
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
     work = Path(tempfile.mkdtemp(prefix="assize-p0m-", dir=context.scratch))
-    shas = _trailer_repo(work / "repo")
-    commits = claims.branch_commits(work / "repo", "master~" + str(len(TRAILER_FIXTURE)))
+    shas, exemptions = _trailer_repo(work / "repo")
+    commits = claims.branch_commits(work / "repo", "master~" + str(len(shas)), exemptions=exemptions)
     expect([c.sha for c in commits] == shas, f"fixture: {len(commits)} branch commits read, want {len(shas)}")
-    for (label, _, trailers, want), c in zip(TRAILER_FIXTURE, commits):
+    cases = [(label, trailers, want) for label, _, trailers, want in TRAILER_FIXTURE] + \
+            [(label, trailers, want) for label, _, _, _, trailers, want in EXEMPTION_FIXTURE]
+    for (label, trailers, want), c in zip(cases, commits):
         got = {f.code for f in claims.commit_findings(c, patterns)}
         expect(got == want and c.parties == trailers,
                f"{label}: parties reported {list(c.parties)}, findings {sorted(got)}; want {list(trailers)}, "
@@ -1236,7 +1254,9 @@ PINS = [
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),)),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
-                                Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
+                                Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
+                                Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
+                                Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")))),
     Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
         p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
