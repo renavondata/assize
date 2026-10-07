@@ -1,0 +1,52 @@
+cleanup at 2026-10-07T13:22:28Z
+== /tmp/rev22-* :
+ls: cannot access '/tmp/rev22-*': No such file or directory
+== git worktree list:
+/home/g/git/assize                          ba332ad [constitution-4]
+/home/g/git/assize-review                   2817eb7 (detached HEAD)
+/home/g/git/worktrees/assize/l1-a4-1-ledger 2817eb7 [l1-a4-1-ledger]
+== harness / make pins processes:
+none
+== podman ps -a:
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+cinny ghcr.io/cinnyapp/cinny:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+mautrix-telegram dock.mau.dev/mautrix/telegram:latest
+mautrix-discord dock.mau.dev/mautrix/discord:latest
+mautrix-instagram2 dock.mau.dev/mautrix/meta:latest
+mautrix-signal dock.mau.dev/mautrix/signal:latest
+renavon-test-pg17 docker.io/library/postgres:17-alpine
+invidious_invidious-db_1 docker.io/library/postgres:14
+pod_invidious-infra 
+invidious_ts-mullvad_1 docker.io/tailscale/tailscale:latest
+invidious_companion_1 quay.io/invidious/invidious-companion:latest
+invidious_redlib_1 localhost/redlib:source
+invidious_invidious_1 quay.io/invidious/invidious:latest
+== docker ps -a:
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+cinny ghcr.io/cinnyapp/cinny:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+mautrix-telegram dock.mau.dev/mautrix/telegram:latest
+mautrix-discord dock.mau.dev/mautrix/discord:latest
+mautrix-instagram2 dock.mau.dev/mautrix/meta:latest
+mautrix-signal dock.mau.dev/mautrix/signal:latest
+renavon-test-pg17 docker.io/library/postgres:17-alpine
+invidious_invidious-db_1 docker.io/library/postgres:14
+pod_invidious-infra 
+invidious_ts-mullvad_1 docker.io/tailscale/tailscale:latest
+invidious_companion_1 quay.io/invidious/invidious-companion:latest
+invidious_redlib_1 localhost/redlib:source
+invidious_invidious_1 quay.io/invidious/invidious:latest
+== assize containers (name or image matching assize):
+none
+== /tmp/assize-* now (pre-existing entries predate this review; the run's scratch /tmp/assize-scratch-21lx6eap must be absent):
+/tmp/assize-mkpins.txt
+/tmp/assize-pins-2c5c519.txt
+/tmp/assize-pins-f80571a.txt
+/tmp/assize-scratch-1nr09mas
+/tmp/assize-scratch-2px40nxn
+/tmp/assize-scratch-_9b1sc88
+/tmp/assize-scratch-1nr09mas mtime 2026-10-07 15:27:55.730983038 +0300 (12:27:55Z, before this review's run began at 13:1xZ): not this review's; left alone. /tmp/assize-scratch-21lx6eap absent.
