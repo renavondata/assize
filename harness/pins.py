@@ -682,21 +682,18 @@ TRAJECTORY_GOLDEN = "f65aed28a596149bb27abda1e82bd2416adb5b22c9131ac7c73a692f3e5
 
 
 def _trajectories(*hash_seeds: str) -> list[dict]:
-    """TRAJECTORY_RUN for every seed of TRAJECTORY_SEEDS in its own fresh interpreter, once per `hash_seeds`, each
-    salting string hashing by its hash seed; one dict per hash seed, keyed by seed. The interpreters run concurrently
-    and share nothing but the tree; one per (hash seed, seed) rather than one per hash seed keeps P11's wall time
-    within `pins` CI's job timeout (L1 review 42d7331 F5: the job was cancelled at 15 minutes with P11 last)."""
-    pairs = [(h, seed) for h in hash_seeds for seed in TRAJECTORY_SEEDS]
-    children = [subprocess.Popen(proc.python("-c", TRAJECTORY_RUN, json.dumps([seed]), str(TRAJECTORY_STEPS)),
+    """TRAJECTORY_RUN in one fresh interpreter per `hash_seeds`, each salting string hashing by its seed. The
+    interpreters run concurrently, which halves P11's wall time (L1 STATUS obligation: `make pins` near 10 minutes);
+    they share nothing but the tree."""
+    children = [subprocess.Popen(proc.python("-c", TRAJECTORY_RUN, json.dumps(TRAJECTORY_SEEDS), str(TRAJECTORY_STEPS)),
                                  cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": h}, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE, text=True, preexec_fn=proc.setup(False))
-                for h, seed in pairs]
+                for h in hash_seeds]
     outs = [(c, *c.communicate()) for c in children]
     for c, _, err in outs:
         if c.returncode:
             raise RuntimeError(f"trajectory child exited {c.returncode}: {err.strip()[-500:]}")
-    found = [(h, json.loads(out)) for (h, _), (_, out, _) in zip(pairs, outs)]
-    return [{k: v for g, rec in found if g == h for k, v in rec.items()} for h in hash_seeds]
+    return [json.loads(out) for _, out, _ in outs]
 
 
 def p11_crafter_determinism() -> bool:
