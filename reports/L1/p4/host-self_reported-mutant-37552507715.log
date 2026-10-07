@@ -1,0 +1,29 @@
+copy of /home/assize-runner/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-ixl7y6j4/assize-copy-5gn26frt/repo
+applied 2 edit(s) from harness/edits/P4_self_reported.toml
+pin:       P4
+protects:  an episode's CPU and peak memory are measured from its container's cgroup, never self-reported
+role:      mutant
+tree:      /tmp/assize-scratch-ixl7y6j4/assize-copy-5gn26frt/repo
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-ixl7y6j4
+  known: 1.0 CPU s per busy episode (5 steps of 0.2 s); 268435456 bytes filled and freed per step; limits Limits(cpus=1.0, memory_mib=1024, pids=64)
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman busy: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.0, "wall_s": 1.2155877819750458, "peak_memory_bytes": 0, "unmeasured_s": 0.0015413970686495304}}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.0, "wall_s": 1.016370350960642, "peak_memory_bytes": 0, "unmeasured_s": 0.0013784379698336124}}]
+  [ok] podman busy: two episodes of 5 steps, ended by the World
+  [FAIL] podman busy episode 0: measured CPU 0.0 s is at least the known 1.0 s and less than two episodes' 2.0 s
+  [ok] podman busy episode 0: wall-clock 1.2155877819750458 s is at least 1.0 s
+  [FAIL] podman busy episode 0: peak memory 0 bytes is at least the 268435456 filled
+  [FAIL] podman busy episode 0: nothing unmeasured (0.0015413970686495304 s)
+  [FAIL] podman busy episode 1: measured CPU 0.0 s is at least the known 1.0 s and less than two episodes' 2.0 s
+  [ok] podman busy episode 1: wall-clock 1.016370350960642 s is at least 1.0 s
+  [FAIL] podman busy episode 1: peak memory 0 bytes is at least the 268435456 filled
+  [FAIL] podman busy episode 1: nothing unmeasured (0.0013784379698336124 s)
+  podman busy_crash: [{"episode": 0, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.0, "wall_s": 0.40668560995254666, "peak_memory_bytes": 0, "unmeasured_s": 0.40668625093530864}}]
+  [ok] podman busy_crash: recorded crash
+  [ok] podman busy_crash: measured 0.0 s plus 1.0 CPUs times unmeasured 0.40668625093530864 s covers the known 0.2 s
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (6 failed)
+result:    FAIL

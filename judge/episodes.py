@@ -12,7 +12,16 @@ missing target recorded missing and never imputed. A reply carrying NaN or an in
 `invalid_reply`.
 
 Teardown force-removes the container by name and then asks the runtime whether anything of that name is left. A
-container still listed is an episode with termination `leaked`, counted, never dropped (brief 1 A4 item 5, P10)."""
+container still listed is an episode with termination `leaked`, counted, never dropped (brief 1 A4 item 5, P10).
+
+Every episode records its compute, measured by the judge from the container's cgroup (`compute.py`, P4), never
+self-reported. The container is sampled after every reply and once more when the episode ends. A container's CPU time
+is partitioned over its episodes: each is charged from the previous episode's last sample, or from the container's
+start, to its own last sample. `wall_s` runs from the episode's start to its last sample attempt; `peak_memory_bytes`
+is the container's high-water mark from its start to the episode's last sample. A container that exits (a crash) takes
+its cgroup with it, so its last stretch cannot be read: `unmeasured_s` is the wall-clock time from the last sample read
+to the episode's end, zero when the last attempt read, and the candidate's CPU in that stretch is at most the configured
+CPUs times it. CPU a candidate spends after its last episode's last sample, before removal, is charged to no episode."""
 
 from __future__ import annotations
 
@@ -30,7 +39,7 @@ from pathlib import Path
 import jsonschema
 import referencing
 
-from judge import runtime, scoring
+from judge import compute, runtime, scoring
 
 SPEC = Path(__file__).resolve().parent.parent / "worlds" / "spec"
 SCHEMA_VERSION = "1.0.0"
@@ -85,6 +94,17 @@ class Container:
                                      stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0)
         self._buffer = b""
         self._next_id = 0
+        self.cgroup = None
+        self.usage, self.measured_at = compute.Sample(0, 0), time.monotonic()
+
+    def measure(self) -> float:
+        """Sample the container's cgroup and return when; `usage` and `measured_at` advance only if it was read."""
+        now = time.monotonic()
+        self.cgroup = self.cgroup or compute.cgroup_of(self.rt, self.name)
+        s = compute.sample(self.cgroup) if self.cgroup else None
+        if s is not None:
+            self.usage, self.measured_at = s, now
+        return now
 
     def _send(self, method: str, params: Mapping) -> int:
         rid, self._next_id = self._next_id, self._next_id + 1
@@ -130,6 +150,7 @@ class Container:
         errors = [e.message for e in REPLY.iter_errors(reply)]
         if errors or reply["id"] != rid or "result" not in reply:
             raise Failure("invalid_reply", f"{method}: {errors[:1] or 'wrong id or an error reply'}")
+        self.measure()
         return reply["result"]
 
     def teardown(self, t: Timeouts) -> bool:
@@ -196,13 +217,18 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
     for i, world in enumerate(worlds):
         c = c or Container(rt, image, lim, command)
         losses: list[dict] = []
+        start, began = c.usage, time.monotonic()
         code, detail = _play(c, world, manifest, t, losses)
+        ended = c.measure()
+        used = {"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6, "wall_s": ended - began,
+                "peak_memory_bytes": c.usage.peak_bytes, "unmeasured_s": ended - c.measured_at}
         if code not in WORLD_ENDINGS:
             if not c.teardown(t):
                 code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
             c = None
         records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
-                        "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"])})
+                        "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"]),
+                        "compute": used})
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
     return records

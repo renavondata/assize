@@ -1,0 +1,32 @@
+--- cleanup witness 2026-10-07T00:52:52Z
+scratch dirs:
+ls: cannot access '/tmp/assize-review-pins.*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+worktrees:
+/home/g/git/assize        42d7331 [l1-s2-p4-compute]
+/home/g/git/assize-review 42d7331 (detached HEAD)
+podman containers:
+tuwunel
+cinny
+mautrix-whatsapp
+matrix-archiver
+mautrix-telegram
+mautrix-discord
+mautrix-instagram2
+mautrix-signal
+renavon-test-pg17
+invidious_invidious-db_1
+pod_invidious-infra
+invidious_ts-mullvad_1
+invidious_companion_1
+invidious_redlib_1
+invidious_invidious_1
+harness/candidate processes:
+625928 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791333786199-ngbxvl.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'S=$(cat /tmp/assize-review-scratch); SHA=42d73311a23333e265476c0f0222a9bfc478e050; R=reports/L1/review/$SHA; mkdir -p $R && cp $S/make-pins.txt $R/make-pins.txt && cp $S/probe-init-rusage.txt $R/probe-init-process-rusage.txt && (cd $S/w && git diff) > $R/probe-init-process-rusage.diff && git worktree remove --force $S/w && rm -rf "$S" /tmp/assize-art.HLQF /tmp/assize-review-scratch && git worktree prune && { echo "--- cleanup witness $(date -u +%FT%TZ)"; echo "scratch dirs:"; ls -d /tmp/assize-review-pins.* /tmp/assize-scratch-* 2>&1; echo "worktrees:"; git worktree list; echo "podman containers:"; podman ps -a --format '"'"'{{.Names}}'"'"'; echo "harness/candidate processes:"; pgrep -af "harness run|python -I -c|podman run" || echo none; } | tee $R/cleanup.txt; ls $R' < /dev/null && pwd -P >| /tmp/claude-3ca2-cwd
+625940 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791333786199-ngbxvl.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'S=$(cat /tmp/assize-review-scratch); SHA=42d73311a23333e265476c0f0222a9bfc478e050; R=reports/L1/review/$SHA; mkdir -p $R && cp $S/make-pins.txt $R/make-pins.txt && cp $S/probe-init-rusage.txt $R/probe-init-process-rusage.txt && (cd $S/w && git diff) > $R/probe-init-process-rusage.diff && git worktree remove --force $S/w && rm -rf "$S" /tmp/assize-art.HLQF /tmp/assize-review-scratch && git worktree prune && { echo "--- cleanup witness $(date -u +%FT%TZ)"; echo "scratch dirs:"; ls -d /tmp/assize-review-pins.* /tmp/assize-scratch-* 2>&1; echo "worktrees:"; git worktree list; echo "podman containers:"; podman ps -a --format '"'"'{{.Names}}'"'"'; echo "harness/candidate processes:"; pgrep -af "harness run|python -I -c|podman run" || echo none; } | tee $R/cleanup.txt; ls $R' < /dev/null && pwd -P >| /tmp/claude-3ca2-cwd
+--- re-check excluding this shell 2026-10-07T00:52:58Z
+candidate containers (judge name prefix):
+none
+processes:
+none
+(the two pgrep lines above were the cleanup command's own shell)

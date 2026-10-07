@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-07T00:32:30Z","event":"pull_request","head_branch":"l1-s2-p4-compute","head_sha":"80b7e8f7c89efe7e3147da99d22f54eb2dfa9379","html_url":"https://github.com/renavondata/assize/actions/runs/37552507715","id":37552507715,"name":"measure","path":".github/workflows/measure.yml","run_attempt":1,"status":"completed"}

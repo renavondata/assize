@@ -1,0 +1,14 @@
+# P4's mutant `self_reported` (brief 1 section 2): the judge takes the candidate's CPU time from what the candidate
+# writes on its stderr, its own report, instead of from the container's cgroup.
+[[edit]]
+path = "judge/episodes.py"
+old = "stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0)"
+new = "stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)"
+
+[[edit]]
+path = "judge/episodes.py"
+old = "        s = compute.sample(self.cgroup) if self.cgroup else None\n"
+new = """        os.set_blocking(self.proc.stderr.fileno(), False)
+        said = (self.proc.stderr.read() or b"").split()
+        s = compute.Sample(round(float(said[-1]) * 1e6), 0) if said else None
+"""

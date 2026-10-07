@@ -1,0 +1,6 @@
+# P4's mutant `not_differenced` (brief 1 section 2): an episode is charged the container's CPU time since the container
+# started, so an episode played in a container that served earlier ones is charged their CPU as well.
+[[edit]]
+path = "judge/episodes.py"
+old = '"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6'
+new = '"cpu_s": c.usage.cpu_usec / 1e6'

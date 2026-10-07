@@ -1,0 +1,30 @@
+# CI runs via Actions API, 2026-10-07T00:58:49Z
+measure 6a3e54a attempt=1 completed success 37547407186 2026-10-06T23:35:36Z 2026-10-06T23:44:29Z
+pins 6a3e54a attempt=1 completed cancelled 37547404118 2026-10-06T23:35:34Z 2026-10-06T23:50:56Z
+measure 80b7e8f attempt=1 completed success 37552507715 2026-10-07T00:32:30Z 2026-10-07T00:41:24Z
+pins 80b7e8f attempt=1 completed success 37549802069 2026-10-07T00:02:17Z 2026-10-07T00:14:17Z
+pins 42d7331 attempt=1 completed cancelled 37553396812 2026-10-07T00:42:47Z 2026-10-07T00:58:10Z
+# run 37553396812 job steps
+pins cancelled 2026-10-07T00:42:50Z 2026-10-07T00:58:09Z
+  Set up job success
+  Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 success
+  Install uv success
+  Sync environment success
+  make pins cancelled
+  Upload pins report success
+  Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 success
+  Complete job success
+# run 37553396812 pins-report rows (kind=run): role, expected==observed
+{('clean', True): 20, ('mutant', True): 38, ('twin', True): 38}
+P4 rows: [(None, 'clean', 'pass'), ('P4/self_reported', 'mutant', 'fail'), ('P4/self_reported', 'twin', 'pass'), ('P4/client_rusage', 'mutant', 'fail'), ('P4/client_rusage', 'twin', 'pass'), ('P4/not_differenced', 'mutant', 'fail'), ('P4/not_differenced', 'twin', 'pass'), ('P4/peak_from_current', 'mutant', 'fail'), ('P4/peak_from_current', 'twin', 'pass')]
+last row: P11 P11/chunks_replaced_after_worldgen twin
+# first pins run 37547404118 (6a3e54a) pins-report: P4 FAIL lines per runtime per mutant
+self_reported docker: 6 FAIL lines; twin FAIL lines: 0
+self_reported podman: 6 FAIL lines; twin FAIL lines: 0
+client_rusage docker: 2 FAIL lines; twin FAIL lines: 0
+client_rusage podman: 2 FAIL lines; twin FAIL lines: 0
+not_differenced docker: 1 FAIL lines; twin FAIL lines: 0
+not_differenced podman: 1 FAIL lines; twin FAIL lines: 0
+peak_from_current docker: 2 FAIL lines; twin FAIL lines: 0
+peak_from_current podman: 2 FAIL lines; twin FAIL lines: 0
+clean P4 runtimes:  docker busy:  docker busy_crash:  podman busy:  podman busy_crash: 
