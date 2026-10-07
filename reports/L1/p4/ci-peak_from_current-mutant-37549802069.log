@@ -1,0 +1,44 @@
+copy of /home/runner/work/assize/assize
+  at /tmp/assize-scratch-2frk5p4l/assize-copy-is_tjdt2/repo
+applied 1 edit(s) from harness/edits/P4_peak_from_current.toml
+pin:       P4
+protects:  an episode's CPU and peak memory are measured from its container's cgroup, never self-reported
+role:      mutant
+tree:      /tmp/assize-scratch-2frk5p4l/assize-copy-is_tjdt2/repo
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-2frk5p4l
+  known: 1.0 CPU s per busy episode (5 steps of 0.2 s); 268435456 bytes filled and freed per step; limits Limits(cpus=1.0, memory_mib=1024, pids=64)
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+  docker busy: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 1.100203, "wall_s": 1.3173546740000006, "peak_memory_bytes": 8101888, "unmeasured_s": 0.0}}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 1.002735, "wall_s": 1.272634580999977, "peak_memory_bytes": 8040448, "unmeasured_s": 0.0}}]
+  [ok] docker busy: two episodes of 5 steps, ended by the World
+  [ok] docker busy episode 0: measured CPU 1.100203 s is at least the known 1.0 s and less than two episodes' 2.0 s
+  [ok] docker busy episode 0: wall-clock 1.3173546740000006 s is at least 1.0 s
+  [FAIL] docker busy episode 0: peak memory 8101888 bytes is at least the 268435456 filled
+  [ok] docker busy episode 0: nothing unmeasured (0.0 s)
+  [ok] docker busy episode 1: measured CPU 1.002735 s is at least the known 1.0 s and less than two episodes' 2.0 s
+  [ok] docker busy episode 1: wall-clock 1.272634580999977 s is at least 1.0 s
+  [FAIL] docker busy episode 1: peak memory 8040448 bytes is at least the 268435456 filled
+  [ok] docker busy episode 1: nothing unmeasured (0.0 s)
+  docker busy_crash: [{"episode": 0, "termination": "crash", "detail": "candidate closed its output (exit 3)", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.101041, "wall_s": 0.634991862999982, "peak_memory_bytes": 7950336, "unmeasured_s": 0.4035158859999797}}]
+  [ok] docker busy_crash: recorded crash
+  [ok] docker busy_crash: measured 0.101041 s plus 1.0 CPUs times unmeasured 0.4035158859999797 s covers the known 0.2 s
+  [ok] docker: no candidate container listed after the cases ([])
+  [FAIL] docker: every assertion above held (2 failed)
+  podman busy: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 1.077766, "wall_s": 1.4769612320000078, "peak_memory_bytes": 7909376, "unmeasured_s": 0.0}}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 1.002813, "wall_s": 1.4042869360000054, "peak_memory_bytes": 7938048, "unmeasured_s": 0.0}}]
+  [ok] podman busy: two episodes of 5 steps, ended by the World
+  [ok] podman busy episode 0: measured CPU 1.077766 s is at least the known 1.0 s and less than two episodes' 2.0 s
+  [ok] podman busy episode 0: wall-clock 1.4769612320000078 s is at least 1.0 s
+  [FAIL] podman busy episode 0: peak memory 7909376 bytes is at least the 268435456 filled
+  [ok] podman busy episode 0: nothing unmeasured (0.0 s)
+  [ok] podman busy episode 1: measured CPU 1.002813 s is at least the known 1.0 s and less than two episodes' 2.0 s
+  [ok] podman busy episode 1: wall-clock 1.4042869360000054 s is at least 1.0 s
+  [FAIL] podman busy episode 1: peak memory 7938048 bytes is at least the 268435456 filled
+  [ok] podman busy episode 1: nothing unmeasured (0.0 s)
+  podman busy_crash: [{"episode": 0, "termination": "crash", "detail": "candidate closed its output (exit None)", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.052217, "wall_s": 0.43298220599996284, "peak_memory_bytes": 7819264, "unmeasured_s": 0.31080536899997924}}]
+  [ok] podman busy_crash: recorded crash
+  [ok] podman busy_crash: measured 0.052217 s plus 1.0 CPUs times unmeasured 0.31080536899997924 s covers the known 0.2 s
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (2 failed)
+result:    FAIL

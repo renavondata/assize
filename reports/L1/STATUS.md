@@ -1,18 +1,19 @@
-# STATUS — L1 — 2026-10-07 — 36d2a1f — PR #17
+# STATUS — L1 — 2026-10-07 — 80b7e8f — PR #18
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: no root REPORT.md verdict; opens no layer's brief)
-pins: clean 19/19; mutants 35/35 KILLED; twins 35/35; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: judge/{scoring.py (new),episodes.py,README.md}; harness/{pins.py (P7; P11 concurrent),fixtures/candidates.py,edits/P7_*,proposer.toml,README.md}; reports/L1/{forecasts.jsonl,make-pins.txt,p7/,ci/,measure-37540447019.txt,STATUS.md}
-did: brief 1 §2 prediction scoring: judge/scoring.py validates each step's prediction against the manifest (undeclared target, wrong length, sum ≠ 1 beyond len(support)·ε → invalid_reply before the World advances; NaN/Infinity in a reply is not JSON → invalid_reply) and scores −ln p(realised) per declared target against the next observation
-did: +∞ counted, never clipped; missing counted, never imputed; each record carries per target scored/missing/infinite/finite_sum/log_loss, scored+missing = steps
-did: P7: `forecaster` fixture's record must equal the one derived by replaying the episode in the binding; `undeclared`/`short`/`zeros`/`nan` end invalid_reply at t=0. Mutants clipped, missing_imputed, sum_unchecked KILLED with passing twins under Docker 28.0.4 and rootless Podman 4.9.3 in pins CI run 37540444218 on 36d2a1f: success (reports/L1/p7/ci-*); host: measure run 37540447019 on 36d2a1f, rootless Podman 6.1.2, 35/35 KILLED, 0 leaked (reports/L1/measure-37540447019.txt, p7/host-*)
-did: make pins at 36d2a1f on steel-legend 22:16:57Z–22:24:43Z (7m46s, was 8m47s before P7): PINS PASSED (reports/L1/make-pins.txt). P11's two salted-hash interpreters now run concurrently (18.7s → 9.7s per run)
-decided (not asked): a malformed prediction ends the episode invalid_reply, like any other malformed reply, rather than being scored as missing — p(stands on review)=0.7
-decided (not asked): sum tolerance len(support)·machine-ε, a derived bound, not a config constant; check written NaN-safe — p=0.75
-decided (not asked): JSON has no infinity, so an infinite log_loss is the string "+inf" beside an `infinite` count; finite_sum is kept so finite steps stay visible — p=0.65
-decided (not asked): per-step losses are aggregated per episode, not stored; A4 item 3's reliability table will need per-step probabilities and add them then — p=0.6
-decided (not asked): P11 concurrency addresses the prior STATUS's 10-minute obligation now, since adding P7 would otherwise approach the limit; assertions unchanged — p=0.75
-forecasts: made 4; resolved 0 this session; ledger L0+L1: 50 claims, 33 resolved; cumulative log-loss 8.805 vs base rate 22.874 (0.5) over 33
-obligations added: none
+pins: clean 20/20; mutants 39/39 KILLED; twins 39/39; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
+changed: judge/{compute.py (new),episodes.py,README.md}; harness/{pins.py (P4; _each_runtime),fixtures/candidates.py,edits/P4_*,proposer.toml,README.md}; reports/L1/{forecasts.jsonl,make-pins.txt,p4/,ci/,measure-37552507715.txt,STATUS.md}
+did: brief 1 §2 measured compute: judge/compute.py reads cpu.stat usage_usec and memory.peak from the cgroup the runtime created for the container (init pid via `container inspect`, /proc/<pid>/cgroup cut at the component naming the container id, so child cgroups still count); never a self-report
+did: episodes.py samples after every reply and at episode end; each record carries compute {cpu_s, wall_s, peak_memory_bytes, unmeasured_s}; CPU partitioned over a container's episodes; a crashed container's vanished cgroup leaves unmeasured_s > 0 (CPU there ≤ cpus × it), counted, never dropped
+did: P4: `busy` (0.2 s own CPU + 256 MiB filled and freed per step, self-reports 0 on stderr) over two episodes in one container: each cpu_s ∈ [1.0, 2.0), wall ≥ 1.0, peak ≥ 256 MiB, unmeasured 0; `busy_crash` covered. Mutants self_reported, client_rusage, not_differenced, peak_from_current KILLED under Docker 28.0.4 and Podman 4.9.3 in pins CI run 37549802069 on 80b7e8f: success (reports/L1/p4/ci-*); host: measure run 37552507715 on 80b7e8f, rootless Podman 6.1.2, 39/39 KILLED, 0 leaked (reports/L1/measure-37552507715.txt, p4/host-*)
+did: first pins run on the PR (37547404118 on 6a3e54a) was cancelled at the job's 15-min timeout with P4 passing under both runtimes. CI suite was already 9.5–14.6 min before P4; P3/P4/P7/P10 now run their runtimes concurrently (80b7e8f), CI make pins 11m45s. make pins at 80b7e8f on steel-legend 23:53:13Z–00:02:04Z (8m51s): PINS PASSED (reports/L1/make-pins.txt)
+decided (not asked): self-report mutant opens a stderr channel, since the RPC schema admits no self-report field (ack is additionalProperties:false); the clean judge discards stderr — p(stands on review)=0.7
+decided (not asked): peak_memory_bytes is the container's memory.peak since its start (not reset per episode: reset needs kernel ≥6.12 and write access Docker's root-owned cgroup denies) — an upper bound on the episode's own peak — p=0.6
+decided (not asked): wall_s is the judge's monotonic clock (cgroup has none); CPU after a container's last episode's last sample, before removal, is charged to no episode, stated in episodes.py — p=0.65
+decided (not asked): upper bound cpu_s < 2·known added to P4 (derived: two episodes' known work) so per-episode differencing is pinned; brief states only the lower bound — p=0.75
+decided (not asked): concurrency across runtimes rather than asking for a longer pins.yml timeout (.github is entrenched); assertions unchanged, transcripts printed whole per runtime — p=0.7
+forecasts: made 4; resolved 0 this session; ledger L0+L1: 54 claims, 36 resolved; cumulative log-loss 9.811 vs base rate 24.953 (0.5) over 36. Forecast d6af728ca1cb (pins green on first CI run of the PR head) should resolve false: first run 37547404118 cancelled
+obligations added: L2: pins CI wall time (11m45s of a 15-min job timeout; was 14.6 min at c2a87f6) needs a budget pin or a timeout set under a brief naming .github/workflows/pins.yml
+obligations added: L2: an exception escaping episodes.run() skips teardown (seen once in this session's ad-hoc mutant probe, container removed by hand); a try/finally teardown pin
 NEEDS YOU (at most 1): none
-next: brief 1 §2 continued: measured compute from cgroup accounting per episode (P4), then compute price in config (A4 item 4); A4 item 3 (reliability table, mean entropy) will need per-step predicted probabilities in the record
+next: A4 item 4: compute price (CPU-second, GB-second of peak memory, in achievements per episode) in judge/config.toml with rationale, before any scored run; then A4 item 3 (reliability table, mean entropy; needs per-step probabilities, review c2a87f6 F5)
