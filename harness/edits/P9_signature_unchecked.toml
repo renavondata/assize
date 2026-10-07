@@ -1,0 +1,6 @@
+# P9's mutant `signature_unchecked` (brief 1 A4 item 1): verification never checks a head's signature, so a forger
+# without the judge's key can rebuild the chain and its heads.
+[[edit]]
+path = "judge/ledger.py"
+old = '             if not hmac.compare_digest(str(h.get("mac")), _mac(key, h))]'
+new = '             if False and not hmac.compare_digest(str(h.get("mac")), _mac(key, h))]'

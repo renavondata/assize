@@ -1,0 +1,6 @@
+# P9's mutant `record_dropped` (brief 1 A4 item 1): the judge chains every record of a request but leaves its middle
+# record out of the ledger, so the signed head counts a record the ledger does not hold.
+[[edit]]
+path = "judge/ledger.py"
+old = '    size = _append(ledger, b"".join(canonical(r) + b"\n" for r in chained))'
+new = '    size = _append(ledger, b"".join(canonical(r) + b"\n" for r in chained if r is not chained[len(chained) // 2]))'

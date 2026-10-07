@@ -1,0 +1,10 @@
+# P9's mutant `utility_altered` (brief 1 A4 item 1): after writing a request, the judge rewrites its last record with
+# another utility, so the record on disk is not the record it chained.
+[[edit]]
+path = "judge/ledger.py"
+old = '    head = {"ledger": ledger.name, "request_id": request_id, "records": len(chained), "head": prev, "bytes": size}'
+new = '''    lines = ledger.read_bytes().splitlines(keepends=True)
+    lines[-1] = canonical(json.loads(lines[-1]) | {"utility": 99}) + b"\n"
+    ledger.write_bytes(b"".join(lines))
+    size = ledger.stat().st_size
+    head = {"ledger": ledger.name, "request_id": request_id, "records": len(chained), "head": prev, "bytes": size}'''

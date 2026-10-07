@@ -1,0 +1,6 @@
+# P9's mutant `opened_for_rewrite` (brief 1 A4 item 1): the ledger is opened for writing without O_APPEND, so a later
+# request is written over the start of the file instead of after its end.
+[[edit]]
+path = "judge/ledger.py"
+old = '    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)'
+new = '    fd = os.open(path, os.O_WRONLY | os.O_CREAT, 0o644)'
