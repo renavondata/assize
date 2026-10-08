@@ -1239,6 +1239,130 @@ def p5_commitment_order() -> bool:
     return ok()
 
 
+# P14 plays the random incumbent (brief 1 section 4) for two episodes in one container, each cut to INCUMBENT_STEPS
+# steps: 2 x 100 draws over Crafter's 17 actions expect about 11.8 per action, enough for Pearson's chi-square. Its
+# uniformity is refused only below UNIFORM_ALPHA, the false-failure rate the pin accepts per runtime per run, stated
+# before any run; a candidate's score never passes through it.
+INCUMBENT = ROOT / "incumbents" / "random"
+INCUMBENT_EPISODES = 2
+INCUMBENT_STEPS = 100
+UNIFORM_ALPHA = 1e-6
+
+
+class _Recording:
+    """A World that records each action it is stepped with and each observation it emits, the first included."""
+
+    def __init__(self, world):
+        self.world, self.actions, self.observations = world, [], [world.observation]
+
+    def __getattr__(self, name):
+        return getattr(self.world, name)
+
+    def step(self, action: int) -> dict:
+        self.actions.append(action)
+        self.observations.append(self.world.step(action))
+        return self.observations[-1]
+
+
+def _recorded_crafter(n: int, steps: int) -> list[_Recording]:
+    from worlds.crafter import binding
+
+    def cut(seed: int):
+        ep = binding.Episode(seed)
+        ep._env._length = steps
+        return _Recording(ep)
+
+    return [cut(seed) for seed in range(1, n + 1)]
+
+
+def _floor_summary(observations: list[dict], targets) -> dict:
+    """What the judge must record for the predictive floor over one episode's observations, derived by definition:
+    at step i the floor has seen observations 0..i and puts (1 + count) / (|support| + i + 1) on the value realised at
+    i + 1; scored as -ln of it, summed exactly. Independent of `judge/scoring.py` and of the incumbent's code."""
+
+    def one(tg: dict) -> dict:
+        f, n = tg["field"], len(tg["support"])
+        qs = [(1 + sum(o[f] == nxt[f] for o in observations[:i + 1])) / (n + i + 1)
+              for i, nxt in enumerate(observations[1:])]
+        return {"scored": len(qs), "missing": 0, "infinite": 0, "finite_sum": math.fsum(-math.log(q) for q in qs),
+                "log_loss": math.fsum(-math.log(q) for q in qs)}
+
+    return {tg["name"]: one(tg) for tg in targets}
+
+
+def _chi2_sf(x: float, df: int) -> float:
+    """P(X >= x) for X chi-square with `df` degrees of freedom: the regularised upper gamma Q(df/2, x/2) in its closed
+    forms, a finite sum for integer shape and erfc plus a finite sum for half-integer shape."""
+    h = x / 2
+    if df % 2 == 0:
+        return math.exp(-h) * math.fsum(h ** i / math.factorial(i) for i in range(df // 2))
+    return math.erfc(math.sqrt(h)) + math.exp(-h) * math.fsum(h ** (i + 0.5) / math.gamma(i + 1.5)
+                                                               for i in range((df - 1) // 2))
+
+
+def _build(rt, context_dir: Path) -> str:
+    """Build the image of `context_dir` under `rt` with no network and no pull; return its image id."""
+    with tempfile.TemporaryDirectory() as d:
+        iid = Path(d) / "iid"
+        subprocess.run([rt.binary, "build", "--network=none", "--pull=false", "-q", f"--iidfile={iid}",
+                        "-f", str(context_dir / "Containerfile"), str(context_dir)], check=True, capture_output=True)
+        return iid.read_text().strip()
+
+
+def p14_random_incumbent() -> bool:
+    """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
+    runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
+    pin's, plays two episodes in one container, each ended by the World; every action it plays is uniform over the
+    legal actions (Pearson's chi-square not refused at UNIFORM_ALPHA); and its recorded log-loss at every declared
+    target equals the predictive floor derived by definition from the episode's own observations, per episode, so the
+    floor starts afresh in each, finite and positive."""
+    from judge import episodes, runtime
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    base = runtime.candidate_config()["base_image"]
+    froms = [ln.split()[1] for ln in (INCUMBENT / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
+    expect(froms == [base], f"the incumbent's one FROM is the judge's pinned base image ({froms}, {base})")
+    usable, _ = _usable_runtimes(expect)
+
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        image = _build(rt, INCUMBENT)
+        say(f"  {rt.name} incumbent image: {image}")
+        try:
+            worlds = _recorded_crafter(INCUMBENT_EPISODES, INCUMBENT_STEPS)
+            records = episodes.run(rt, image, worlds, m)
+        finally:
+            subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
+        say(f"  {rt.name} incumbent: {json.dumps(records)}")
+        expect([r["termination"] in episodes.WORLD_ENDINGS for r in records] == [True] * INCUMBENT_EPISODES,
+               f"{rt.name}: {INCUMBENT_EPISODES} episodes, each ended by the World "
+               f"({[(r['termination'], r['steps']) for r in records]})")
+        for r, w in zip(records, worlds):
+            want = _floor_summary(w.observations, m["targets"])
+            expect(len(w.actions) == r["steps"] > 0 and all(v["finite_sum"] > 0 for v in want.values()),
+                   f"{rt.name} episode {r['episode']}: non-vacuous: {r['steps']} steps, the floor positive everywhere")
+            for name, v in want.items():
+                got = r["prediction"].get(name)
+                expect(got == v, f"{rt.name} episode {r['episode']} {name}: recorded {got}, floor derived {v}")
+        k = len(m["actions"])
+        played = [a for w in worlds for a in w.actions]
+        counts = [played.count(a) for a in range(k)]
+        e = len(played) / k
+        chi2 = math.fsum((c - e) ** 2 / e for c in counts)
+        p = _chi2_sf(chi2, k - 1)
+        say(f"  {rt.name} actions: {len(played)} played, counts {counts}; chi-square {chi2:.3f}, df {k - 1}, p {p:.3g}")
+        expect(all(w.legal_actions == list(range(k)) for w in worlds),
+               f"{rt.name}: the legal set is all {k} actions, so uniform means {e:.2f} each")
+        expect(p >= UNIFORM_ALPHA, f"{rt.name}: actions uniform over the legal ones: p {p:.3g} >= {UNIFORM_ALPHA}")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -1291,6 +1415,10 @@ PINS = [
                               Mutant("peak_from_current", _edits("P4_peak_from_current")))),
     Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
         p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),)),
+    Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",
+        p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
+                               Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
+                               Mutant("seen_not_reset", _edits("P14_seen_not_reset")))),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),

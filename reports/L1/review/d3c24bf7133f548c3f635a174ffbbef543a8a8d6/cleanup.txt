@@ -1,0 +1,29 @@
+# cleanup 2026-10-08T07:29:08Z on steel-legend
+$ git worktree remove --force ~/git/worktrees/assize/review-26-d3c24bf && git worktree prune
+$ rm -rf /tmp/rev26
+$ git worktree list
+/home/g/actions-runner/_work/assize/assize d3c24bf [l1-s4-random-incumbent]
+$ ls -d /tmp/rev26 /tmp/assize-rev26-* ~/git/worktrees/assize/review-26-d3c24bf
+ls: cannot access '/tmp/rev26': No such file or directory
+ls: cannot access '/tmp/assize-rev26-*': No such file or directory
+ls: cannot access '/home/g/git/worktrees/assize/review-26-d3c24bf': No such file or directory
+$ pgrep -af "harness run|incumbent/agent.py"
+(none)
+$ podman ps -a --format "{{.ID}} {{.Image}} {{.Names}}"
+57c59d92dba7 ghcr.io/matrix-construct/tuwunel:latest tuwunel
+ec27a02df108 ghcr.io/cinnyapp/cinny:latest cinny
+efc91f992834 dock.mau.dev/mautrix/whatsapp:latest mautrix-whatsapp
+df76d2cb4f13 localhost/matrix-local-archiver:latest matrix-archiver
+43bd7e301b3a dock.mau.dev/mautrix/telegram:latest mautrix-telegram
+29b8ec30afde dock.mau.dev/mautrix/discord:latest mautrix-discord
+e6fa137f3059 dock.mau.dev/mautrix/meta:latest mautrix-instagram2
+847be2bce487 dock.mau.dev/mautrix/signal:latest mautrix-signal
+05381121a18c docker.io/library/postgres:17-alpine renavon-test-pg17
+edaa1f71b30e docker.io/library/postgres:14 invidious_invidious-db_1
+8d1a4ebbbcc4  pod_invidious-infra
+d86b8163d5d2 docker.io/tailscale/tailscale:latest invidious_ts-mullvad_1
+6cb8ce59b9d3 quay.io/invidious/invidious-companion:latest invidious_companion_1
+876e50b4cf1a localhost/redlib:source invidious_redlib_1
+49bb4f7de66b quay.io/invidious/invidious:latest invidious_invidious_1
+$ podman images --filter dangling=false | grep -i d32211b78e8f || none
+(incumbent image from this run not present)
