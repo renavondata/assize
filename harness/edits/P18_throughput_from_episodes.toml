@@ -1,0 +1,6 @@
+# P18's mutant `throughput_from_episodes` (brief 1 section 5): throughput over the episodes' own compute wall-clock,
+# leaving out container starts, seed issuance and ledger writes, so time-to-learn's wall-clock is understated.
+[[edit]]
+path = "pilot/run.py"
+old = """    throughput = n / played.wall_s if played.wall_s > 0 else None"""
+new = """    throughput = n / math.fsum(r["compute"]["wall_s"] for r in rs) if rs else None"""

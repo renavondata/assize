@@ -1,0 +1,22 @@
+# Actions API, read 2026-10-08T19:45:16Z as assize-reviewer
+$ gh api repos/renavondata/assize/actions/runs?head_sha=cab0ca00be7a9fd82502c5e941a2e944266ceaa6
+review pull_request completed skipped 37831165689 attempt=1 2026-10-08T19:20:10Z cab0ca00be7a9fd82502c5e941a2e944266ceaa6
+measure pull_request completed success 37831165785 attempt=1 2026-10-08T19:20:10Z cab0ca00be7a9fd82502c5e941a2e944266ceaa6
+build pull_request completed cancelled 37831165921 attempt=1 2026-10-08T19:20:10Z cab0ca00be7a9fd82502c5e941a2e944266ceaa6
+pins pull_request completed success 37829367792 attempt=1 2026-10-08T19:05:52Z cab0ca00be7a9fd82502c5e941a2e944266ceaa6
+PR #31 dynamic completed success 37829364596 attempt=1 2026-10-08T19:05:51Z cab0ca00be7a9fd82502c5e941a2e944266ceaa6
+$ gh api repos/renavondata/assize/actions/runs?head_sha=571ee563f91d71938cef0ff52d76a849073adccb
+measure pull_request completed skipped 37833917850 attempt=1 2026-10-08T19:42:11Z 571ee563f91d71938cef0ff52d76a849073adccb
+review pull_request in_progress null 37833917871 attempt=1 2026-10-08T19:42:11Z 571ee563f91d71938cef0ff52d76a849073adccb
+build pull_request completed skipped 37833917812 attempt=1 2026-10-08T19:42:11Z 571ee563f91d71938cef0ff52d76a849073adccb
+pins pull_request in_progress null 37833894397 attempt=1 2026-10-08T19:42:00Z 571ee563f91d71938cef0ff52d76a849073adccb
+PR #31 dynamic completed success 37833883635 attempt=1 2026-10-08T19:41:54Z 571ee563f91d71938cef0ff52d76a849073adccb
+$ gh pr view 31 --json createdAt,commits
+created 2026-10-08T19:05:48Z
+cab0ca00be7a9fd82502c5e941a2e944266ceaa6 2026-10-08T19:05:12Z
+571ee563f91d71938cef0ff52d76a849073adccb 2026-10-08T19:41:49Z
+$ gh api repos/renavondata/assize/actions/runs/37831165785/artifacts
+11574163997 measure-host 725616 expired=false sha256:1de2965a5a557b41b819db70b14c43ff9a1b8689ff01881ced53f7e426df04c0
+$ diff committed record reports/L1/ci/37829367792.json vs API
+37829367792 cab0ca00be7a9fd82502c5e941a2e944266ceaa6 success attempt=1
+{'id': 37829367792, 'head_sha': 'cab0ca00be7a9fd82502c5e941a2e944266ceaa6', 'conclusion': 'success', 'run_attempt': 1}

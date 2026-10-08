@@ -1,0 +1,6 @@
+# P18's mutant `cap_ignored` (brief 1 section 5): the pilot never checks its wall-clock cap, so a pilot past the cap
+# runs on and states a verdict instead of stopping.
+[[edit]]
+path = "pilot/run.py"
+old = "        if clock() - start >= cap:"
+new = "        if False:"

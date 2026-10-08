@@ -1,0 +1,6 @@
+# P18's mutant `mixed_proposers_admitted` (brief 1 A4 item 2): records carrying two proposers are reported as one
+# pilot with a verdict.
+[[edit]]
+path = "pilot/run.py"
+old = """    several = [k for k, v in one.items() if len(v) != 1]"""
+new = """    several = [k for k, v in one.items() if len(v) != 1 and k != "proposer"]"""

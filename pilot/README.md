@@ -6,4 +6,9 @@ L1 — pilot and time-to-learn (brief 1 §5). Host only: nothing here is evidenc
 
     uv run --frozen python -c "from pilot import timetolearn as t; c = t.config()['time_to_learn']; rows = t.table(UTILITIES, THROUGHPUT, c); print(rows, t.verdict(rows, c))"
 
-P15 (`harness/pins.py`) pins it. The pilot run itself waits for `evaluate()` (brief 1 §2) and for the host (`measure.yml`).
+P15 (`harness/pins.py`) pins it.
+
+`run.py` and `python -m pilot` run the pilot through `evaluate()` (brief 1 §2): the random incumbent's image is built offline, its proposer (`[incumbent]`, the `Proposer:` trailer of 0f698c4, which added it) is issued a credential and the image registered under it, and the committed episodes are asked for in requests of `[requests] episodes`, the cap checked before each. The report (`report.json`, `report.md`) carries the verdict first, then the records' proposer, judge hash and image, every episode's utility and termination, Hafner's score beside the utility, the predictive floor's log-loss and calibration per target, compute per episode, throughput over the pilot's whole wall-clock and the time-to-learn table with its assumption. Reaching the cap, a refused or short request, or records of more than one proposer, judge hash or image stop it with no verdict. P18 pins it over a faked `evaluate()`.
+
+    make measure      # host only (measure.yml): host facts, make pins, then the pilot; judge storage in ~/.local/share/assize
+    make smoke        # at most 10 episodes in throwaway storage, Docker by default (SMOKE_RUNTIME=podman); never evidence

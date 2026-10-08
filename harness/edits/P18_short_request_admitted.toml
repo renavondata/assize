@@ -1,0 +1,6 @@
+# P18's mutant `short_request_admitted` (CLAUDE.md "Nothing is dropped silently"): a request returning fewer records
+# than the episodes it asked for is accepted, and the pilot goes on to a verdict.
+[[edit]]
+path = "pilot/run.py"
+old = "        if len(got) != n:"
+new = "        if False:"

@@ -1,0 +1,50 @@
+# cleanup 2026-10-08T20:02:54Z
+$ git worktree list
+/home/g/Downloads/actions-runner/_work/assize/assize 571ee56 [l1-s5-pilot]
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ pgrep -af "harness run|make pins|python -m pilot|judge evaluate"
+1007741 /bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791488545641-gx99ji.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'D=reports/L1/review/571ee563f91d71938cef0ff52d76a849073adccb; git worktree remove --force /tmp/assize-review-571ee56 && rm -rf /tmp/assize-review-571ee56 /tmp/assize-review-out /tmp/assize-review-art /tmp/assize-review-probe; { echo "# cleanup $(date -u +%FT%TZ)"; echo '"'"'$ git worktree list'"'"'; git worktree list; echo '"'"'$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*'"'"'; ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1; echo '"'"'$ pgrep -af "harness run|make pins|python -m pilot|judge evaluate"'"'"'; pgrep -af '"'"'harness run|make pins|python -m pilot|judge evaluate'"'"' || echo "(none)"; echo '"'"'$ podman ps -a --format "{{.Names}} {{.Image}}"'"'"'; podman ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' 2>&1; echo '"'"'$ docker ps -a'"'"'; docker ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' 2>&1; } > $D/cleanup.txt; cat $D/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-c8c8-cwd
+$ podman ps -a --format "{{.Names}} {{.Image}}"
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+rssfeed-standby_db_1 docker.io/pgvector/pgvector:pg17
+rssfeed-standby_miniflux_1 docker.io/miniflux/miniflux:latest
+renavon-ci-pg docker.io/library/postgres:17-alpine
+relock-ch docker.io/clickhouse/clickhouse-server:26.3
+accessinfohk_db_1 localhost/accessinfohk_db:latest
+accessinfohk_redis_1 docker.io/library/redis:latest
+accessinfohk_smtp_1 docker.io/mailhog/mailhog:latest
+accessinfohk_app_1 localhost/accessinfohk_app:latest
+accessinfohk_sidekiq_1 localhost/accessinfohk_sidekiq:latest
+cobalt_bgutil-pot-provider_1 docker.io/brainicism/bgutil-ytdlp-pot-provider:latest
+rssfeed_db_1 docker.io/pgvector/pgvector:pg17
+n8n_n8n_1 docker.n8n.io/n8nio/n8n:2.16.0
+cobalt_cobalt-api_1 ghcr.io/imputnet/cobalt:11
+photoprism_mariadb_1 docker.io/library/mariadb:11.8.6
+photoprism_photoprism_1 docker.io/photoprism/photoprism:260601
+rssfeed_miniflux_1 docker.io/miniflux/miniflux:latest
+$ docker ps -a
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+rssfeed-standby_db_1 docker.io/pgvector/pgvector:pg17
+rssfeed-standby_miniflux_1 docker.io/miniflux/miniflux:latest
+renavon-ci-pg docker.io/library/postgres:17-alpine
+relock-ch docker.io/clickhouse/clickhouse-server:26.3
+accessinfohk_db_1 localhost/accessinfohk_db:latest
+accessinfohk_redis_1 docker.io/library/redis:latest
+accessinfohk_smtp_1 docker.io/mailhog/mailhog:latest
+accessinfohk_app_1 localhost/accessinfohk_app:latest
+accessinfohk_sidekiq_1 localhost/accessinfohk_sidekiq:latest
+cobalt_bgutil-pot-provider_1 docker.io/brainicism/bgutil-ytdlp-pot-provider:latest
+rssfeed_db_1 docker.io/pgvector/pgvector:pg17
+n8n_n8n_1 docker.n8n.io/n8nio/n8n:2.16.0
+cobalt_cobalt-api_1 ghcr.io/imputnet/cobalt:11
+photoprism_mariadb_1 docker.io/library/mariadb:11.8.6
+photoprism_photoprism_1 docker.io/photoprism/photoprism:260601
+rssfeed_miniflux_1 docker.io/miniflux/miniflux:latest
+# reading: the one pgrep match is this cleanup command's own shell (its command line contains the pattern); no harness, make pins, pilot or judge process remains. Every listed container is an unrelated host service; none is from assize.

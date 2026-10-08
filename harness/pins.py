@@ -1992,6 +1992,134 @@ def p17_evaluate() -> bool:
     return ok()
 
 
+# P18's fixture pilot (brief 1 section 5; A4 items 2 and 3): 25 episodes asked in requests of 10, two of them crashes
+# with utility 0, one with an infinite loss on target `a`. The judge's records are faked, so the pin starts no container;
+# what it pins is how the pilot asks, stops and reports, which reads nothing but records. Every number below is the
+# fixture's, stated before any run; no candidate's score passes through it.
+P18_CFG = {"pilot": {"world": "crafter", "episodes": 25, "cap_s": 1000.0}, "requests": {"episodes": 10},
+           "time_to_learn": {"deltas": [0.25, 0.5, 1.0], "mass": 0.9, "fit_delta": 0.5, "marginal_delta": 1.0,
+                             "budget_s": 86400, "experiments": 200, "posterior_draws": 200, "seed": 0},
+           "incumbent": {"context": "incumbents/random",
+                         "proposer": {"kind": "guy", "model": "", "session": "not-the-registering-party"}}}
+P18_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p18-registering-party"}
+P18_TARGETS = ("a", "b")
+P18_COMPONENTS = ("x", "y", "z")
+P18_CRASHES = (3, 17)
+P18_INFINITE = 5
+P18_STEP_S = 1.0  # the fake clock's advance per reading: the pilot's wall-clock far exceeds its episodes' compute wall
+
+
+def _p18_record(i: int, proposer: dict = P18_PARTY) -> dict:
+    crash = i in P18_CRASHES
+    achieved = [] if crash else list(P18_COMPONENTS[: 1 + i % 3])
+
+    def pred(name: str) -> dict:
+        inf = int(name == "a" and i == P18_INFINITE)
+        return {"scored": 10, "missing": i % 2, "infinite": inf, "finite_sum": 1.0 + i, "log_loss": "+inf" if inf
+                else 1.0 + i}
+
+    def cal(name: str) -> dict:
+        return {"entropy_sum": 0.5 * (i + 1), "mean_entropy": 0.05 * (i + 1),
+                "reliability": {"bins": 2, "n": [[i % 10, 10 - i % 10], [10 - i % 10, i % 10]], "hits": [[0, 1], [1, 0]],
+                                "p_sum": [[0.25, 0.5], [0.5, 0.25]]}}
+
+    return {"episode": i, "termination": "crash" if crash else "terminal", "utility": len(achieved),
+            "achievements": achieved, "proposer": proposer, "judge_sha256": "f" * 64, "image": "sha256:" + "e" * 64,
+            "world": "crafter", "runtime": "fake", "prediction": {t: pred(t) for t in P18_TARGETS},
+            "calibration": {t: cal(t) for t in P18_TARGETS},
+            "compute": {"cpu_s": 0.01, "wall_s": 0.02, "unmeasured_s": 0.0, "peak_memory_bytes": 1000 + i,
+                        "peak_memory_scope": "container_since_start"},
+            "price": {"cpu": 0.0, "memory": 0.0, "total": 1e-6 * i}}
+
+
+def _p18_clock(step: float = P18_STEP_S):
+    t = [0.0]
+
+    def clock() -> float:
+        t[0] += step
+        return t[0]
+
+    return clock
+
+
+def p18_pilot() -> bool:
+    """Brief 1 section 5's pilot runner (`pilot/run.py`) over a faked `evaluate()`. The 25 episodes are asked in
+    requests of 10, 10 and 5 under distinct request ids, and every record enters the report: the crashes' utilities
+    among the per-episode utilities and terminations (none dropped); the throughput is recorded episodes over the
+    pilot's wall-clock, not over its episodes' compute; the proposer is the one the records carry, not the config's,
+    and records of two proposers are no pilot; a target with an infinite step has log-loss +inf; reliability tables add.
+    The cap passing before the episodes complete, a refused request, or a request returning fewer records than asked,
+    each stops the pilot with the records it has and no verdict."""
+    from judge import registry
+    from pilot import run
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    asked: list[tuple[str, int]] = []
+
+    def ask(rid: str, n: int, short: bool = False, refuse_at: int | None = None, mixed: bool = False) -> list[dict]:
+        if refuse_at is not None and len(asked) == refuse_at:
+            raise registry.Refused("interrupted", f"{rid}: fixture refusal")
+        start = sum(k for _, k in asked)
+        asked.append((rid, n))
+        return [_p18_record(i, P18_CFG["incumbent"]["proposer"] if mixed and i == start else P18_PARTY)
+                for i in range(start, start + n - short)]
+
+    def pilot(**kw):
+        asked.clear()
+        clock = kw.pop("clock", _p18_clock())
+        played = run.play(lambda rid, n: ask(rid, n, **kw), "p18", P18_CFG, refusals=(registry.Refused,),
+                          clock=clock)
+        return played, run.report(played, P18_CFG, P18_TARGETS, P18_COMPONENTS, binding.hafner_score,
+                                  evidence=False)
+
+    played, rep = pilot()
+    print(f"  full pilot: requests {asked}; verdict {rep['verdict']}; terminations {rep['episodes']['terminations']}")
+    every = [_p18_record(i) for i in range(25)]
+    expect([n for _, n in asked] == [10, 10, 5] and len({r for r, _ in asked}) == 3,
+           f"25 episodes asked in requests of 10, 10, 5 under distinct ids ({asked})")
+    expect(rep["episodes"]["recorded"] == 25 and rep["episodes"]["terminations"] == {"crash": 2, "terminal": 23},
+           f"every record counted, crashes included ({rep['episodes']})")
+    expect(rep["utility"]["per_episode"] == [r["utility"] for r in every] and rep["utility"]["n"] == 25,
+           f"per-episode utilities are every episode's, crashes' zeros included ({rep['utility']['counts']})")
+    expect(rep["verdict"] in {"FIT", "MARGINAL", "UNFIT"} and len(rep["time_to_learn"]["rows"]) == 3,
+           f"a completed pilot states a verdict and a time-to-learn row per shift ({rep['verdict']})")
+    expect(rep["throughput_episodes_per_s"] == 25 / played.wall_s and played.wall_s > 25 * 0.02,
+           f"throughput is recorded episodes over the pilot's wall-clock {played.wall_s} s "
+           f"({rep['throughput_episodes_per_s']})")
+    expect(rep["proposer"] == P18_PARTY, f"the report's proposer is the records' ({rep['proposer']})")
+    rates = [100 * sum(c in r["achievements"] for r in every) / 25 for c in P18_COMPONENTS]
+    hafner = math.exp(math.fsum(math.log(1 + s) for s in rates) / len(rates)) - 1
+    expect(math.isclose(rep["hafner_score"], hafner), f"Hafner score {rep['hafner_score']} is {hafner}")
+    a, b = rep["prediction"]["a"], rep["prediction"]["b"]
+    finite = math.fsum(1.0 + i for i in range(25))
+    expect(a["log_loss_per_step"] == "+inf" and a["infinite"] == 1,
+           f"a target with an infinite step has log-loss +inf, counted ({a})")
+    expect(b["log_loss_per_step"] == finite / 250 and b["missing"] == 12 and b["scored"] == 250,
+           f"a finite target's log-loss per scored step is its finite sum over 250 scored, 12 missing ({b})")
+    rel = rep["calibration"]["a"]["reliability"]
+    expect(rel["n"] == [[100, 150], [150, 100]] and rel["hits"] == [[0, 25], [25, 0]]
+           and rep["calibration"]["a"]["mean_entropy"] == 0.5 * 325 / 250,
+           f"reliability tables and entropies add over episodes ({rel['n']}, {rep['calibration']['a']['mean_entropy']})")
+
+    played, rep = pilot(clock=_p18_clock(P18_CFG["pilot"]["cap_s"] / 3))
+    print(f"  cap pilot: requests {asked}; verdict {rep['verdict']}")
+    expect(rep["verdict"].startswith("STOPPED: cap") and rep["episodes"]["recorded"] == 10
+           and rep["time_to_learn"]["rows"] == [],
+           f"the cap passing after one request stops the pilot with its 10 records and no verdict "
+           f"({rep['verdict']}, {rep['episodes']['recorded']})")
+    played, rep = pilot(refuse_at=1)
+    expect(rep["verdict"].startswith("STOPPED: refused") and rep["episodes"]["recorded"] == 10,
+           f"a refused request stops the pilot with the records it has ({rep['verdict']})")
+    played, rep = pilot(short=True)
+    expect(rep["verdict"].startswith("STOPPED: request") and rep["episodes"]["recorded"] == 9,
+           f"a request returning 9 of 10 records stops the pilot ({rep['verdict']})")
+    played, rep = pilot(mixed=True)
+    expect(rep["verdict"].startswith("STOPPED: records carry 2 proposer") and rep["time_to_learn"]["rows"] == [],
+           f"records of two proposers are no pilot ({rep['verdict']})")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -2081,6 +2209,14 @@ PINS = [
                        Mutant("idempotency_dropped", _edits("P17_idempotency_dropped")),
                        Mutant("conflict_unchecked", _edits("P17_conflict_unchecked")),
                        Mutant("hash_partial", _edits("P17_hash_partial")))),
+    Pin("P18", "the pilot records every episode, stops at the cap, and reports the records' proposer and throughput",
+        p18_pilot, (Mutant("cap_ignored", _edits("P18_cap_ignored")),
+                    Mutant("failures_dropped", _edits("P18_failures_dropped")),
+                    Mutant("throughput_from_episodes", _edits("P18_throughput_from_episodes")),
+                    Mutant("proposer_from_config", _edits("P18_proposer_from_config")),
+                    Mutant("mixed_proposers_admitted", _edits("P18_mixed_proposers_admitted")),
+                    Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
+                    Mutant("short_request_admitted", _edits("P18_short_request_admitted")))),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),

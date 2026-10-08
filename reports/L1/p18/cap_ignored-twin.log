@@ -1,0 +1,26 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-o6rv9xto/assize-copy-7ocwsuff/repo
+twin: no edits applied
+pin:       P18
+protects:  the pilot records every episode, stops at the cap, and reports the records' proposer and throughput
+role:      twin
+tree:      /tmp/assize-scratch-o6rv9xto/assize-copy-7ocwsuff/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-o6rv9xto
+  full pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; verdict FIT; terminations {'crash': 2, 'terminal': 23}
+  [ok] 25 episodes asked in requests of 10, 10, 5 under distinct ids ([('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)])
+  [ok] every record counted, crashes included ({'requested': 25, 'recorded': 25, 'cap_s': 1000.0, 'terminations': {'crash': 2, 'terminal': 23}})
+  [ok] per-episode utilities are every episode's, crashes' zeros included ({'0': 2, '1': 8, '2': 8, '3': 7})
+  [ok] a completed pilot states a verdict and a time-to-learn row per shift (FIT)
+  [ok] throughput is recorded episodes over the pilot's wall-clock 10.0 s (2.5)
+  [ok] the report's proposer is the records' ({'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p18-registering-party'})
+  [ok] Hafner score 53.794494802784726 is 53.794494802784726
+  [ok] a target with an infinite step has log-loss +inf, counted ({'scored': 250, 'missing': 12, 'infinite': 1, 'finite_sum': 325.0, 'log_loss_per_step': '+inf'})
+  [ok] a finite target's log-loss per scored step is its finite sum over 250 scored, 12 missing ({'scored': 250, 'missing': 12, 'infinite': 0, 'finite_sum': 325.0, 'log_loss_per_step': 1.3})
+  [ok] reliability tables and entropies add over episodes ([[100, 150], [150, 100]], 0.65)
+  cap pilot: requests [('pilot-p18-0', 10)]; verdict STOPPED: cap: 1000.0 s reached with 10 of 25 episodes recorded
+  [ok] the cap passing after one request stops the pilot with its 10 records and no verdict (STOPPED: cap: 1000.0 s reached with 10 of 25 episodes recorded, 10)
+  [ok] a refused request stops the pilot with the records it has (STOPPED: refused: request pilot-p18-1: interrupted: pilot-p18-1: fixture refusal)
+  [ok] a request returning 9 of 10 records stops the pilot (STOPPED: request pilot-p18-0 asked for 10 episodes and returned 9 records)
+  [ok] records of two proposers are no pilot (STOPPED: records carry 2 proposer)
+result:    PASS
