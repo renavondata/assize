@@ -1,0 +1,6 @@
+# stale.yml probe, read-only, as assize-reviewer, 2026-10-08T00:46:47Z; stale.yml's gh invocation with its jq trimmed to .number
+$ gh pr list -R renavondata/assize --state open --json number,title,updatedAt -q --arg c "$cutoff" '.[] | select(.updatedAt < $c) | .number'
+unknown arguments ["c" "2026-10-07T12:46:47Z" ".[] | select(.updatedAt < $c) | .number"]; please quote all values that have spaces
+exit=1
+gh version: gh version 2.101.0 (2026-09-15)
+note: gh's -q/--jq takes one expression and has no --arg; under set -euo pipefail the sweep exits non-zero before any issue is written.

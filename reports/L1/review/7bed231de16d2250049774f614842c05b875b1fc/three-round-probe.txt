@@ -1,0 +1,6 @@
+# build.md three-round guard probe, 2026-10-08T00:47:02Z
+# build.md at 7bed231 counts attempts with: ls reports/L*/review-*.md 2>/dev/null | wc -l
+review files at origin/master (fbe63cf): 21
+review files at PR head 7bed231: 21
+of which on this branch only (git diff origin/master...7bed231): 0
+note: any branch cut from master starts at >=21 > 3, so the guard 'If this branch already has three review files' fires on the first BLOCK of every PR.
