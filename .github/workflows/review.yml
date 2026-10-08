@@ -23,4 +23,7 @@ jobs:
       - run: claude -p "/review ${{ github.event.pull_request.number || inputs.pr }}" --max-turns 250 --output-format stream-json --verbose > review.log 2>&1
       - if: always()
         uses: actions/upload-artifact@v4
-        with: { name: review-${{ github.run_id }}, path: review.log, retention-days: 14 }
+        with:
+          name: review-${{ github.run_id }}
+          path: review.log
+          retention-days: 14

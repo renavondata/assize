@@ -26,4 +26,7 @@ jobs:
       - run: claude -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
       - if: always()
         uses: actions/upload-artifact@v4
-        with: { name: build-${{ github.run_id }}, path: build.log, retention-days: 14 }
+        with:
+          name: build-${{ github.run_id }}
+          path: build.log
+          retention-days: 14
