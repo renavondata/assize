@@ -1203,6 +1203,42 @@ def p7_infinite_loss() -> bool:
     return ok()
 
 
+def p5_commitment_order() -> bool:
+    """Under every usable runtime, a candidate commits its prediction before the observation it predicts exists for
+    it: a clairvoyant fixture, which puts all mass on any observation the step request carries beyond the current
+    one and otherwise predicts the floor, records exactly the floor's log-loss over one episode with the same actions,
+    so it gains nothing; the floor's log-loss is finite and positive at every target. A judge that sent the next
+    observation early would let it score zero (brief 1 section 2, P5)."""
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    usable, image = _usable_runtimes(expect)
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        got = {}
+        for behaviour in ("floor", "clairvoyant"):
+            records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)],
+                   f"{rt.name} {behaviour}: one episode of {LOOP_STEPS} steps, ended by the World")
+            got[behaviour] = records[0]["prediction"] if records else {}
+        floor, seer = got["floor"], got["clairvoyant"]
+        expect(len(floor) == len(m["targets"]) and all(
+            v["scored"] == LOOP_STEPS and v["infinite"] == 0 and v["finite_sum"] > 0 for v in floor.values()),
+               f"{rt.name}: non-vacuous: the floor scores every declared target finite and positive at every step")
+        for name, v in floor.items():
+            expect(seer.get(name) == v, f"{rt.name} clairvoyant {name}: log-loss {seer.get(name, {}).get('log_loss')}, "
+                                        f"floor {v['log_loss']}: equal, so nothing gained")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -1253,6 +1289,8 @@ PINS = [
                               Mutant("client_rusage", _edits("P4_client_rusage")),
                               Mutant("not_differenced", _edits("P4_not_differenced")),
                               Mutant("peak_from_current", _edits("P4_peak_from_current")))),
+    Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
+        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),)),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),

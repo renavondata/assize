@@ -1,0 +1,104 @@
+2026-10-08T06:09:54Z
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 22 pins, 44 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (3.115s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.384s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.188s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (5.245s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.437s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.335s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.735s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.299s) out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.335s) out/pins/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.582s) out/pins/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.282s) out/pins/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.285s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.334s) out/pins/runs/P0m/clean/transcript.log
+[clean ] P1: observed pass -> ok (2.036s) out/pins/runs/P1/clean/transcript.log
+[clean ] P2: observed pass -> ok (0.984s) out/pins/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (22.869s) out/pins/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (6.796s) out/pins/runs/P4/clean/transcript.log
+[clean ] P5: observed pass -> ok (3.94s) out/pins/runs/P5/clean/transcript.log
+[clean ] P7: observed pass -> ok (8.347s) out/pins/runs/P7/clean/transcript.log
+[clean ] P10: observed pass -> ok (8.698s) out/pins/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.384s) out/pins/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (9.698s) out/pins/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (3.247s + 3.049s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.293s + 0.293s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.042s + 1.045s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.003s + 4.998s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.552s + 1.445s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.343s + 1.343s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.295s + 1.946s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.369s + 12.26s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.358s + 12.359s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.36s + 12.357s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (10.155s + 12.31s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.079s + 12.411s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.343s + 0.343s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.594s + 0.628s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.292s + 0.291s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.293s + 0.292s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.342s + 0.342s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+[mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.343s + 0.344s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+[mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (1.793s + 1.895s) out/pins/runs/P1/seed_reissued/mutant/transcript.log
+[mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.047s + 1.996s) out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+[mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (2.044s + 1.893s) out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+[mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (1.846s + 1.894s) out/pins/runs/P1/training_undomained/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.051s + 1.045s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.093s + 1.144s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.044s + 1.195s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.044s + 1.093s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (24.851s + 23.38s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (7.032s + 7.205s) out/pins/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (7.156s + 7.054s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (7.025s + 7.055s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (7.204s + 7.153s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (4.398s + 3.898s) out/pins/runs/P5/next_sent_early/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (8.506s + 8.757s) out/pins/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (8.609s + 9.207s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (12.994s + 9.208s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (18.621s + 8.508s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.393s + 0.394s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (9.66s + 9.711s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (10.01s + 9.756s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (9.862s + 9.709s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (9.005s + 9.66s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (3.348s + 9.76s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (9.762s + 9.708s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 22/22 passed, 0/22 failed
+mutants: 44/44 killed, 0/44 survived, 0/44 inconclusive, 0/44 stale, 0/44 non-causal, 0 leaked (clean and mutant)
+twins: 44/44 passed
+report: out/pins/pins.jsonl
+PINS PASSED
+exit 0
+2026-10-08T06:19:43Z
+
+== P5 mutant transcript (out/pins/runs/P5/next_sent_early/mutant/transcript.log)
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-xwax8juz/assize-copy-zn20c0wr/repo
+applied 1 edit(s) from harness/edits/P5_next_sent_early.toml
+pin:       P5
+protects:  a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early
+role:      mutant
+tree:      /tmp/assize-scratch-xwax8juz/assize-copy-zn20c0wr/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-xwax8juz
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman floor: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "food": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "wood": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "stone": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}}, "compute": {"cpu_s": 0.063419, "wall_s": 0.5711261159740388, "peak_memory_bytes": 9625600, "unmeasured_s": 0.0}}]
+  [ok] podman floor: one episode of 5 steps, ended by the World
+  podman clairvoyant: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "stone": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}, "compute": {"cpu_s": 0.063461, "wall_s": 0.5265545180300251, "peak_memory_bytes": 9609216, "unmeasured_s": 0.0}}]
+  [ok] podman clairvoyant: one episode of 5 steps, ended by the World
+  [ok] podman: non-vacuous: the floor scores every declared target finite and positive at every step
+  [FAIL] podman clairvoyant health: log-loss 0.0, floor 6.215607598755275: equal, so nothing gained
+  [FAIL] podman clairvoyant food: log-loss 0.0, floor 6.215607598755275: equal, so nothing gained
+  [FAIL] podman clairvoyant drink: log-loss 0.0, floor 6.215607598755275: equal, so nothing gained
+  [FAIL] podman clairvoyant energy: log-loss 0.0, floor 6.215607598755275: equal, so nothing gained
+  [FAIL] podman clairvoyant wood: log-loss 0.0, floor 6.215607598755275: equal, so nothing gained
+  [FAIL] podman clairvoyant stone: log-loss 0.0, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (6 failed)
+result:    FAIL
