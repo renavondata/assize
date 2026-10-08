@@ -1,0 +1,6 @@
+# P17's mutant `idempotency_dropped` (brief 1 section 2): evaluate() ignores a request_id the ledger already holds and
+# evaluates it again.
+[[edit]]
+path = "judge/evaluate.py"
+old = "    done = _recorded(led, private, request_id)"
+new = "    done = None"

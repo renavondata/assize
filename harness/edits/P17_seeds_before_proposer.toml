@@ -1,0 +1,10 @@
+# P17's mutant `seeds_before_proposer` (brief 1 A4 item 2): evaluate() looks up the image's proposer only after issuing
+# its seeds, so an unregistered image is refused after seeds were issued to it.
+[[edit]]
+path = "judge/evaluate.py"
+old = "    proposer = registry.proposer_of(private, image)\n    done = "
+new = "    done = "
+[[edit]]
+path = "judge/evaluate.py"
+old = "    m = binding.manifest()\n"
+new = "    proposer = registry.proposer_of(private, image)\n    m = binding.manifest()\n"

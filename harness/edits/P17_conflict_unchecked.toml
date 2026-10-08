@@ -1,0 +1,6 @@
+# P17's mutant `conflict_unchecked` (brief 1 section 2): a request_id asked again of another image, World or episode
+# count returns the earlier request's records as if they answered it.
+[[edit]]
+path = "judge/evaluate.py"
+old = "        if asked != {(image, world, n_episodes)}:"
+new = "        if False:"

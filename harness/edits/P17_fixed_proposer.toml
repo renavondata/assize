@@ -1,0 +1,6 @@
+# P17's mutant `fixed_proposer` (brief 1 A4 item 2): evaluate() stamps every record with a fixed proposer instead of
+# the party whose credential registered the image.
+[[edit]]
+path = "judge/evaluate.py"
+old = "             \"proposer\": proposer, \"world\": world,"
+new = "             \"proposer\": {\"kind\": \"guy\", \"model\": \"\", \"session\": \"\"}, \"world\": world,"

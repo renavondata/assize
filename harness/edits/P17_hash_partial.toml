@@ -1,0 +1,6 @@
+# P17's mutant `hash_partial` (brief 1 section 2): the judge hash covers the judge's own directory only, so a change to
+# the interface, a World binding or manifest, or the World's pinned version leaves it unchanged.
+[[edit]]
+path = "judge/evaluate.py"
+old = "HASHED = (\"judge\", \"worlds\", \"uv.lock\")"
+new = "HASHED = (\"judge\",)"

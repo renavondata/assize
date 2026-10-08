@@ -1857,6 +1857,140 @@ def p15_time_to_learn() -> bool:
         expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
     return ok()
 
+# P17 registers the random incumbent's image under one credential and asks `evaluate` for EVALUATE_EPISODES full
+# Crafter episodes of it; a random player dies within a few hundred steps, so each costs about a second.
+P17_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p17-builder-session"}
+EVALUATE_EPISODES = 2
+# What `judge_sha256` must cover, from the root: P17 changes one byte of each in a copy and requires a new hash.
+JUDGE_HASHED = ("judge/config.toml", "judge/episodes.py", "worlds/spec/rpc.schema.json",
+                "worlds/crafter/manifest.json", "worlds/crafter/binding.py", "uv.lock")
+
+
+def _digest(iid: str) -> str:
+    return iid if iid.startswith("sha256:") else f"sha256:{iid}"
+
+
+def _judge_hash_by_definition(root: Path) -> str:
+    """SHA-256 over every file of judge/, worlds/ and uv.lock under `root` but bytecode caches, in path order: path,
+    NUL, the SHA-256 of its bytes, newline. Derived here from the definition, independently of `judge/evaluate.py`."""
+    import hashlib
+
+    files = sorted(f.relative_to(root).as_posix() for top in ("judge", "worlds") for f in (root / top).rglob("*")
+                   if f.is_file() and "__pycache__" not in f.relative_to(root).parts) + ["uv.lock"]
+    h = hashlib.sha256()
+    for rel in sorted(files):
+        h.update(rel.encode() + b"\0" + hashlib.sha256((root / rel).read_bytes()).hexdigest().encode() + b"\n")
+    return h.hexdigest()
+
+
+def _keys(x) -> set[str]:
+    if isinstance(x, dict):
+        return set(x) | {k for v in x.values() for k in _keys(v)}
+    return {k for v in x for k in _keys(v)} if isinstance(x, list) else set()
+
+
+def p17_evaluate() -> bool:
+    """`evaluate(image, world, n_episodes, request_id)` (brief 1 section 2; A4 items 1 and 2). Under every usable
+    runtime, the random incumbent's image, registered under one judge-issued credential, is evaluated on two fresh
+    Crafter seeds: two records, each ended by the World and carrying `schema_version`, the image digest, the
+    registering party as `proposer`, the judge hash derived by definition, the World, its achievement set (utility its
+    size) and no seed; the ledger verifies and holds exactly them, and the seed store exactly the request's two seeds.
+    The same request asked again, from a child interpreter, prints the same records and changes nothing; asked of
+    another episode count it is refused `request_conflict`. A present but unregistered image is refused `unregistered`
+    with the seed store and ledger unchanged, so no seed is issued to it; a request whose seeds were issued but never
+    signed is refused `interrupted`. The judge hash changes when any of judge config and code, the interface, the
+    Crafter binding and manifest, or the lock file changes."""
+    from judge import episodes, evaluate, ledger, registry, runtime, seeds
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    want_hash = _judge_hash_by_definition(ROOT)
+    work = Path(tempfile.mkdtemp(prefix="assize-p17-", dir=context.scratch))
+    try:
+        copy = work / "copy"
+        for top in ("judge", "worlds"):
+            shutil.copytree(ROOT / top, copy / top, ignore=shutil.ignore_patterns("__pycache__"))
+        shutil.copy2(ROOT / "uv.lock", copy / "uv.lock")
+        base = evaluate.judge_hash(copy)
+        expect(base == want_hash == evaluate.judge_hash(), f"judge_hash is the definition's ({base[:12]})")
+        for rel in JUDGE_HASHED:
+            original = (copy / rel).read_bytes()
+            (copy / rel).write_bytes(original + b" ")
+            changed = evaluate.judge_hash(copy)
+            (copy / rel).write_bytes(original)
+            expect(changed != base, f"judge_hash changes when {rel} changes ({changed[:12]})")
+        components = binding.crafter.constants.achievements
+        usable, base_image = _usable_runtimes(expect)
+
+        def case(rt, expect, say):
+            before = _candidates(rt)
+            private, ledgers = work / rt.name / "private", work / rt.name / "ledgers"
+            led = evaluate.ledger_path(ledgers, "crafter")
+            store = private / "crafter.seeds.jsonl"
+            image = _digest(_build(rt, INCUMBENT))
+            other = _digest(subprocess.run([rt.binary, "image", "inspect", "--format", "{{.Id}}", base_image],
+                                           capture_output=True, text=True, check=True).stdout.strip())
+            say(f"  {rt.name} incumbent image {image}; unregistered present image {other}")
+
+            def snapshot() -> tuple[bytes, bytes]:
+                return tuple(p.read_bytes() if p.exists() else b"" for p in (store, led))
+
+            def refused(label: str, want: str, *args, **kw) -> None:
+                was = snapshot()
+                try:
+                    evaluate.evaluate(*args, private=private, ledgers=ledgers, runtime_name=rt.name, **kw)
+                    got = "evaluated"
+                except (registry.Refused, seeds.SeedError) as e:
+                    got = e.code
+                expect(got == want and snapshot() == was,
+                       f"{rt.name} {label}: refused {want} (got {got}), seed store and ledger unchanged")
+
+            try:
+                registry.register(private, image, registry.credential(private, P17_PARTY))
+                refused("unregistered image", "unregistered", other, "crafter", EVALUATE_EPISODES, "p17-other")
+                got = evaluate.evaluate(image, "crafter", EVALUATE_EPISODES, "p17-a", private=private,
+                                        ledgers=ledgers, runtime_name=rt.name)
+                say(f"  {rt.name} evaluate p17-a: {json.dumps(got)}")
+                expect([(r["episode"], r["termination"] in episodes.WORLD_ENDINGS) for r in got]
+                       == [(i, True) for i in range(EVALUATE_EPISODES)],
+                       f"{rt.name}: {EVALUATE_EPISODES} records, in order, each ended by the World "
+                       f"({[(r['termination'], r['steps']) for r in got]})")
+                stamped = {"schema_version": episodes.SCHEMA_VERSION, "image": image, "proposer": P17_PARTY,
+                           "judge_sha256": want_hash, "world": "crafter", "n_episodes": EVALUATE_EPISODES}
+                for r in got:
+                    for k, v in stamped.items():
+                        expect(r.get(k) == v, f"{rt.name} episode {r['episode']}: {k} is {r.get(k)!r}, want {v!r}")
+                    expect(set(r["achievements"]) <= set(components) and r["utility"] == len(r["achievements"]),
+                           f"{rt.name} episode {r['episode']}: utility {r['utility']} is the size of its achievement "
+                           f"set {r['achievements']}")
+                    expect(not _keys(r) & {"seed", "seeds", "key"}, f"{rt.name} episode {r['episode']}: no seed")
+                expect(ledger.verify(led, private) == [] and ledger._lines(led) == got,
+                       f"{rt.name}: the ledger verifies and holds exactly the request's records")
+                issued = seeds.records(private, "crafter")
+                expect([r["request_id"] for r in issued] == ["p17-a"] * EVALUATE_EPISODES,
+                       f"{rt.name}: the seed store holds exactly the request's {EVALUATE_EPISODES} seeds")
+
+                was = snapshot()
+                code, out, err = _judge_cli(private, "evaluate", str(ledgers), rt.name, image, "crafter",
+                                            str(EVALUATE_EPISODES), "p17-a")
+                again = [json.loads(line) for line in out.splitlines()] if code == 0 else err
+                expect(again == got and snapshot() == was,
+                       f"{rt.name}: p17-a asked again from a child interpreter prints the same records, changing "
+                       f"nothing (exit {code}{'' if code == 0 else ': ' + err})")
+                refused("p17-a of another episode count", "request_conflict", image, "crafter",
+                        EVALUATE_EPISODES + 1, "p17-a")
+                seeds.issue(private, "crafter", binding.world_seed, 1, "p17-b")
+                refused("seeds issued, records never signed", "interrupted", image, "crafter", 1, "p17-b")
+            finally:
+                subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
+            strays = _removing_strays(rt, before)
+            expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+        _each_runtime(usable, case, expect)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
 
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
@@ -1941,6 +2075,12 @@ PINS = [
         p16_proposer_from_credential, (Mutant("unattributed_admitted", _edits("P16_unattributed_admitted")),
                                        Mutant("any_credential", _edits("P16_any_credential")),
                                        Mutant("registration_taken_over", _edits("P16_registration_taken_over")))),
+    Pin("P17", "evaluate() stamps every record with its registered proposer, issues no seed unregistered, is idempotent",
+        p17_evaluate, (Mutant("fixed_proposer", _edits("P17_fixed_proposer")),
+                       Mutant("seeds_before_proposer", _edits("P17_seeds_before_proposer")),
+                       Mutant("idempotency_dropped", _edits("P17_idempotency_dropped")),
+                       Mutant("conflict_unchecked", _edits("P17_conflict_unchecked")),
+                       Mutant("hash_partial", _edits("P17_hash_partial")))),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
