@@ -1,0 +1,17 @@
+# Actions API, 2026-10-08T14:54:23Z
+measure pull_request completed skipped 37793784370 2026-10-08T14:35:58Z 2026-10-08T14:35:59Z https://github.com/renavondata/assize/actions/runs/37793784370
+build pull_request completed skipped 37793784236 2026-10-08T14:35:58Z 2026-10-08T14:35:59Z https://github.com/renavondata/assize/actions/runs/37793784236
+review pull_request in_progress null 37793784431 2026-10-08T14:35:58Z 2026-10-08T14:36:02Z https://github.com/renavondata/assize/actions/runs/37793784431
+pins pull_request completed success 37792255657 2026-10-08T14:24:52Z 2026-10-08T14:45:13Z https://github.com/renavondata/assize/actions/runs/37792255657
+PR #19 dynamic completed success 37792248925 2026-10-08T14:24:49Z 2026-10-08T14:26:01Z https://github.com/renavondata/assize/actions/runs/37792248925
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-08T14:24:57.7472895Z   clean: true
+pins	make pins	2026-10-08T14:37:10.4671688Z [clean ] P0m: observed pass -> ok (0.537s) out/pins/runs/P0m/clean/transcript.log
+pins	make pins	2026-10-08T14:37:10.4720877Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.502s + 0.501s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	make pins	2026-10-08T14:37:10.4722769Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.502s + 0.551s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	make pins	2026-10-08T14:37:10.4724963Z [mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.501s + 0.501s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+pins	make pins	2026-10-08T14:37:10.4726929Z [mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.502s + 0.552s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+pins	make pins	2026-10-08T14:37:10.4728877Z [mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.553s + 0.503s) out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+pins	make pins	2026-10-08T14:45:07.0773405Z clean: 26/26 passed, 0/26 failed
+pins	make pins	2026-10-08T14:45:07.0774091Z mutants: 59/59 killed, 0/59 survived, 0/59 inconclusive, 0/59 stale, 0/59 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-08T14:45:07.0775057Z twins: 59/59 passed
+pins	make pins	2026-10-08T14:45:07.0775735Z PINS PASSED
