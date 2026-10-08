@@ -106,3 +106,58 @@ Commit locally; do not push.
 2. **AutoAscend source.** Vendor AutoAscend as a git submodule pinned to a named commit. If the cloud session cannot fetch it, stop and report.
 3. **Measurement.** All pilots, including AutoAscend episodes, run only on the host via `measure.yml`. In the cloud, each incumbent runs at most 3 smoke episodes per World, with a step cap committed in config.
 4. **Zero diff.** P1 (zero diff on `judge/` and `worlds/spec/`) compares against the merged L1 commit on `master`, not a local commit.
+
+---
+
+## Amendment A2: L1 exit carry-over (DRAFT, appended; overrides earlier text where they conflict)
+Drafted by the Builder (session afb193a1-6114-4d73-87de-0b24f8570087) as the last deliverable of L1 (CLAUDE.md A1.10). It stands only on Reviewer approval under A1.4, and opens L2 only when Guy merges it.
+
+### Precondition
+`reports/L1/REPORT.md` records **SEALED** and **FIT** (host measure run 37831165785, judge_sha256 `28710725463f36b93123771ddcda4390e3b02f4ee15488b42834809929eda7ff`), and the root `REPORT.md` carries its L1 verdict line. Read that report, `reports/L1/review-*.md` and this amendment before starting.
+
+### Purpose
+L1 left 55 obligations on L2 (`reports/L1/REPORT.md`, *Obligations on L2*). Brief 2 §1 forbids any change to `judge/` or `worlds/spec/`, and CLAUDE.md freezes them after L2. Every obligation that needs a judge change therefore has to land before NetHack work starts, or never. Two facts make this binding:
+- `judge/evaluate.py:33` hard-codes `WORLDS = {"crafter": ...}`, so adding NetHack as written edits the judge.
+- Prices are per World in `judge/config.toml` (`[price.crafter]` only), so pricing NetHack edits it too.
+
+As things stand, brief 2's zero-diff test would fail on its first NetHack commit, for reasons that are about the judge, not about NetHack.
+
+### Scope and order
+1. **L2a, judge carry-over.** Judge, harness and pilot obligations only, with no NetHack code and no NetHack name in `judge/` or `worlds/spec/`:
+   - World discovery becomes data: the judge binds every `worlds/<name>/binding.py` that has a manifest, and prices each World from its manifest's committed `price` block, with the derivation in its rationale. Crafter's price moves there unchanged.
+   - A1 item 4's zero-diff baseline becomes the merged L2a commit on `master`, not the merged L1 commit. The L2a merge is a layer-internal milestone that Guy merges, because it changes the court.
+2. **L2b, NetHack.** Brief 2 §§2–4 as written, under the zero-diff pin against the L2a baseline.
+3. **L2c, seal.** The judge is built as an image, released and pinned by digest:
+   - the image carries `verify`;
+   - P0b's scan (brief 1 A2 item 3) runs over the built image, not only the tree;
+   - `judge/` and `worlds/spec/` enter `CODEOWNERS` (CLAUDE.md A1.1, entrenched, so Guy's).
+
+### Pre-stated criteria added by A2
+These join brief 2's criteria; none replaces one.
+- Every OPEN obligation listed in `reports/L1/REPORT.md` is either discharged by a pin whose named mutant is KILLED with a passing twin, or is entrenched and listed as Guy's, with its fixture and mutant written out.
+- P1 (zero diff) holds from the L2a baseline to the L2b head.
+- The pilot runner and its config are hashed into every pilot report, beside `judge_sha256`.
+- Brief 2's time-to-learn verdict is rechecked against the first non-random candidate's variance once one exists. Until then the random incumbent's variance is reported as a weak proxy and is not used, as brief 2 §4 already says.
+
+### Pins added by A2 (each with its named mutant, KILLED with a passing twin)
+- **P19 World discovery.** A fixture World directory with a manifest and a binding is bound with no judge edit; a directory without a manifest is refused. Mutant: `world_table_hardcoded`.
+- **P20 Per-World price.** `evaluate()` refuses a World whose manifest commits no price. Mutant: `crafter_price_fallback`.
+- **P21 Seal.** The released image's digest equals the one recorded in `REPORT.md`; its `verify` subcommand verifies a fixture ledger; P0b's scan of the image finds nothing. Mutants: `verify_omitted`, `image_imports_mutants`.
+- Each pinnable obligation of L1 carries the pin and mutant `reports/L1/REPORT.md` names for it.
+
+### Refusal list (added)
+- No NetHack code, manifest or name under `judge/` or `worlds/spec/`, ever.
+- No change to `judge/` or `worlds/spec/` after the L2a baseline.
+- No edit to entrenched paths (`.github/`, `.claude/`, `CODEOWNERS`, `CLAUDE.md`). Obligations on them are drafted as text for Guy.
+
+### Stop-and-report boundaries (added)
+Stop and report if:
+- any judge-touching obligation turns out to need NetHack-specific knowledge to discharge;
+- the Crafter judge hash changes in a way the L2a diff does not explain;
+- re-running the L1 pins after L2a gives anything other than all clean and all KILLED.
+
+### Deliverables (added)
+- L2a's pull request, with its pins.
+- `reports/L2/REPORT.md` recording the baseline sha.
+- The seal's image digest.
+- A draft of brief 3 (A1.10).
