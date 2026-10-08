@@ -1,0 +1,5 @@
+# P15's mutant `abs_difference` (brief 1 section 5): posterior mass on any nonzero difference, not on the correct sign.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """return float((diff > 0).mean(axis=1).sum())"""
+new = """return float((diff != 0).mean(axis=1).sum())"""

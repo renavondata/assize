@@ -1,0 +1,20 @@
+copy of /tmp/assize-review-0d5e9ecf3c6f12848d2eb022908013229bcc2c0d
+  at /tmp/assize-scratch-hcypd3p2/assize-copy-10wf7mw_/repo
+applied 1 edit(s) from harness/edits/P15_shift_dropped.toml
+pin:       P15
+protects:  time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict
+role:      mutant
+tree:      /tmp/assize-scratch-hcypd3p2/assize-copy-10wf7mw_/repo
+invoked:   /tmp/assize-review-0d5e9ecf3c6f12848d2eb022908013229bcc2c0d
+scratch:   /tmp/assize-scratch-hcypd3p2
+  [ok] pilot config is the brief's default ({'world': 'crafter', 'episodes': 200, 'cap_s': 7200})
+  [ok] time-to-learn config is the brief's ({'deltas': [0.25, 0.5, 1.0], 'mass': 0.9, 'fit_delta': 0.5, 'marginal_delta': 1.0, 'budget_s': 86400, 'experiments': 1000, 'posterior_draws': 1000, 'seed': 0})
+  delta 0.25: episodes per arm None, normal oracle 105.11
+  [FAIL] delta 0.25: m* None within x1.5 of the oracle 105.11
+  delta 0.5: episodes per arm None, normal oracle 26.28
+  [FAIL] delta 0.5: m* None within x1.5 of the oracle 26.28
+  delta 1.0: episodes per arm None, normal oracle 6.57
+  [FAIL] delta 1.0: m* None within x1.5 of the oracle 6.57
+  [FAIL] no incumbent variance: one episode per arm, all mass on the correct sign (None)
+  [FAIL] fixture separates the verdicts: m* None for 1.0 < m* None for 0.5
+result:    FAIL

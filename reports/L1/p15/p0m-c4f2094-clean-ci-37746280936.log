@@ -1,0 +1,16 @@
+pin:       P0m
+protects:  a commit touching an entrenched path without a guy Proposer is rejected; every party is read
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-xe32tckn
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: 6 branch commits read, want 6
+  [ok] builder, ordinary path: parties reported ['builder m s'], findings []; want ['builder m s'], []
+  [ok] no trailer: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s'], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], findings []; want ['guy', 'builder m s'], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], findings []; want ['builder m s', 'guy'], []
+  [ok] malformed party: parties reported ['builder m'], findings ['bad_party']; want ['builder m'], ['bad_party']
+  [skip] real branch at /home/runner/work/assize/assize: shallow clone without master, base unresolvable; not checked in this run (checked by every make pins in a full clone)
+result:    PASS
