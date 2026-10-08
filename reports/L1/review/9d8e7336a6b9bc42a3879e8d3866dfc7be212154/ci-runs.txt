@@ -1,0 +1,2 @@
+pins completed success id=37730664698 attempt=1 2026-10-08T05:05:51Z..2026-10-08T05:21:37Z head=b2ca5eebcc781b6957d773e49a735eec793e7847 https://github.com/renavondata/assize/actions/runs/37730664698
+pins completed success id=37732027104 attempt=1 2026-10-08T05:22:14Z..2026-10-08T05:38:10Z head=9d8e7336a6b9bc42a3879e8d3866dfc7be212154 https://github.com/renavondata/assize/actions/runs/37732027104
