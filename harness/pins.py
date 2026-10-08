@@ -497,14 +497,25 @@ EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exem
     ("body-only Proposer, exempted", "docs/z.md", "reviewer m s", "reviewer m s", ("reviewer m s",), set()),
     ("body-only Proposer, another party exempted", "docs/z.md", "reviewer m s", "reviewer m t", (), {"no_proposer"}),
 )
+MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
+    ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
+    ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
+    ("merge by assize-builder", "docs/m.md", "339109611+assize-builder@users.noreply.github.com", (), ("builder",),
+     set()),
+    ("merge by assize-reviewer, .github/", ".github/m.yml", "assize-reviewer@gfrm.in", (), ("reviewer",),
+     {"entrenched_without_guy"}),
+    ("merge by an unknown author", "docs/m.md", "f@f", (), (), {"unknown_merge_author"}),
+    ("merge by an unknown author, Proposer: guy trailer", "docs/m.md", "f@f", ("guy",), (), {"unknown_merge_author"}),
+)
 FIXTURE_GIT = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@f", "GIT_COMMITTER_NAME": "f",
                "GIT_COMMITTER_EMAIL": "f@f"}
 
 
 def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     """A fixture repository: a base commit, one commit per TRAILER_FIXTURE case, then one per EXEMPTION_FIXTURE case,
-    whose `Proposer:` line a blank line separates from a following `Co-Authored-By:`, so git parses no trailer.
-    Returns their shas and the exemptions the EXEMPTION_FIXTURE cases name."""
+    whose `Proposer:` line a blank line separates from a following `Co-Authored-By:`, so git parses no trailer, then one
+    merge per MERGE_FIXTURE case, on the branch and the base commit, by its author (brief 1 A9). Returns their shas and
+    the exemptions the EXEMPTION_FIXTURE cases name."""
     env = os.environ | claims.GIT_ENV | FIXTURE_GIT
 
     def git(*args: str) -> str:
@@ -522,6 +533,17 @@ def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     def trailered(trailers: tuple[str, ...]) -> str:
         return "".join(f"Proposer: {t}\n" for t in trailers)
 
+    def merge(path: str, author: str, message: str, n: int, base: str) -> str:
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(f"{n}\n")
+        git("add", "-A")
+        sha = subprocess.run(["git", "-C", str(repo), "commit-tree", git("write-tree"), "-p", "HEAD", "-p", base,
+                              "-m", f"case {n}\n\nbody\n\n{message}"], check=True, capture_output=True, text=True,
+                             env=env | {"GIT_AUTHOR_EMAIL": author}).stdout.strip()
+        git("update-ref", "HEAD", sha)
+        return sha
+
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
     commit("CODEOWNERS", trailered(("guy",)), 0)
@@ -529,7 +551,10 @@ def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     unparsed = [commit(path, f"Proposer: {party}\n\nCo-Authored-By: f <f@f>\n", n)
                 for n, (_, path, party, *_) in enumerate(EXEMPTION_FIXTURE, len(shas) + 1)]
     exemptions = {sha: exempt for sha, (_, _, _, exempt, *_) in zip(unparsed, EXEMPTION_FIXTURE) if exempt}
-    return shas + unparsed, exemptions
+    base = git("rev-list", "--max-parents=0", "HEAD")
+    merges = [merge(path, author, trailered(trailers), n, base)
+              for n, (_, path, author, trailers, *_) in enumerate(MERGE_FIXTURE, len(shas) + len(unparsed) + 1)]
+    return shas + unparsed + merges, exemptions
 
 
 def _branch_base(root: Path) -> str | None:
@@ -545,16 +570,20 @@ def p0m_commit_proposers() -> bool:
     """Every commit on the branch carries well-formed `Proposer:` trailers; one touching an entrenched path
     (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
     `Proposer:` line counts only for a commit claims.PROPOSER_EXEMPTIONS lists, and only as the party it names
-    (review aa993f4 F1)."""
+    (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
+    author is rejected, whatever trailer it carries (brief 1 A9)."""
     expect, ok = _expecter()
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
     work = Path(tempfile.mkdtemp(prefix="assize-p0m-", dir=context.scratch))
     shas, exemptions = _trailer_repo(work / "repo")
     commits = claims.branch_commits(work / "repo", "master~" + str(len(shas)), exemptions=exemptions)
+    expect([c.merge for c in commits] == [False] * (len(shas) - len(MERGE_FIXTURE)) + [True] * len(MERGE_FIXTURE),
+           f"fixture: the last {len(MERGE_FIXTURE)} commits read as merges and no other")
     expect([c.sha for c in commits] == shas, f"fixture: {len(commits)} branch commits read, want {len(shas)}")
     cases = [(label, trailers, want) for label, _, trailers, want in TRAILER_FIXTURE] + \
-            [(label, trailers, want) for label, _, _, _, trailers, want in EXEMPTION_FIXTURE]
+            [(label, trailers, want) for label, _, _, _, trailers, want in EXEMPTION_FIXTURE] + \
+            [(label, parties, want) for label, _, _, _, parties, want in MERGE_FIXTURE]
     for (label, trailers, want), c in zip(cases, commits):
         got = {f.code for f in claims.commit_findings(c, patterns)}
         expect(got == want and c.parties == trailers,
@@ -1636,7 +1665,8 @@ PINS = [
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
                                 Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
-                                Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")))),
+                                Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")),
+                                Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

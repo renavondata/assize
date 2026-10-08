@@ -202,3 +202,7 @@ Drafted by the Builder (session 3e7df36a-f6ef-498f-bf6a-ff0251387ec4) after hitt
    - Assertions: the same seed and action sequence give an identical trajectory hash twice in one process and across two fresh processes with differently salted string hashing; distinct seeds give distinct hashes; every observation the binding emits conforms to the manifest (field names, shapes, vocabulary and ranges).
    - Mutants, each an anchored edit KILLED with a passing twin: `set_order_restored` (the item-1 change removed); `seed_ignored` (the binding constructs the Env without the seed); `hash_constant` (the trajectory hash ignores the trajectory); `field_dropped` (an emitted observation lacks a manifest field).
 4. **Version.** `crafter` is pinned at `==1.8.3` in `pyproject.toml` and `uv.lock`. A different release is a different World and is admitted only by a further amendment.
+
+## Amendment A9: merge commits (appended)
+
+A commit with more than one parent is a GitHub merge; its proposer is its author account (gfrmin → guy, assize-builder → builder, assize-reviewer → reviewer) and it needs no trailer. Any other author on a merge commit fails P0m. Non-merge commits carry trailers as before. Rationale: GitHub writes the merge message but sets the author from the merging account, so the proposer is recoverable from git, which is what P0m protects.
