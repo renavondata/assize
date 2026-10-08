@@ -3,7 +3,10 @@
 storage (brief 1 A4 item 1); exit 0 if and only if nothing is found.
 `credential PRIVATE KIND MODEL SESSION`: issue a credential to that proposer and print its token once (A4 item 2).
 `register PRIVATE IMAGE`: register the image digest under the credential whose token is read from stdin, never from
-the command line; print the registration, or exit 1 with the refusal's code."""
+the command line; print the registration, or exit 1 with the refusal's code.
+`evaluate PRIVATE LEDGERS RUNTIME IMAGE WORLD N REQUEST_ID`: evaluate the registered image on N fresh seeds of WORLD
+under RUNTIME (`judge/evaluate.py`), the ledger in LEDGERS; print the request's records, one JSON line each, or exit 1
+with the refusal's code. Asked again with the same REQUEST_ID, it prints the same records and runs nothing."""
 
 from __future__ import annotations
 
@@ -11,10 +14,10 @@ import json
 import sys
 from pathlib import Path
 
-from judge import ledger, registry
+from judge import evaluate, ledger, registry, seeds
 
 USAGE = ("usage: python -m judge verify LEDGER PRIVATE | credential PRIVATE KIND MODEL SESSION | "
-         "register PRIVATE IMAGE (token on stdin)")
+         "register PRIVATE IMAGE (token on stdin) | evaluate PRIVATE LEDGERS RUNTIME IMAGE WORLD N REQUEST_ID")
 
 
 def _verify(led: str, private: str) -> int:
@@ -35,7 +38,17 @@ def _register(private: str, image: str) -> int:
     return 0
 
 
-COMMANDS = {"verify": (_verify, 2), "credential": (_credential, 4), "register": (_register, 2)}
+def _evaluate(private: str, ledgers: str, rt: str, image: str, world: str, n: str, request_id: str) -> int:
+    if not n.isdigit():
+        raise registry.Refused("bad_episodes", f"{n!r} is not a positive episode count")
+    for r in evaluate.evaluate(image, world, int(n), request_id, private=Path(private), ledgers=Path(ledgers),
+                               runtime_name=rt):
+        print(json.dumps(r, sort_keys=True))
+    return 0
+
+
+COMMANDS = {"verify": (_verify, 2), "credential": (_credential, 4), "register": (_register, 2),
+            "evaluate": (_evaluate, 7)}
 
 
 def main(argv: list[str]) -> int:
@@ -45,7 +58,7 @@ def main(argv: list[str]) -> int:
         return 2
     try:
         return command(*argv[1:])
-    except registry.Refused as e:
+    except (registry.Refused, seeds.SeedError) as e:
         print(f"refused: {e}", file=sys.stderr)
         return 1
 

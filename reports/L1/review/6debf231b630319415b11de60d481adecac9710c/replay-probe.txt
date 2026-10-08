@@ -1,0 +1,39 @@
+# probe: evaluate() replay against a tampered ledger (scratch /tmp/assize-review-probe-c20ddb0a, code of the PR head 6debf23)
+    """Probe evaluate()'s replay path against a tampered ledger; no container needed."""
+    import json, sys, os
+    from pathlib import Path
+    from judge import evaluate, ledger, registry
+    
+    run = Path(sys.argv[1]); private, ledgers = run / "private", run / "ledgers"
+    private.mkdir(mode=0o700, parents=True); ledgers.mkdir()
+    image = "sha256:" + "a" * 64
+    party = {"kind": "builder", "model": "m", "session": "probe"}
+    registry.register(private, image, registry.credential(private, party))
+    led = evaluate.ledger_path(ledgers, "crafter")
+    recs = [{"image": image, "world": "crafter", "n_episodes": 2, "episode": i, "utility": i, "proposer": party} for i in range(2)]
+    ledger.append(led, private, "r1", recs)
+    call = lambda: evaluate.evaluate(image, "crafter", 2, "r1", private=private, ledgers=ledgers, runtime_name="podman")
+    print("clean replay utilities:", [r["utility"] for r in call()], "verify:", ledger.verify(led, private))
+    lines = led.read_text().splitlines()
+    r0 = json.loads(lines[0]); r0["utility"] = 99; lines[0] = json.dumps(r0, sort_keys=True, separators=(",", ":"))
+    led.write_text("\n".join(lines) + "\n")
+    try:
+        print("tampered replay utilities:", [r["utility"] for r in call()], "(no refusal)")
+    except Exception as e:
+        print("tampered replay refused:", type(e).__name__, e)
+    print("verify after tamper:", ledger.verify(led, private))
+    led.write_text(lines[1] + "\n")
+    try:
+        print("truncated replay returns", len(call()), "of 2 signed records (no refusal)")
+    except Exception as e:
+        print("truncated replay refused:", type(e).__name__, e)
+    print("verify after truncation:", ledger.verify(led, private))
+# output
+clean replay utilities: [0, 1] verify: []
+tampered replay utilities: [99, 1] (no refusal)
+verify after tamper: ['crafter.ledger.jsonl is 753 bytes; the last signed head says 752', "r1[0]: sha256 is not the record's own digest"]
+truncated replay returns 1 of 2 signed records (no refusal)
+verify after truncation: ['crafter.ledger.jsonl is 376 bytes; the last signed head says 752', "requests in crafter.ledger.jsonl [('r1', 1, 'e894b47369402c0cdbac68b1de8b924db66862ba4a804709e0ac40bfbf9fe300')] are not the signed heads [('r1', 2, 'e894b47369402c0cdbac68b1de8b924db66862ba4a804709e0ac40bfbf9fe300')]", 'r1[0]: prev_sha256 does not link to the request_id']
+# probe: CLI episode count that passes str.isdigit but not int()
+$ python -B -m judge evaluate PRIVATE LEDGERS podman sha256:aaaa…a crafter ² r9
+ValueError: invalid literal for int() with base 10: '²'  (traceback, exit 1; not a 'refused:' line)

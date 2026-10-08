@@ -1,0 +1,49 @@
+$ git worktree list
+/home/g/Downloads/actions-runner/_work/assize/assize 6debf23 [l1-s2-evaluate]
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ ps -eo pid,args | grep -E "harness run|make pins|judge evaluate" (excluding the grep and this shell)
+none
+$ podman ps -a --format "{{.Names}} {{.Image}}"
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+rssfeed-standby_db_1 docker.io/pgvector/pgvector:pg17
+rssfeed-standby_miniflux_1 docker.io/miniflux/miniflux:latest
+renavon-ci-pg docker.io/library/postgres:17-alpine
+relock-ch docker.io/clickhouse/clickhouse-server:26.3
+accessinfohk_db_1 localhost/accessinfohk_db:latest
+accessinfohk_redis_1 docker.io/library/redis:latest
+accessinfohk_smtp_1 docker.io/mailhog/mailhog:latest
+accessinfohk_app_1 localhost/accessinfohk_app:latest
+accessinfohk_sidekiq_1 localhost/accessinfohk_sidekiq:latest
+cobalt_bgutil-pot-provider_1 docker.io/brainicism/bgutil-ytdlp-pot-provider:latest
+rssfeed_db_1 docker.io/pgvector/pgvector:pg17
+n8n_n8n_1 docker.n8n.io/n8nio/n8n:2.16.0
+cobalt_cobalt-api_1 ghcr.io/imputnet/cobalt:11
+photoprism_mariadb_1 docker.io/library/mariadb:11.8.6
+photoprism_photoprism_1 docker.io/photoprism/photoprism:260601
+rssfeed_miniflux_1 docker.io/miniflux/miniflux:latest
+$ docker ps -a
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+rssfeed-standby_db_1 docker.io/pgvector/pgvector:pg17
+rssfeed-standby_miniflux_1 docker.io/miniflux/miniflux:latest
+renavon-ci-pg docker.io/library/postgres:17-alpine
+relock-ch docker.io/clickhouse/clickhouse-server:26.3
+accessinfohk_db_1 localhost/accessinfohk_db:latest
+accessinfohk_redis_1 docker.io/library/redis:latest
+accessinfohk_smtp_1 docker.io/mailhog/mailhog:latest
+accessinfohk_app_1 localhost/accessinfohk_app:latest
+accessinfohk_sidekiq_1 localhost/accessinfohk_sidekiq:latest
+cobalt_bgutil-pot-provider_1 docker.io/brainicism/bgutil-ytdlp-pot-provider:latest
+rssfeed_db_1 docker.io/pgvector/pgvector:pg17
+n8n_n8n_1 docker.n8n.io/n8nio/n8n:2.16.0
+cobalt_cobalt-api_1 ghcr.io/imputnet/cobalt:11
+photoprism_mariadb_1 docker.io/library/mariadb:11.8.6
+photoprism_photoprism_1 docker.io/photoprism/photoprism:260601
+rssfeed_miniflux_1 docker.io/miniflux/miniflux:latest
+# Every container listed is an unrelated host service; none is an assize candidate.
