@@ -1,0 +1,5 @@
+# P1's mutant `domain_check_skipped`: the issuance check admits a seed keyed in the training domain.
+[[edit]]
+path = "judge/seeds.py"
+old = "        bad = [s for s, k in keyed if domain(k) != EVAL]\n"
+new = "        bad = []\n"

@@ -573,6 +573,82 @@ PURITY_MANIFEST = {"world": "fx", "observation": [{"name": "semantic", "vocabula
                    "utility": {"components": []}}
 
 
+def p1_seed_issuance() -> bool:
+    """Evaluation seeds are issued from a CSPRNG into judge-private storage, keyed by the seed the World actually
+    generates from, and never reissued: two requests from two store openings get disjoint evaluation-domain seeds, all
+    recorded; the issuance check refuses a used seed, a training-domain seed, a reused request id and a non-private
+    store, recording nothing; the public training stream is deterministic and entirely training-domain, hence
+    disjoint from every issued seed (brief 1 section 2)."""
+    from judge import seeds
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    key, world, n = binding.world_seed, "crafter", 5
+    work = Path(tempfile.mkdtemp(prefix="assize-p1-", dir=context.scratch))
+    root = work / "judge-private"
+
+    def refused(code: str, ss, rid: str) -> None:
+        before = (root / f"{world}.seeds.jsonl").read_bytes()
+        try:
+            seeds.admit(root, world, key, ss, rid)
+            got = "admitted"
+        except seeds.SeedError as e:
+            got = e.code
+        expect(got == code and (root / f"{world}.seeds.jsonl").read_bytes() == before,
+               f"admit({ss}, {rid!r}) refused {code}, store unchanged (got {got})")
+
+    issued: list[int] = []
+    for rid in ("request-a", "request-b"):  # each from the store as the files left it, no state carried over
+        try:
+            got = seeds.issue(root, world, key, n, rid)
+        except seeds.SeedError as e:
+            got = []
+            print(f"    issue({rid!r}) raised {e}")
+        print(f"    {rid}: {got}")
+        expect(len(got) == n, f"{rid}: {n} seeds issued")
+        issued += got
+    keys = [key(s) for s in issued]
+    expect(len(set(keys)) == len(keys) == 2 * n, f"{len(keys)} issued seeds have {len(set(keys))} distinct World keys")
+    expect(all(k % 2 == seeds.EVAL for k in keys), "every issued seed is keyed in the evaluation domain (odd)")
+    recs = seeds.records(root, world)
+    expect([(r["request_id"], r["seed"], r["key"]) for r in recs]
+           == [(rid, s, key(s)) for rid, ss in (("request-a", issued[:n]), ("request-b", issued[n:])) for s in ss],
+           f"the store records exactly the issued seeds, in order ({len(recs)} records)")
+    mode = (root.stat().st_mode & 0o777, (root / f"{world}.seeds.jsonl").stat().st_mode & 0o777)
+    expect(mode == (0o700, 0o600), f"store directory and file modes {oct(mode[0])}, {oct(mode[1])}")
+
+    refused("reused", [issued[0]], "request-c")
+    refused("reused", [issued[-1]], "request-d")
+    twin = next(s for s in range(SEED_SCAN) if key(s) % 2 == seeds.EVAL and key(s) not in keys)
+    refused("reused", [twin, twin], "request-e")
+    refused("request_reused", [twin], "request-a")
+    train = seeds.training_seeds(world, key, n)
+    refused("training_domain", [train[0]], "request-f")
+    refused("out_of_space", [seeds.SEED_SPACE], "request-g")
+
+    again = seeds.training_seeds(world, key, n)
+    tkeys = [key(s) for s in train]
+    print(f"    training stream: {train}")
+    expect(train == again and len(set(tkeys)) == n, "the training stream is deterministic and its keys distinct")
+    expect(all(k % 2 == seeds.TRAIN for k in tkeys), "every training seed is keyed in the training domain (even)")
+    expect(not set(tkeys) & set(keys), "no training seed's key is an issued seed's key")
+
+    loose = work / "loose"
+    loose.mkdir(mode=0o755)
+    loose.chmod(0o755)
+    try:
+        seeds.issue(loose, world, key, 1, "request-h")
+        got = "issued"
+    except seeds.SeedError as e:
+        got = e.code
+    expect(got == "not_private", f"a store directory of mode 755 refused not_private (got {got})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+SEED_SCAN = 64  # small seeds searched for an unissued evaluation-domain one; each is odd-keyed with probability 1/2
+
+
 def p6_schema_purity() -> bool:
     """No manifest vocabulary token appears in any interface schema file; the schemas are valid JSON Schema carrying
     schema_version, every manifest conforms to the manifest schema, and the step messages they define carry no seed
@@ -1160,6 +1236,11 @@ PINS = [
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
+    Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+        p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
+                           Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
+                           Mutant("domain_check_skipped", _edits("P1_domain_check_skipped")),
+                           Mutant("training_undomained", _edits("P1_training_undomained")))),
     Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
         p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
