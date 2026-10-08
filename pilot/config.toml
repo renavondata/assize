@@ -1,0 +1,25 @@
+# Pilot and time-to-learn configuration (brief 1 section 5). Committed before the first scored run; never tuned after
+# seeing scores (brief 1 refusal list). Every value here is the brief's stated default or a criterion it states.
+
+[pilot]
+# The incumbent's pilot on the measurement host: this many episodes or this much wall-clock, whichever binds first.
+# Reaching the cap before the episodes complete is a stop-and-report boundary, not a smaller pilot.
+world = "crafter"
+episodes = 200
+cap_s = 7200
+
+[time_to_learn]
+# Assumed shifts of a candidate over the incumbent, in achievements per episode (section 5), and the posterior mass on
+# the correct sign of the difference in mean utility that makes a shift detected.
+deltas = [0.25, 0.5, 1.0]
+mass = 0.9
+# Pre-stated criteria: FIT if fit_delta is detectable within budget_s of compute on the host, MARGINAL if only
+# marginal_delta is, UNFIT otherwise. budget_s is one day.
+fit_delta = 0.5
+marginal_delta = 1.0
+budget_s = 86400
+# Monte Carlo sizes of the analysis: simulated experiments per sample size, and Bayesian-bootstrap draws of each
+# experiment's posterior. seed starts the analysis's own random stream; it is never a World seed.
+experiments = 1000
+posterior_draws = 1000
+seed = 0

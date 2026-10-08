@@ -1,0 +1,6 @@
+# P15's mutant `one_arm` (brief 1 section 5): the incumbent's mean is taken as known, so only the candidate arm is
+# uncertain and the episodes per arm come out about half.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """ - _means(rng, a, values, cfg["posterior_draws"])"""
+new = """ - (w @ values)[:, None]"""

@@ -1363,6 +1363,74 @@ def p14_random_incumbent() -> bool:
     return ok()
 
 
+# P15's fixture: per-episode utilities 0 and 2, half each, so variance 1 (population) and an independent oracle in
+# closed form: with each arm's posterior mean normal, the expected posterior mass on the correct sign at m episodes
+# per arm is Phi(delta / (2 sigma / sqrt(m))), which reaches q at m = 4 sigma^2 Phi^-1(q)^2 / delta^2.
+TTL_UTILITIES = (0,) * 100 + (2,) * 100
+# The pin's criterion: the Bayesian bootstrap's m* within this factor of the normal oracle's. A pin constant, stated
+# before any run; no candidate's score passes through it.
+TTL_FACTOR = 1.5
+BRIEF_PILOT = {"world": "crafter", "episodes": 200, "cap_s": 7200}
+BRIEF_TTL = {"deltas": [0.25, 0.5, 1.0], "mass": 0.9, "fit_delta": 0.5, "marginal_delta": 1.0, "budget_s": 86400}
+
+
+def p15_time_to_learn() -> bool:
+    """Brief 1 section 5's committed pilot size, cap, shifts, mass and FIT/MARGINAL criteria are the brief's; on a
+    fixture whose answer is known in closed form, the Bayesian-bootstrap time-to-learn finds, for every shift, the
+    smallest episodes per arm whose expected posterior mass on the correct sign reaches the mass, within TTL_FACTOR of
+    the normal oracle; the wall-clock counts both arms; and the verdict is FIT, MARGINAL or UNFIT as the budget affords
+    the oracle's episodes for 0.5, only for 1, or for neither."""
+    import statistics
+
+    from pilot import timetolearn as ttl
+
+    expect, ok = _expecter()
+    whole = ttl.config()
+    cfg = whole["time_to_learn"]
+    expect(whole["pilot"] == BRIEF_PILOT, f"pilot config is the brief's default ({whole['pilot']})")
+    expect({k: cfg[k] for k in BRIEF_TTL} == BRIEF_TTL, f"time-to-learn config is the brief's ({cfg})")
+
+    mean = statistics.fmean(TTL_UTILITIES)
+    var = statistics.fmean((u - mean) ** 2 for u in TTL_UTILITIES)
+    z = statistics.NormalDist().inv_cdf(cfg["mass"])
+    oracle = {d: 4 * var * z * z / (d * d) for d in cfg["deltas"]}
+    cap = math.ceil(TTL_FACTOR * 2 * max(oracle.values()))
+    found = {}
+    for d in cfg["deltas"]:
+        got = ttl.episodes_per_arm(TTL_UTILITIES, d, cap, cfg)
+        found[d] = got
+        print(f"  delta {d}: episodes per arm {got}, normal oracle {oracle[d]:.2f}")
+        expect(got is not None and oracle[d] / TTL_FACTOR <= got[0] <= oracle[d] * TTL_FACTOR,
+               f"delta {d}: m* {got and got[0]} within x{TTL_FACTOR} of the oracle {oracle[d]:.2f}")
+        if got is not None:
+            expect(got[1] >= cfg["mass"], f"delta {d}: measure at m* {got[1]:.4f} >= {cfg['mass']}")
+            below = ttl.measure(TTL_UTILITIES, d, got[0] - 1, cfg) if got[0] > 1 else None
+            expect(below is None or below < cfg["mass"], f"delta {d}: m* is the smallest: measure at m*-1 {below}")
+
+    flat = ttl.episodes_per_arm((3,) * 50, cfg["fit_delta"], cap, cfg)
+    expect(flat == (1, 1.0), f"no incumbent variance: one episode per arm, all mass on the correct sign ({flat})")
+
+    # Budgets at the boundaries the search found: exactly m* for 0.5, one short of it, and one short of m* for 1.
+    # Counting one arm would double each and move the last two verdicts up.
+    m_fit, m_marg = (found[cfg[k]] and found[cfg[k]][0] for k in ("fit_delta", "marginal_delta"))
+    expect(m_fit is not None and m_marg is not None and 1 < m_marg < m_fit,
+           f"fixture separates the verdicts: m* {m_marg} for {cfg['marginal_delta']} < m* {m_fit} for {cfg['fit_delta']}")
+    if m_fit is None or m_marg is None:
+        return ok()
+    budget = cfg["budget_s"]
+    affords = {"FIT": m_fit, "MARGINAL": m_fit - 1, "UNFIT": m_marg - 1}
+    for want, k in affords.items():
+        throughput = (2 * k + 0.5) / budget  # a quarter-episode spare per arm, so rounding never costs one
+        rows = ttl.table(TTL_UTILITIES, throughput, cfg)
+        got = ttl.verdict(rows, cfg)
+        print(f"  {k} episodes per arm affordable: {[(r.delta, r.episodes_per_arm, r.wall_s) for r in rows]}")
+        expect(ttl.affordable(throughput, cfg) == k, f"{want}: the budget affords {k} episodes per arm, both arms run")
+        expect(all(r.wall_s == 2 * r.episodes_per_arm / throughput for r in rows if r.episodes_per_arm is not None),
+               f"{want}: wall-clock counts both arms")
+        expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -1419,6 +1487,11 @@ PINS = [
         p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
                                Mutant("seen_not_reset", _edits("P14_seen_not_reset")))),
+    Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
+        p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
+                            Mutant("shift_dropped", _edits("P15_shift_dropped")),
+                            Mutant("one_arm", _edits("P15_one_arm")),
+                            Mutant("budget_one_arm", _edits("P15_budget_one_arm")))),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
