@@ -1,0 +1,13 @@
+Actions API, queried 2026-10-07T13:13:07Z by assize-reviewer
+== runs head_sha=0e59d1cfd8418d0042f3911a2ca726aab02ee242 event=pull_request
+pins completed cancelled 37622453754 attempt=2 created=2026-10-07T12:38:28Z https://github.com/renavondata/assize/actions/runs/37622453754
+== runs head_sha=2817eb7478152a1e616d5c620db53c8e7eef32f0 event=pull_request
+pins in_progress null 37626554148 attempt=1 created=2026-10-07T13:11:24Z https://github.com/renavondata/assize/actions/runs/37626554148
+== run 37622453754 attempt 1 jobs
+pins completed cancelled started=2026-10-07T12:38:30Z completed=2026-10-07T12:53:51Z
+== run 37622453754 attempt 2 jobs
+pins completed cancelled started=2026-10-07T12:54:33Z completed=2026-10-07T13:09:54Z
+== PR #22 created
+2026-10-07T12:38:24Z
+== PR #21
+OPEN merged=null

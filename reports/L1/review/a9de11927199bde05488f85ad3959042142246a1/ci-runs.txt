@@ -1,0 +1,6 @@
+# ci-runs.txt — runs on PR #22 head a9de11927199bde05488f85ad3959042142246a1, read via the Actions API at 2026-10-08T16:03Z (name event status conclusion id attempt created updated). "review" in_progress is this review session.
+measure pull_request completed skipped 37803218712 attempt=1 2026-10-08T15:44:24Z 2026-10-08T15:44:26Z
+review pull_request in_progress null 37803218418 attempt=1 2026-10-08T15:44:24Z 2026-10-08T15:44:28Z
+build pull_request completed skipped 37803218677 attempt=1 2026-10-08T15:44:24Z 2026-10-08T15:44:34Z
+pins pull_request completed success 37802942788 attempt=1 2026-10-08T15:42:20Z 2026-10-08T16:03:08Z
+PR #22 dynamic completed success 37802934012 attempt=1 2026-10-08T15:42:16Z 2026-10-08T15:43:34Z

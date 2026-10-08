@@ -1,0 +1,6 @@
+# P9's mutant `chain_update_skipped` (brief 1 A4 item 1): the chain is never advanced, so every record links to the
+# request's genesis instead of the record before it.
+[[edit]]
+path = "judge/ledger.py"
+old = '        prev = rec["sha256"]'
+new = '        pass'

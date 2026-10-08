@@ -1,0 +1,6 @@
+# P9's mutant `genesis_empty` (brief 1 A5 F4): a request's first record chains from the empty string instead of the
+# SHA-256 of its request_id.
+[[edit]]
+path = "judge/ledger.py"
+old = '    prev = genesis(request_id)'
+new = '    prev = ""'

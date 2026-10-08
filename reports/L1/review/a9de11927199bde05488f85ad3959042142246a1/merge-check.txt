@@ -1,0 +1,36 @@
+# merge-check.txt — what a9de119 changed relative to the reviewed tip 946e08c and to master 46a4667
+$ git diff 946e08c a9de119 -- judge/ledger.py judge/__main__.py harness/edits/P9_*.toml | wc -l
+0
+$ diff of p9_ledger_tamper body (946e08c vs a9de119), up to the next def
+identical
+$ pin functions at 46a4667
+p0b_no_switches p0c_clean_failure p0d_inconclusive p0e_registry_validation p0f_non_causal p0g_stale p0h_daemon p0h_escapee p0h_timeouts_leave_nothing p0i_no_stale_bytecode p0j_host_facts_complete p0k_forecast_ledger p0l_ci_claims p0m_commit_proposers p0_survivors_reported p10_container_teardown p11_crafter_determinism p12_compute_price p13_calibration p14_random_incumbent p15_time_to_learn p1_seed_issuance p2_peek p3_survivorship p4_measured_compute p5_commitment_order p6_schema_purity p7_infinite_loss 
+$ pin functions at 946e08c
+p0b_no_switches p0c_clean_failure p0d_inconclusive p0e_registry_validation p0f_non_causal p0g_stale p0h_daemon p0h_escapee p0h_timeouts_leave_nothing p0i_no_stale_bytecode p0j_host_facts_complete p0k_forecast_ledger p0l_ci_claims p0m_commit_proposers p0_survivors_reported p10_container_teardown p11_crafter_determinism p12_compute_price p13_calibration p2_peek p3_survivorship p4_measured_compute p6_schema_purity p7_infinite_loss p9_ledger_tamper 
+$ pin functions at a9de119
+p0b_no_switches p0c_clean_failure p0d_inconclusive p0e_registry_validation p0f_non_causal p0g_stale p0h_daemon p0h_escapee p0h_timeouts_leave_nothing p0i_no_stale_bytecode p0j_host_facts_complete p0k_forecast_ledger p0l_ci_claims p0m_commit_proposers p0_survivors_reported p10_container_teardown p11_crafter_determinism p12_compute_price p13_calibration p14_random_incumbent p15_time_to_learn p1_seed_issuance p2_peek p3_survivorship p4_measured_compute p5_commitment_order p6_schema_purity p7_infinite_loss p9_ledger_tamper 
+$ git log -1 --format='%H parents=%P author=%an <%ae>' a9de119
+a9de11927199bde05488f85ad3959042142246a1 parents=946e08cc3269df6a31307f4dfc02d7bea7bd057d 46a4667304d7976caa5a329b4d4f338530eb7b1d author=Guy Freeman <guy@publicdatamarket.com>
+$ git diff --stat 46a4667 a9de119
+ harness/edits/P9_chain_update_skipped.toml         |   6 +
+ harness/edits/P9_genesis_empty.toml                |   6 +
+ harness/edits/P9_opened_for_rewrite.toml           |   6 +
+ harness/edits/P9_record_dropped.toml               |   6 +
+ harness/edits/P9_signature_unchecked.toml          |   6 +
+ harness/edits/P9_utility_altered.toml              |  10 +
+ harness/pins.py                                    | 149 ++++++++++++
+ harness/proposer.toml                              |   2 +-
+ judge/README.md                                    |   2 +-
+ judge/__main__.py                                  |  24 ++
+ judge/ledger.py                                    | 143 +++++++++++
+ reports/L1/STATUS.md                               |  34 +--
+ reports/L1/ci/37622453754.json                     |   1 +
+ reports/L1/forecasts.jsonl                         |   5 +
+ reports/L1/make-pins-0e59d1c.txt                   | 133 ++++++++++
+ ...iew-2817eb7478152a1e616d5c620db53c8e7eef32f0.md |  41 ++++
+ .../ci-runs.txt                                    |  13 +
+ .../cleanup.txt                                    |  52 ++++
+ .../make-pins.txt                                  | 267 +++++++++++++++++++++
+ .../truncate_probe.py                              |  21 ++
+ .../truncate_probe.txt                             |   4 +
+ 21 files changed, 912 insertions(+), 19 deletions(-)

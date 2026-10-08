@@ -1,0 +1,4 @@
+as written: exit 0: verify: ledger.jsonl: ok (0 findings)
+last request and its head removed, no key used: exit 0: verify: ledger.jsonl: ok (0 findings)
+ledger and heads.jsonl both deleted: exit 0: verify: ledger.jsonl: ok (0 findings)
+probe dir removed: True

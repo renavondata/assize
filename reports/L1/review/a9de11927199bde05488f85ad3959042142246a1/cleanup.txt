@@ -1,0 +1,31 @@
+# cleanup.txt — 2026-10-08T16:02:59Z on thinkpad
+$ git worktree list
+/home/g/Downloads/actions-runner/_work/assize/assize a9de119 [l1-a4-1-ledger]
+$ ls -d /tmp/rev22b-* 2>&1
+ls: cannot access '/tmp/rev22b-*': No such file or directory
+$ pgrep -af "harness run|make pins|rev22b"
+(none)
+$ podman ps -a --format "{{.Names}} {{.Image}}"
+tuwunel ghcr.io/matrix-construct/tuwunel:latest
+mautrix-whatsapp dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver localhost/matrix-local-archiver:latest
+rssfeed-standby_db_1 docker.io/pgvector/pgvector:pg17
+rssfeed-standby_miniflux_1 docker.io/miniflux/miniflux:latest
+renavon-ci-pg docker.io/library/postgres:17-alpine
+relock-ch docker.io/clickhouse/clickhouse-server:26.3
+accessinfohk_db_1 localhost/accessinfohk_db:latest
+accessinfohk_redis_1 docker.io/library/redis:latest
+accessinfohk_smtp_1 docker.io/mailhog/mailhog:latest
+accessinfohk_app_1 localhost/accessinfohk_app:latest
+accessinfohk_sidekiq_1 localhost/accessinfohk_sidekiq:latest
+cobalt_bgutil-pot-provider_1 docker.io/brainicism/bgutil-ytdlp-pot-provider:latest
+rssfeed_db_1 docker.io/pgvector/pgvector:pg17
+n8n_n8n_1 docker.n8n.io/n8nio/n8n:2.16.0
+cobalt_cobalt-api_1 ghcr.io/imputnet/cobalt:11
+photoprism_mariadb_1 docker.io/library/mariadb:11.8.6
+photoprism_photoprism_1 docker.io/photoprism/photoprism:260601
+rssfeed_miniflux_1 docker.io/miniflux/miniflux:latest
+(end of list)
+$ ls -d /tmp/assize-scratch-* 2>&1
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+(none of the containers above is an assize candidate container; they are this host's standing services)

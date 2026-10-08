@@ -1402,6 +1402,148 @@ def p12_compute_price() -> bool:
     _each_runtime(usable, case, expect)
     return ok()
 
+# P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
+# the canonical serialisation is exercised on the strings and floats a real record carries.
+P9_REQUESTS = (
+    ("p9-request-a", [{"episode": i, "termination": c, "detail": "", "steps": s, "utility": u,
+                       "prediction": {"inventory_wood": {"scored": s, "missing": 0, "infinite": f, "finite_sum": 1.5,
+                                                         "log_loss": "+inf" if f else 1.5}}}
+                      for i, (c, s, u, f) in enumerate((("terminal", 120, 3, 0), ("crash", 7, 0, 1),
+                                                         ("truncated", 10000, 5, 0)))]),
+    ("p9-request-b", [{"episode": 0, "termination": "step_timeout", "detail": "no reply", "steps": 2, "utility": 1,
+                       "prediction": {}}]),
+)
+CHAIN_FIELDS = ("request_id", "prev_sha256", "sha256")
+
+
+def _verify_cli(led: Path, private: Path) -> tuple[int, str]:
+    """The judge's verification subcommand, run as the judge runs it, in a child interpreter."""
+    r = subprocess.run(proc.python("-m", "judge", "verify", str(led), str(private)), cwd=ROOT, env=proc.child_env(),
+                       capture_output=True, text=True, timeout=120)
+    return r.returncode, (r.stdout + r.stderr).strip()
+
+
+def _resigned(private: Path, rows: list[dict], led: Path) -> None:
+    """Rewrite `led` as `rows` and re-sign heads matching them with the judge's own key: a forger who holds the key,
+    so that only the chain itself can expose the tamper."""
+    import hashlib
+    import hmac
+
+    key = (private / "key").read_bytes()
+    data = b"".join(json.dumps(r, sort_keys=True, separators=(",", ":")).encode() + b"\n" for r in rows)
+    led.write_bytes(data)
+    heads, size = [], 0
+    for rid in dict.fromkeys(r["request_id"] for r in rows):
+        mine = [r for r in rows if r["request_id"] == rid]
+        size += sum(len(json.dumps(r, sort_keys=True, separators=(",", ":")).encode()) + 1 for r in mine)
+        h = {"ledger": led.name, "request_id": rid, "records": len(mine), "head": mine[-1]["sha256"], "bytes": size}
+        mac = hmac.new(key, json.dumps(h, sort_keys=True, separators=(",", ":")).encode(), hashlib.sha256).hexdigest()
+        heads.append(json.dumps(h | {"mac": mac}, sort_keys=True, separators=(",", ":")) + "\n")
+    (private / "heads.jsonl").write_text("".join(heads))
+
+
+def _rechained(rows: list[dict], first_prev) -> list[dict]:
+    """`rows` re-chained by definition, each request's first record linking to `first_prev(request_id)`."""
+    import hashlib
+
+    out, prev, rid = [], None, None
+    for r in rows:
+        if r["request_id"] != rid:
+            rid, prev = r["request_id"], first_prev(r["request_id"])
+        rec = {k: v for k, v in r.items() if k != "sha256"} | {"prev_sha256": prev}
+        prev = hashlib.sha256(json.dumps(rec, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        out.append(rec | {"sha256": prev})
+    return out
+
+
+def p9_ledger_tamper() -> bool:
+    """The judge's ledger is tamper-evident (brief 1 A4 item 1; A5 F4). Two requests appended by `judge.ledger` hold
+    exactly the records given, in order; each record links by `prev_sha256` to the previous record's `sha256`, the
+    first to the SHA-256 of its request_id, each `sha256` the digest of its canonical serialisation, all derived here
+    by definition; the first request's bytes are untouched by the second (O_APPEND, never rewritten); and `python -m
+    judge verify` passes it. Every tamper fails verification: a record dropped, a utility altered, extra records, a
+    request removed, a forged head without the key, and, with the key in a forger's hands, a chain rebuilt from the
+    empty string or with a record left out. A request_id is written once."""
+    import hashlib
+
+    from judge import ledger
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p9-", dir=context.scratch))
+    try:
+        led, private = work / "ledger.jsonl", work / "private"
+        (a_id, a), (b_id, b) = P9_REQUESTS
+        try:
+            ledger.append(led, private, a_id, a)
+            first = led.read_bytes()
+            ledger.append(led, private, b_id, b)
+            written = led.read_bytes()
+            rows = [json.loads(line) for line in written.splitlines()]
+        except (ValueError, OSError) as e:
+            expect(False, f"the judge writes two requests to a ledger that parses as JSONL ({type(e).__name__}: {e})")
+            return ok()
+        expect(written.startswith(first), f"request a's {len(first)} bytes unchanged by request b (never rewritten)")
+        expect([{k: v for k, v in r.items() if k not in CHAIN_FIELDS} for r in rows] == a + b,
+               f"the ledger holds exactly the {len(a) + len(b)} records given, in order, utilities included: "
+               f"{[r.get('utility') for r in rows]}")
+        expect([r.get("request_id") for r in rows] == [a_id] * len(a) + [b_id] * len(b), "each record names its request")
+        derived = _rechained(rows, lambda rid: hashlib.sha256(rid.encode()).hexdigest())
+        expect(rows == derived, "every prev_sha256 and sha256 equals its derivation: first records from the SHA-256 "
+                                "of the request_id, each next from the previous sha256")
+        code, out = _verify_cli(led, private)
+        print("  " + out.replace("\n", "\n  "))
+        expect(code == 0, f"verify passes the ledger as written (exit {code})")
+        try:
+            ledger.append(led, private, a_id, a)
+            expect(False, "a request_id already written is refused")
+        except ValueError as e:
+            expect(led.read_bytes() == written, f"a request_id already written is refused, ledger unchanged ({e})")
+
+        snapshot = {p.name: p.read_bytes() for p in (led, private / "heads.jsonl")}
+
+        def tampered(name: str, act) -> None:
+            act()
+            code, out = _verify_cli(led, private)
+            print(f"  {name}: " + out.replace("\n", "\n    "))
+            expect(code == 1, f"{name}: verification fails (exit {code})")
+            led.write_bytes(snapshot[led.name])
+            (private / "heads.jsonl").write_bytes(snapshot["heads.jsonl"])
+
+        def lines(keep) -> bytes:
+            return b"".join(line + b"\n" for i, line in enumerate(written.splitlines()) if keep(i))
+
+        def utility_altered() -> None:
+            out = list(rows)
+            out[1] = out[1] | {"utility": out[1]["utility"] + 1}
+            led.write_bytes(b"".join(ledger.canonical(r) + b"\n" for r in out))
+
+        def forged_head() -> None:
+            import hmac
+            out = _rechained([r | {"utility": 99} if i == 0 else r for i, r in enumerate(rows)],
+                             lambda rid: hashlib.sha256(rid.encode()).hexdigest())
+            _resigned(private, out, led)
+            heads = [json.loads(h) for h in (private / "heads.jsonl").read_text().splitlines()]
+            (private / "heads.jsonl").write_text("".join(
+                json.dumps(h | {"mac": hmac.new(b"not the judge's key", ledger.canonical(
+                    {k: v for k, v in h.items() if k != "mac"}), hashlib.sha256).hexdigest()}) + "\n" for h in heads))
+
+        tampered("record_dropped", lambda: led.write_bytes(lines(lambda i: i != 1)))
+        tampered("last_record_dropped", lambda: led.write_bytes(lines(lambda i: i != len(rows) - 1)))
+        tampered("utility_altered", utility_altered)
+        tampered("record_appended", lambda: led.write_bytes(written + ledger.canonical(
+            _rechained(rows + [rows[-1] | {"episode": 1}], lambda rid: hashlib.sha256(rid.encode()).hexdigest())[-1])
+            + b"\n"))
+        tampered("request_removed", lambda: led.write_bytes(lines(lambda i: i < len(a))))
+        tampered("forged_head", forged_head)
+        tampered("rechained_from_empty_with_key", lambda: _resigned(private, _rechained(rows, lambda rid: ""), led))
+        tampered("dropped_and_resigned_with_key", lambda: _resigned(private, [r for i, r in enumerate(rows) if i != 1],
+                                                                    led))
+        code, _ = _verify_cli(led, private)
+        expect(code == 0, f"the restored ledger verifies again (exit {code}), so each failure above was the tamper's")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
 
 def p5_commitment_order() -> bool:
     """Under every usable runtime, a candidate commits its prediction before the observation it predicts exists for
@@ -1703,6 +1845,13 @@ PINS = [
         p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
                           Mutant("realised_row_only", _edits("P13_realised_row_only")),
                           Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed")))),
+    Pin("P9", "a ledger record dropped, altered or rechained, or a head forged, fails the judge's verification",
+        p9_ledger_tamper, (Mutant("record_dropped", _edits("P9_record_dropped")),
+                           Mutant("utility_altered", _edits("P9_utility_altered")),
+                           Mutant("chain_update_skipped", _edits("P9_chain_update_skipped")),
+                           Mutant("opened_for_rewrite", _edits("P9_opened_for_rewrite")),
+                           Mutant("genesis_empty", _edits("P9_genesis_empty")),
+                           Mutant("signature_unchecked", _edits("P9_signature_unchecked")))),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
