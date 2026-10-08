@@ -1,0 +1,6 @@
+# P18's mutant `infinite_pooled_finite` (brief 1 section 2 Prediction scoring): the pooled log-loss of a target ignores
+# its infinite steps, as if clipped.
+[[edit]]
+path = "pilot/run.py"
+old = """            "log_loss_per_step": INFINITE if infinite else (finite / scored if scored else None)}"""
+new = """            "log_loss_per_step": finite / scored if scored else None}"""

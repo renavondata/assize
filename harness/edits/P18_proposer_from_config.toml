@@ -1,0 +1,7 @@
+# P18's mutant `proposer_from_config` (brief 1 A4 item 2): the pilot report's proposer is taken from the pilot's own
+# config, not from the records the judge stamped with the registering credential's party.
+[[edit]]
+path = "pilot/run.py"
+old = """    several = [k for k, v in one.items() if len(v) != 1]"""
+new = """    one["proposer"] = [cfg["incumbent"]["proposer"]]
+    several = [k for k, v in one.items() if len(v) != 1]"""

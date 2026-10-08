@@ -1,0 +1,6 @@
+# P18's mutant `failures_dropped` (brief 1 section 2 Terminations; CLAUDE.md "Nothing is dropped silently"): the
+# report's utilities keep only the episodes the World ended, dropping crashes and timeouts.
+[[edit]]
+path = "pilot/run.py"
+old = """    utilities = [r["utility"] for r in rs]"""
+new = """    utilities = [r["utility"] for r in rs if r["termination"] in ("terminal", "truncated")]"""

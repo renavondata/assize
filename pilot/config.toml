@@ -23,3 +23,17 @@ budget_s = 86400
 experiments = 1000
 posterior_draws = 1000
 seed = 0
+
+[requests]
+# The pilot asks evaluate() for its episodes in requests of this many; the cap is checked before each request, so an
+# episode under way when the cap passes is finished and recorded, never cut. A request plays its episodes in one
+# container while none fails, so each request pays one container start: ten episodes amortise it as an evaluating
+# caller would, and keep the cap's resolution at ten episodes. Not a score: no utility passes through it.
+episodes = 10
+
+[incumbent]
+# The random incumbent's image (brief 1 section 4) and the party that proposed it: the `Proposer:` trailer of
+# 0f698c4, the commit that added incumbents/random. The pilot issues this party a credential and registers the image
+# under it, so the judge stamps every pilot record with it (A4 item 2); the report's proposer is read off the records.
+context = "incumbents/random"
+proposer = { kind = "builder", model = "claude-opus-5-5", session = "95480223-ce68-40b9-8786-3b70a9bdb7da" }
