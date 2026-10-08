@@ -1,0 +1,43 @@
+# P14 uniformity test: power and false-refusal rate. Pure computation with harness.pins._chi2_sf at d3c24bf; no container. Scripts below.
+# First block script (inline, run with `uv run --frozen python -I -c` from the repo root):
+    import random,math,sys; sys.path.insert(0,'.')
+    from harness.pins import _chi2_sf
+    rng=random.Random(20261008); k=17; N=200; T=20000
+    def rate(acts):
+      hits=0
+      for _ in range(T):
+        c=[0]*k
+        for _ in range(N): c[rng.choice(acts)]+=1
+        e=N/k; x=sum((ci-e)**2/e for ci in c)
+        hits+= _chi2_sf(x,k-1)<1e-6
+      return hits/T
+    print('uniform 17 refusal rate', rate(list(range(17))))
+    print('drop 1 action (uniform over 16) refusal rate', rate(list(range(16))))
+    print('drop 4 actions (uniform over 13) refusal rate', rate(list(range(13))))
+    print('drop 8 actions (uniform over 9) refusal rate', rate(list(range(9))))
+# Second block script (/tmp/rev26/null_rate.py):
+    # Empirical false-refusal rate of P14's uniformity test under the true null (uniform over 17, 200 draws).
+    import sys, numpy as np
+    sys.path.insert(0, '.')
+    from harness.pins import _chi2_sf
+    lo, hi = 0.0, 200.0
+    for _ in range(100):
+        m = (lo + hi) / 2
+        lo, hi = (m, hi) if _chi2_sf(m, 16) >= 1e-6 else (lo, m)
+    crit = hi
+    rng = np.random.default_rng(20261008)
+    k, N, e = 17, 200, 200 / 17
+    total, hits = 0, 0
+    for _ in range(40):
+        c = rng.multinomial(N, [1 / k] * k, size=500_000)
+        x = ((c - e) ** 2 / e).sum(axis=1)
+        hits += int((x > crit).sum()); total += len(x)
+    print(f"critical chi2 (df 16, alpha 1e-6) = {crit:.3f}")
+    print(f"null draws {total}; refused {hits}; empirical false-refusal rate {hits/total:.2e} vs nominal 1e-6")
+# Output (first block: random.Random(20261008), 20000 trials each, 200 draws over 17 actions; second: numpy default_rng(20261008), 2e7 null trials):
+uniform 17 refusal rate 5e-05
+drop 1 action (uniform over 16) refusal rate 0.0001
+drop 4 actions (uniform over 13) refusal rate 1.0
+drop 8 actions (uniform over 9) refusal rate 1.0
+critical chi2 (df 16, alpha 1e-6) = 58.324
+null draws 20000000; refused 47; empirical false-refusal rate 2.35e-06 vs nominal 1e-6
