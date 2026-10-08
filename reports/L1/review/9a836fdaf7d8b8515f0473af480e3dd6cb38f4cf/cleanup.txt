@@ -1,0 +1,10 @@
+# cleanup 2026-10-08T21:17:59Z
+$ git worktree list
+/home/g/Downloads/actions-runner/_work/assize/assize 9a836fd [l1-exit]
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ pgrep -af "harness run|make pins|python -m pilot|judge evaluate"
+(none)
+$ podman ps -a --format "{{.Names}} {{.Image}}" | grep -i assize
+(none)

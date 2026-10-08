@@ -1,0 +1,8 @@
+2026-10-08T20:34:32.8119396Z   clean: true
+2026-10-08T20:45:44.2323185Z [clean ] P0b: observed pass -> ok (0.434s) out/pins/runs/P0b/clean/transcript.log
+2026-10-08T20:45:44.2379295Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.356s + 0.358s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+2026-10-08T20:45:44.2381222Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.355s + 0.355s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-08T20:58:50.2811731Z clean: 30/30 passed, 0/30 failed
+2026-10-08T20:58:50.2812691Z mutants: 81/81 killed, 0/81 survived, 0/81 inconclusive, 0/81 stale, 0/81 non-causal, 0 leaked (clean and mutant)
+2026-10-08T20:58:50.2814024Z twins: 81/81 passed
+2026-10-08T20:58:50.2815155Z PINS PASSED

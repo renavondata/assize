@@ -1,0 +1,16 @@
+# PR #32: createdAt 2026-10-08T20:34:21Z, first head 1374d8f
+$ gh api repos/renavondata/assize/actions/runs?head_sha=1374d8f48b4bd242b8c566e01431d9a29dae874e&event=pull_request (pins)
+completed success 37840452533 attempt 1 https://github.com/renavondata/assize/actions/runs/37840452533
+$ gh api repos/renavondata/assize/actions/runs?head_sha=25f36e6bed0d08a704ff9a71757928896c872c1a&event=pull_request (pins)
+completed success 37840644452 attempt 1 https://github.com/renavondata/assize/actions/runs/37840644452
+$ gh api repos/renavondata/assize/actions/runs?head_sha=9a836fdaf7d8b8515f0473af480e3dd6cb38f4cf&event=pull_request (pins)
+in_progress null 37843066334 attempt 1 https://github.com/renavondata/assize/actions/runs/37843066334
+# cited runs
+37829367792 pins cab0ca00be7a9fd82502c5e941a2e944266ceaa6 completed success attempt 1
+37836660872 pins af3a8ea2fc00bfb84fbd4bb953cfa690fd49935c completed success attempt 1
+37840644452 pins 25f36e6bed0d08a704ff9a71757928896c872c1a completed success attempt 1
+37831165785 measure cab0ca00be7a9fd82502c5e941a2e944266ceaa6 completed success attempt 1
+# PR commits (GitHub API)
+1374d8f author=Guy Freeman <guy@publicdatamarket.com> login=null
+25f36e6 author=Guy Freeman <guy@publicdatamarket.com> login=null
+9a836fd author=Guy Freeman <guy@publicdatamarket.com> login=null
