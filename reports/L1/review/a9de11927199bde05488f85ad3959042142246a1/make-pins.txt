@@ -1,0 +1,157 @@
+2026-10-08T15:45:40Z
+thinkpad
+a9de11927199bde05488f85ad3959042142246a1
+uv run --frozen python -m harness run --registry harness --phase all --out /tmp/rev22b-out
+Using CPython 3.11.17
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 52ms
+registry harness: 27 pins, 65 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (4.094s) ../rev22b-out/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.468s) ../rev22b-out/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.428s) ../rev22b-out/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (5.686s) ../rev22b-out/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (2.224s) ../rev22b-out/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.821s) ../rev22b-out/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (2.327s) ../rev22b-out/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (13.224s) ../rev22b-out/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.518s) ../rev22b-out/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.791s) ../rev22b-out/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.436s) ../rev22b-out/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.427s) ../rev22b-out/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.519s) ../rev22b-out/runs/P0m/clean/transcript.log
+[clean ] P1: observed pass -> ok (2.823s) ../rev22b-out/runs/P1/clean/transcript.log
+[clean ] P2: observed pass -> ok (1.494s) ../rev22b-out/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (29.041s) ../rev22b-out/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (8.441s) ../rev22b-out/runs/P4/clean/transcript.log
+[clean ] P5: observed pass -> ok (5.234s) ../rev22b-out/runs/P5/clean/transcript.log
+[clean ] P14: observed pass -> ok (6.935s) ../rev22b-out/runs/P14/clean/transcript.log
+[clean ] P15: observed pass -> ok (15.003s) ../rev22b-out/runs/P15/clean/transcript.log
+[clean ] P7: observed pass -> ok (12.997s) ../rev22b-out/runs/P7/clean/transcript.log
+[clean ] P13: observed pass -> ok (3.377s) ../rev22b-out/runs/P13/clean/transcript.log
+[clean ] P9: observed pass -> ok (1.622s) ../rev22b-out/runs/P9/clean/transcript.log
+[clean ] P12: observed pass -> ok (6.585s) ../rev22b-out/runs/P12/clean/transcript.log
+[clean ] P10: observed pass -> ok (9.502s) ../rev22b-out/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.62s) ../rev22b-out/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (15.603s) ../rev22b-out/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (4.118s + 4.036s) ../rev22b-out/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.433s + 0.429s) ../rev22b-out/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.431s + 1.431s) ../rev22b-out/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.706s + 5.776s) ../rev22b-out/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (8.297s + 2.182s) ../rev22b-out/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.833s + 1.853s) ../rev22b-out/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.988s + 2.333s) ../rev22b-out/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (15.35s + 13.201s) ../rev22b-out/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (13.267s + 13.267s) ../rev22b-out/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (13.212s + 13.223s) ../rev22b-out/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (11.024s + 13.172s) ../rev22b-out/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.885s + 13.172s) ../rev22b-out/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.531s + 0.549s) ../rev22b-out/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.504s + 0.563s) ../rev22b-out/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.814s + 0.805s) ../rev22b-out/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.429s + 0.431s) ../rev22b-out/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.439s + 0.436s) ../rev22b-out/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.53s + 0.53s) ../rev22b-out/runs/P0m/trailer_check_disabled/mutant/transcript.log
+[mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.579s + 0.531s) ../rev22b-out/runs/P0m/first_proposer_only/mutant/transcript.log
+[mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.528s + 0.528s) ../rev22b-out/runs/P0m/exemption_unkeyed/mutant/transcript.log
+[mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.53s + 0.528s) ../rev22b-out/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+[mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.602s + 0.53s) ../rev22b-out/runs/P0m/unknown_merge_author/mutant/transcript.log
+[mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (2.733s + 2.833s) ../rev22b-out/runs/P1/seed_reissued/mutant/transcript.log
+[mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.934s + 2.884s) ../rev22b-out/runs/P1/reuse_check_skipped/mutant/transcript.log
+[mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (2.834s + 3.136s) ../rev22b-out/runs/P1/domain_check_skipped/mutant/transcript.log
+[mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (2.636s + 2.745s) ../rev22b-out/runs/P1/training_undomained/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (3.4s + 1.343s) ../rev22b-out/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.335s + 1.34s) ../rev22b-out/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.332s + 1.358s) ../rev22b-out/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.344s + 1.335s) ../rev22b-out/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (30.052s + 29.419s) ../rev22b-out/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (8.519s + 8.5s) ../rev22b-out/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (8.351s + 8.56s) ../rev22b-out/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (8.71s + 8.445s) ../rev22b-out/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (8.45s + 8.406s) ../rev22b-out/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (6.158s + 5.293s) ../rev22b-out/runs/P5/next_sent_early/mutant/transcript.log
+[mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (6.404s + 6.49s) ../rev22b-out/runs/P14/first_legal_action/mutant/transcript.log
+[mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (6.441s + 6.646s) ../rev22b-out/runs/P14/floor_unsmoothed/mutant/transcript.log
+[mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (6.644s + 6.541s) ../rev22b-out/runs/P14/seen_not_reset/mutant/transcript.log
+[mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (1.38s + 14.409s) ../rev22b-out/runs/P15/abs_difference/mutant/transcript.log
+[mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (6.292s + 14.457s) ../rev22b-out/runs/P15/shift_dropped/mutant/transcript.log
+[mutant] P15/one_arm: mutant fail, twin pass -> KILLED (4.947s + 15.121s) ../rev22b-out/runs/P15/one_arm/mutant/transcript.log
+[mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (16.415s + 14.664s) ../rev22b-out/runs/P15/budget_one_arm/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (12.605s + 12.908s) ../rev22b-out/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (12.708s + 12.709s) ../rev22b-out/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (12.856s + 12.808s) ../rev22b-out/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (3.285s + 3.334s) ../rev22b-out/runs/P13/infinite_dropped/mutant/transcript.log
+[mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (3.334s + 3.337s) ../rev22b-out/runs/P13/realised_row_only/mutant/transcript.log
+[mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (3.286s + 3.334s) ../rev22b-out/runs/P13/entropy_missing_imputed/mutant/transcript.log
+[mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (1.634s + 1.8s) ../rev22b-out/runs/P9/record_dropped/mutant/transcript.log
+[mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (1.887s + 1.633s) ../rev22b-out/runs/P9/utility_altered/mutant/transcript.log
+[mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (1.632s + 1.634s) ../rev22b-out/runs/P9/chain_update_skipped/mutant/transcript.log
+[mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.43s + 1.633s) ../rev22b-out/runs/P9/opened_for_rewrite/mutant/transcript.log
+[mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (1.632s + 1.632s) ../rev22b-out/runs/P9/genesis_empty/mutant/transcript.log
+[mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (1.632s + 1.683s) ../rev22b-out/runs/P9/signature_unchecked/mutant/transcript.log
+[mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (6.695s + 6.707s) ../rev22b-out/runs/P12/peak_differenced/mutant/transcript.log
+[mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (6.592s + 6.493s) ../rev22b-out/runs/P12/unmeasured_free/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (19.41s + 9.416s) ../rev22b-out/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.629s + 0.63s) ../rev22b-out/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (15.216s + 16.767s) ../rev22b-out/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (17.414s + 16.959s) ../rev22b-out/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (16.662s + 17.417s) ../rev22b-out/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (15.864s + 16.974s) ../rev22b-out/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (6.95s + 17.618s) ../rev22b-out/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (17.022s + 16.766s) ../rev22b-out/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 27/27 passed, 0/27 failed
+mutants: 65/65 killed, 0/65 survived, 0/65 inconclusive, 0/65 stale, 0/65 non-causal, 0 leaked (clean and mutant)
+twins: 65/65 passed
+report: ../rev22b-out/pins.jsonl
+PINS PASSED
+exit 0
+2026-10-08T16:02:22Z
+== P9 clean
+pin:       P9
+protects:  a ledger record dropped, altered or rechained, or a head forged, fails the judge's verification
+role:      clean
+tree:      /tmp/rev22b-hE5x
+invoked:   /tmp/rev22b-hE5x
+scratch:   /tmp/assize-scratch-uw3ls544
+  [ok] request a's 1093 bytes unchanged by request b (never rewritten)
+  [ok] the ledger holds exactly the 4 records given, in order, utilities included: [3, 0, 5, 1]
+  [ok] each record names its request
+  [ok] every prev_sha256 and sha256 equals its derivation: first records from the SHA-256 of the request_id, each next from the previous sha256
+  verify: ledger.jsonl: ok (0 findings)
+  [ok] verify passes the ledger as written (exit 0)
+  [ok] a request_id already written is refused, ledger unchanged (request 'p9-request-a' is already in ledger.jsonl)
+  record_dropped: verify: ledger.jsonl is 1019 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 2, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: p9-request-a[1]: prev_sha256 does not link to the previous record
+    verify: ledger.jsonl: FAILED (3 findings)
+  [ok] record_dropped: verification fails (exit 1)
+  last_record_dropped: verify: ledger.jsonl is 1093 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] last_record_dropped: verification fails (exit 1)
+  utility_altered: verify: p9-request-a[1]: sha256 is not the record's own digest
+    verify: ledger.jsonl: FAILED (1 findings)
+  [ok] utility_altered: verification fails (exit 1)
+  record_appended: verify: ledger.jsonl is 1665 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 2, '4c028b161c8c4388e47b59e2377bf4336143e0e16c902deaaa81f518501c0549')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] record_appended: verification fails (exit 1)
+  request_removed: verify: ledger.jsonl is 1093 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] request_removed: verification fails (exit 1)
+  forged_head: verify: head of 'p9-request-a': signature invalid
+    verify: head of 'p9-request-b': signature invalid
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] forged_head: verification fails (exit 1)
+  rechained_from_empty_with_key: verify: p9-request-a[0]: prev_sha256 does not link to the request_id
+    verify: p9-request-b[0]: prev_sha256 does not link to the request_id
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] rechained_from_empty_with_key: verification fails (exit 1)
+  dropped_and_resigned_with_key: verify: p9-request-a[1]: prev_sha256 does not link to the previous record
+    verify: ledger.jsonl: FAILED (1 findings)
+  [ok] dropped_and_resigned_with_key: verification fails (exit 1)
+  [ok] the restored ledger verifies again (exit 0), so each failure above was the tamper's
+result:    PASS
