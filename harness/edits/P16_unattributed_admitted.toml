@@ -1,0 +1,6 @@
+# P16's mutant `unattributed_admitted` (brief 1 A4 item 2): a token matching no issued credential is admitted, and the
+# image is registered with no attributable proposer.
+[[edit]]
+path = "judge/registry.py"
+old = "    if party is None:\n"
+new = "    if party is None and False:\n"

@@ -1,0 +1,40 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-dxmwwj3r/assize-copy-pyipz80e/repo
+applied 2 edit(s) from harness/edits/P16_registration_taken_over.toml
+pin:       P16
+protects:  a candidate's proposer comes from the judge-issued credential that registered it, or it is refused
+role:      mutant
+tree:      /tmp/assize-scratch-dxmwwj3r/assize-copy-pyipz80e/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-dxmwwj3r
+  [ok] builder: credential issued (exit 0) 
+  [ok] reviewer: credential issued (exit 0) 
+  [ok] the judge keeps no token, only hashes
+  [ok] private storage and credentials modes ['0o700', '0o600']
+    register sha256:aaaaaaaa: exit 0: {'credential': '11a2bd635ba10c172647a620126e0752b0832949ac233c305b6373d2bcaabbdc', 'image': 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'proposer': {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'}}
+  [ok] sha256:aaaaaaaa registered to the credential's holder builder
+  [ok] sha256:aaaaaaaa: proposer_of is builder
+    register sha256:bbbbbbbb: exit 0: {'credential': '888ef9ac11ac23dfa70c215bd2cd46bbb78b383694fefefe030eb0ce7d3bf50e', 'image': 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'proposer': {'kind': 'reviewer', 'model': 'claude-opus-5-5', 'session': 'p16-reviewer-session'}}
+  [ok] sha256:bbbbbbbb registered to the credential's holder reviewer
+  [ok] sha256:bbbbbbbb: proposer_of is reviewer
+  [ok] the registrations are exactly the two, in order (2 rows)
+    register sha256:aaaaaaaa: exit 0: {'credential': '11a2bd635ba10c172647a620126e0752b0832949ac233c305b6373d2bcaabbdc', 'image': 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'proposer': {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'}}
+  [ok] sha256:aaaaaaaa registered to the credential's holder builder
+  [ok] sha256:aaaaaaaa: proposer_of is builder
+  [ok] the same party registering again records nothing new
+    no token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] no token: refused unattributed, registrations unchanged
+    forged token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] forged token: refused unattributed, registrations unchanged
+    self-named proposer: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] self-named proposer: refused unattributed, registrations unchanged
+    stored hash of a real token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] stored hash of a real token: refused unattributed, registrations unchanged
+    another party's credential on a registered image: exit 0: {"credential": "888ef9ac11ac23dfa70c215bd2cd46bbb78b383694fefefe030eb0ce7d3bf50e", "image": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "proposer": {"kind": "reviewer", "model": "claude-opus-5-5", "session": "p16-reviewer-session"}}
+  [FAIL] another party's credential on a registered image: refused registered, registrations unchanged
+    not a digest: exit 1: refused: bad_image: 'candidate:latest' is not an image digest sha256:<64 hex>
+  [ok] not a digest: refused bad_image, registrations unchanged
+  [FAIL] image a's proposer is still the builder
+  [ok] an image never registered has no proposer (unregistered)
+  [ok] a credential for a kind outside A1.7 is refused (exit 1)
+result:    FAIL

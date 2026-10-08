@@ -1,0 +1,6 @@
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=<sha>&event=pull_request"
+== ca0be631598061ea5a33e0f3c7f0f54e123371eb
+completed success 37809169847 attempt 1 2026-10-08T16:29:19Z 2026-10-08T16:50:30Z https://github.com/renavondata/assize/actions/runs/37809169847
+== 02a71436d9ffd3eada4a4190061b2c685598307d
+in_progress null 37812022534 attempt 1 2026-10-08T16:51:19Z 2026-10-08T16:51:22Z https://github.com/renavondata/assize/actions/runs/37812022534
+PR #29 createdAt: 2026-10-08T16:29:15Z
