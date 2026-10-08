@@ -1,0 +1,6 @@
+# P14's mutant `floor_unsmoothed` (brief 1 section 4): the incumbent's floor drops add-one smoothing, so a value not yet
+# seen in the episode has zero mass.
+[[edit]]
+path = "incumbents/random/agent.py"
+old = """[(1 + sum(o[tg["field"]] == x for o in seen)) / (len(tg["support"]) + len(seen))"""
+new = """[sum(o[tg["field"]] == x for o in seen) / len(seen)"""

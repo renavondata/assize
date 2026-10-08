@@ -1,0 +1,6 @@
+# P14's mutant `first_legal_action` (brief 1 section 4): the random incumbent plays the first legal action at every
+# step instead of drawing uniformly from the legal ones.
+[[edit]]
+path = "incumbents/random/agent.py"
+old = """reply(msg["id"], {"action": CHOOSE(p["legal_actions"]), "prediction": floor(targets, seen)})"""
+new = """reply(msg["id"], {"action": p["legal_actions"][0], "prediction": floor(targets, seen)})"""

@@ -1,0 +1,6 @@
+# P14's mutant `seen_not_reset` (brief 1 section 4): the incumbent keeps its observations across episodes, so its
+# floor in the second episode of a container counts the first's.
+[[edit]]
+path = "incumbents/random/agent.py"
+old = """targets, seen = msg["params"]["manifest"]["targets"], []"""
+new = """targets, seen = msg["params"]["manifest"]["targets"], seen"""
