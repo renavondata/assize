@@ -1,0 +1,2 @@
+measure run 37831165785 (label measure on PR #31), head cab0ca00be7a9fd82502c5e941a2e944266ceaa6 (checked out as the PR merge ref, PILOT_ID 20261008T192043Z-e6b31a01cbd7), conclusion success, job 19:20:16Z-19:39:13Z
+artefact measure-host downloaded by the Builder (session e56585b6-fcd7-46ab-b9e5-1deaed3bebfa); files here are copied unchanged, records.jsonl gzipped (sha256 of the uncompressed file in records.jsonl.sha256)
