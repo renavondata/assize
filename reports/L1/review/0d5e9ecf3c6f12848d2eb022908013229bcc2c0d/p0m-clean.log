@@ -1,0 +1,19 @@
+pin:       P0m
+protects:  a commit touching an entrenched path without a guy Proposer is rejected; every party is read
+role:      clean
+tree:      /tmp/assize-review-0d5e9ecf3c6f12848d2eb022908013229bcc2c0d
+invoked:   /tmp/assize-review-0d5e9ecf3c6f12848d2eb022908013229bcc2c0d
+scratch:   /tmp/assize-scratch-nsj6rsp8
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: 6 branch commits read, want 6
+  [ok] builder, ordinary path: parties reported ['builder m s'], findings []; want ['builder m s'], []
+  [ok] no trailer: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s'], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], findings []; want ['guy', 'builder m s'], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], findings []; want ['builder m s', 'guy'], []
+  [ok] malformed party: parties reported ['builder m'], findings ['bad_party']; want ['builder m'], ['bad_party']
+  [ok] real branch: base resolved (8b4309d237875f823e4d330a6c09d8b73eb90cc4)
+    b33c7a4fcb37 parties ['builder claude-opus-5-5 2205780a-3601-405c-9a4e-443bfcdc0840']
+    0d5e9ecf3c6f parties ['builder claude-opus-5-5 2205780a-3601-405c-9a4e-443bfcdc0840']
+  [ok] real branch 8b4309d23787..HEAD: 2 commits; findings []
+result:    PASS

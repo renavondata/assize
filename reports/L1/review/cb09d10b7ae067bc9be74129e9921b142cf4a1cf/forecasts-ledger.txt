@@ -1,0 +1,20 @@
+reports/L0/forecasts.jsonl records 8 without id 2 claims 3 resolved 3 open 0
+reports/L1/forecasts.jsonl records 90 without id 0 claims 54 resolved 36 open 18
+  open 11503575a841 unknown p= 0.85 L1 host verdict for Crafter is FIT
+  open 1246215b63b6 3e7df36a p= 0.75 L1 host verdict for Crafter is FIT
+  open 1608ce8c1b56 e264099a p= 0.6 L1 host verdict for Crafter is FIT
+  open 1a17d995d71e 09b7a870 p= 0.8 L1 host verdict for Crafter is FIT
+  open 3a5f0cbb05b4 44a3d35e p= 0.6 brief 1 Crafter host verdict is FIT
+  open 3a9cd81ca8e6 e68ba67d p= 0.6 L1 host verdict for Crafter is FIT
+  open 4c58b8342e24 4127d142 p= 0.6 L1 host verdict for Crafter is FIT
+  open 74fcea41ee75 44a3d35e p= 0.75 Reviewer verdict on PR #21 (branch constitution-4) after this session is ACCEPT or ACCEPT WITH OBLIG
+  open 797996cf2a45 ffd5aa82 p= 0.6 brief 1 Crafter host verdict is FIT
+  open 7eff9e8b7183 baad25ab p= 0.6 L1 host verdict for Crafter is FIT
+  open 80958ca8df0b 6d75feeb p= 0.6 L1 host verdict for Crafter is FIT
+  open 89eceb51a335 87962b69 p= 0.6 brief 1 Crafter host verdict is FIT
+  open 8e214039842c 44a3d35e p= 0.85 pins is green on the first CI run of the last PR head of branch constitution-4 pushed by this sessio
+  open 9947f990f46d d36c0f48 p= 0.6 brief 1 Crafter host verdict is FIT
+  open c86d08b75084 76372e0f p= 0.6 L1 host verdict for Crafter is FIT
+  open d2c4349bd09f d1c31c5a p= 0.6 L1 host verdict for Crafter is FIT
+  open df6b8390db31 23f06d9c p= 0.6 L1 host verdict for Crafter is FIT
+  open ea9eb9df5c15 53fc33d0 p= 0.7 L1 host verdict for Crafter is FIT

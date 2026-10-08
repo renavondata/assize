@@ -591,6 +591,82 @@ PURITY_MANIFEST = {"world": "fx", "observation": [{"name": "semantic", "vocabula
                    "utility": {"components": []}}
 
 
+def p1_seed_issuance() -> bool:
+    """Evaluation seeds are issued from a CSPRNG into judge-private storage, keyed by the seed the World actually
+    generates from, and never reissued: two requests from two store openings get disjoint evaluation-domain seeds, all
+    recorded; the issuance check refuses a used seed, a training-domain seed, a reused request id and a non-private
+    store, recording nothing; the public training stream is deterministic and entirely training-domain, hence
+    disjoint from every issued seed (brief 1 section 2)."""
+    from judge import seeds
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    key, world, n = binding.world_seed, "crafter", 5
+    work = Path(tempfile.mkdtemp(prefix="assize-p1-", dir=context.scratch))
+    root = work / "judge-private"
+
+    def refused(code: str, ss, rid: str) -> None:
+        before = (root / f"{world}.seeds.jsonl").read_bytes()
+        try:
+            seeds.admit(root, world, key, ss, rid)
+            got = "admitted"
+        except seeds.SeedError as e:
+            got = e.code
+        expect(got == code and (root / f"{world}.seeds.jsonl").read_bytes() == before,
+               f"admit({ss}, {rid!r}) refused {code}, store unchanged (got {got})")
+
+    issued: list[int] = []
+    for rid in ("request-a", "request-b"):  # each from the store as the files left it, no state carried over
+        try:
+            got = seeds.issue(root, world, key, n, rid)
+        except seeds.SeedError as e:
+            got = []
+            print(f"    issue({rid!r}) raised {e}")
+        print(f"    {rid}: {got}")
+        expect(len(got) == n, f"{rid}: {n} seeds issued")
+        issued += got
+    keys = [key(s) for s in issued]
+    expect(len(set(keys)) == len(keys) == 2 * n, f"{len(keys)} issued seeds have {len(set(keys))} distinct World keys")
+    expect(all(k % 2 == seeds.EVAL for k in keys), "every issued seed is keyed in the evaluation domain (odd)")
+    recs = seeds.records(root, world)
+    expect([(r["request_id"], r["seed"], r["key"]) for r in recs]
+           == [(rid, s, key(s)) for rid, ss in (("request-a", issued[:n]), ("request-b", issued[n:])) for s in ss],
+           f"the store records exactly the issued seeds, in order ({len(recs)} records)")
+    mode = (root.stat().st_mode & 0o777, (root / f"{world}.seeds.jsonl").stat().st_mode & 0o777)
+    expect(mode == (0o700, 0o600), f"store directory and file modes {oct(mode[0])}, {oct(mode[1])}")
+
+    refused("reused", [issued[0]], "request-c")
+    refused("reused", [issued[-1]], "request-d")
+    twin = next(s for s in range(SEED_SCAN) if key(s) % 2 == seeds.EVAL and key(s) not in keys)
+    refused("reused", [twin, twin], "request-e")
+    refused("request_reused", [twin], "request-a")
+    train = seeds.training_seeds(world, key, n)
+    refused("training_domain", [train[0]], "request-f")
+    refused("out_of_space", [seeds.SEED_SPACE], "request-g")
+
+    again = seeds.training_seeds(world, key, n)
+    tkeys = [key(s) for s in train]
+    print(f"    training stream: {train}")
+    expect(train == again and len(set(tkeys)) == n, "the training stream is deterministic and its keys distinct")
+    expect(all(k % 2 == seeds.TRAIN for k in tkeys), "every training seed is keyed in the training domain (even)")
+    expect(not set(tkeys) & set(keys), "no training seed's key is an issued seed's key")
+
+    loose = work / "loose"
+    loose.mkdir(mode=0o755)
+    loose.chmod(0o755)
+    try:
+        seeds.issue(loose, world, key, 1, "request-h")
+        got = "issued"
+    except seeds.SeedError as e:
+        got = e.code
+    expect(got == "not_private", f"a store directory of mode 755 refused not_private (got {got})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+SEED_SCAN = 64  # small seeds searched for an unissued evaluation-domain one; each is odd-keyed with probability 1/2
+
+
 def p6_schema_purity() -> bool:
     """No manifest vocabulary token appears in any interface schema file; the schemas are valid JSON Schema carrying
     schema_version, every manifest conforms to the manifest schema, and the step messages they define carry no seed
@@ -1221,7 +1297,6 @@ def p7_infinite_loss() -> bool:
     return ok()
 
 
-
 # P12's derivation of the committed price (brief 1 A4 item 4): an episode exhausting every allowance is charged the
 # smallest effect brief 1's FIT criterion requires the court to detect, half for CPU and half for memory.
 FIT_DELTA = 0.5
@@ -1298,6 +1373,235 @@ def p12_compute_price() -> bool:
     _each_runtime(usable, case, expect)
     return ok()
 
+
+def p5_commitment_order() -> bool:
+    """Under every usable runtime, a candidate commits its prediction before the observation it predicts exists for
+    it: a clairvoyant fixture, which puts all mass on any observation the step request carries beyond the current
+    one and otherwise predicts the floor, records exactly the floor's log-loss over one episode with the same actions,
+    so it gains nothing; the floor's log-loss is finite and positive at every target. A judge that sent the next
+    observation early would let it score zero (brief 1 section 2, P5)."""
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    usable, image = _usable_runtimes(expect)
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        got = {}
+        for behaviour in ("floor", "clairvoyant"):
+            records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)],
+                   f"{rt.name} {behaviour}: one episode of {LOOP_STEPS} steps, ended by the World")
+            got[behaviour] = records[0]["prediction"] if records else {}
+        floor, seer = got["floor"], got["clairvoyant"]
+        expect(len(floor) == len(m["targets"]) and all(
+            v["scored"] == LOOP_STEPS and v["infinite"] == 0 and v["finite_sum"] > 0 for v in floor.values()),
+               f"{rt.name}: non-vacuous: the floor scores every declared target finite and positive at every step")
+        for name, v in floor.items():
+            expect(seer.get(name) == v, f"{rt.name} clairvoyant {name}: log-loss {seer.get(name, {}).get('log_loss')}, "
+                                        f"floor {v['log_loss']}: equal, so nothing gained")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
+
+# P14 plays the random incumbent (brief 1 section 4) for two episodes in one container, each cut to INCUMBENT_STEPS
+# steps: 2 x 100 draws over Crafter's 17 actions expect about 11.8 per action, enough for Pearson's chi-square. Its
+# uniformity is refused only below UNIFORM_ALPHA, the false-failure rate the pin accepts per runtime per run, stated
+# before any run; a candidate's score never passes through it.
+INCUMBENT = ROOT / "incumbents" / "random"
+INCUMBENT_EPISODES = 2
+INCUMBENT_STEPS = 100
+UNIFORM_ALPHA = 1e-6
+
+
+class _Recording:
+    """A World that records each action it is stepped with and each observation it emits, the first included."""
+
+    def __init__(self, world):
+        self.world, self.actions, self.observations = world, [], [world.observation]
+
+    def __getattr__(self, name):
+        return getattr(self.world, name)
+
+    def step(self, action: int) -> dict:
+        self.actions.append(action)
+        self.observations.append(self.world.step(action))
+        return self.observations[-1]
+
+
+def _recorded_crafter(n: int, steps: int) -> list[_Recording]:
+    from worlds.crafter import binding
+
+    def cut(seed: int):
+        ep = binding.Episode(seed)
+        ep._env._length = steps
+        return _Recording(ep)
+
+    return [cut(seed) for seed in range(1, n + 1)]
+
+
+def _floor_summary(observations: list[dict], targets) -> dict:
+    """What the judge must record for the predictive floor over one episode's observations, derived by definition:
+    at step i the floor has seen observations 0..i and puts (1 + count) / (|support| + i + 1) on the value realised at
+    i + 1; scored as -ln of it, summed exactly. Independent of `judge/scoring.py` and of the incumbent's code."""
+
+    def one(tg: dict) -> dict:
+        f, n = tg["field"], len(tg["support"])
+        qs = [(1 + sum(o[f] == nxt[f] for o in observations[:i + 1])) / (n + i + 1)
+              for i, nxt in enumerate(observations[1:])]
+        return {"scored": len(qs), "missing": 0, "infinite": 0, "finite_sum": math.fsum(-math.log(q) for q in qs),
+                "log_loss": math.fsum(-math.log(q) for q in qs)}
+
+    return {tg["name"]: one(tg) for tg in targets}
+
+
+def _chi2_sf(x: float, df: int) -> float:
+    """P(X >= x) for X chi-square with `df` degrees of freedom: the regularised upper gamma Q(df/2, x/2) in its closed
+    forms, a finite sum for integer shape and erfc plus a finite sum for half-integer shape."""
+    h = x / 2
+    if df % 2 == 0:
+        return math.exp(-h) * math.fsum(h ** i / math.factorial(i) for i in range(df // 2))
+    return math.erfc(math.sqrt(h)) + math.exp(-h) * math.fsum(h ** (i + 0.5) / math.gamma(i + 1.5)
+                                                               for i in range((df - 1) // 2))
+
+
+def _build(rt, context_dir: Path) -> str:
+    """Build the image of `context_dir` under `rt` with no network and no pull; return its image id."""
+    with tempfile.TemporaryDirectory() as d:
+        iid = Path(d) / "iid"
+        subprocess.run([rt.binary, "build", "--network=none", "--pull=false", "-q", f"--iidfile={iid}",
+                        "-f", str(context_dir / "Containerfile"), str(context_dir)], check=True, capture_output=True)
+        return iid.read_text().strip()
+
+
+def p14_random_incumbent() -> bool:
+    """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
+    runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
+    pin's, plays two episodes in one container, each ended by the World; every action it plays is uniform over the
+    legal actions (Pearson's chi-square not refused at UNIFORM_ALPHA); and its recorded log-loss at every declared
+    target equals the predictive floor derived by definition from the episode's own observations, per episode, so the
+    floor starts afresh in each, finite and positive."""
+    from judge import episodes, runtime
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    base = runtime.candidate_config()["base_image"]
+    froms = [ln.split()[1] for ln in (INCUMBENT / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
+    expect(froms == [base], f"the incumbent's one FROM is the judge's pinned base image ({froms}, {base})")
+    usable, _ = _usable_runtimes(expect)
+
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        image = _build(rt, INCUMBENT)
+        say(f"  {rt.name} incumbent image: {image}")
+        try:
+            worlds = _recorded_crafter(INCUMBENT_EPISODES, INCUMBENT_STEPS)
+            records = episodes.run(rt, image, worlds, m)
+        finally:
+            subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
+        say(f"  {rt.name} incumbent: {json.dumps(records)}")
+        expect([r["termination"] in episodes.WORLD_ENDINGS for r in records] == [True] * INCUMBENT_EPISODES,
+               f"{rt.name}: {INCUMBENT_EPISODES} episodes, each ended by the World "
+               f"({[(r['termination'], r['steps']) for r in records]})")
+        for r, w in zip(records, worlds):
+            want = _floor_summary(w.observations, m["targets"])
+            expect(len(w.actions) == r["steps"] > 0 and all(v["finite_sum"] > 0 for v in want.values()),
+                   f"{rt.name} episode {r['episode']}: non-vacuous: {r['steps']} steps, the floor positive everywhere")
+            for name, v in want.items():
+                got = r["prediction"].get(name)
+                expect(got == v, f"{rt.name} episode {r['episode']} {name}: recorded {got}, floor derived {v}")
+        k = len(m["actions"])
+        played = [a for w in worlds for a in w.actions]
+        counts = [played.count(a) for a in range(k)]
+        e = len(played) / k
+        chi2 = math.fsum((c - e) ** 2 / e for c in counts)
+        p = _chi2_sf(chi2, k - 1)
+        say(f"  {rt.name} actions: {len(played)} played, counts {counts}; chi-square {chi2:.3f}, df {k - 1}, p {p:.3g}")
+        expect(all(w.legal_actions == list(range(k)) for w in worlds),
+               f"{rt.name}: the legal set is all {k} actions, so uniform means {e:.2f} each")
+        expect(p >= UNIFORM_ALPHA, f"{rt.name}: actions uniform over the legal ones: p {p:.3g} >= {UNIFORM_ALPHA}")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
+
+# P15's fixture: per-episode utilities 0 and 2, half each, so variance 1 (population) and an independent oracle in
+# closed form: with each arm's posterior mean normal, the expected posterior mass on the correct sign at m episodes
+# per arm is Phi(delta / (2 sigma / sqrt(m))), which reaches q at m = 4 sigma^2 Phi^-1(q)^2 / delta^2.
+TTL_UTILITIES = (0,) * 100 + (2,) * 100
+# The pin's criterion: the Bayesian bootstrap's m* within this factor of the normal oracle's. A pin constant, stated
+# before any run; no candidate's score passes through it.
+TTL_FACTOR = 1.5
+BRIEF_PILOT = {"world": "crafter", "episodes": 200, "cap_s": 7200}
+BRIEF_TTL = {"deltas": [0.25, 0.5, 1.0], "mass": 0.9, "fit_delta": 0.5, "marginal_delta": 1.0, "budget_s": 86400}
+
+
+def p15_time_to_learn() -> bool:
+    """Brief 1 section 5's committed pilot size, cap, shifts, mass and FIT/MARGINAL criteria are the brief's; on a
+    fixture whose answer is known in closed form, the Bayesian-bootstrap time-to-learn finds, for every shift, the
+    smallest episodes per arm whose expected posterior mass on the correct sign reaches the mass, within TTL_FACTOR of
+    the normal oracle; the wall-clock counts both arms; and the verdict is FIT, MARGINAL or UNFIT as the budget affords
+    the oracle's episodes for 0.5, only for 1, or for neither."""
+    import statistics
+
+    from pilot import timetolearn as ttl
+
+    expect, ok = _expecter()
+    whole = ttl.config()
+    cfg = whole["time_to_learn"]
+    expect(whole["pilot"] == BRIEF_PILOT, f"pilot config is the brief's default ({whole['pilot']})")
+    expect({k: cfg[k] for k in BRIEF_TTL} == BRIEF_TTL, f"time-to-learn config is the brief's ({cfg})")
+
+    mean = statistics.fmean(TTL_UTILITIES)
+    var = statistics.fmean((u - mean) ** 2 for u in TTL_UTILITIES)
+    z = statistics.NormalDist().inv_cdf(cfg["mass"])
+    oracle = {d: 4 * var * z * z / (d * d) for d in cfg["deltas"]}
+    cap = math.ceil(TTL_FACTOR * 2 * max(oracle.values()))
+    found = {}
+    for d in cfg["deltas"]:
+        got = ttl.episodes_per_arm(TTL_UTILITIES, d, cap, cfg)
+        found[d] = got
+        print(f"  delta {d}: episodes per arm {got}, normal oracle {oracle[d]:.2f}")
+        expect(got is not None and oracle[d] / TTL_FACTOR <= got[0] <= oracle[d] * TTL_FACTOR,
+               f"delta {d}: m* {got and got[0]} within x{TTL_FACTOR} of the oracle {oracle[d]:.2f}")
+        if got is not None:
+            expect(got[1] >= cfg["mass"], f"delta {d}: measure at m* {got[1]:.4f} >= {cfg['mass']}")
+            below = ttl.measure(TTL_UTILITIES, d, got[0] - 1, cfg) if got[0] > 1 else None
+            expect(below is None or below < cfg["mass"], f"delta {d}: m* is the smallest: measure at m*-1 {below}")
+
+    flat = ttl.episodes_per_arm((3,) * 50, cfg["fit_delta"], cap, cfg)
+    expect(flat == (1, 1.0), f"no incumbent variance: one episode per arm, all mass on the correct sign ({flat})")
+
+    # Budgets at the boundaries the search found: exactly m* for 0.5, one short of it, and one short of m* for 1.
+    # Counting one arm would double each and move the last two verdicts up.
+    m_fit, m_marg = (found[cfg[k]] and found[cfg[k]][0] for k in ("fit_delta", "marginal_delta"))
+    expect(m_fit is not None and m_marg is not None and 1 < m_marg < m_fit,
+           f"fixture separates the verdicts: m* {m_marg} for {cfg['marginal_delta']} < m* {m_fit} for {cfg['fit_delta']}")
+    if m_fit is None or m_marg is None:
+        return ok()
+    budget = cfg["budget_s"]
+    affords = {"FIT": m_fit, "MARGINAL": m_fit - 1, "UNFIT": m_marg - 1}
+    for want, k in affords.items():
+        throughput = (2 * k + 0.5) / budget  # a quarter-episode spare per arm, so rounding never costs one
+        rows = ttl.table(TTL_UTILITIES, throughput, cfg)
+        got = ttl.verdict(rows, cfg)
+        print(f"  {k} episodes per arm affordable: {[(r.delta, r.episodes_per_arm, r.wall_s) for r in rows]}")
+        expect(ttl.affordable(throughput, cfg) == k, f"{want}: the budget affords {k} episodes per arm, both arms run")
+        expect(all(r.wall_s == 2 * r.episodes_per_arm / throughput for r in rows if r.episodes_per_arm is not None),
+               f"{want}: wall-clock counts both arms")
+        expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
+    return ok()
+
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
         p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
@@ -1333,6 +1637,11 @@ PINS = [
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
                                 Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
                                 Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")))),
+    Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+        p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
+                           Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
+                           Mutant("domain_check_skipped", _edits("P1_domain_check_skipped")),
+                           Mutant("training_undomained", _edits("P1_training_undomained")))),
     Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
         p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
@@ -1345,6 +1654,17 @@ PINS = [
                               Mutant("client_rusage", _edits("P4_client_rusage")),
                               Mutant("not_differenced", _edits("P4_not_differenced")),
                               Mutant("peak_from_current", _edits("P4_peak_from_current")))),
+    Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
+        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),)),
+    Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",
+        p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
+                               Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
+                               Mutant("seen_not_reset", _edits("P14_seen_not_reset")))),
+    Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
+        p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
+                            Mutant("shift_dropped", _edits("P15_shift_dropped")),
+                            Mutant("one_arm", _edits("P15_one_arm")),
+                            Mutant("budget_one_arm", _edits("P15_budget_one_arm")))),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),

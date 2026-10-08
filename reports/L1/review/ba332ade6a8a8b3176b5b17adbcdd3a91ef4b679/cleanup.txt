@@ -1,0 +1,17 @@
+# cleanup, 2026-10-07T15:09:31Z
+$ git worktree remove --force ~/git/worktrees/assize/review-21-ba332ad && git worktree prune
+ok
+$ ls -d ~/git/worktrees/assize/review-21-ba332ad
+ls: cannot access '/home/g/git/worktrees/assize/review-21-ba332ad': No such file or directory
+$ git worktree list
+/home/g/git/assize                          c8fdf97 [master]
+/home/g/git/assize-review                   c8fdf97 (detached HEAD)
+/home/g/git/worktrees/assize/l1-a4-1-ledger 2817eb7 [l1-a4-1-ledger]
+$ pgrep -af '[p]ython -m harness run'
+count=0
+$ podman ps -a --filter name=assize --format ...
+count=0
+$ ls -d /tmp/assize-scratch-*
+drwx------ 5 g g 100 Oct  7 15:27 /tmp/assize-scratch-1nr09mas
+drwx------ 3 g g  60 Oct  7 10:18 /tmp/assize-scratch-2px40nxn
+drwx------ 4 g g  80 Oct  7 11:08 /tmp/assize-scratch-_9b1sc88

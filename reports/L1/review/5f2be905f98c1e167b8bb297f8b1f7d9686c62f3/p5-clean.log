@@ -1,0 +1,23 @@
+pin:       P5
+protects:  a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early
+role:      clean
+tree:      /home/g/git/worktrees/assize/review-25-5f2be90
+invoked:   /home/g/git/worktrees/assize/review-25-5f2be90
+scratch:   /tmp/assize-scratch-a9c6xwmz
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman floor: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "food": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "wood": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "stone": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}}, "compute": {"cpu_s": 0.048379, "wall_s": 0.48439682903699577, "peak_memory_bytes": 8798208, "unmeasured_s": 0.0}}]
+  [ok] podman floor: one episode of 5 steps, ended by the World
+  podman clairvoyant: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "food": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "wood": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "stone": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}}, "compute": {"cpu_s": 0.047868, "wall_s": 0.26974769099615514, "peak_memory_bytes": 9248768, "unmeasured_s": 0.0}}]
+  [ok] podman clairvoyant: one episode of 5 steps, ended by the World
+  [ok] podman: non-vacuous: the floor scores every declared target finite and positive at every step
+  [ok] podman clairvoyant health: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant food: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant drink: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant energy: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant wood: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant stone: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+result:    PASS

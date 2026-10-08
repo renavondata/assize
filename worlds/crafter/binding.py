@@ -53,6 +53,29 @@ def make_env(seed: int) -> crafter.Env:
     return env
 
 
+class _Generated(Exception):
+    pass
+
+
+def world_seed(seed: int) -> int:
+    """The seed from which the World of `seed` actually generates: what its first reset passes to
+    `crafter.engine.World.reset`, captured there, before any generation. Crafter reduces `hash((seed, 1))` modulo
+    2**31 - 1, so distinct seeds can name one World; the judge keys seed issuance on this (brief 1 section 2)."""
+    env = make_env(seed)
+    got: list[int] = []
+
+    def capture(seed=None):
+        got.append(seed)
+        raise _Generated
+
+    env._world.reset = capture
+    try:
+        env.reset()
+    except _Generated:
+        pass
+    return got[0]
+
+
 def chunk_departures(env: crafter.Env) -> list[str]:
     """Where the chunk containers differ from the package's own object list: each must hold exactly the live
     objects whose position falls in that chunk, so that every world-generated creature takes part in balancing."""

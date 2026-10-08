@@ -1,0 +1,33 @@
+2026-10-08T06:36:22Z
+$ git worktree remove ~/git/worktrees/assize/review-25-5f2be90 && git worktree prune
+rc 0
+$ rm -rf /tmp/review25-probe-A6ms /tmp/review25-pins-out
+rc 0
+$ git worktree list
+/home/g/actions-runner/_work/assize/assize 5f2be90 [l1-p5-commitment-order]
+$ ls -d /tmp/review25-* ~/git/worktrees/assize/review-25-*
+ls: cannot access '/tmp/review25-*': No such file or directory
+ls: cannot access '/home/g/git/worktrees/assize/review-25-*': No such file or directory
+$ pgrep -af "harness (run|check)|review25"
+none
+$ podman ps -a
+CONTAINER ID  IMAGE                                         COMMAND               CREATED         STATUS                   PORTS                                                     NAMES
+57c59d92dba7  ghcr.io/matrix-construct/tuwunel:latest                             6 weeks ago     Up 8 days                8008/tcp, 8448/tcp                                        tuwunel
+ec27a02df108  ghcr.io/cinnyapp/cinny:latest                 nginx -g daemon o...  6 weeks ago     Up 8 days                0.0.0.0:6168->80/tcp                                      cinny
+efc91f992834  dock.mau.dev/mautrix/whatsapp:latest          /docker-run.sh        6 weeks ago     Up 8 days                                                                          mautrix-whatsapp
+df76d2cb4f13  localhost/matrix-local-archiver:latest        python -u /app/ma...  6 weeks ago     Up 8 days                                                                          matrix-archiver
+43bd7e301b3a  dock.mau.dev/mautrix/telegram:latest          /docker-run.sh        6 weeks ago     Up 8 days                                                                          mautrix-telegram
+29b8ec30afde  dock.mau.dev/mautrix/discord:latest           /docker-run.sh        6 weeks ago     Up 8 days                                                                          mautrix-discord
+e6fa137f3059  dock.mau.dev/mautrix/meta:latest              /docker-run.sh        6 weeks ago     Up 8 days                                                                          mautrix-instagram2
+847be2bce487  dock.mau.dev/mautrix/signal:latest            /docker-run.sh        6 weeks ago     Up 8 days                                                                          mautrix-signal
+05381121a18c  docker.io/library/postgres:17-alpine          postgres              9 days ago      Up 9 days (healthy)      127.0.0.1:5417->5432/tcp                                  renavon-test-pg17
+edaa1f71b30e  docker.io/library/postgres:14                 postgres              9 days ago      Up 9 days (healthy)      5432/tcp                                                  invidious_invidious-db_1
+8d1a4ebbbcc4                                                                      6 days ago      Up 6 days                0.0.0.0:5151->3000/tcp, 0.0.0.0:5152->8080/tcp            pod_invidious-infra
+d86b8163d5d2  docker.io/tailscale/tailscale:latest          /usr/local/bin/co...  6 days ago      Up 6 days (healthy)      0.0.0.0:5151->3000/tcp, 0.0.0.0:5152->8080/tcp            invidious_ts-mullvad_1
+6cb8ce59b9d3  quay.io/invidious/invidious-companion:latest                        3 days ago      Up 3 days                0.0.0.0:5151->3000/tcp, 0.0.0.0:5152->8080/tcp, 8282/tcp  invidious_companion_1
+876e50b4cf1a  localhost/redlib:source                       redlib                3 days ago      Up 3 days                0.0.0.0:5151->3000/tcp, 0.0.0.0:5152->8080/tcp            invidious_redlib_1
+e787c156bf8b  quay.io/invidious/invidious:latest            /invidious/invidi...  35 minutes ago  Up 35 minutes (healthy)  0.0.0.0:5151->3000/tcp, 0.0.0.0:5152->8080/tcp            invidious_invidious_1
+$ docker ps -a
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+CONTAINER ID  IMAGE                                         COMMAND               CREATED         STATUS                   PORTS                                                     NAMES
+57c59d92dba7  ghcr.io/matrix-construct/tuwunel:latest                             6 weeks ago     Up 8 days                8008/tcp, 8448/tcp                                        tuwunel

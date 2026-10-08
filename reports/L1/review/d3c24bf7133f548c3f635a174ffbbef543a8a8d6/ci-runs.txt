@@ -1,0 +1,5 @@
+# pins runs via Actions API, 2026-10-08T07:35:00Z
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=0f698c4d62bd7863f85a7c7a0e0c8b5a465f1c82&event=pull_request" -q '.workflow_runs[] | select(.name=="pins") | ...'
+completed success 37740632126 attempt 1 2026-10-08T06:58:36Z–2026-10-08T07:15:58Z https://github.com/renavondata/assize/actions/runs/37740632126
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=d3c24bf7133f548c3f635a174ffbbef543a8a8d6&event=pull_request" -q '.workflow_runs[] | select(.name=="pins") | ...'
+completed success 37742491561 attempt 1 2026-10-08T07:17:11Z–2026-10-08T07:34:32Z https://github.com/renavondata/assize/actions/runs/37742491561

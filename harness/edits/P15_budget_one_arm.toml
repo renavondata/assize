@@ -1,0 +1,5 @@
+# P15's mutant `budget_one_arm` (brief 1 section 5): the budget is spent as if only the candidate arm were run.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """math.floor(cfg["budget_s"] * throughput / 2)"""
+new = """math.floor(cfg["budget_s"] * throughput)"""

@@ -1,0 +1,21 @@
+"""Reviewer probe (PR #27): reading of 'episodes per arm for 90% posterior mass on the correct sign'.
+Compares, on P15's fixture (100 zeros, 100 twos; sigma^2 = 1), the expected-mass reading (the PR's) with the
+assurance reading (probability over experiments that the posterior mass reaches 0.9), by the normal closed forms
+and by the PR's own Bayesian-bootstrap machinery."""
+import sys, math, statistics
+sys.path.insert(0, sys.argv[1])
+import numpy as np
+from pilot import timetolearn as t
+cfg = t.config()["time_to_learn"]
+U = (0,) * 100 + (2,) * 100
+z = statistics.NormalDist().inv_cdf(0.9)
+N = statistics.NormalDist()
+for d in cfg["deltas"]:
+    m_exp = 4 * z * z / d**2
+    m_ass = 2 * (2 * z) ** 2 / d**2
+    got = t.episodes_per_arm(U, d, 10**4, cfg)
+    m = got[0]
+    s = math.sqrt(2 / m)
+    assurance_at_mstar = 1 - N.cdf(z - d / s)
+    print(f"delta {d}: expected-mass m* normal {m_exp:.1f}, PR bootstrap {got}; assurance-reading m* normal {m_ass:.1f}; "
+          f"P(posterior mass >= 0.9) at PR m* = {assurance_at_mstar:.3f}; posterior mass at the median experiment = {N.cdf(d/s):.3f}")
