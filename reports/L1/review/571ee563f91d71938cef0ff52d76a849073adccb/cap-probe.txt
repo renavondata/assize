@@ -1,0 +1,18 @@
+# cap probe on a scratch export of pilot/ at 571ee56 (/tmp/assize-review-probe), run with the head's .venv python -I -B
+## probe.py
+import sys; sys.path.insert(0, sys.argv[1])
+from pilot import run
+cfg = {"pilot": {"world": "crafter", "episodes": 20, "cap_s": 100.0}, "requests": {"episodes": 10},
+       "time_to_learn": {"deltas": [0.5], "mass": 0.9, "fit_delta": 0.5, "marginal_delta": 1.0, "budget_s": 86400,
+                         "experiments": 50, "posterior_draws": 50, "seed": 0}}
+t = [0.0]
+def clock():
+    return t[0]
+def ask(rid, n):
+    t[0] += 90.0  # each request takes 90 s: the cap (100 s) passes during the second, final request
+    return [{"utility": i % 3, "termination": "terminal"} for i in range(n)]
+p = run.play(ask, "probe", cfg, clock=clock)
+print("cap_s", cfg["pilot"]["cap_s"], "wall_s", p.wall_s, "records", len(p.records), "stopped", p.stopped)
+## output
+cap_s 100.0 wall_s 180.0 records 20 stopped None
+## reading: the cap (100 s) passed during the final request; play() returned all 20 records, wall_s 180 > cap_s, stopped None, so report() would state a verdict
