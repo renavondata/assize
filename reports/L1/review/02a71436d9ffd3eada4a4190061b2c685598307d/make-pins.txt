@@ -1,0 +1,190 @@
+make pins on scratch worktree /tmp/assize-rev29-wt (detached 02a7143), host thinkpad, start 2026-10-08T16:53:59Z
+uv run --frozen python -m harness run --registry harness --phase all --out /tmp/assize-rev29-out/pins
+Using CPython 3.11.17
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 46ms
+registry harness: 28 pins, 68 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (4.027s) ../assize-rev29-out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.466s) ../assize-rev29-out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.419s) ../assize-rev29-out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (5.686s) ../assize-rev29-out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (2.171s) ../assize-rev29-out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.82s) ../assize-rev29-out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (2.323s) ../assize-rev29-out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (13.111s) ../assize-rev29-out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.53s) ../assize-rev29-out/pins/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.881s) ../assize-rev29-out/pins/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.422s) ../assize-rev29-out/pins/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.422s) ../assize-rev29-out/pins/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.574s) ../assize-rev29-out/pins/runs/P0m/clean/transcript.log
+[clean ] P1: observed pass -> ok (3.023s) ../assize-rev29-out/pins/runs/P1/clean/transcript.log
+[clean ] P2: observed pass -> ok (1.377s) ../assize-rev29-out/pins/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (29.141s) ../assize-rev29-out/pins/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (8.388s) ../assize-rev29-out/pins/runs/P4/clean/transcript.log
+[clean ] P5: observed pass -> ok (5.179s) ../assize-rev29-out/pins/runs/P5/clean/transcript.log
+[clean ] P14: observed pass -> ok (6.38s) ../assize-rev29-out/pins/runs/P14/clean/transcript.log
+[clean ] P15: observed pass -> ok (14.095s) ../assize-rev29-out/pins/runs/P15/clean/transcript.log
+[clean ] P7: observed pass -> ok (12.455s) ../assize-rev29-out/pins/runs/P7/clean/transcript.log
+[clean ] P13: observed pass -> ok (3.224s) ../assize-rev29-out/pins/runs/P13/clean/transcript.log
+[clean ] P9: observed pass -> ok (1.621s) ../assize-rev29-out/pins/runs/P9/clean/transcript.log
+[clean ] P16: observed pass -> ok (2.075s) ../assize-rev29-out/pins/runs/P16/clean/transcript.log
+[clean ] P12: observed pass -> ok (6.691s) ../assize-rev29-out/pins/runs/P12/clean/transcript.log
+[clean ] P10: observed pass -> ok (9.455s) ../assize-rev29-out/pins/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.624s) ../assize-rev29-out/pins/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (15.298s) ../assize-rev29-out/pins/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (4.038s + 4.041s) ../assize-rev29-out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.437s + 0.43s) ../assize-rev29-out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.429s + 1.48s) ../assize-rev29-out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.765s + 5.693s) ../assize-rev29-out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (8.345s + 2.183s) ../assize-rev29-out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.843s + 1.832s) ../assize-rev29-out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.985s + 2.331s) ../assize-rev29-out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (15.225s + 13.121s) ../assize-rev29-out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (13.126s + 13.245s) ../assize-rev29-out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (13.183s + 13.184s) ../assize-rev29-out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (11.022s + 13.174s) ../assize-rev29-out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.824s + 13.23s) ../assize-rev29-out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.547s + 0.552s) ../assize-rev29-out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.483s + 0.546s) ../assize-rev29-out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.804s + 0.795s) ../assize-rev29-out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.428s + 0.439s) ../assize-rev29-out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.429s + 0.428s) ../assize-rev29-out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.527s + 0.528s) ../assize-rev29-out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+[mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.526s + 0.526s) ../assize-rev29-out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+[mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.526s + 0.535s) ../assize-rev29-out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+[mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.526s + 0.527s) ../assize-rev29-out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+[mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.528s + 0.53s) ../assize-rev29-out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+[mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (2.532s + 2.782s) ../assize-rev29-out/pins/runs/P1/seed_reissued/mutant/transcript.log
+[mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.684s + 2.885s) ../assize-rev29-out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+[mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (2.785s + 2.683s) ../assize-rev29-out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+[mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (2.682s + 2.835s) ../assize-rev29-out/pins/runs/P1/training_undomained/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (3.396s + 1.595s) ../assize-rev29-out/pins/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.361s + 1.407s) ../assize-rev29-out/pins/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.485s + 1.486s) ../assize-rev29-out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.443s + 1.489s) ../assize-rev29-out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (30.415s + 29.202s) ../assize-rev29-out/pins/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (8.347s + 8.299s) ../assize-rev29-out/pins/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (8.769s + 8.297s) ../assize-rev29-out/pins/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (8.345s + 8.359s) ../assize-rev29-out/pins/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (8.465s + 8.399s) ../assize-rev29-out/pins/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (6.196s + 5.373s) ../assize-rev29-out/pins/runs/P5/next_sent_early/mutant/transcript.log
+[mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (6.91s + 6.461s) ../assize-rev29-out/pins/runs/P14/first_legal_action/mutant/transcript.log
+[mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (6.555s + 6.342s) ../assize-rev29-out/pins/runs/P14/floor_unsmoothed/mutant/transcript.log
+[mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (6.392s + 6.389s) ../assize-rev29-out/pins/runs/P14/seen_not_reset/mutant/transcript.log
+[mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (1.379s + 14.007s) ../assize-rev29-out/pins/runs/P15/abs_difference/mutant/transcript.log
+[mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (6.289s + 14.408s) ../assize-rev29-out/pins/runs/P15/shift_dropped/mutant/transcript.log
+[mutant] P15/one_arm: mutant fail, twin pass -> KILLED (4.736s + 14.255s) ../assize-rev29-out/pins/runs/P15/one_arm/mutant/transcript.log
+[mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (15.759s + 14.262s) ../assize-rev29-out/pins/runs/P15/budget_one_arm/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (12.979s + 13.556s) ../assize-rev29-out/pins/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (12.812s + 12.407s) ../assize-rev29-out/pins/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (12.663s + 13.004s) ../assize-rev29-out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (3.539s + 3.339s) ../assize-rev29-out/pins/runs/P13/infinite_dropped/mutant/transcript.log
+[mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (3.337s + 3.334s) ../assize-rev29-out/pins/runs/P13/realised_row_only/mutant/transcript.log
+[mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (3.283s + 3.384s) ../assize-rev29-out/pins/runs/P13/entropy_missing_imputed/mutant/transcript.log
+[mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (1.633s + 1.63s) ../assize-rev29-out/pins/runs/P9/record_dropped/mutant/transcript.log
+[mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (1.633s + 1.682s) ../assize-rev29-out/pins/runs/P9/utility_altered/mutant/transcript.log
+[mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (1.734s + 1.63s) ../assize-rev29-out/pins/runs/P9/chain_update_skipped/mutant/transcript.log
+[mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.427s + 1.633s) ../assize-rev29-out/pins/runs/P9/opened_for_rewrite/mutant/transcript.log
+[mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (1.63s + 1.635s) ../assize-rev29-out/pins/runs/P9/genesis_empty/mutant/transcript.log
+[mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (1.632s + 1.633s) ../assize-rev29-out/pins/runs/P9/signature_unchecked/mutant/transcript.log
+[mutant] P16/unattributed_admitted: mutant fail, twin pass -> KILLED (1.882s + 1.881s) ../assize-rev29-out/pins/runs/P16/unattributed_admitted/mutant/transcript.log
+[mutant] P16/any_credential: mutant fail, twin pass -> KILLED (1.88s + 1.881s) ../assize-rev29-out/pins/runs/P16/any_credential/mutant/transcript.log
+[mutant] P16/registration_taken_over: mutant fail, twin pass -> KILLED (1.893s + 1.883s) ../assize-rev29-out/pins/runs/P16/registration_taken_over/mutant/transcript.log
+[mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (6.839s + 6.643s) ../assize-rev29-out/pins/runs/P12/peak_differenced/mutant/transcript.log
+[mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (6.503s + 6.541s) ../assize-rev29-out/pins/runs/P12/unmeasured_free/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (19.394s + 9.561s) ../assize-rev29-out/pins/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.631s + 0.636s) ../assize-rev29-out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (15.409s + 16.762s) ../assize-rev29-out/pins/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (17.012s + 16.462s) ../assize-rev29-out/pins/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (17.046s + 16.315s) ../assize-rev29-out/pins/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (15.159s + 16.309s) ../assize-rev29-out/pins/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (5.602s + 16.913s) ../assize-rev29-out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (16.368s + 16.482s) ../assize-rev29-out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 28/28 passed, 0/28 failed
+mutants: 68/68 killed, 0/68 survived, 0/68 inconclusive, 0/68 stale, 0/68 non-causal, 0 leaked (clean and mutant)
+twins: 68/68 passed
+report: ../assize-rev29-out/pins/pins.jsonl
+PINS PASSED
+exit 0
+2026-10-08T17:10:43Z
+
+=== P16 clean transcript
+pin:       P16
+protects:  a candidate's proposer comes from the judge-issued credential that registered it, or it is refused
+role:      clean
+tree:      /tmp/assize-rev29-wt
+invoked:   /tmp/assize-rev29-wt
+scratch:   /tmp/assize-scratch-vnx3ugqs
+  [ok] builder: credential issued (exit 0) 
+  [ok] reviewer: credential issued (exit 0) 
+  [ok] the judge keeps no token, only hashes
+  [ok] private storage and credentials modes ['0o700', '0o600']
+    register sha256:aaaaaaaa: exit 0: {'credential': 'f751b44be4c33e155dd89a652e451e6a869db0a58be8d539b602dfb4905472a9', 'image': 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'proposer': {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'}}
+  [ok] sha256:aaaaaaaa registered to the credential's holder builder
+  [ok] sha256:aaaaaaaa: proposer_of is builder
+    register sha256:bbbbbbbb: exit 0: {'credential': '1a8adbea8354237d7222b084c6d9831634c0a37d71f4fb62aa7aa0f130e00cc6', 'image': 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'proposer': {'kind': 'reviewer', 'model': 'claude-opus-5-5', 'session': 'p16-reviewer-session'}}
+  [ok] sha256:bbbbbbbb registered to the credential's holder reviewer
+  [ok] sha256:bbbbbbbb: proposer_of is reviewer
+  [ok] the registrations are exactly the two, in order (2 rows)
+    register sha256:aaaaaaaa: exit 0: {'credential': 'f751b44be4c33e155dd89a652e451e6a869db0a58be8d539b602dfb4905472a9', 'image': 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'proposer': {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'}}
+  [ok] sha256:aaaaaaaa registered to the credential's holder builder
+  [ok] sha256:aaaaaaaa: proposer_of is builder
+  [ok] the same party registering again records nothing new
+    no token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] no token: refused unattributed, registrations unchanged
+    forged token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] forged token: refused unattributed, registrations unchanged
+    self-named proposer: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] self-named proposer: refused unattributed, registrations unchanged
+    stored hash of a real token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] stored hash of a real token: refused unattributed, registrations unchanged
+    another party's credential on a registered image: exit 1: refused: registered: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa is registered to {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'}, not {'kind': 'reviewer', 'model': 'claude-opus-5-5', 'session': 'p16-reviewer-session'}
+  [ok] another party's credential on a registered image: refused registered, registrations unchanged
+    not a digest: exit 1: refused: bad_image: 'candidate:latest' is not an image digest sha256:<64 hex>
+  [ok] not a digest: refused bad_image, registrations unchanged
+  [ok] image a's proposer is still the builder
+  [ok] an image never registered has no proposer (unregistered)
+  [ok] a credential for a kind outside A1.7 is refused (exit 1)
+result:    PASS
+=== P16/unattributed_admitted mutant
+    self-named proposer: exit 0: {"credential": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "image": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "proposer": null}
+  [FAIL] self-named proposer: refused unattributed, registrations unchanged
+    stored hash of a real token: exit 0: {"credential": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "image": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "proposer": null}
+  [FAIL] stored hash of a real token: refused unattributed, registrations unchanged
+    another party's credential on a registered image: exit 1: refused: registered: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa is registered to {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'}, not {'kind': 'reviewer', 'model': 'claude-opus-5-5', 'session': 'p16-reviewer-session'}
+  [ok] another party's credential on a registered image: refused registered, registrations unchanged
+    not a digest: exit 1: refused: bad_image: 'candidate:latest' is not an image digest sha256:<64 hex>
+  [ok] not a digest: refused bad_image, registrations unchanged
+  [ok] image a's proposer is still the builder
+  [FAIL] an image never registered has no proposer (None)
+  [ok] a credential for a kind outside A1.7 is refused (exit 1)
+result:    FAIL
+=== P16/any_credential mutant
+    self-named proposer: exit 0: {"credential": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "image": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "proposer": {"kind": "builder", "model": "claude-opus-5-5", "session": "p16-builder-session"}}
+  [FAIL] self-named proposer: refused unattributed, registrations unchanged
+    stored hash of a real token: exit 0: {"credential": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "image": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "proposer": {"kind": "builder", "model": "claude-opus-5-5", "session": "p16-builder-session"}}
+  [FAIL] stored hash of a real token: refused unattributed, registrations unchanged
+    another party's credential on a registered image: exit 0: {"credential": "803e2796a0ca682e73bac4640b8b21337e3e1067e2c1475f16b2c32ede35b5a7", "image": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "proposer": {"kind": "builder", "model": "claude-opus-5-5", "session": "p16-builder-session"}}
+  [FAIL] another party's credential on a registered image: refused registered, registrations unchanged
+    not a digest: exit 1: refused: bad_image: 'candidate:latest' is not an image digest sha256:<64 hex>
+  [ok] not a digest: refused bad_image, registrations unchanged
+  [ok] image a's proposer is still the builder
+  [FAIL] an image never registered has no proposer ({'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'p16-builder-session'})
+  [ok] a credential for a kind outside A1.7 is refused (exit 1)
+result:    FAIL
+=== P16/registration_taken_over mutant
+    self-named proposer: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] self-named proposer: refused unattributed, registrations unchanged
+    stored hash of a real token: exit 1: refused: unattributed: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc: no credential the judge issued matches; a candidate with no attributable proposer is refused
+  [ok] stored hash of a real token: refused unattributed, registrations unchanged
+    another party's credential on a registered image: exit 0: {"credential": "888d3aafe5eaec6e1706221155c6b123ced1e4b1c5f276ebe87b789df5c6fc39", "image": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "proposer": {"kind": "reviewer", "model": "claude-opus-5-5", "session": "p16-reviewer-session"}}
+  [FAIL] another party's credential on a registered image: refused registered, registrations unchanged
+    not a digest: exit 1: refused: bad_image: 'candidate:latest' is not an image digest sha256:<64 hex>
+  [ok] not a digest: refused bad_image, registrations unchanged
+  [FAIL] image a's proposer is still the builder
+  [ok] an image never registered has no proposer (unregistered)
+  [ok] a credential for a kind outside A1.7 is refused (exit 1)
+result:    FAIL

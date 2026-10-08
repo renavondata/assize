@@ -1,0 +1,56 @@
+# probe of judge/registry.py at 02a7143; script below, run with uv run --frozen python -B against the scratch worktree
+"""Reviewer probes of judge/registry.py at 02a7143 (PR #29); run against a scratch copy."""
+import json, os, sys, tempfile, threading, subprocess
+from pathlib import Path
+root = Path(sys.argv[1]); sys.path.insert(0, str(root))
+from judge import registry as R
+t = Path(tempfile.mkdtemp(prefix="assize-p29-")); p = t / "private"
+B = {"kind": "builder", "model": "m", "session": "s1"}; V = {"kind": "reviewer", "model": "m", "session": "s2"}
+tb, tv = R.credential(p, B), R.credential(p, V)
+def tryit(label, f):
+    try: print(f"{label}: ok {f()}")
+    except R.Refused as e: print(f"{label}: refused {e.code}")
+img = "sha256:" + "d" * 64
+# 1 race: two parties register the same image concurrently, 20 trials on fresh images
+wins = []
+for i in range(20):
+    im = "sha256:" + f"{i:064x}"
+    out = {}
+    def go(k, tok): 
+        try: out[k] = R.register(p, im, tok)["proposer"]["kind"]
+        except R.Refused as e: out[k] = e.code
+    th = [threading.Thread(target=go, args=(k, tok)) for k, tok in (("b", tb), ("v", tv))]
+    [x.start() for x in th]; [x.join() for x in th]
+    wins.append(tuple(sorted(out.values())))
+print("race outcomes (20 trials):", sorted(set(wins)), "proposer_of rows unique:",
+      all(len([r for r in R._lines(p / R.REGISTRATIONS) if r["image"] == "sha256:" + f"{i:064x}"]) == 1 for i in range(20)))
+# 2 token variants
+tryit("token with surrounding whitespace via CLI strip", lambda: subprocess.run([sys.executable, "-B", "-m", "judge", "register", str(p), img],
+      cwd=root, input=f"  {tb}\n", capture_output=True, text=True).returncode)
+tryit("uppercased token", lambda: R.register(p, "sha256:" + "e" * 64, tb.upper()))
+tryit("token prefix (63 hex)", lambda: R.register(p, "sha256:" + "e" * 64, tb[:-1]))
+tryit("uppercase digest", lambda: R.register(p, "sha256:" + "E" * 64, tb))
+tryit("non-str token", lambda: R.register(p, "sha256:" + "e" * 64, None))
+# 3 proposer validation
+tryit("guy with empty model/session", lambda: bool(R.credential(p, {"kind": "guy", "model": "", "session": ""})))
+tryit("builder missing session", lambda: bool(R.credential(p, {"kind": "builder", "model": "m", "session": ""})))
+tryit("extra key", lambda: bool(R.credential(p, B | {"x": 1})))
+# 4 privacy: storage made group-readable
+os.chmod(p, 0o750); tryit("register with private dir 0750", lambda: R.register(p, "sha256:" + "f" * 64, tb)); os.chmod(p, 0o700)
+os.chmod(p / R.CREDENTIALS, 0o644); tryit("register with credentials.jsonl 0644 (dir 0700)", lambda: R.register(p, "sha256:" + "f" * 64, tb)["proposer"]["kind"])
+print("files:", sorted((f.name, oct(f.stat().st_mode & 0o777)) for f in p.iterdir()))
+import shutil; shutil.rmtree(t); print("removed", t, not t.exists())
+# --- output
+race outcomes (20 trials): [('builder', 'registered'), ('registered', 'reviewer')] proposer_of rows unique: True
+token with surrounding whitespace via CLI strip: ok 0
+uppercased token: refused unattributed
+token prefix (63 hex): refused unattributed
+uppercase digest: refused bad_image
+non-str token: refused unattributed
+guy with empty model/session: ok True
+builder missing session: refused bad_proposer
+extra key: refused bad_proposer
+register with private dir 0750: refused not_private
+register with credentials.jsonl 0644 (dir 0700): ok builder
+files: [('credentials.jsonl', '0o644'), ('registrations.jsonl', '0o600')]
+removed /tmp/assize-p29-fg_dyxtt True
