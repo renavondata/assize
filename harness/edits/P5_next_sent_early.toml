@@ -1,0 +1,6 @@
+# P5's mutant `next_sent_early` (brief 1 section 2): the judge sends, with each step request, the observation the
+# World would emit next under every legal action, from a copy of the World, before the candidate commits its prediction.
+[[edit]]
+path = "judge/episodes.py"
+old = """            result = c.call("step", {"t": world.t, "observation": world.observation, "legal_actions": legal},"""
+new = """            result = c.call("step", {"t": world.t, "observation": world.observation, "legal_actions": legal, "next": {str(a): __import__("copy").deepcopy(world).step(a) for a in legal}},"""
