@@ -1545,6 +1545,91 @@ def p9_ledger_tamper() -> bool:
     return ok()
 
 
+# P16's parties (brief 1 A4 item 2; CLAUDE.md A1.7) and images: digests the judge never pulls, since registration reads
+# nothing of an image but its digest.
+P16_BUILDER = {"kind": "builder", "model": "claude-opus-5-5", "session": "p16-builder-session"}
+P16_REVIEWER = {"kind": "reviewer", "model": "claude-opus-5-5", "session": "p16-reviewer-session"}
+P16_IMAGES = tuple(f"sha256:{c * 64}" for c in "abc")
+
+
+def _judge_cli(private: Path, *args: str, stdin: str = "") -> tuple[int, str, str]:
+    """A judge subcommand, run as the judge runs it, in a child interpreter."""
+    r = subprocess.run(proc.python("-m", "judge", args[0], str(private), *args[1:]), cwd=ROOT, env=proc.child_env(),
+                       input=stdin, capture_output=True, text=True, timeout=120)
+    return r.returncode, r.stdout.strip(), r.stderr.strip()
+
+
+def p16_proposer_from_credential() -> bool:
+    """A candidate's proposer is the party whose judge-issued credential registered its image (brief 1 A4 item 2).
+    Two credentials register two images, each attributed exactly to its holder, and the judge keeps no token; the same
+    party registering again changes nothing; a candidate with no attributable proposer is refused, recording nothing:
+    no token, a forged token, a proposer the candidate names itself, or the stored hash of a real token; another
+    party's credential cannot take over a registered image; and an unregistered image has no proposer."""
+    import hashlib
+
+    from judge import registry
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p16-", dir=context.scratch))
+    try:
+        private = work / "private"
+        regs = private / registry.REGISTRATIONS
+        tokens = {}
+        for party in (P16_BUILDER, P16_REVIEWER):
+            code, out, err = _judge_cli(private, "credential", party["kind"], party["model"], party["session"])
+            expect(code == 0 and len(out) == 64, f"{party['kind']}: credential issued (exit {code}) {err}")
+            tokens[party["kind"]] = out
+        stored = (private / registry.CREDENTIALS).read_text() if (private / registry.CREDENTIALS).exists() else ""
+        expect(bool(stored) and not any(t in stored for t in tokens.values()), "the judge keeps no token, only hashes")
+        mode = (private.stat().st_mode & 0o777, (private / registry.CREDENTIALS).stat().st_mode & 0o777
+                if stored else None)
+        expect(mode == (0o700, 0o600), f"private storage and credentials modes {[m and oct(m) for m in mode]}")
+
+        def registered(image: str, token: str, party: dict) -> None:
+            code, out, err = _judge_cli(private, "register", image, stdin=token)
+            got = json.loads(out) if code == 0 else err
+            print(f"    register {image[:15]}: exit {code}: {got}")
+            expect(code == 0 and got.get("proposer") == party and got.get("image") == image,
+                   f"{image[:15]} registered to the credential's holder {party['kind']}")
+            expect(registry.proposer_of(private, image) == party, f"{image[:15]}: proposer_of is {party['kind']}")
+
+        def refused(label: str, image: str, token: str, want: str) -> None:
+            before = regs.read_bytes() if regs.exists() else b""
+            code, out, err = _judge_cli(private, "register", image, stdin=token)
+            print(f"    {label}: exit {code}: {out or err}")
+            expect(code == 1 and f"refused: {want}:" in err and (regs.read_bytes() if regs.exists() else b"") == before,
+                   f"{label}: refused {want}, registrations unchanged")
+
+        a, b, c = P16_IMAGES
+        registered(a, tokens["builder"], P16_BUILDER)
+        registered(b, tokens["reviewer"], P16_REVIEWER)
+        rows = registry._lines(regs)
+        expect([(r["image"], r["proposer"]) for r in rows] == [(a, P16_BUILDER), (b, P16_REVIEWER)],
+               f"the registrations are exactly the two, in order ({len(rows)} rows)")
+        before = regs.read_bytes()
+        registered(a, tokens["builder"], P16_BUILDER)
+        expect(regs.read_bytes() == before, "the same party registering again records nothing new")
+
+        refused("no token", c, "", "unattributed")
+        refused("forged token", c, "0" * 64, "unattributed")
+        refused("self-named proposer", c, json.dumps(P16_BUILDER | {"kind": "guy"}), "unattributed")
+        refused("stored hash of a real token", c, hashlib.sha256(tokens["builder"].encode()).hexdigest(),
+                "unattributed")
+        refused("another party's credential on a registered image", a, tokens["reviewer"], "registered")
+        refused("not a digest", "candidate:latest", tokens["builder"], "bad_image")
+        expect(registry.proposer_of(private, a) == P16_BUILDER, "image a's proposer is still the builder")
+        try:
+            got = registry.proposer_of(private, c)
+        except registry.Refused as e:
+            got = e.code
+        expect(got == "unregistered", f"an image never registered has no proposer ({got})")
+        code, _, err = _judge_cli(private, "credential", "candidate", "m", "s")
+        expect(code == 1 and "bad_proposer" in err, f"a credential for a kind outside A1.7 is refused (exit {code})")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 def p5_commitment_order() -> bool:
     """Under every usable runtime, a candidate commits its prediction before the observation it predicts exists for
     it: a clairvoyant fixture, which puts all mass on any observation the step request carries beyond the current
@@ -1852,6 +1937,10 @@ PINS = [
                            Mutant("opened_for_rewrite", _edits("P9_opened_for_rewrite")),
                            Mutant("genesis_empty", _edits("P9_genesis_empty")),
                            Mutant("signature_unchecked", _edits("P9_signature_unchecked")))),
+    Pin("P16", "a candidate's proposer comes from the judge-issued credential that registered it, or it is refused",
+        p16_proposer_from_credential, (Mutant("unattributed_admitted", _edits("P16_unattributed_admitted")),
+                                       Mutant("any_credential", _edits("P16_any_credential")),
+                                       Mutant("registration_taken_over", _edits("P16_registration_taken_over")))),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
