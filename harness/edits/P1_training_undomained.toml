@@ -1,0 +1,5 @@
+# P1's mutant `training_undomained`: the public training stream keeps every candidate seed, whatever its key's domain.
+[[edit]]
+path = "judge/seeds.py"
+old = "        if domain(key(s)) == TRAIN:\n"
+new = "        if True:\n"

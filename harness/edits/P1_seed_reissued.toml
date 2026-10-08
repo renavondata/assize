@@ -1,0 +1,5 @@
+# P1's mutant `seed_reissued` (brief 1 P1): the evaluator reissues the earliest used seeds before drawing fresh ones.
+[[edit]]
+path = "judge/seeds.py"
+old = "    seeds = fresh(root, world, key, n)\n"
+new = "    seeds = ([r[\"seed\"] for r in records(root, world)] + fresh(root, world, key, n))[:n]\n"
