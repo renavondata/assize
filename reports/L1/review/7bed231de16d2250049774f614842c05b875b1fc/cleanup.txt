@@ -1,0 +1,15 @@
+# cleanup 2026-10-08T00:55:53Z
+worktrees:
+/home/g/git/assize                          7bed231 [constitution-5]
+/home/g/git/assize-review                   7bed231 (detached HEAD)
+/home/g/git/worktrees/assize/l1-a4-1-ledger 2817eb7 [l1-a4-1-ledger]
+scratch worktree present: no
+harness processes: 0 (pgrep -fc 'harness run' printed 1: its own invoking shell; re-checked with ps below)
+assize containers (podman): 0
+assize containers (docker): 0
+/tmp/assize-scratch-*:
+drwx------ 5 g g 100 2026-10-07T15:27:55 /tmp/assize-scratch-1nr09mas
+drwx------ 3 g g  60 2026-10-07T10:18:13 /tmp/assize-scratch-2px40nxn
+drwx------ 4 g g  80 2026-10-07T11:08:35 /tmp/assize-scratch-_9b1sc88
+ps, python harness processes: 0
+/tmp/assize-scratch-* all predate this session's run (00:46Z); not created by it, left untouched. The untracked reports/L1/review/5ed34486…/ in this worktree belongs to another session; left uncommitted and untouched.
