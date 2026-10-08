@@ -1,0 +1,13 @@
+# 2026-10-07T05:19:08Z cleanup
+removed /tmp/assize-review-8634307.23iM and /tmp/assize-scratch-*
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ podman ps -a --filter name=assize
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
+$ pgrep -f "python -m harness"; pgrep -x make
+1506955
+(no make process)
+note: pid 1506955 above was the cleanup command's own shell (gone on re-check). Re-check from a separate shell:
+$ pgrep -af "python -m harness" | grep -v pgrep
+(no harness process)

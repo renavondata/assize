@@ -1,0 +1,34 @@
+# gh api repos/renavondata/assize/actions/runs?head_sha=<sha>&event=pull_request (read 2026-10-07T09:26:06Z)
+c45718a2e6b9f6be2b751883a90f782221c15214 pins completed success 37595039341 2026-10-07T08:37:48Z 2026-10-07T08:48:39Z https://github.com/renavondata/assize/actions/runs/37595039341
+576fe9632eab478be48984bf678b8ead6537e226 pins completed success 37596389939 2026-10-07T08:49:48Z 2026-10-07T09:03:03Z https://github.com/renavondata/assize/actions/runs/37596389939
+
+# trailers master..576fe96 (git log --format='%h %(trailers:key=Proposer,valueonly,separator=|)')
+576fe96 builder claude-opus-5-5 84d0019f-7704-431b-b47e-550d94f68d0d
+c45718a builder claude-opus-5-5 84d0019f-7704-431b-b47e-550d94f68d0d
+5ed3448 reviewer claude-opus-5-5 bc6ab402-f2e5-4623-8c83-40163c7622c1
+aa993f4 reviewer claude-opus-5-5 87c6baaa-5664-4e04-97ea-34d9a94e2a46
+c51bbfd reviewer claude-opus-5-5 6d086bf1-7467-4b06-81c6-a1fd3bc2d6d7
+471d5c7 reviewer claude-opus-5-5 e55dd428-5c35-467f-805e-a4bc522ce4ec
+ef57c70 reviewer claude-opus-5-5 624f5f44-7796-4b0a-829a-3d357090709e
+8634307 reviewer claude-opus-5-5 8498fcb4-6792-4687-b692-6bd37e28be3e
+ce65c88 reviewer claude-opus-5-5 adcbf54c-343f-45b9-bff8-f97f16c55ada
+e5e86bd reviewer claude-opus-5-5 7239636f-b7f5-42d8-8959-90d68238ab2d
+6596dee reviewer claude-opus-5-5 c594d70d-ac15-4067-9dc0-d0b603c32985
+d553dc5 reviewer claude-opus-5-5 db8fe26e-02e1-4ddd-b5c4-5c300e61ea26
+0475503 reviewer claude-opus-5-5 12b96db8-ea35-424e-b2eb-861ec0d56d0e
+bb7b387 
+c6679c6 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+b6ed5a9 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+2c70242 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+d190bfc builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+08856e7 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+
+# bb7b387 body tail (cat -A)
+Proposer: reviewer claude-opus-5-5 fa0fb7b4-c85c-4c89-a70a-8f059dc787cc$
+$
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>$
+$
+
+# pins on d0ec15e (this review's commit), Actions API, read 2026-10-07T09:52:02Z
+d0ec15e30b05e19c37713d95cf995b023ddc0f6f pins completed cancelled 37601736700 2026-10-07T09:36:06Z 2026-10-07T09:51:30Z https://github.com/renavondata/assize/actions/runs/37601736700
+job pins: Set up job=success, Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success, Install uv=success, Sync environment=success, make pins=cancelled, Upload pins report=success, Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683=success, Complete job=success

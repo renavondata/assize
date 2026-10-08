@@ -1,0 +1,5 @@
+# P0m's fifth mutant (brief 1 A9): a merge from an author no account names is attributed to guy, so it passes.
+[[edit]]
+path = "harness/claims.py"
+old = "party = MERGE_AUTHORS.get(account(email))"
+new = "party = MERGE_AUTHORS.get(account(email), \"guy\")"

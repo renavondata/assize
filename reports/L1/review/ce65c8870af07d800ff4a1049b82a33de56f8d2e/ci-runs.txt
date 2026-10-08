@@ -1,0 +1,4 @@
+# 2026-10-07T05:06:39Z gh api repos/renavondata/assize/actions/runs?head_sha=ce65c88…&event=pull_request
+pins completed cancelled 37573412424 2026-10-07T04:50:49Z 2026-10-07T05:06:10Z https://github.com/renavondata/assize/actions/runs/37573412424
+# timeout-minutes at head:
+12:    timeout-minutes: 15

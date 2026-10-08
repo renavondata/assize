@@ -1,0 +1,15 @@
+# 2026-10-07T06:19:57Z cleanup
+$ rm -rf /tmp/assize-review-ef57c70.CJIw /tmp/assize-scratch-*
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ docker ps -a --format '{{.Names}} {{.Image}}' | grep -i assize
+(none)
+$ podman ps -a --format '{{.Names}} {{.Image}}' | grep -i assize
+(none)
+$ pgrep -af 'harness|make pins'
+1754508 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791353345374-ihficm.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'D=reports/L1/review/ef57c709557383cde39688e64dcefc3d329390e6; T=/tmp/assize-review-ef57c70.CJIw; { echo "# $(date -u +%FT%TZ) cleanup"; echo "\$ rm -rf $T /tmp/assize-scratch-*"; rm -rf $T /tmp/assize-scratch-*; echo "\$ ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1"; ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1; echo "\$ docker ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' | grep -i assize"; docker ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' 2>&1 | grep -i assize || echo "(none)"; echo "\$ podman ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' | grep -i assize"; podman ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' 2>&1 | grep -i assize || echo "(none)"; echo "\$ pgrep -af '"'"'harness|make pins'"'"'"; pgrep -af '"'"'python -m harness|make pins'"'"' || echo "(none)"; echo "\$ git worktree prune && git worktree list"; git worktree prune; git worktree list; } > $D/cleanup.txt 2>&1; cat $D/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-90dd-cwd
+$ git worktree prune && git worktree list
+/home/g/git/assize        c6679c6 [l1-a4-4-compute-price]
+/home/g/git/assize-review ef57c70 (detached HEAD)
+# note: the single pgrep match (pid 1754508) is this cleanup command's own shell, whose argv contains the pattern; no harness or make process remains.

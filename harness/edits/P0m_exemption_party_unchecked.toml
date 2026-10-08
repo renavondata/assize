@@ -1,0 +1,5 @@
+# P0m's fourth mutant (review aa993f4 F1): an exempted sha gets the listed party whether or not its body states it.
+[[edit]]
+path = "harness/claims.py"
+old = "if party is not None and f\"Proposer: {party}\" in message.splitlines() else ()"
+new = "if party is not None else ()"

@@ -1,7 +1,7 @@
-"""Fixture candidates for P3, P4, P5, P7 and P10: each a Python program run as `python -I -c <source>` in the judge's candidate
-base image, speaking the judge's JSON-RPC over stdio. `BEHAVIOUR` says what each does at its first step; at
-begin_episode and end_episode every one acknowledges, keeping the manifest's `targets` from begin_episode and
-starting an empty list `seen` of the episode's observations."""
+"""Fixture candidates for P3, P4, P5, P7, P10 and P12: each a Python program run as `python -I -c <source>` in the judge's
+candidate base image, speaking the judge's JSON-RPC over stdio. `BEHAVIOUR` says what each does at its first step; at
+begin_episode and end_episode every one acknowledges, keeping the manifest's `targets` from begin_episode, counting
+episodes from 0 in `episode` and starting an empty list `seen` of the episode's observations."""
 
 from __future__ import annotations
 
@@ -18,11 +18,11 @@ def reply(rid, result):
     sys.stdout.write(json.dumps({{"jsonrpc": "2.0", "id": rid, "result": result}}) + "\\n")
     sys.stdout.flush()
 
-targets, seen = [], []
+targets, seen, episode = [], [], -1
 for line in sys.stdin:
     msg = json.loads(line)
     if msg["method"] == "begin_episode":
-        targets, seen = msg["params"]["manifest"]["targets"], []
+        targets, seen, episode = msg["params"]["manifest"]["targets"], [], episode + 1
     if msg["method"] != "step":
         reply(msg["id"], {{}})
         continue
@@ -97,6 +97,11 @@ BEHAVIOUR = {
     "busy_crash": ("t0 = time.process_time()\n"
                    "    while time.process_time() - t0 < BUSY_S: pass\n"
                    "    sys.exit(3)"),
+    # P12: fills and frees BUSY_MIB MiB at the first step of its first episode only, and plays the first legal action.
+    "hog_once": ("if episode == 0 and p['t'] == 0:\n"
+                 "        block = b'\\x01' * (BUSY_MIB << 20)\n"
+                 "        del block\n"
+                 "    reply(msg['id'], {'action': p['legal_actions'][0]})"),
     # Ignores SIGTERM, starts a child that ignores it too, and never replies: only a forced kill ends it (P10).
     "stubborn": ("signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
                  "    if os.fork() == 0:\n"

@@ -1,0 +1,22 @@
+# probe: a local merge authored by guy@publicdatamarket.com (the address builder sessions commit under), trailer 'Proposer: builder claude-opus-5-5 deadbeef', resolving into CLAUDE.md; read by harness/claims.py at 45cdcea
+# author emails vs Proposer trailers over the last 150 commits of 45cdcea (session ids elided):
+     33 guy@publicdatamarket.com|
+     27 guy@publicdatamarket.com|builder …
+     24 assize-reviewer@users.noreply.github.com|reviewer …
+     21 416374+gfrmin@users.noreply.github.com|
+      8 guy@publicdatamarket.com|guy
+      5 assize-reviewer@users.noreply.github.com|
+      3 noreply@anthropic.com|
+      3 assize-reviewer@gfrm.in|
+      2 guy@publicdatamarket.com|guy;builder …
+      2 guy@publicdatamarket.com|builder
+      1 guy@publicdatamarket.com|guy (A4 text); builder …
+      1 assize-builder@gfrm.in|
+# probe repo log:
+eb63f9b parents=b720a0c 167e728 author=guy@publicdatamarket.com | Merge side (local, by a builder session) | trailers=builder claude-opus-5-5 deadbeef
+
+167e728 parents=e588980 author=f@f | side | trailers=builder m s
+
+# claims.branch_commits + commit_findings (patterns CLAUDE.md, .github/, CODEOWNERS):
+167e72815046 plain f@f ('builder m s',) ('x',) []
+eb63f9baa1d3 merge guy@publicdatamarket.com ('guy',) ('CLAUDE.md',) []

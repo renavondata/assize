@@ -1,0 +1,3 @@
+probe: judge/scoring.bin_of vs P13 _forecaster_calibration's edge rule (sum(e <= q)), bins=10, at each edge and its neighbouring doubles
+DISAGREE q=0.8999999999999999: judge bin 9, derivation bin 8  (q*bins=9.0)
+0.3*3 = 0.8999999999999999 -> judge bin 9; docstring '[b/bins, (b+1)/bins)' puts it in bin 8

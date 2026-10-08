@@ -492,30 +492,69 @@ TRAILER_FIXTURE = (  # (label, path written, Proposer trailer lines, finding cod
     ("builder then guy, .github/", ".github/x.yml", ("builder m s", "guy"), set()),
     ("malformed party", "docs/y.md", ("builder m",), {"bad_party"}),
 )
+EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exempted or None, parties, findings wanted)
+    ("body-only Proposer, not exempted", "docs/z.md", "reviewer m s", None, (), {"no_proposer"}),
+    ("body-only Proposer, exempted", "docs/z.md", "reviewer m s", "reviewer m s", ("reviewer m s",), set()),
+    ("body-only Proposer, another party exempted", "docs/z.md", "reviewer m s", "reviewer m t", (), {"no_proposer"}),
+)
+MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
+    ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
+    ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
+    ("merge by assize-builder", "docs/m.md", "339109611+assize-builder@users.noreply.github.com", (), ("builder",),
+     set()),
+    ("merge by assize-reviewer, .github/", ".github/m.yml", "assize-reviewer@gfrm.in", (), ("reviewer",),
+     {"entrenched_without_guy"}),
+    ("merge by an unknown author", "docs/m.md", "f@f", (), (), {"unknown_merge_author"}),
+    ("merge by an unknown author, Proposer: guy trailer", "docs/m.md", "f@f", ("guy",), (), {"unknown_merge_author"}),
+)
 FIXTURE_GIT = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@f", "GIT_COMMITTER_NAME": "f",
                "GIT_COMMITTER_EMAIL": "f@f"}
 
 
-def _trailer_repo(repo: Path) -> list[str]:
-    """A fixture repository: a base commit, then one commit per TRAILER_FIXTURE case. Returns their shas."""
+def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
+    """A fixture repository: a base commit, one commit per TRAILER_FIXTURE case, then one per EXEMPTION_FIXTURE case,
+    whose `Proposer:` line a blank line separates from a following `Co-Authored-By:`, so git parses no trailer, then one
+    merge per MERGE_FIXTURE case, on the branch and the base commit, by its author (brief 1 A9). Returns their shas and
+    the exemptions the EXEMPTION_FIXTURE cases name."""
     env = os.environ | claims.GIT_ENV | FIXTURE_GIT
 
     def git(*args: str) -> str:
         return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
                               env=env).stdout.strip()
 
-    def commit(path: str, trailers: tuple[str, ...], n: int) -> str:
+    def commit(path: str, message: str, n: int) -> str:
         target = repo / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(f"{n}\n")
         git("add", "-A")
-        git("commit", "-q", "-m", f"case {n}\n\nbody\n\n" + "".join(f"Proposer: {t}\n" for t in trailers))
+        git("commit", "-q", "-m", f"case {n}\n\nbody\n\n{message}")
         return git("rev-parse", "HEAD")
+
+    def trailered(trailers: tuple[str, ...]) -> str:
+        return "".join(f"Proposer: {t}\n" for t in trailers)
+
+    def merge(path: str, author: str, message: str, n: int, base: str) -> str:
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(f"{n}\n")
+        git("add", "-A")
+        sha = subprocess.run(["git", "-C", str(repo), "commit-tree", git("write-tree"), "-p", "HEAD", "-p", base,
+                              "-m", f"case {n}\n\nbody\n\n{message}"], check=True, capture_output=True, text=True,
+                             env=env | {"GIT_AUTHOR_EMAIL": author}).stdout.strip()
+        git("update-ref", "HEAD", sha)
+        return sha
 
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
-    commit("CODEOWNERS", ("guy",), 0)
-    return [commit(path, trailers, n) for n, (_, path, trailers, _) in enumerate(TRAILER_FIXTURE, 1)]
+    commit("CODEOWNERS", trailered(("guy",)), 0)
+    shas = [commit(path, trailered(trailers), n) for n, (_, path, trailers, _) in enumerate(TRAILER_FIXTURE, 1)]
+    unparsed = [commit(path, f"Proposer: {party}\n\nCo-Authored-By: f <f@f>\n", n)
+                for n, (_, path, party, *_) in enumerate(EXEMPTION_FIXTURE, len(shas) + 1)]
+    exemptions = {sha: exempt for sha, (_, _, _, exempt, *_) in zip(unparsed, EXEMPTION_FIXTURE) if exempt}
+    base = git("rev-list", "--max-parents=0", "HEAD")
+    merges = [merge(path, author, trailered(trailers), n, base)
+              for n, (_, path, author, trailers, *_) in enumerate(MERGE_FIXTURE, len(shas) + len(unparsed) + 1)]
+    return shas + unparsed + merges, exemptions
 
 
 def _branch_base(root: Path) -> str | None:
@@ -529,15 +568,23 @@ def _branch_base(root: Path) -> str | None:
 
 def p0m_commit_proposers() -> bool:
     """Every commit on the branch carries well-formed `Proposer:` trailers; one touching an entrenched path
-    (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2)."""
+    (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
+    `Proposer:` line counts only for a commit claims.PROPOSER_EXEMPTIONS lists, and only as the party it names
+    (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
+    author is rejected, whatever trailer it carries (brief 1 A9)."""
     expect, ok = _expecter()
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
     work = Path(tempfile.mkdtemp(prefix="assize-p0m-", dir=context.scratch))
-    shas = _trailer_repo(work / "repo")
-    commits = claims.branch_commits(work / "repo", "master~" + str(len(TRAILER_FIXTURE)))
+    shas, exemptions = _trailer_repo(work / "repo")
+    commits = claims.branch_commits(work / "repo", "master~" + str(len(shas)), exemptions=exemptions)
+    expect([c.merge for c in commits] == [False] * (len(shas) - len(MERGE_FIXTURE)) + [True] * len(MERGE_FIXTURE),
+           f"fixture: the last {len(MERGE_FIXTURE)} commits read as merges and no other")
     expect([c.sha for c in commits] == shas, f"fixture: {len(commits)} branch commits read, want {len(shas)}")
-    for (label, _, trailers, want), c in zip(TRAILER_FIXTURE, commits):
+    cases = [(label, trailers, want) for label, _, trailers, want in TRAILER_FIXTURE] + \
+            [(label, trailers, want) for label, _, _, _, trailers, want in EXEMPTION_FIXTURE] + \
+            [(label, parties, want) for label, _, _, _, parties, want in MERGE_FIXTURE]
+    for (label, trailers, want), c in zip(cases, commits):
         got = {f.code for f in claims.commit_findings(c, patterns)}
         expect(got == want and c.parties == trailers,
                f"{label}: parties reported {list(c.parties)}, findings {sorted(got)}; want {list(trailers)}, "
@@ -1135,16 +1182,25 @@ def p10_container_teardown() -> bool:
 MALFORMED = ("undeclared", "short", "zeros", "nan")
 
 
-def _forecaster_summary(targets) -> dict:
-    """What the judge must record for the `forecaster` fixture over one short episode, derived here by replaying the
-    same seed and actions in the binding and scoring each step by definition, independently of `judge/scoring.py`."""
+def _forecaster_observations() -> list[dict]:
+    """The observations of the `forecaster` fixture's one short episode, replayed with the same seed and actions."""
     ep = next(_short_crafter(1))
     obs = [ep.observation]
     while not ep.done:
         obs.append(ep.step(ep.legal_actions[0]))
+    return obs
 
-    def predicted(i: int, s: list, v) -> list[float]:
-        return [[float(x == v) for x in s], [0.0 if x == v else 1 / (len(s) - 1) for x in s], [1 / len(s)] * len(s)][i % 3]
+
+def _forecaster_predicted(i: int, s: list, v) -> list[float]:
+    """What the `forecaster` fixture predicts for target `i` of support `s` when its field's current value is `v`."""
+    return [[float(x == v) for x in s], [0.0 if x == v else 1 / (len(s) - 1) for x in s], [1 / len(s)] * len(s)][i % 3]
+
+
+def _forecaster_summary(targets) -> dict:
+    """What the judge must record for the `forecaster` fixture over one short episode, derived here by replaying the
+    same seed and actions in the binding and scoring each step by definition, independently of `judge/scoring.py`."""
+    obs = _forecaster_observations()
+    predicted = _forecaster_predicted
 
     def one(i: int, tg: dict) -> dict:
         steps = len(obs) - 1
@@ -1160,6 +1216,70 @@ def _forecaster_summary(targets) -> dict:
     return {tg["name"]: one(i, tg) for i, tg in enumerate(targets)}
 
 
+def _forecaster_calibration(targets, bins: int) -> dict:
+    """The calibration the judge must record for the `forecaster` fixture over one short episode, derived here by
+    definition, independently of `judge/scoring.py`: per target, every scored step adds, for every support value, one
+    count to the bin whose edges enclose the probability it put on that value (the last bin closed at 1), a hit if that
+    value was realised, and that probability; and the entropy in nats of its distribution. The last target is missing."""
+    obs = _forecaster_observations()
+    edges = [b / bins for b in range(1, bins)]
+
+    def one(i: int, tg: dict) -> dict:
+        s, f = tg["support"], tg["field"]
+        steps = [] if i == len(targets) - 1 else [(_forecaster_predicted(i, s, a[f]), b[f]) for a, b in zip(obs, obs[1:])]
+        cells = {(v, b): [] for v in range(len(s)) for b in range(bins)}
+        for p, realised in steps:
+            for v, x in enumerate(s):
+                cells[(v, sum(e <= p[v] for e in edges))].append((p[v], x == realised))
+        h = [-math.fsum(q * math.log(q) for q in p if q > 0) for p, _ in steps]
+        table = {k: [[g(cells[(v, b)]) for b in range(bins)] for v in range(len(s))]
+                 for k, g in (("n", len), ("hits", lambda c: sum(1 for _, r in c if r)),
+                              ("p_sum", lambda c: math.fsum(q for q, _ in c)))}
+        return {"entropy_sum": math.fsum(h), "mean_entropy": math.fsum(h) / len(h) if h else None,
+                "reliability": {"bins": bins} | table}
+
+    return {tg["name"]: one(i, tg) for i, tg in enumerate(targets)}
+
+
+def p13_calibration() -> bool:
+    """Each declared target's calibration (brief 1 A4 item 3; review c2a87f6 F5): the judge's scoring of the
+    `forecaster` fixture's episode, replayed here step by step, equals the calibration derived by definition: the
+    entropies' sum and mean, none where the target is missing, and a reliability table over the declared support in
+    the committed bins, in which every scored step, an infinite-loss step included, enters every support value's row
+    once, so each row's counts sum to `scored`. P7 checks the record of the same episode, played through the judge's
+    loop under every usable runtime, against the same derivation."""
+    from judge import episodes, scoring
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    m = binding.manifest()
+    targets, bins = m["targets"], episodes.calibration_bins()
+    obs = _forecaster_observations()
+    steps = [scoring.step_predictions({tg["name"]: _forecaster_predicted(i, tg["support"], a[tg["field"]])
+                                       for i, tg in enumerate(targets[:-1])}, targets, b)
+             for a, b in zip(obs, obs[1:])]
+    summary = scoring.summary([scoring.step_losses({n: v[0] for n, v in s.items() if v is not None}, targets, b)
+                               for s, b in zip(steps, obs[1:])], targets)
+    got, want = scoring.calibration(steps, targets, bins), _forecaster_calibration(targets, bins)
+    print(f"  bins {bins}; summary {json.dumps(summary)}")
+    expect(any(w["infinite"] == w["scored"] > 0 for w in summary.values()),
+           "non-vacuous: some target puts zero mass on the realised value at every scored step")
+    expect(any(w["missing"] == w["scored"] + w["missing"] > 0 for w in summary.values()),
+           "non-vacuous: some target is missing at every step")
+    for tg in targets:
+        name, g, w = tg["name"], got.get(tg["name"], {}), want[tg["name"]]
+        print(f"  {name}: recorded {json.dumps(g)}")
+        expect(g == w, f"{name}: calibration equals its derivation" + ("" if g == w else f" {json.dumps(w)}"))
+        rows = g.get("reliability", {}).get("n", [])
+        expect(len(rows) == len(tg["support"]) and all(sum(r) == summary[name]["scored"] for r in rows),
+               f"{name}: each of the {len(tg['support'])} support values' bin counts sums to scored "
+               f"({summary[name]['scored']}): {[sum(r) for r in rows]}")
+        hits = g.get("reliability", {}).get("hits", [])
+        expect(sum(map(sum, hits)) == summary[name]["scored"],
+               f"{name}: each scored step realises one value: {sum(map(sum, hits))} hits")
+    return ok()
+
+
 def p7_infinite_loss() -> bool:
     """Under every usable runtime, a candidate's predictions are scored per declared target per step against the
     World's next observation: zero mass on the realised value is recorded +inf and counted, never clipped; an omitted
@@ -1173,6 +1293,7 @@ def p7_infinite_loss() -> bool:
     expect, ok = _expecter()
     m = binding.manifest()
     want = _forecaster_summary(m["targets"])
+    calibration = _forecaster_calibration(m["targets"], episodes.calibration_bins())
     print(f"  derived: {json.dumps(want)}")
     expect(any(w["infinite"] == w["scored"] > 0 for w in want.values()),
            "non-vacuous: some target puts zero mass on the realised value at every scored step")
@@ -1189,6 +1310,8 @@ def p7_infinite_loss() -> bool:
         got = records[0].get("prediction", {}) if records else {}
         for name, w in want.items():
             expect(got.get(name) == w, f"{rt.name} forecaster {name}: recorded {got.get(name)}, derived {w}")
+        cal = records[0].get("calibration") if records else None
+        expect(cal == calibration, f"{rt.name} forecaster: the recorded calibration equals P13's derivation")
         for behaviour in MALFORMED:
             records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
             say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
@@ -1196,6 +1319,83 @@ def p7_infinite_loss() -> bool:
                    f"{rt.name} {behaviour}: invalid_reply at the first step, before the World advances")
             expect(all(v["scored"] == 0 for r in records for v in r["prediction"].values()),
                    f"{rt.name} {behaviour}: nothing scored")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
+
+# P12's derivation of the committed price (brief 1 A4 item 4): an episode exhausting every allowance is charged the
+# smallest effect brief 1's FIT criterion requires the court to detect, half for CPU and half for memory.
+FIT_DELTA = 0.5
+
+
+def _priced(used: dict, cfg: dict) -> dict:
+    """What the judge must charge for `used`, derived here from `judge/config.toml` and the rule `judge/price.py`
+    states, independently of that module: the unmeasured stretch at the configured CPUs and memory, the peak memory
+    over the rest, in gigabytes of 1e9 bytes."""
+    rate, lim = cfg["price"]["crafter"], cfg["candidate"]
+    unmeasured = used["unmeasured_s"]
+    cpu = rate["cpu_s"] * (used["cpu_s"] + lim["cpus"] * unmeasured)
+    memory = rate["memory_gb_s"] * (used["peak_memory_bytes"] * max(used["wall_s"] - unmeasured, 0.0)
+                                    + lim["memory_mib"] * 2 ** 20 * unmeasured) / 1e9
+    return {"cpu": cpu, "memory": memory, "total": cpu + memory}
+
+
+def _same(a: dict | None, b: dict) -> bool:
+    """`a` equals `b` term by term up to the rounding of a few double-precision operations (a derived bound)."""
+    return isinstance(a, dict) and a.keys() == b.keys() and all(
+        math.isclose(a[k], b[k], rel_tol=8 * sys.float_info.epsilon, abs_tol=0.0) for k in b)
+
+
+def p12_compute_price() -> bool:
+    """Under every usable runtime, every episode record carries its compute priced in Crafter achievements at the
+    rates `judge/config.toml` commits, which equal their stated derivation. The peak memory's scope is stated in the
+    record as the container's since its start, and the price follows that scope: a fixture filling a block in its first
+    episode only is charged that block's high-water mark in its second episode too. What the judge could not measure,
+    the stretch after a crashed container's last read, is charged at the configured CPUs and memory (brief 1 A4 item 4;
+    review 42d7331 F4)."""
+    import tomllib
+
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    cfg = tomllib.loads((ROOT / "judge" / "config.toml").read_text())
+    rate, lim, t = cfg["price"]["crafter"], cfg["candidate"], cfg["timeouts"]
+    derived = {"cpu_s": FIT_DELTA / 2 / (lim["cpus"] * t["episode_s"]),
+               "memory_gb_s": FIT_DELTA / 2 / (lim["memory_mib"] * 2 ** 20 / 1e9 * t["episode_s"])}
+    print(f"  committed price {rate}; derived {derived}")
+    expect(_same(rate, derived), "the committed price equals its derivation from FIT's delta and the allowances")
+    block = candidates.BUSY_MIB << 20
+    usable, image = _usable_runtimes(expect)
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        records = episodes.run(rt, image, _short_crafter(2), binding.manifest(), command=candidates.command("hog_once"))
+        say(f"  {rt.name} hog_once: {json.dumps(records)}")
+        expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)] * 2,
+               f"{rt.name} hog_once: two episodes of {LOOP_STEPS} steps in one container, ended by the World")
+        crashed = episodes.run(rt, image, _short_crafter(1), binding.manifest(),
+                               command=candidates.command("busy_crash"))
+        say(f"  {rt.name} busy_crash: {json.dumps(crashed)}")
+        expect([r["termination"] for r in crashed] == ["crash"], f"{rt.name} busy_crash: recorded crash")
+        for r in records:
+            used, n = r.get("compute", {}), f"{rt.name} hog_once episode {r['episode']}"
+            expect(used.get("peak_memory_scope") == "container_since_start",
+                   f"{n}: peak memory's scope stated as container_since_start ({used.get('peak_memory_scope')})")
+            expect(used.get("peak_memory_bytes", -1) >= block,
+                   f"{n}: peak memory {used.get('peak_memory_bytes')} bytes is at least the {block} filled in episode 0")
+            expect(used.get("wall_s", -1) > used.get("unmeasured_s", 0) == 0,
+                   f"{n}: measured throughout ({used.get('wall_s')} s wall, {used.get('unmeasured_s')} s unmeasured)")
+        for r in records + crashed:
+            want = _priced(r["compute"], cfg) if "peak_memory_bytes" in r.get("compute", {}) else {}
+            expect(_same(r.get("price"), want),
+                   f"{rt.name} {r['termination']} episode {r['episode']}: price {r.get('price')}, derived {want}")
+        used = crashed[0].get("compute", {}) if crashed else {}
+        expect(used.get("unmeasured_s", 0) > 0,
+               f"{rt.name} busy_crash: non-vacuous: {used.get('unmeasured_s')} s unmeasured after the container's last read")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
 
@@ -1463,7 +1663,10 @@ PINS = [
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),)),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
-                                Mutant("first_proposer_only", _edits("P0m_first_proposer_only")))),
+                                Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
+                                Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
+                                Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")),
+                                Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
@@ -1496,6 +1699,13 @@ PINS = [
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
                            Mutant("sum_unchecked", _edits("P7_sum_unchecked")))),
+    Pin("P13", "every scored step, +inf included, enters each support value's reliability row; entropy is never imputed",
+        p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
+                          Mutant("realised_row_only", _edits("P13_realised_row_only")),
+                          Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed")))),
+    Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
+        p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
+                            Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

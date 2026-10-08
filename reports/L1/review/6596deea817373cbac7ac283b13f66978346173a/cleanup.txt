@@ -1,0 +1,11 @@
+# 2026-10-07T04:34:18Z after rm -rf /tmp/assize-review-6596dee.Ig3E /tmp/assize-review-art.* /tmp/assize-scratch-*; git worktree prune
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ docker ps -a | grep -i assize
+(exit 1)
+$ pgrep -f "[p]ython -m harness"
+(exit 1)
+$ git worktree list
+/home/g/git/assize        c6679c6 [l1-a4-4-compute-price]
+/home/g/git/assize-review 6596dee (detached HEAD)

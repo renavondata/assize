@@ -1,0 +1,18 @@
+# git log --format='%h %(trailers:key=Proposer,valueonly)' c8fdf97..6596dee
+6596dee reviewer claude-opus-5-5 c594d70d-ac15-4067-9dc0-d0b603c32985
+
+d553dc5 reviewer claude-opus-5-5 db8fe26e-02e1-4ddd-b5c4-5c300e61ea26
+
+0475503 reviewer claude-opus-5-5 12b96db8-ea35-424e-b2eb-861ec0d56d0e
+
+bb7b387 
+c6679c6 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+
+b6ed5a9 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+
+2c70242 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+
+d190bfc builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+
+08856e7 builder claude-opus-5-5 608119b2-0a0c-42cd-875e-15feb38c2ed2
+

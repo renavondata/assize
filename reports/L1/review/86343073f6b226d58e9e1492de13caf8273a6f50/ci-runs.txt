@@ -1,0 +1,12 @@
+# 2026-10-07T05:22:25Z gh api repos/renavondata/assize/actions/runs?head_sha=8634307…&event=pull_request
+pins completed success 37574754065 2026-10-07T05:07:17Z 2026-10-07T05:21:37Z https://github.com/renavondata/assize/actions/runs/37574754065
+# P0m and summary lines from gh run view 37574754065 --log:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-07T05:07:25.3740813Z   clean: true
+pins	make pins	﻿2026-10-07T05:07:32.7430617Z ##[group]Run make pins PINS_OUT=out/pins
+pins	make pins	2026-10-07T05:07:32.7431589Z ^[[36;1mmake pins PINS_OUT=out/pins^[[0m
+pins	make pins	2026-10-07T05:21:32.6796748Z [clean ] P0m: observed pass -> ok (0.377s) out/pins/runs/P0m/clean/transcript.log
+pins	make pins	2026-10-07T05:21:32.6860831Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.386s + 0.384s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	make pins	2026-10-07T05:21:32.6865300Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.385s + 0.385s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	make pins	2026-10-07T05:21:32.6901480Z clean: 21/21 passed, 0/21 failed
+pins	make pins	2026-10-07T05:21:32.6902278Z mutants: 41/41 killed, 0/41 survived, 0/41 inconclusive, 0/41 stale, 0/41 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-07T05:21:32.6904401Z PINS PASSED

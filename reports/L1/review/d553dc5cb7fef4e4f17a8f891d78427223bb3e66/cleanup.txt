@@ -1,0 +1,13 @@
+# 2026-10-07T04:18:55Z after rm -rf /tmp/assize-review-d553dc5.MjRz /tmp/assize-review-art.* /tmp/assize-scratch-*; git worktree prune
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ docker ps -a --format '{{.Names}} {{.Image}}' | grep -i assize
+(exit 1)
+$ pgrep -af 'python -m harness'
+1310388 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791346115695-9nnn1h.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'w=reports/L1/review/d553dc5cb7fef4e4f17a8f891d78427223bb3e66; rm -rf /tmp/assize-review-d553dc5.MjRz; ls -d /tmp/assize-scratch-* 2>/dev/null | xargs -r rm -rf; git worktree prune; { echo "# $(date -u +%FT%TZ) after rm -rf /tmp/assize-review-d553dc5.MjRz /tmp/assize-review-art.* /tmp/assize-scratch-*; git worktree prune"; echo "\$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*"; ls -d /tmp/assize-review-* /tmp/assize-scratch-* 2>&1; echo "\$ docker ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' | grep -i assize"; docker ps -a --format '"'"'{{.Names}} {{.Image}}'"'"' 2>&1 | grep -i assize; echo "(exit $?)"; echo "\$ pgrep -af '"'"'python -m harness'"'"'"; pgrep -af '"'"'python -m harness'"'"'; echo "(exit $?)"; echo "\$ git worktree list"; git worktree list; } > $w/cleanup.txt 2>&1; cat $w/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-01db-cwd
+(exit 0)
+$ git worktree list
+/home/g/git/assize        c6679c6 [l1-a4-4-compute-price]
+/home/g/git/assize-review d553dc5 (detached HEAD)
+note: the one pgrep match (pid 1310388) is the shell running this very cleanup command, whose text contains the pattern; no harness process remains.

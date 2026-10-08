@@ -1,0 +1,14 @@
+# 2026-10-07T07:05:11Z cleanup
+$ rm -rf /tmp/assize-review-c51bbfd.1cuF /tmp/assize-review-c51bbfd.path
+$ ls -d /tmp/assize-review-* /tmp/assize-scratch-*
+ls: cannot access '/tmp/assize-review-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+$ docker ps -a | grep -i assize
+(none)
+$ podman ps -a | grep -i assize
+(none)
+$ pgrep -f '[p]ython -m harness|[m]ake pins'
+(none)
+$ git worktree list
+/home/g/git/assize        c6679c6 [l1-a4-4-compute-price]
+/home/g/git/assize-review c51bbfd (detached HEAD)

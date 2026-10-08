@@ -1,0 +1,6 @@
+# 2026-10-07T07:05:10Z gh api repos/renavondata/assize/actions/runs?head_sha=c51bbfdfc22126b749eeb08c1ab93cb744a6ad71&event=pull_request (name==pins)
+completed success 37583759398 https://github.com/renavondata/assize/actions/runs/37583759398 started=2026-10-07T06:50:32Z updated=2026-10-07T07:00:26Z
+# CI log: 166:pins	make pins	﻿2026-10-07T06:50:44.1154953Z ##[group]Run make pins PINS_OUT=out/pins
+# CI log: 167:pins	make pins	2026-10-07T06:50:44.1155162Z ^[[36;1mmake pins PINS_OUT=out/pins^[[0m
+# CI log: 235:pins	make pins	2026-10-07T07:00:22.5926742Z mutants: 41/41 killed, 0/41 survived, 0/41 inconclusive, 0/41 stale, 0/41 non-causal, 0 leaked (clean and mutant)
+# CI log: 238:pins	make pins	2026-10-07T07:00:22.5927752Z PINS PASSED

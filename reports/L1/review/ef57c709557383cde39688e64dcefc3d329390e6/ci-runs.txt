@@ -1,0 +1,4 @@
+# 2026-10-07T06:09:58Z gh api repos/renavondata/assize/actions/runs?head_sha=ef57c709557383cde39688e64dcefc3d329390e6&event=pull_request (name==pins)
+completed cancelled 37576032704 https://github.com/renavondata/assize/actions/runs/37576032704 started=2026-10-07T05:23:05Z updated=2026-10-07T05:38:30Z
+# jobs:
+pins completed cancelled 2026-10-07T05:23:07Z 2026-10-07T05:38:29Z

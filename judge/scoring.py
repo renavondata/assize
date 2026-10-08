@@ -8,7 +8,15 @@ rounding a candidate normalising in double precision can accumulate; the bound i
 Each declared target is scored at every completed step against the World's next observation of its field, as the
 negative natural logarithm of the probability put on the realised value. Zero probability scores +inf, counted, never
 clipped. A target the reply omits is recorded missing, never imputed. Per episode and target, `scored + missing` is the
-episode's step count."""
+episode's step count.
+
+Beside log-loss, each declared target is calibrated per episode (brief 1 A4 item 3) from the distributions the
+candidate predicted: the sum and mean of their entropies in nats, and a reliability table over the declared support.
+Each support value's row counts, per bin of predicted probability, the scored steps that put a probability in that bin
+on the value, how many of them realised it, and the sum of those probabilities. Every scored step enters every row once,
+an infinite-loss step included, so each row's counts sum to `scored`; a missing step enters nothing, and a target with
+no scored step has no mean entropy, never an imputed one. Tables, counts and sums add across episodes; nothing is
+pooled across targets."""
 
 from __future__ import annotations
 
@@ -65,3 +73,44 @@ def summary(steps: Sequence[Mapping[str, float | None]], targets: Sequence[Mappi
                 "finite_sum": math.fsum(finite), "log_loss": INFINITE if infinite else math.fsum(finite)}
 
     return {t["name"]: one(t["name"]) for t in targets}
+
+
+def step_predictions(prediction: Mapping[str, Sequence[float]], targets: Sequence[Mapping],
+                     observation: Mapping) -> dict[str, tuple[Sequence[float], int] | None]:
+    """Each declared target's predicted distribution and the index in its support of the value `observation`, the
+    World's next one, realised; None where the target is missing."""
+    return {t["name"]: None if t["name"] not in prediction
+            else (prediction[t["name"]], t["support"].index(observation[t["field"]]))
+            for t in targets}
+
+
+def entropy(p: Sequence[float]) -> float:
+    """The entropy of `p` in nats, with 0 ln 0 = 0."""
+    return -math.fsum(x * math.log(x) for x in p if x > 0)
+
+
+def bin_of(q: float, bins: int) -> int:
+    """The bin of probability `q` among `bins` equal bins of [0, 1]: bin b covers [b/bins, (b+1)/bins), the last
+    includes 1."""
+    return min(int(q * bins), bins - 1)
+
+
+def calibration(steps: Sequence[Mapping[str, tuple[Sequence[float], int] | None]], targets: Sequence[Mapping],
+                bins: int) -> dict[str, dict]:
+    """Per declared target over an episode's steps: the sum and mean of the predicted entropies over its scored steps,
+    and its reliability table, `n`, `hits` and `p_sum` each indexed by support value, then by bin."""
+
+    def one(t: Mapping) -> dict:
+        scored = [s[t["name"]] for s in steps if s[t["name"]] is not None]
+        cells = [[[] for _ in range(bins)] for _ in t["support"]]
+        for p, realised in scored:
+            for v, q in enumerate(p):
+                cells[v][bin_of(q, bins)].append((q, v == realised))
+        entropy_sum = math.fsum(entropy(p) for p, _ in scored)
+        return {"entropy_sum": entropy_sum, "mean_entropy": entropy_sum / len(scored) if scored else None,
+                "reliability": {"bins": bins,
+                                "n": [[len(c) for c in row] for row in cells],
+                                "hits": [[sum(hit for _, hit in c) for c in row] for row in cells],
+                                "p_sum": [[math.fsum(q for q, _ in c) for c in row] for row in cells]}}
+
+    return {t["name"]: one(t) for t in targets}
