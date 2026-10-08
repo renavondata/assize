@@ -1,7 +1,7 @@
-"""Fixture candidates for P3, P4, P7, P10 and P12: each a Python program run as `python -I -c <source>` in the judge's candidate
-base image, speaking the judge's JSON-RPC over stdio. `BEHAVIOUR` says what each does at its first step; at
-begin_episode and end_episode every one acknowledges, keeping the manifest's `targets` from begin_episode and counting
-episodes from 0 in `episode`."""
+"""Fixture candidates for P3, P4, P5, P7, P10 and P12: each a Python program run as `python -I -c <source>` in the judge's
+candidate base image, speaking the judge's JSON-RPC over stdio. `BEHAVIOUR` says what each does at its first step; at
+begin_episode and end_episode every one acknowledges, keeping the manifest's `targets` from begin_episode, counting
+episodes from 0 in `episode` and starting an empty list `seen` of the episode's observations."""
 
 from __future__ import annotations
 
@@ -18,16 +18,22 @@ def reply(rid, result):
     sys.stdout.write(json.dumps({{"jsonrpc": "2.0", "id": rid, "result": result}}) + "\\n")
     sys.stdout.flush()
 
-targets, episode = [], -1
+targets, seen, episode = [], [], -1
 for line in sys.stdin:
     msg = json.loads(line)
     if msg["method"] == "begin_episode":
-        targets, episode = msg["params"]["manifest"]["targets"], episode + 1
+        targets, seen, episode = msg["params"]["manifest"]["targets"], [], episode + 1
     if msg["method"] != "step":
         reply(msg["id"], {{}})
         continue
     p = msg["params"]
 """
+
+# P5's predictive floor (brief 1 section 4): each target's unigram frequencies over the episode's observations so far,
+# the current one included, with one added to every support value so that no value has zero mass.
+_FLOOR = ("seen.append(p['observation'])\n"
+          "    pred = {tg['name']: [(1 + sum(o[tg['field']] == x for o in seen)) / (len(tg['support']) + len(seen))\n"
+          "                         for x in tg['support']] for tg in targets}\n")
 
 # Each behaviour is the body of the step branch, with `msg` the request and `p` its params.
 BEHAVIOUR = {
@@ -50,6 +56,24 @@ BEHAVIOUR = {
                    "        pred[tg['name']] = [[float(x == v) for x in s], [0.0 if x == v else 1 / (len(s) - 1) for x in s],\n"
                    "                            [1 / len(s)] * len(s)][i % 3]\n"
                    "    reply(msg['id'], {'action': p['legal_actions'][0], 'prediction': pred})"),
+    # P5: plays the first legal action and predicts the floor.
+    "floor": _FLOOR + "    reply(msg['id'], {'action': p['legal_actions'][0], 'prediction': pred})",
+    # P5: plays the first legal action and searches everything the step request carries beyond t, observation and
+    # legal_actions for an observation, a mapping holding every target's field, looking first under its action's key.
+    # Where it finds one it puts all mass on that observation's value of every target; elsewhere it predicts the floor.
+    "clairvoyant": (_FLOOR +
+                    "    action = p['legal_actions'][0]\n"
+                    "    def found(v):\n"
+                    "        if isinstance(v, dict):\n"
+                    "            if all(tg['field'] in v for tg in targets): return [v]\n"
+                    "            keyed = [v[k] for k in (str(action), action) if k in v]\n"
+                    "            return [o for x in keyed + list(v.values()) for o in found(x)]\n"
+                    "        return [o for x in v for o in found(x)] if isinstance(v, list) else []\n"
+                    "    leaks = found({k: v for k, v in p.items() if k not in ('t', 'observation', 'legal_actions')})\n"
+                    "    for tg in targets if leaks else []:\n"
+                    "        if leaks[0][tg['field']] in tg['support']:\n"
+                    "            pred[tg['name']] = [float(x == leaks[0][tg['field']]) for x in tg['support']]\n"
+                    "    reply(msg['id'], {'action': action, 'prediction': pred})"),
     # P7: predicts a target the manifest does not declare.
     "undeclared": 'reply(msg["id"], {"action": p["legal_actions"][0], "prediction": {"undeclared": [0.5, 0.5]}})',
     # P7: predicts the first target with one probability fewer than its support, uniformly.

@@ -1,0 +1,7 @@
+# pins runs via Actions API (never gh pr checks), read 2026-10-07T15:00:49Z as assize-reviewer
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=ba332ade6a8a8b3176b5b17adbcdd3a91ef4b679&event=pull_request" -q '.workflow_runs[] | select(.name=="pins") | ...'
+completed success 37618683123 attempt=1 created=2026-10-07T12:06:36Z updated=2026-10-07T12:21:56Z https://github.com/renavondata/assize/actions/runs/37618683123
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=cb09d10b7ae067bc9be74129e9921b142cf4a1cf&event=pull_request" -q '.workflow_runs[] | select(.name=="pins") | ...'
+completed success 37616240221 attempt=1 created=2026-10-07T11:45:24Z updated=2026-10-07T11:55:32Z https://github.com/renavondata/assize/actions/runs/37616240221
+# run 37618683123 artifact pins-report: pins.jsonl summary row
+{"clean_failed": 0, "clean_ok": 20, "clean_total": 20, "exit_code": 0, "inconclusive": 0, "killed": 39, "kind": "summary", "leaked": 0, "mutants_total": 39, "non_causal": 0, "phase": "all", "registry": "harness", "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 39, "twins_total": 39}

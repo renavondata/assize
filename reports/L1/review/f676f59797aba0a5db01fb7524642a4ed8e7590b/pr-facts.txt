@@ -1,0 +1,53 @@
+# PR #21 facts, read 2026-10-07T11:08:45Z by assize-reviewer
+PR #21 author=assize-reviewer constitution-4@f676f59797aba0a5db01fb7524642a4ed8e7590b -> master labels=[] files=[".github/workflows/measure.yml",".github/workflows/pins.yml","reports/L1/STATUS.md","reports/L1/make-pins-3f82afb.txt"]
+
+f676f59 Guy Freeman | L1: STATUS after timeout change; make pins transcript at 3f82afb
+Proposer: guy
+Proposer: builder claude-opus-5-5 cfb349f0-6deb-4625-86b5-c7443972dc9f
+
+3f82afb Guy Freeman | .github: pins timeout 30 min, measure timeout 45 min
+Proposer: guy
+
+## diff
+diff --git a/.github/workflows/measure.yml b/.github/workflows/measure.yml
+index d0d2c28..4521511 100644
+--- a/.github/workflows/measure.yml
++++ b/.github/workflows/measure.yml
+@@ -12,7 +12,7 @@ jobs:
+   measure:
+     if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'measure'
+     runs-on: [self-hosted, measure]
+-    timeout-minutes: 60
++    timeout-minutes: 45
+     env:
+       ASSIZE_HOST: measure
+     steps:
+diff --git a/.github/workflows/pins.yml b/.github/workflows/pins.yml
+index 714556b..16e7ad3 100644
+--- a/.github/workflows/pins.yml
++++ b/.github/workflows/pins.yml
+@@ -9,7 +9,7 @@ permissions:
+ jobs:
+   pins:
+     runs-on: ubuntu-latest
+-    timeout-minutes: 15
++    timeout-minutes: 30
+     steps:
+       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+         with:
+## measure.yml run durations (last 13)
+37561995448 b6ed5a9 success 2026-10-07T02:26:34Z 2026-10-07T02:36:01Z
+37559908539 2c70242 success 2026-10-07T02:00:49Z 2026-10-07T02:09:33Z
+37557842476 d190bfc success 2026-10-07T01:35:13Z 2026-10-07T01:44:30Z
+37552507715 80b7e8f success 2026-10-07T00:32:30Z 2026-10-07T00:41:24Z
+37547407186 6a3e54a success 2026-10-06T23:35:36Z 2026-10-06T23:44:29Z
+37540447019 36d2a1f success 2026-10-06T22:25:07Z 2026-10-06T22:33:10Z
+37532821213 0a9da74 success 2026-10-06T21:17:30Z 2026-10-06T21:26:25Z
+37525910249 6ef8006 success 2026-10-06T20:22:10Z 2026-10-06T20:29:28Z
+37523385036 7bbadbf success 2026-10-06T20:02:11Z 2026-10-06T20:09:58Z
+37484737316 3210f7e success 2026-10-06T15:07:35Z 2026-10-06T15:10:49Z
+37457660562 8270085 failure 2026-10-06T11:37:41Z 2026-10-06T11:37:58Z
+37445779465 7c4e937 skipped 2026-10-06T09:50:56Z 2026-10-06T09:50:57Z
+37369883675 744868f success 2026-10-05T20:27:48Z 2026-10-05T20:29:58Z
+## ledger recompute (L0+L1 forecasts.jsonl at f676f59)
+claims 54; resolved 39; log-loss 11.814 vs 0.5 base 27.033

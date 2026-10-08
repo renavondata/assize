@@ -1,0 +1,3 @@
+delta 0.25: expected-mass m* normal 105.1, PR bootstrap (103, 0.901545); assurance-reading m* normal 210.2; P(posterior mass >= 0.9) at PR m* = 0.696; posterior mass at the median experiment = 0.964
+delta 0.5: expected-mass m* normal 26.3, PR bootstrap (26, 0.904866); assurance-reading m* normal 52.6; P(posterior mass >= 0.9) at PR m* = 0.699; posterior mass at the median experiment = 0.964
+delta 1.0: expected-mass m* normal 6.6, PR bootstrap (7, 0.9181429999999999); assurance-reading m* normal 13.1; P(posterior mass >= 0.9) at PR m* = 0.722; posterior mass at the median experiment = 0.969

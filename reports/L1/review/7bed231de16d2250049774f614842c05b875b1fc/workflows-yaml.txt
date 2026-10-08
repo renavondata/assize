@@ -1,0 +1,17 @@
+# workflow YAML parse at 7bed231 (2026-10-08T00:46:33Z), python3 yaml.safe_load (GitHub Actions also rejects these: see push runs below)
+build FAIL while parsing a flow mapping |   in ".github/workflows/build.yml", line 29, column 15 | expected ',' or '}', but got '{' |   in ".github/workflows/build.yml", line 29, column 30
+review FAIL while parsing a flow mapping |   in ".github/workflows/review.yml", line 26, column 15 | expected ',' or '}', but got '{' |   in ".github/workflows/review.yml", line 26, column 31
+stale OK
+pins OK
+measure OK
+## offending lines
+build.yml:29:         with: { name: build-${{ github.run_id }}, path: build.log, retention-days: 14 }
+review.yml:26:         with: { name: review-${{ github.run_id }}, path: review.log, retention-days: 14 }
+## Actions runs on head_sha 7bed231 (all events)
+pins event=pull_request in_progress null id=37709335616 created=2026-10-08T00:44:31Z https://github.com/renavondata/assize/actions/runs/37709335616
+PR #23 event=dynamic completed success id=37709335414 created=2026-10-08T00:44:31Z https://github.com/renavondata/assize/actions/runs/37709335414
+.github/workflows/build.yml event=push completed failure id=37672284000 created=2026-10-07T19:09:00Z https://github.com/renavondata/assize/actions/runs/37672284000
+.github/workflows/review.yml event=push completed failure id=37672285600 created=2026-10-07T19:09:00Z https://github.com/renavondata/assize/actions/runs/37672285600
+jobs in run 37672284000: 0
+jobs in run 37672285600: 0
+note: a run named by its file path with 0 jobs and conclusion failure is GitHub's record of a workflow file it could not parse.

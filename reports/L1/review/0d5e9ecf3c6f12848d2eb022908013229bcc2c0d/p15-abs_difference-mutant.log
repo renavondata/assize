@@ -1,0 +1,38 @@
+copy of /tmp/assize-review-0d5e9ecf3c6f12848d2eb022908013229bcc2c0d
+  at /tmp/assize-scratch-d62a86s6/assize-copy-z_19_c7f/repo
+applied 1 edit(s) from harness/edits/P15_abs_difference.toml
+pin:       P15
+protects:  time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict
+role:      mutant
+tree:      /tmp/assize-scratch-d62a86s6/assize-copy-z_19_c7f/repo
+invoked:   /tmp/assize-review-0d5e9ecf3c6f12848d2eb022908013229bcc2c0d
+scratch:   /tmp/assize-scratch-d62a86s6
+  [ok] pilot config is the brief's default ({'world': 'crafter', 'episodes': 200, 'cap_s': 7200})
+  [ok] time-to-learn config is the brief's ({'deltas': [0.25, 0.5, 1.0], 'mass': 0.9, 'fit_delta': 0.5, 'marginal_delta': 1.0, 'budget_s': 86400, 'experiments': 1000, 'posterior_draws': 1000, 'seed': 0})
+  delta 0.25: episodes per arm (1, 1.0), normal oracle 105.11
+  [FAIL] delta 0.25: m* 1 within x1.5 of the oracle 105.11
+  [ok] delta 0.25: measure at m* 1.0000 >= 0.9
+  [ok] delta 0.25: m* is the smallest: measure at m*-1 None
+  delta 0.5: episodes per arm (1, 1.0), normal oracle 26.28
+  [FAIL] delta 0.5: m* 1 within x1.5 of the oracle 26.28
+  [ok] delta 0.5: measure at m* 1.0000 >= 0.9
+  [ok] delta 0.5: m* is the smallest: measure at m*-1 None
+  delta 1.0: episodes per arm (1, 1.0), normal oracle 6.57
+  [FAIL] delta 1.0: m* 1 within x1.5 of the oracle 6.57
+  [ok] delta 1.0: measure at m* 1.0000 >= 0.9
+  [ok] delta 1.0: m* is the smallest: measure at m*-1 None
+  [ok] no incumbent variance: one episode per arm, all mass on the correct sign ((1, 1.0))
+  [FAIL] fixture separates the verdicts: m* 1 for 1.0 < m* 1 for 0.5
+  1 episodes per arm affordable: [(0.25, 1, 69120.0), (0.5, 1, 69120.0), (1.0, 1, 69120.0)]
+  [ok] FIT: the budget affords 1 episodes per arm, both arms run
+  [ok] FIT: wall-clock counts both arms
+  [ok] 1 episodes per arm affordable: verdict FIT, want FIT
+  0 episodes per arm affordable: [(0.25, None, None), (0.5, None, None), (1.0, None, None)]
+  [ok] MARGINAL: the budget affords 0 episodes per arm, both arms run
+  [ok] MARGINAL: wall-clock counts both arms
+  [FAIL] 0 episodes per arm affordable: verdict UNFIT, want MARGINAL
+  0 episodes per arm affordable: [(0.25, None, None), (0.5, None, None), (1.0, None, None)]
+  [ok] UNFIT: the budget affords 0 episodes per arm, both arms run
+  [ok] UNFIT: wall-clock counts both arms
+  [ok] 0 episodes per arm affordable: verdict UNFIT, want UNFIT
+result:    FAIL

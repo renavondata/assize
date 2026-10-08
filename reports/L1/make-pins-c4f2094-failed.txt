@@ -1,0 +1,89 @@
+07:53:04Z
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 24 pins, 51 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (3.04s) out/pins/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.382s) out/pins/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.033s) out/pins/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (4.989s) out/pins/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.435s) out/pins/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.431s) out/pins/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.793s) out/pins/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.303s) out/pins/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.334s) out/pins/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.586s) out/pins/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.372s) out/pins/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.287s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0m: observed fail -> FAILED (0.336s) out/pins/runs/P0m/clean/transcript.log
+CLEAN FAILED: P0m (observed fail)
+[clean ] P1: observed pass -> ok (2.038s) out/pins/runs/P1/clean/transcript.log
+[clean ] P2: observed pass -> ok (1.036s) out/pins/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (22.822s) out/pins/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (6.795s) out/pins/runs/P4/clean/transcript.log
+[clean ] P5: observed pass -> ok (3.842s) out/pins/runs/P5/clean/transcript.log
+[clean ] P14: observed pass -> ok (4.493s) out/pins/runs/P14/clean/transcript.log
+[clean ] P15: observed pass -> ok (10.148s) out/pins/runs/P15/clean/transcript.log
+[clean ] P7: observed pass -> ok (8.714s) out/pins/runs/P7/clean/transcript.log
+[clean ] P10: observed pass -> ok (8.506s) out/pins/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.436s) out/pins/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (9.699s) out/pins/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (2.997s + 2.997s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.441s + 0.395s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.046s + 1.045s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.05s + 5.001s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.102s + 1.448s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.347s + 1.347s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.246s + 1.746s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.412s + 12.36s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.46s + 12.309s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.462s + 12.641s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (10.164s + 12.423s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.01s + 12.394s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.348s + 0.346s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.344s + 0.345s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.617s + 0.596s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.294s + 0.293s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.294s + 0.295s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin fail -> NON-CAUSAL (0.346s + 0.345s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+MUTANT NON-CAUSAL: P0m/trailer_check_disabled
+[mutant] P0m/first_proposer_only: mutant fail, twin fail -> NON-CAUSAL (0.347s + 0.344s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+MUTANT NON-CAUSAL: P0m/first_proposer_only
+[mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (1.797s + 2.048s) out/pins/runs/P1/seed_reissued/mutant/transcript.log
+[mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.002s + 2.197s) out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+[mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (1.996s + 1.998s) out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+[mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (1.898s + 2.0s) out/pins/runs/P1/training_undomained/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.104s + 1.044s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.045s + 0.995s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.295s + 1.049s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.048s + 0.996s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (23.378s + 24.086s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (7.204s + 7.056s) out/pins/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (7.054s + 7.104s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (7.204s + 7.157s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (7.058s + 7.004s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (4.753s + 4.201s) out/pins/runs/P5/next_sent_early/mutant/transcript.log
+[mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (4.852s + 4.804s) out/pins/runs/P14/first_legal_action/mutant/transcript.log
+[mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (4.752s + 4.8s) out/pins/runs/P14/floor_unsmoothed/mutant/transcript.log
+[mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (4.858s + 4.803s) out/pins/runs/P14/seen_not_reset/mutant/transcript.log
+[mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (0.946s + 10.16s) out/pins/runs/P15/abs_difference/mutant/transcript.log
+[mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (4.498s + 10.114s) out/pins/runs/P15/shift_dropped/mutant/transcript.log
+[mutant] P15/one_arm: mutant fail, twin pass -> KILLED (3.401s + 10.11s) out/pins/runs/P15/one_arm/mutant/transcript.log
+[mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (11.545s + 10.161s) out/pins/runs/P15/budget_one_arm/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (9.257s + 9.109s) out/pins/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (9.513s + 8.409s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (9.159s + 9.062s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (18.523s + 8.607s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.445s + 0.446s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (9.912s + 9.711s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (10.211s + 9.757s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (9.763s + 9.66s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (9.006s + 9.711s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (3.35s + 9.71s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (9.713s + 9.709s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 23/24 passed, 1/24 failed
+mutants: 49/51 killed, 0/51 survived, 0/51 inconclusive, 0/51 stale, 2/51 non-causal, 0 leaked (clean and mutant)
+twins: 49/51 passed
+report: out/pins/pins.jsonl
+PINS FAILED
+make: *** [Makefile:13: pins] Error 1
+exit 2
+08:04:35Z

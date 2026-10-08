@@ -1,0 +1,7 @@
+# The random incumbent's candidate image (brief 1 section 4). The base is the judge's candidate base image, pinned by
+# the same digest as `judge/config.toml` [candidate] base_image (P14 checks they are equal). Nothing is installed, so
+# the image builds with no network; the agent is the standard library only.
+FROM docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+COPY agent.py /incumbent/agent.py
+ENTRYPOINT ["python", "-I", "-B", "/incumbent/agent.py"]
+CMD []

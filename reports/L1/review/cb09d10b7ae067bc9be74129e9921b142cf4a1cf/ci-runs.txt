@@ -1,0 +1,10 @@
+# gh api actions/runs?head_sha=<sha>&event=pull_request, name==pins, at 2026-10-07T11:57:04Z
+cb09d10b7ae067bc9be74129e9921b142cf4a1cf completed success 37616240221 1 2026-10-07T11:45:24Z 2026-10-07T11:55:32Z https://github.com/renavondata/assize/actions/runs/37616240221
+d5f8217a3836d461a555df1e01d7717b734ecceb completed success 37614332392 1 2026-10-07T11:28:38Z 2026-10-07T11:43:58Z https://github.com/renavondata/assize/actions/runs/37614332392
+# job log of run 37616240221, summary lines
+2026-10-07T11:55:27.4858615Z [clean ] P0l: observed pass -> ok (0.226s) out/pins/runs/P0l/clean/transcript.log
+2026-10-07T11:55:27.4888252Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.235s + 0.235s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+2026-10-07T11:55:27.4910250Z PINS PASSED
+2026-10-07T11:55:27.4908552Z clean: 20/20 passed, 0/20 failed
+2026-10-07T11:55:27.4909075Z mutants: 39/39 killed, 0/39 survived, 0/39 inconclusive, 0/39 stale, 0/39 non-causal, 0 leaked (clean and mutant)
+2026-10-07T11:55:27.4909613Z twins: 39/39 passed

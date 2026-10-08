@@ -160,6 +160,8 @@ class Commit:
     sha: str
     parties: tuple[str, ...]
     paths: tuple[str, ...]
+    merge: bool = False
+    author: str = ""
 
 
 def parties(trailer_values: str) -> tuple[str, ...]:
@@ -183,6 +185,29 @@ def exempt_parties(sha: str, message: str, exemptions: Mapping[str, str]) -> tup
     return (party,) if party is not None and f"Proposer: {party}" in message.splitlines() else ()
 
 
+# Brief 1 A9: a commit with more than one parent is a GitHub merge, whose proposer is its author account and which needs
+# no trailer. GitHub sets a merge's author from the merging account: its noreply address `<id>+<login>@users.noreply.
+# github.com`, or an address the account's owner commits under (ACCOUNT_EMAILS; Guy's two stated on 2026-10-08). Any
+# other author on a merge has no party.
+MERGE_AUTHORS: Mapping[str, str] = {"gfrmin": "guy", "assize-builder": "builder", "assize-reviewer": "reviewer"}
+ACCOUNT_EMAILS: Mapping[str, str] = {"guy@publicdatamarket.com": "gfrmin", "git@gfrm.in": "gfrmin",
+                                     "assize-builder@gfrm.in": "assize-builder",
+                                     "assize-reviewer@gfrm.in": "assize-reviewer"}
+NOREPLY = re.compile(r"^(?:\d+\+)?([A-Za-z0-9-]+)@users\.noreply\.github\.com$")
+
+
+def account(email: str) -> str | None:
+    """The GitHub account an author address names: a noreply address's login, or a listed bot address's account."""
+    m = NOREPLY.match(email)
+    return m.group(1) if m else ACCOUNT_EMAILS.get(email)
+
+
+def merge_parties(email: str) -> tuple[str, ...]:
+    """The one party of a merge authored by `email`, from MERGE_AUTHORS; none for any other author."""
+    party = MERGE_AUTHORS.get(account(email))
+    return (party,) if party is not None else ()
+
+
 def codeowners_patterns(text: str) -> tuple[str, ...]:
     return tuple(line.split()[0].lstrip("/") for line in text.splitlines()
                  if line.strip() and not line.lstrip().startswith("#"))
@@ -194,10 +219,13 @@ def entrenched(path: str, patterns: Sequence[str]) -> bool:
 
 def commit_findings(c: Commit, patterns: Sequence[str]) -> list[Finding]:
     where = f"commit {c.sha[:12]}"
+    if c.merge and not c.parties:
+        return [Finding(where, "unknown_merge_author",
+                        f"merge authored by {c.author!r}, no account of {sorted(MERGE_AUTHORS)}")]
     if not c.parties:
         return [Finding(where, "no_proposer", "no `Proposer:` trailer")]
     malformed = [Finding(where, "bad_party", f"{p!r} is not `guy` or `<kind> <model> <session>`")
-                 for p in c.parties if not PARTY.match(p)]
+                 for p in c.parties if not (PARTY.match(p) or c.merge and p in MERGE_AUTHORS.values())]
     touched = sorted(p for p in c.paths if entrenched(p, patterns))
     unsigned = ([Finding(where, "entrenched_without_guy", f"touches {touched}; parties {list(c.parties)}")]
                 if touched and "guy" not in c.parties else [])
@@ -216,15 +244,17 @@ def _git(repo: Path, *args: str) -> str:
 def branch_commits(repo: Path, base: str, head: str = "HEAD",
                    exemptions: Mapping[str, str] = PROPOSER_EXEMPTIONS) -> list[Commit]:
     """Commits in base..head, oldest first, with their `Proposer:` parties (parsed by git; for a commit with none,
-    its exempted party, if any) and the paths each changes itself: for a merge, only paths differing from every
-    parent (`-c`), so content a merge brings in from its other parent is attributed to the commit that authored it."""
-    fmt = "%H%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f%B%x1d"
+    its exempted party, if any; for a merge, its author account's party only, brief 1 A9) and the paths each changes
+    itself: for a merge, only paths differing from every parent (`-c`), so content a merge brings in from its other parent is attributed to the commit that authored it."""
+    fmt = "%H%x1f%P%x1f%ae%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f%B%x1d"
     records = [r.strip("\n") for r in _git(repo, "log", "--reverse", f"--format={fmt}", f"{base}..{head}")
                .split("\x1d") if r.strip()]
 
     def commit(record: str) -> Commit:
-        sha, values, message = record.split("\x1f", 2)
+        sha, parents, email, values, message = record.split("\x1f", 4)
         paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", "-c", sha).splitlines()
-        return Commit(sha, parties(values) or exempt_parties(sha, message, exemptions), tuple(paths))
+        if len(parents.split()) > 1:
+            return Commit(sha, merge_parties(email), tuple(paths), merge=True, author=email)
+        return Commit(sha, parties(values) or exempt_parties(sha, message, exemptions), tuple(paths), author=email)
 
     return [commit(r) for r in records]

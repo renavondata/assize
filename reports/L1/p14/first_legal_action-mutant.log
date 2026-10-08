@@ -1,0 +1,36 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-ye_gyn1y/assize-copy-pc0unm_b/repo
+applied 1 edit(s) from harness/edits/P14_first_legal_action.toml
+pin:       P14
+protects:  the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor
+role:      mutant
+tree:      /tmp/assize-scratch-ye_gyn1y/assize-copy-pc0unm_b/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-ye_gyn1y
+  [ok] the incumbent's one FROM is the judge's pinned base image (['docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce'], docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce)
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman incumbent image: sha256:e6892995e95f6871d020a4b2f09dcd2d9348806fcfc037aea2cc73c2be86655f
+  podman incumbent: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 100, "utility": 0, "prediction": {"health": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 26.86386788145704, "log_loss": 26.86386788145704}, "food": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 159.82658310309142, "log_loss": 159.82658310309142}, "drink": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 180.19273490981726, "log_loss": 180.19273490981726}, "energy": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 150.33709039117062, "log_loss": 150.33709039117062}, "wood": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 26.86386788145704, "log_loss": 26.86386788145704}, "stone": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 26.86386788145704, "log_loss": 26.86386788145704}}, "compute": {"cpu_s": 0.090711, "wall_s": 0.7430072140414268, "peak_memory_bytes": 12103680, "unmeasured_s": 0.0}}, {"episode": 1, "termination": "truncated", "detail": "", "steps": 100, "utility": 0, "prediction": {"health": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 26.86386788145704, "log_loss": 26.86386788145704}, "food": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 159.82658310309142, "log_loss": 159.82658310309142}, "drink": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 180.19273490981726, "log_loss": 180.19273490981726}, "energy": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 150.33709039117062, "log_loss": 150.33709039117062}, "wood": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 26.86386788145704, "log_loss": 26.86386788145704}, "stone": {"scored": 100, "missing": 0, "infinite": 0, "finite_sum": 26.86386788145704, "log_loss": 26.86386788145704}}, "compute": {"cpu_s": 0.041159, "wall_s": 0.27072993002366275, "peak_memory_bytes": 12328960, "unmeasured_s": 0.0}}]
+  [ok] podman: 2 episodes, each ended by the World ([('truncated', 100), ('truncated', 100)])
+  [ok] podman episode 0: non-vacuous: 100 steps, the floor positive everywhere
+  [ok] podman episode 0 health: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}
+  [ok] podman episode 0 food: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 159.82658310309142, 'log_loss': 159.82658310309142}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 159.82658310309142, 'log_loss': 159.82658310309142}
+  [ok] podman episode 0 drink: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 180.19273490981726, 'log_loss': 180.19273490981726}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 180.19273490981726, 'log_loss': 180.19273490981726}
+  [ok] podman episode 0 energy: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 150.33709039117062, 'log_loss': 150.33709039117062}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 150.33709039117062, 'log_loss': 150.33709039117062}
+  [ok] podman episode 0 wood: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}
+  [ok] podman episode 0 stone: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}
+  [ok] podman episode 1: non-vacuous: 100 steps, the floor positive everywhere
+  [ok] podman episode 1 health: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}
+  [ok] podman episode 1 food: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 159.82658310309142, 'log_loss': 159.82658310309142}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 159.82658310309142, 'log_loss': 159.82658310309142}
+  [ok] podman episode 1 drink: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 180.19273490981726, 'log_loss': 180.19273490981726}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 180.19273490981726, 'log_loss': 180.19273490981726}
+  [ok] podman episode 1 energy: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 150.33709039117062, 'log_loss': 150.33709039117062}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 150.33709039117062, 'log_loss': 150.33709039117062}
+  [ok] podman episode 1 wood: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}
+  [ok] podman episode 1 stone: recorded {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}, floor derived {'scored': 100, 'missing': 0, 'infinite': 0, 'finite_sum': 26.86386788145704, 'log_loss': 26.86386788145704}
+  podman actions: 200 played, counts [200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; chi-square 3200.000, df 16, p 0
+  [ok] podman: the legal set is all 17 actions, so uniform means 11.76 each
+  [FAIL] podman: actions uniform over the legal ones: p 0 >= 1e-06
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (1 failed)
+result:    FAIL

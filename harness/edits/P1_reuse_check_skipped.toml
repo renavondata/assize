@@ -1,0 +1,5 @@
+# P1's mutant `reuse_check_skipped`: the issuance check no longer compares a seed's key with those issued before.
+[[edit]]
+path = "judge/seeds.py"
+old = "        bad = [s for s, k in keyed if k in used]\n"
+new = "        bad = []\n"

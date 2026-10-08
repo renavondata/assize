@@ -1,0 +1,34 @@
+# probe: P5 under an unregistered mutant that nests the next observation (under every legal action, from a deepcopy of the World) inside the step's `observation` as key "upcoming". Scratch copy /tmp/review25-probe-A6ms of 5f2be90 (git archive), edit:
+         c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest}, t, deadline)
+         while not world.done:
+             legal = world.legal_actions
+-            result = c.call("step", {"t": world.t, "observation": world.observation, "legal_actions": legal},
++            result = c.call("step", {"t": world.t, "observation": {**world.observation, "upcoming": {str(a): __import__("copy").deepcopy(world).step(a) for a in legal}}, "legal_actions": legal},
+                             t, deadline)
+             if result.get("action") not in legal:
+                 raise Failure("illegal_action", f"t={world.t}: action {result.get('action')!r} not legal")
+2026-10-08T06:35:54Z
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 194ms
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman floor: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "food": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "wood": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "stone": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}}, "compute": {"cpu_s": 0.06367, "wall_s": 0.5819694580277428, "peak_memory_bytes": 11386880, "unmeasured_s": 0.0}}]
+  [ok] podman floor: one episode of 5 steps, ended by the World
+  podman clairvoyant: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "food": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "wood": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}, "stone": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 6.215607598755275, "log_loss": 6.215607598755275}}, "compute": {"cpu_s": 0.065387, "wall_s": 0.5886258960235864, "peak_memory_bytes": 11493376, "unmeasured_s": 0.0}}]
+  [ok] podman clairvoyant: one episode of 5 steps, ended by the World
+  [ok] podman: non-vacuous: the floor scores every declared target finite and positive at every step
+  [ok] podman clairvoyant health: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant food: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant drink: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant energy: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant wood: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant stone: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+P5 RESULT True
+2026-10-08T06:35:58Z

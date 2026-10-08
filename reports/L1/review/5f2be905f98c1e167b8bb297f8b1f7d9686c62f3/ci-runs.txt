@@ -1,0 +1,6 @@
+$ gh api repos/renavondata/assize/actions/runs?head_sha=3289fd725570a10ce49fa34af330cfedc6af7632&event=pull_request (pins)
+3289fd725570a10ce49fa34af330cfedc6af7632 completed success 37735250569 attempt 1 2026-10-08T06:00:18Z https://github.com/renavondata/assize/actions/runs/37735250569
+$ gh api repos/renavondata/assize/actions/runs?head_sha=1e518e56269230f5c16c2b3b4fa864a14cef2c35&event=pull_request (pins)
+1e518e56269230f5c16c2b3b4fa864a14cef2c35 completed success 37736127505 attempt 1 2026-10-08T06:10:01Z https://github.com/renavondata/assize/actions/runs/37736127505
+$ gh api repos/renavondata/assize/actions/runs?head_sha=5f2be905f98c1e167b8bb297f8b1f7d9686c62f3&event=pull_request (pins)
+5f2be905f98c1e167b8bb297f8b1f7d9686c62f3 in_progress null 37737483327 attempt 1 2026-10-08T06:25:04Z https://github.com/renavondata/assize/actions/runs/37737483327

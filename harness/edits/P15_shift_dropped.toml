@@ -1,0 +1,5 @@
+# P15's mutant `shift_dropped` (brief 1 section 5): the candidate arm is not shifted by delta.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """cfg["posterior_draws"]) + delta) - """
+new = """cfg["posterior_draws"]) + 0 * delta) - """
