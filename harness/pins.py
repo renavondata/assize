@@ -1586,9 +1586,9 @@ def p9_ledger_tamper() -> bool:
         led, private = work / "ledger.jsonl", work / "private"
         (a_id, a), (b_id, b) = P9_REQUESTS
         try:
-            ledger.append(led, private, a_id, a)
+            held_a = ledger.append(led, private, a_id, a)
             first = led.read_bytes()
-            ledger.append(led, private, b_id, b)
+            held_b = ledger.append(led, private, b_id, b)
             written = led.read_bytes()
             rows = [json.loads(line) for line in written.splitlines()]
         except (ValueError, OSError) as e:
@@ -1602,11 +1602,11 @@ def p9_ledger_tamper() -> bool:
         derived = _rechained(rows, lambda rid: hashlib.sha256(rid.encode()).hexdigest())
         expect(rows == derived, "every prev_sha256 and sha256 equals its derivation: first records from the SHA-256 "
                                 "of the request_id, each next from the previous sha256")
-        anchor = rows[-1]["sha256"]
+        anchor = held_b[-1]["sha256"]  # the head the caller holds: the last record `append` returned to it
         code, out = _verify_cli(led, private, anchor)
         print("  " + out.replace("\n", "\n  "))
         expect(code == 0, f"verify passes the ledger as written, anchored at request b's head (exit {code})")
-        code, out = _verify_cli(led, private, rows[len(a) - 1]["sha256"])
+        code, out = _verify_cli(led, private, held_a[-1]["sha256"])
         expect(code == 0, f"verify passes it anchored at request a's head, a later request admitted (exit {code})")
         try:
             ledger.append(led, private, a_id, a)
