@@ -1,0 +1,8 @@
+  clean: true
+[clean ] P0l: observed pass -> ok (0.334s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.535s) out/pins/runs/P0m/clean/transcript.log
+[mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.357s + 0.356s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+clean: 32/32 passed, 0/32 failed
+mutants: 83/83 killed, 0/83 survived, 0/83 inconclusive, 0/83 stale, 0/83 non-causal, 0 leaked (clean and mutant)
+twins: 83/83 passed
+PINS PASSED
