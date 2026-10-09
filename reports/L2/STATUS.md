@@ -1,7 +1,7 @@
 # STATUS — L2 — 2026-10-09 — 592e1d8 — PR #35
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in root REPORT.md, adds or opens no brief)
-pins: clean 32/32; mutants 83/83 KILLED; twins 83/83; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at 592e1d8, steel-legend, 03:23:02Z–03:37:30Z: reports/L2/make-pins-592e1d8.txt; transcripts reports/L2/p19p20/)
+pins: clean 32/32; mutants 83/83 KILLED; twins 83/83; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at 592e1d8, steel-legend, 03:23:02Z–03:37:30Z: reports/L2/make-pins-592e1d8.txt; transcripts reports/L2/p19p20/; pins CI run 37880173083 on 592e1d8: success, attempt 1; record reports/L2/ci/37880173083.json, cited by the F1 fix session)
 changed: judge/{evaluate.py,price.py,episodes.py,config.toml,README.md}; worlds/spec/{manifest.schema.json,README.md}; worlds/crafter/manifest.json; harness/{pins.py,proposer.toml,edits/P19_world_table_hardcoded.toml,edits/P20_crafter_price_fallback.toml,edits/P17_seeds_before_proposer.toml}; reports/L2/
 did: L2a item 1 (brief 2 A2): the judge binds every worlds/<name>/ holding manifest.json beside binding.py (evaluate.bound); no World table left in judge/
 did: price is data: manifest `price` {cpu_s, memory_gb_s, rationale}, required by manifest.schema.json; Crafter's moved from judge/config.toml unchanged, derivation in rationale; evaluate() refuses `unpriced` before any seed
