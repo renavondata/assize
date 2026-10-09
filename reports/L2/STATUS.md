@@ -1,20 +1,24 @@
-# STATUS — L2 — 2026-10-09 — d11b2e8 — PR #48
+# STATUS — L2 — 2026-10-09 — eea8253 — PR #52
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in root REPORT.md, adds or opens no brief)
-pins: clean 33/33; mutants 87/87 KILLED; twins 87/87; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at d11b2e8, 13:04:49Z–13:25:09Z: reports/L2/make-pins-d11b2e8.txt; pins CI run 37934349490 on d11b2e8: success, attempt 1; record reports/L2/ci/37934349490.json)
-changed: CLAUDE.md; .claude/commands/audit.md; harness/{ledger.py,claims.py,pins.py,README.md,proposer.toml,edits/P0n_ranking_reversed.toml}; reports/L2/{STATUS.md,forecasts.jsonl,make-pins-d11b2e8.txt,ci/37934349490.json}
-did: closed #39 (PR #45 merged 2026-10-09T12:45:10Z)
-did: Instruction #46 items 1, 2, 5: CLAUDE.md Amendment 2 (text and seven criteria verbatim); /audit command; `python -m harness.ledger surprise --since <sha>`, pin P0n, mutant ranking_reversed KILLED
-did: items 3, 4 (audit.yml; failed.yml failed-run label) written but NOT pushed: push refused, builder token lacks workflow scope; diff in the PR body
-did: item 6 (first audit on dispatch) follows the merge; not done here
-decided (not asked): claims.py admits proposer kind `auditor` in forecasts (P0k) and Proposer trailers (P0m), one fixture case each; required by the amendment's "proposer kind `auditor`" — p(stands on review)=0.7
-decided (not asked): the Auditor's distribution is four binary A1.6 forecasts, one per bin, p summing to 1, so P0k holds unchanged — p=0.75
-decided (not asked): Auditor model `claude-fable-5-1` (Builder runs default Opus, Reviewer sonnet) — p=0.8
-decided (not asked): the record against the Reviewer is a `passed by` field on the audit finding, not a ledger row (a non-forecast, non-resolution row fails P0k) — p=0.6
-decided (not asked): a PR's forecasts are the forecast rows its merge adds to a ledger; outcome is the last resolution at head; unresolved add no loss and are counted — p=0.75
-decided (not asked): the window starts at the sha in the newest audit-<sha>.md filename, or at the root commit if no audit exists — p=0.8
-forecasts: made 3 (832503334df8 pins green first CI run p=0.8; d64cdd5aad2c Reviewer ACCEPT p=0.55; 6bc4332fc253 L2 NetHack host verdict FIT p=0.35); resolved 0 this session; ledger L0–L2: 117 claims, 108 resolved; cumulative log-loss 42.641 vs base rate 74.860 (0.5) over 108
-obligations added: L3: failed.yml opens issues with GITHUB_TOKEN, whose events trigger no workflow, so audit.yml's `issues: labeled failed-run` trigger cannot fire from them; route via workflow_dispatch or another token
-obligations added: L3: audit PRs are authored by assize-reviewer, which A1.3 bars from approving them; only Guy can
-NEEDS YOU (at most 1): push the .github/ diff in PR #48's body to its branch (commit with `Proposer: guy`; the builder token lacks workflow scope), then approve and merge (entrenched)
-next: close #46 once PR #48 merges and dispatch audit.yml (item 6); then L2a obligation 2 of reports/L1/REPORT.md (P9 request-a bytes before parsing), then 3; then Ax item 2, Ay items in order, Az
+pins: clean 34/34; mutants 89/89 KILLED; twins 89/89; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at eea8253, 14:17:30Z–14:38:09Z: reports/L2/make-pins-eea8253.txt; pins CI run 37943125821 on eea8253: success, attempt 1; record reports/L2/ci/37943125821.json)
+changed: CLAUDE.md; .claude/commands/{vizier.md,build.md,audit.md}; harness/{claims.py,ledger.py,pins.py,README.md,proposer.toml,edits/P0m_*,edits/P0o_overturned_scored_success.toml}; reports/L2/{STATUS.md,forecasts.jsonl,make-pins-eea8253.txt,ci/37943125821.json}
+did: #46 is with Guy in PR #48 (Reviewer ACCEPT WITH OBLIGATIONS); took the next signed instruction, #49, stacked on #48 (PR base instr-46-auditor-role)
+did: CLAUDE.md Amendment 3 "The sovereign" + act-alone list verbatim; /vizier (record before act; triggers: wish, awaits-guy, assigned, failed-run, boundary brief, daily, act-alone list)
+did: signer check: claims.instruction_labeler reads the timeline; authorises needs gfrmin's label, admits signed drafts; /build acts only on `python -m harness.claims signed`; P0m mutant instruction_labeler_unchecked KILLED
+did: `python -m harness.ledger proposer <kind>`, P0o mutant overturned_scored_success KILLED; /audit samples the Vizier's three worst resolved forecasts; labels wish, draft created
+did: vizier.yml written, NOT pushed (builder token lacks workflow scope, as PR #48); diff in the PR body
+decided (not asked): stack #49 on #48 with base instr-46-auditor-role, retarget to master after #48 merges; #49 depends on the Auditor — p(stands on review)=0.7
+decided (not asked): Vizier has no Contents write yet must append to forecasts.jsonl: records go as `vizier-ledger: <row>` comments before each act; the Auditor transcribes them; the Reviewer of the audit PR resolves them (A1.6) — p=0.5
+decided (not asked): the boundary brief is posted as an issue `Sovereign brief at L<n>` assigned to gfrmin; the Auditor commits it as reports/L<n>/sovereign-brief.md — p=0.55
+decided (not asked): no Telegram notifier in this repo; the daily line is comments addressed to @gfrmin, relayed by whatever notifier forwards them — p=0.6
+decided (not asked): the labeler rule applies to every instruction issue, not only drafts (#38, #39, #46, #49, #50 were all labelled by gfrmin) — p=0.75
+decided (not asked): Vizier model claude-haiku-5-5, so Builder (default Opus), Reviewer (sonnet), Auditor (fable) and Vizier are four distinct models — p=0.55
+decided (not asked): Vizier forecast rows add `class` and `mode` (act | recommend) to A1.6's keys; P0k unchanged — p=0.7
+decided (not asked): PROPOSER_EXEMPTIONS gains e37357e (PR #48's review commit; blank line before Co-Authored-By), needed for P0m on any branch stacked on it, as for b7eafee/0a4f2b8 — p=0.65
+forecasts: made 3 (d9e7e314094d pins green first CI run p=0.8; a9b75affc18a Reviewer ACCEPT p=0.5; 3b293a70061e L2 NetHack host verdict FIT p=0.35); resolved 0 this session; ledger L0–L2: 120 claims, 110 resolved; cumulative log-loss 43.462 vs base rate 76.246 (0.5) over 110
+obligations added: L3: the Vizier's ledger reaches the repository only through the Auditor's transcription; a Vizier with Contents write on reports/ only (or a ledger endpoint) would remove the lag
+obligations added: L3: the Telegram relay named in #49 §3 lives outside this repository and is unwitnessed here
+obligations added: L3: #49 §5's live criteria (wish → draft in one run; awaits-guy → recommendation; benign failed-run closed; first boundary brief) can be witnessed only after the account, secret and vizier.yml exist
+NEEDS YOU (at most 1): create account assize-vizier with the PAT and secret ASSIZE_VIZIER_TOKEN named in #49 §4, and push the vizier.yml diff in PR #52's body (commit with `Proposer: guy`); then approve and merge after #48 (entrenched)
+next: if #48 has merged, retarget PR #52 to master (`gh pr edit 52 --base master`) and close #46; then instruction #50 (failed.yml: no issue for a run cancelled before any step)
