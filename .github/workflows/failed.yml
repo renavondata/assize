@@ -1,0 +1,30 @@
+name: failed
+on:
+  workflow_run:
+    workflows: [build, review]
+    types: [completed]
+permissions:
+  issues: write
+jobs:
+  report:
+    if: contains(fromJSON('["failure","cancelled","timed_out"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          WF: ${{ github.event.workflow_run.name }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          set -euo pipefail
+          title="$WF run $RUN_ID $CONCLUSION on $BRANCH"
+          existing=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number,title \
+            | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
+          [ -n "$existing" ] && exit 0
+          gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee gfrmin \
+            --body "$(printf 'The %s session died: %s.\n\n%s\n' "$WF" "$CONCLUSION" "$URL")"
