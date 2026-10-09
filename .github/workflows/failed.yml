@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 5
     permissions:
       issues: write
+      actions: read
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -22,6 +23,12 @@ jobs:
           URL: ${{ github.event.workflow_run.html_url }}
         run: |
           set -euo pipefail
+          if [ "$CONCLUSION" = cancelled ]; then
+            started=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs" \
+              --jq '[.jobs[].steps[]? | select(.started_at != null and .conclusion != "skipped")] | length' \
+              | awk '{n += $1} END {print n + 0}')
+            [ "$started" -eq 0 ] && exit 0
+          fi
           title="$WF run $RUN_ID $CONCLUSION on $BRANCH"
           existing=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number,title \
             | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
