@@ -1,0 +1,23 @@
+copy of <scratch>
+  at /tmp/assize-scratch-pp4x5nje/assize-copy-njobwoo3/repo
+applied 1 edit(s) from harness/edits/P0l_sha_comparison_skipped.toml
+pin:       P0l
+protects:  a verdict citing a pins run on another sha, or one not concluded success, is rejected
+role:      mutant
+tree:      /tmp/assize-scratch-pp4x5nje/assize-copy-njobwoo3/repo
+invoked:   <scratch>
+scratch:   /tmp/assize-scratch-pp4x5nje
+  [ok] STATUS cites a successful pins run on its own sha: findings [], want []
+  [FAIL] STATUS cites a run on an older sha: findings [], want ['head_mismatch']
+  [ok] STATUS cites a failed run: findings ['not_success'], want ['not_success']
+  [ok] STATUS STOPPED, cites a failed run on its own sha: findings [], want []
+  [ok] STATUS cites no run: findings ['uncited'], want ['uncited']
+  [ok] STATUS cites an unrecorded run: findings ['unrecorded'], want ['unrecorded']
+  [ok] STATUS cites a measure run: findings ['not_pins'], want ['not_pins']
+  [ok] STATUS cites a run under the wrong sha: findings ['citation_mismatch'], want ['citation_mismatch']
+  [FAIL] REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({('REPORT:4', 'uncited'), ('REPORT:3', 'citation_mismatch')})
+  [ok] real STATUS files from L1: ['reports/L1/STATUS.md', 'reports/L2/STATUS.md']; 37 committed run records
+  [ok] reports/L1/STATUS.md: cites [('37840644452', '25f36e6')]; findings []
+  [FAIL] reports/L2/STATUS.md: cites []; findings ['reports/L2/STATUS.md: uncited: no `pins CI run <id> on <sha>` citation']
+  [ok] REPORT.md: 1 verdict lines from L1; findings []
+result:    FAIL
