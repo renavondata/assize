@@ -1,0 +1,54 @@
+pin:       P9
+protects:  a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's verification
+role:      clean
+tree:      /home/g/actions-runner/_work/assize/assize
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-oa0cm1tm
+  [ok] request a's 1093 bytes unchanged by request b (never rewritten)
+  [ok] the ledger holds exactly the 4 records given, in order, utilities included: [3, 0, 5, 1]
+  [ok] each record names its request
+  [ok] every prev_sha256 and sha256 equals its derivation: first records from the SHA-256 of the request_id, each next from the previous sha256
+  verify: ledger.jsonl: ok (0 findings)
+  [ok] verify passes the ledger as written, anchored at request b's head (exit 0)
+  [ok] verify passes it anchored at request a's head, a later request admitted (exit 0)
+  [ok] a request_id already written is refused, ledger unchanged (request 'p9-request-a' is already in ledger.jsonl)
+  record_dropped: verify: ledger.jsonl is 1019 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 2, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: p9-request-a[1]: prev_sha256 does not link to the previous record
+    verify: ledger.jsonl: FAILED (3 findings)
+  [ok] record_dropped: verification fails (exit 1)
+  last_record_dropped: verify: ledger.jsonl is 1093 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] last_record_dropped: verification fails (exit 1)
+  utility_altered: verify: p9-request-a[1]: sha256 is not the record's own digest
+    verify: ledger.jsonl: FAILED (1 findings)
+  [ok] utility_altered: verification fails (exit 1)
+  record_appended: verify: ledger.jsonl is 1665 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 2, '4c028b161c8c4388e47b59e2377bf4336143e0e16c902deaaa81f518501c0549')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] record_appended: verification fails (exit 1)
+  request_removed: verify: ledger.jsonl is 1093 bytes; the last signed head says 1379
+    verify: requests in ledger.jsonl [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f')] are not the signed heads [('p9-request-a', 3, 'c3c73273edbc3b742daa64a9a9609b45129228ed54e3fa789a9513eaa6bd667f'), ('p9-request-b', 1, 'b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98')]
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] request_removed: verification fails (exit 1)
+  forged_head: verify: head of 'p9-request-a': signature invalid
+    verify: head of 'p9-request-b': signature invalid
+    verify: ledger.jsonl: FAILED (2 findings)
+  [ok] forged_head: verification fails (exit 1)
+  last_request_truncated: verify: the anchor b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98 is the head of no signed request of ledger.jsonl
+    verify: ledger.jsonl: FAILED (1 findings)
+  [ok] last_request_truncated: verification fails (exit 1)
+  ledger_and_heads_deleted: verify: the anchor b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98 is the head of no signed request of ledger.jsonl
+    verify: ledger.jsonl: FAILED (1 findings)
+  [ok] ledger_and_heads_deleted: verification fails (exit 1)
+  rechained_from_empty_with_key: verify: the anchor b6a42172bd12f568837aae976b802d104b3389d19bcd474503a3a2ca4a1d4d98 is the head of no signed request of ledger.jsonl
+    verify: p9-request-a[0]: prev_sha256 does not link to the request_id
+    verify: p9-request-b[0]: prev_sha256 does not link to the request_id
+    verify: ledger.jsonl: FAILED (3 findings)
+  [ok] rechained_from_empty_with_key: verification fails (exit 1)
+  dropped_and_resigned_with_key: verify: p9-request-a[1]: prev_sha256 does not link to the previous record
+    verify: ledger.jsonl: FAILED (1 findings)
+  [ok] dropped_and_resigned_with_key: verification fails (exit 1)
+  [ok] the restored ledger verifies again (exit 0), so each failure above was the tamper's
+result:    PASS
