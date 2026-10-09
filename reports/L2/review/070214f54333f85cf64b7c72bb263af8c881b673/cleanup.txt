@@ -1,0 +1,2 @@
+cleanup: both scratch copies removed (ls /tmp | grep assize-review: empty). No harness process remains. Running podman containers (rssfeed_db_1, n8n_n8n_1, tuwunel, mautrix-whatsapp, matrix-archiver) are the host's pre-existing services, not started by this review.
+A first scratch copy made with git archive (no .git) failed P0m (git rev-parse --is-shallow-repository exit 128): 31/32, 79/84, 5 NON-CAUSAL all P0m. That is an artefact of my copy, not a verdict of the PR; it was removed and the run repeated in a git clone (make-pins.txt here). Its transcript was not kept.
