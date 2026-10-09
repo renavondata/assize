@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-09T10:25:59Z","event":"pull_request","head_branch":"instr-38-p0m-instruction-authority","head_sha":"d2159e6b6d26b598ac68d0c6b1e7c2551f67142d","html_url":"https://github.com/renavondata/assize/actions/runs/37917562576","id":37917562576,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}

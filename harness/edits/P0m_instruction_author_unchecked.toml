@@ -1,0 +1,5 @@
+# P0m's sixth mutant (instruction #38 (a)): an `Instruction:` trailer is accepted without checking the issue's author.
+[[edit]]
+path = "harness/claims.py"
+old = "issue is not None and issue.author == INSTRUCTION_AUTHOR and INSTRUCTION_LABEL in issue.labels"
+new = "issue is not None and INSTRUCTION_LABEL in issue.labels"

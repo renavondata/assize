@@ -162,6 +162,7 @@ class Commit:
     paths: tuple[str, ...]
     merge: bool = False
     author: str = ""
+    instructions: tuple[int, ...] = ()
 
 
 def parties(trailer_values: str) -> tuple[str, ...]:
@@ -181,6 +182,33 @@ PROPOSER_EXEMPTIONS: Mapping[str, str] = {
     "b7eafee0ca572971b799cd6899e632fac7a6e30f": "reviewer claude-opus-5-5 cba02c1d-8bbd-4c1d-951f-804edc546db7",
     "0a4f2b8aa612d799b526a458c8f850669e122a98": "builder claude-opus-5-5 1137b45d-2b48-40ec-8896-f3e4cb2a707a",
 }
+
+
+INSTRUCTION = re.compile(r"^#(\d+)$")
+
+
+def instructions(trailer_values: str) -> tuple[int, ...]:
+    """Every issue number an `Instruction: #<n>` trailer of a commit cites; a value of any other form cites none."""
+    return tuple(int(m.group(1)) for v in trailer_values.split(TRAILER_SEP) if (m := INSTRUCTION.match(v.strip())))
+
+
+# CLAUDE.md A1.5: Guy's instructions enter the court as issues labelled `instruction`, authored by gfrmin. A commit
+# citing one by `Instruction: #<n>` carries Guy's authority on an entrenched path as `Proposer: guy` does (instruction
+# #38). The issue is read through the GitHub API; a closed issue still counts.
+INSTRUCTION_AUTHOR = "gfrmin"
+INSTRUCTION_LABEL = "instruction"
+
+
+@dataclass(frozen=True)
+class Issue:
+    author: str
+    labels: tuple[str, ...]
+    state: str = ""
+
+
+def authorises(issue: Issue | None) -> bool:
+    """An issue carries Guy's authority if gfrmin authored it and it is labelled `instruction`, open or closed."""
+    return issue is not None and issue.author == INSTRUCTION_AUTHOR and INSTRUCTION_LABEL in issue.labels
 
 
 def exempt_parties(sha: str, message: str, exemptions: Mapping[str, str]) -> tuple[str, ...]:
@@ -221,7 +249,14 @@ def entrenched(path: str, patterns: Sequence[str]) -> bool:
     return any(path.startswith(p) if p.endswith("/") else path == p for p in patterns)
 
 
-def commit_findings(c: Commit, patterns: Sequence[str]) -> list[Finding]:
+def needs_guy(c: Commit, patterns: Sequence[str]) -> list[str]:
+    """The entrenched paths `c` touches without a `guy` party."""
+    return sorted(p for p in c.paths if entrenched(p, patterns)) if "guy" not in c.parties else []
+
+
+def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Issue] = {}) -> list[Finding]:
+    """Findings on one commit; `issues` holds the issues its `Instruction:` trailers cite, as read (a missing one
+    could not be read, so it authorises nothing)."""
     where = f"commit {c.sha[:12]}"
     if c.merge and not c.parties:
         return [Finding(where, "unknown_merge_author",
@@ -230,9 +265,12 @@ def commit_findings(c: Commit, patterns: Sequence[str]) -> list[Finding]:
         return [Finding(where, "no_proposer", "no `Proposer:` trailer")]
     malformed = [Finding(where, "bad_party", f"{p!r} is not `guy` or `<kind> <model> <session>`")
                  for p in c.parties if not (PARTY.match(p) or c.merge and p in MERGE_AUTHORS.values())]
-    touched = sorted(p for p in c.paths if entrenched(p, patterns))
-    unsigned = ([Finding(where, "entrenched_without_guy", f"touches {touched}; parties {list(c.parties)}")]
-                if touched and "guy" not in c.parties else [])
+    touched = needs_guy(c, patterns)
+    instructed = any(authorises(issues.get(n)) for n in c.instructions)
+    unsigned = ([Finding(where, "entrenched_without_guy",
+                         f"touches {touched}; parties {list(c.parties)}; instructions "
+                         f"{[(n, issues.get(n)) for n in c.instructions]}")]
+                if touched and not instructed else [])
     return malformed + unsigned
 
 
@@ -250,15 +288,35 @@ def branch_commits(repo: Path, base: str, head: str = "HEAD",
     """Commits in base..head, oldest first, with their `Proposer:` parties (parsed by git; for a commit with none,
     its exempted party, if any; for a merge, its author account's party only, brief 1 A9) and the paths each changes
     itself: for a merge, only paths differing from every parent (`-c`), so content a merge brings in from its other parent is attributed to the commit that authored it."""
-    fmt = "%H%x1f%P%x1f%ae%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f%B%x1d"
+    fmt = ("%H%x1f%P%x1f%ae%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f"
+           "%(trailers:key=Instruction,valueonly,separator=%x1e)%x1f%B%x1d")
     records = [r.strip("\n") for r in _git(repo, "log", "--reverse", f"--format={fmt}", f"{base}..{head}")
                .split("\x1d") if r.strip()]
 
     def commit(record: str) -> Commit:
-        sha, parents, email, values, message = record.split("\x1f", 4)
+        sha, parents, email, values, cited, message = record.split("\x1f", 5)
         paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", "-c", sha).splitlines()
         if len(parents.split()) > 1:
             return Commit(sha, merge_parties(email), tuple(paths), merge=True, author=email)
-        return Commit(sha, parties(values) or exempt_parties(sha, message, exemptions), tuple(paths), author=email)
+        return Commit(sha, parties(values) or exempt_parties(sha, message, exemptions), tuple(paths), author=email,
+                      instructions=instructions(cited))
 
     return [commit(r) for r in records]
+
+
+def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
+    """The issues `numbers` name, read through the GitHub API (`gh api`, from `repo`'s remote). One that cannot be
+    read is left out, so it authorises nothing."""
+    def read(n: int) -> Issue | None:
+        try:
+            out = subprocess.run(["gh", "api", f"repos/{{owner}}/{{repo}}/issues/{n}", "--jq",
+                                  "{author: .user.login, labels: [.labels[].name], state: .state}"],
+                                 cwd=repo, check=True, capture_output=True, text=True, timeout=60).stdout
+        except (OSError, subprocess.SubprocessError) as e:
+            print(f"    issue #{n}: not read ({e})")
+            return None
+        row = json.loads(out)
+        return Issue(str(row["author"]), tuple(row["labels"]), str(row["state"]))
+
+    read_ = {n: read(n) for n in sorted(set(numbers))}
+    return {n: i for n, i in read_.items() if i is not None}
