@@ -1,18 +1,17 @@
-# STATUS — L2 — 2026-10-09 — 0885b8b — PR #35
+# STATUS — L2 — 2026-10-09 — 6e77515 — PR #37
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in root REPORT.md, adds or opens no brief)
-pins: clean 32/32; mutants 83/83 KILLED; twins 83/83; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at 0885b8b, steel-legend, 04:44:50Z–04:59:18Z: reports/L2/make-pins-0885b8b.txt; pins CI run 37885321506 on 0885b8b: success, attempt 1; record reports/L2/ci/37885321506.json)
-changed: harness/{claims.py (two PROPOSER_EXEMPTIONS),proposer.toml}; reports/L2/{STATUS.md,forecasts.jsonl,ci/,make-pins-0a4f2b8.txt,make-pins-0885b8b.txt}
-did: worked review b7f635f F1 (BLOCK, P0l): the STATUS at 592e1d8 now cites pins CI run 37880173083 (success), record committed in reports/L2/ci/; this STATUS cites the CI run on its own sha
-did: make pins at 0a4f2b8 then ran 31/32, P0m FAILED (5 mutants non-causal): review commit b7eafee and my 0a4f2b8 separate `Proposer:` from `Co-Authored-By:` by a blank line, so git reads no trailer. Transcript committed as superseded, not cited
-did: exempted both by full sha in claims.PROPOSER_EXEMPTIONS, each with the exact party its body carries, as bb7b387 was; 0885b8b's trailer parses. make pins at 0885b8b 32/32, 83/83
-did: CI run 37884098195 on 0a4f2b8 concluded success although local P0m failed there: P0m's real-branch check skips in CI's shallow clone (pins.py, disclosed `[skip]`). Recorded reports/L2/ci/37884098195.json
-did: L2a item 1 deliverables (P19, P20; World discovery; price as data) unchanged; review b7f635f F2 found them met
-decided (not asked): exempt the two pushed commits rather than reword and force-push the branch; history stays append-only — p(stands on review)=0.8
-decided (not asked): the repaired 592e1d8 STATUS was regenerated in place (STATUS is regenerated each session, not a report correction) — p=0.75
-decided (not asked): carried forward from 592e1d8: L2 started on Guy's merge of #32 (p=0.7); this PR auto-merges, "the L2a merge" being the last L2a PR (p=0.6); schema_version stays 1.0.0 (p=0.6)
-forecasts: made 2 (6c3da4b89b46 pins green first CI run of new head p=0.8; 7fe89bb337b4 Reviewer ACCEPT p=0.65); resolved 0 this session; ledger L0–L2: 102 claims, 99 resolved; cumulative log-loss 39.882 vs base rate 68.622 (0.5) over 99
-obligations added: L2: P0m's real-branch trailer check runs in CI, not only in a full local clone (fetch master, or fetch-depth 0), so CI cannot be green on a branch P0m rejects
-obligations added: L2 (from review b7f635f F3–F5, F7): evaluate() refuses a malformed price/manifest (pin+mutant); schema_version vs required `price`; manifest `world` = directory name; brief 2 amendment naming "the L2a merge"
-NEEDS YOU (at most 1): CLAUDE.md still reads "Current layer: L1"; L2 opened when #32 merged. Only you amend CLAUDE.md, and the build command finds its brief by that line
-next: L2a: the judge-touching obligations 1–16 of reports/L1/REPORT.md "Obligations on L2", in order, plus the obligations above
+pins: clean 32/32; mutants 83/83 KILLED; twins 83/83; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at 6e77515, steel-legend, 07:19:28Z–07:33:54Z: reports/L2/make-pins-6e77515.txt; pins CI run 37899797478 on 6e77515: success, attempt 1; record reports/L2/ci/37899797478.json)
+changed: harness/proposer.toml; reports/L2/{STATUS.md,forecasts.jsonl,make-pins-6e77515.txt,ci/37898070527.json,ci/37899797478.json}
+did: dispatched onto PR #37 by Guy's `blocked` label. #37 has no review file and no blocking finding, so there was no finding to work
+did: #37's content (CLAUDE.md, .claude/, .github/: Constitution 6 and 7, on Guy's instruction) is entrenched (A1.1) and named by no brief; left untouched
+did: brought #37 to reviewable state: proposer.toml to this session, forecasts per A1.6, make pins, this STATUS, label needs-review
+did: pins CI on the pre-session head 4ead293: run 37898070527 success (reports/L2/ci/37898070527.json)
+decided (not asked): read Guy's `blocked` label with no review as "finish this PR for review", not as a finding — p(stands on review)=0.7
+decided (not asked): add proposer/forecasts/STATUS (non-entrenched, reports/ and harness/proposer.toml only) to the constitution PR rather than leave it without a STATUS — p=0.65
+decided (not asked): no auto-merge: #37 touches entrenched paths, so Guy approves and merges (A1.3) — p=0.95
+decided (not asked): forecast the L2 host verdict as FIT at p=0.35 (A1.6 minimum claim; earlier L2 sessions omitted it) — p=0.7
+forecasts: made 3 (fc59e1aaf7bc pins green first CI run of new head p=0.8; d7fd0b7a29de Reviewer ACCEPT p=0.6; 28023941e2e7 L2 NetHack host verdict FIT p=0.35); resolved 0 this session; ledger L0–L2: 105 claims, 101 resolved; cumulative log-loss 40.535 vs base rate 70.008 (0.5) over 101
+obligations added: none
+NEEDS YOU (at most 1): approve and merge PR #37 (touches CLAUDE.md, .claude/, .github/: entrenched, A1.3); it also answers issue #36 ("Current layer" now derived from REPORT.md)
+next: after #37 merges, on master: L2a, the judge-touching obligations 1–16 of reports/L1/REPORT.md "Obligations on L2", in order, plus the L2 obligations in the 0885b8b STATUS (P0m real-branch check in CI; review b7f635f F3–F5, F7)
