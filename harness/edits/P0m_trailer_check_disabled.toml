@@ -1,5 +1,5 @@
 # P0m's first mutant (brief 1 A4 item 7c): a commit touching an entrenched path is no longer required to carry guy.
 [[edit]]
 path = "harness/claims.py"
-old = "if touched and \"guy\" not in c.parties else [])"
+old = "if touched and not instructed else [])"
 new = "if False else [])"

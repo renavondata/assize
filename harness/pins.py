@@ -497,6 +497,25 @@ EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exem
     ("body-only Proposer, exempted", "docs/z.md", "reviewer m s", "reviewer m s", ("reviewer m s",), set()),
     ("body-only Proposer, another party exempted", "docs/z.md", "reviewer m s", "reviewer m t", (), {"no_proposer"}),
 )
+INSTRUCTION_ISSUES = {  # the issues INSTRUCTION_FIXTURE cites, as claims.load_issues would read them
+    1: claims.Issue("gfrmin", ("instruction",), "open"),
+    2: claims.Issue("gfrmin", ("instruction", "constitution"), "closed"),
+    3: claims.Issue("assize-builder", ("instruction",), "open"),
+    4: claims.Issue("gfrmin", ("constitution",), "open"),
+}
+INSTRUCTION_FIXTURE = (  # (label, path, Proposer trailer lines, Instruction trailer lines, issues cited, findings wanted)
+    ("builder, Instruction of gfrmin's open instruction issue, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#1",),
+     (1,), set()),
+    ("builder, Instruction of gfrmin's closed instruction issue, .github/", ".github/i.yml", ("builder m s",),
+     ("#2",), (2,), set()),
+    ("builder, Instruction of an issue another account authored, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#3",),
+     (3,), {"entrenched_without_guy"}),
+    ("builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md", "CLAUDE.md", ("builder m s",),
+     ("#4",), (4,), {"entrenched_without_guy"}),
+    ("builder, Instruction of an issue not read, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#9",), (9,),
+     {"entrenched_without_guy"}),
+    ("builder, malformed Instruction, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("1",), (), {"entrenched_without_guy"}),
+)
 MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
     ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
     ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
@@ -514,6 +533,7 @@ FIXTURE_GIT = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@f", "GIT_COMMITTER
 def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     """A fixture repository: a base commit, one commit per TRAILER_FIXTURE case, then one per EXEMPTION_FIXTURE case,
     whose `Proposer:` line a blank line separates from a following `Co-Authored-By:`, so git parses no trailer, then one
+    per INSTRUCTION_FIXTURE case, carrying its `Instruction:` and `Proposer:` trailers, then one
     merge per MERGE_FIXTURE case, on the branch and the base commit, by its author (brief 1 A9). Returns their shas and
     the exemptions the EXEMPTION_FIXTURE cases name."""
     env = os.environ | claims.GIT_ENV | FIXTURE_GIT
@@ -551,10 +571,14 @@ def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     unparsed = [commit(path, f"Proposer: {party}\n\nCo-Authored-By: f <f@f>\n", n)
                 for n, (_, path, party, *_) in enumerate(EXEMPTION_FIXTURE, len(shas) + 1)]
     exemptions = {sha: exempt for sha, (_, _, _, exempt, *_) in zip(unparsed, EXEMPTION_FIXTURE) if exempt}
+    instructed = [commit(path, "".join(f"Instruction: {i}\n" for i in cited) + trailered(trailers), n)
+                  for n, (_, path, trailers, cited, *_) in enumerate(INSTRUCTION_FIXTURE,
+                                                                      len(shas) + len(unparsed) + 1)]
     base = git("rev-list", "--max-parents=0", "HEAD")
     merges = [merge(path, author, trailered(trailers), n, base)
-              for n, (_, path, author, trailers, *_) in enumerate(MERGE_FIXTURE, len(shas) + len(unparsed) + 1)]
-    return shas + unparsed + merges, exemptions
+              for n, (_, path, author, trailers, *_) in enumerate(MERGE_FIXTURE,
+                                                                  len(shas) + len(unparsed) + len(instructed) + 1)]
+    return shas + unparsed + instructed + merges, exemptions
 
 
 def _branch_base(root: Path) -> str | None:
@@ -571,7 +595,9 @@ def p0m_commit_proposers() -> bool:
     (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
     `Proposer:` line counts only for a commit claims.PROPOSER_EXEMPTIONS lists, and only as the party it names
     (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
-    author is rejected, whatever trailer it carries (brief 1 A9)."""
+    author is rejected, whatever trailer it carries (brief 1 A9). `Instruction: #<n>` carries Guy's authority on an
+    entrenched path when issue <n>, read through the GitHub API, is authored by gfrmin and labelled `instruction`, open
+    or closed (CLAUDE.md A1.5, instruction #38)."""
     expect, ok = _expecter()
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
@@ -581,14 +607,15 @@ def p0m_commit_proposers() -> bool:
     expect([c.merge for c in commits] == [False] * (len(shas) - len(MERGE_FIXTURE)) + [True] * len(MERGE_FIXTURE),
            f"fixture: the last {len(MERGE_FIXTURE)} commits read as merges and no other")
     expect([c.sha for c in commits] == shas, f"fixture: {len(commits)} branch commits read, want {len(shas)}")
-    cases = [(label, trailers, want) for label, _, trailers, want in TRAILER_FIXTURE] + \
-            [(label, trailers, want) for label, _, _, _, trailers, want in EXEMPTION_FIXTURE] + \
-            [(label, parties, want) for label, _, _, _, parties, want in MERGE_FIXTURE]
-    for (label, trailers, want), c in zip(cases, commits):
-        got = {f.code for f in claims.commit_findings(c, patterns)}
-        expect(got == want and c.parties == trailers,
-               f"{label}: parties reported {list(c.parties)}, findings {sorted(got)}; want {list(trailers)}, "
-               f"{sorted(want)}")
+    cases = [(label, trailers, (), want) for label, _, trailers, want in TRAILER_FIXTURE] + \
+            [(label, trailers, (), want) for label, _, _, _, trailers, want in EXEMPTION_FIXTURE] + \
+            [(label, trailers, cited, want) for label, _, trailers, _, cited, want in INSTRUCTION_FIXTURE] + \
+            [(label, parties, (), want) for label, _, _, _, parties, want in MERGE_FIXTURE]
+    for (label, trailers, cited, want), c in zip(cases, commits):
+        got = {f.code for f in claims.commit_findings(c, patterns, INSTRUCTION_ISSUES)}
+        expect(got == want and c.parties == trailers and c.instructions == cited,
+               f"{label}: parties reported {list(c.parties)}, instructions {list(c.instructions)}, findings "
+               f"{sorted(got)}; want {list(trailers)}, {list(cited)}, {sorted(want)}")
     shutil.rmtree(work, ignore_errors=True)
 
     root = _real_root()
@@ -600,9 +627,12 @@ def p0m_commit_proposers() -> bool:
         return ok()
     expect(base is not None, f"real branch: base resolved ({base})")
     real = claims.branch_commits(root, base) if base else []
-    found = [f for c in real for f in claims.commit_findings(c, patterns)]
+    # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
+    # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
+    issues = claims.load_issues(root, [n for c in real if claims.needs_guy(c, patterns) for n in c.instructions])
+    found = [f for c in real for f in claims.commit_findings(c, patterns, issues)]
     for c in real:
-        print(f"    {c.sha[:12]} parties {list(c.parties)}")
+        print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
     expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
                       f"{[str(f) for f in found]}")
     return ok()
@@ -2269,12 +2299,15 @@ PINS = [
         p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),)),
     Pin("P0l", "a verdict citing a pins run on another sha, or one not concluded success, is rejected",
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),)),
-    Pin("P0m", "a commit touching an entrenched path without a guy Proposer is rejected; every party is read",
+    Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
+        "every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
                                 Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
                                 Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")),
-                                Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")))),
+                                Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")),
+                                Mutant("instruction_author_unchecked", _edits("P0m_instruction_author_unchecked")),
+                                Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
