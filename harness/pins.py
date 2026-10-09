@@ -1526,10 +1526,10 @@ P9_REQUESTS = (
 CHAIN_FIELDS = ("request_id", "prev_sha256", "sha256")
 
 
-def _verify_cli(led: Path, private: Path) -> tuple[int, str]:
+def _verify_cli(led: Path, private: Path, anchor: str) -> tuple[int, str]:
     """The judge's verification subcommand, run as the judge runs it, in a child interpreter."""
-    r = subprocess.run(proc.python("-m", "judge", "verify", str(led), str(private)), cwd=ROOT, env=proc.child_env(),
-                       capture_output=True, text=True, timeout=120)
+    r = subprocess.run(proc.python("-m", "judge", "verify", str(led), str(private), anchor), cwd=ROOT,
+                       env=proc.child_env(), capture_output=True, text=True, timeout=120)
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
@@ -1572,8 +1572,10 @@ def p9_ledger_tamper() -> bool:
     first to the SHA-256 of its request_id, each `sha256` the digest of its canonical serialisation, all derived here
     by definition; the first request's bytes are untouched by the second (O_APPEND, never rewritten); and `python -m
     judge verify` passes it. Every tamper fails verification: a record dropped, a utility altered, extra records, a
-    request removed, a forged head without the key, and, with the key in a forger's hands, a chain rebuilt from the
-    empty string or with a record left out. A request_id is written once."""
+    request removed, a forged head without the key, the last request truncated with its head, the ledger and its heads
+    both deleted (review 2817eb7 F2: verified against the head the caller holds, the last record's `sha256`), and,
+    with the key in a forger's hands, a chain rebuilt from the empty string or with a record left out. An earlier
+    request's head still anchors the ledger after later requests. A request_id is written once."""
     import hashlib
 
     from judge import ledger
@@ -1600,9 +1602,12 @@ def p9_ledger_tamper() -> bool:
         derived = _rechained(rows, lambda rid: hashlib.sha256(rid.encode()).hexdigest())
         expect(rows == derived, "every prev_sha256 and sha256 equals its derivation: first records from the SHA-256 "
                                 "of the request_id, each next from the previous sha256")
-        code, out = _verify_cli(led, private)
+        anchor = rows[-1]["sha256"]
+        code, out = _verify_cli(led, private, anchor)
         print("  " + out.replace("\n", "\n  "))
-        expect(code == 0, f"verify passes the ledger as written (exit {code})")
+        expect(code == 0, f"verify passes the ledger as written, anchored at request b's head (exit {code})")
+        code, out = _verify_cli(led, private, rows[len(a) - 1]["sha256"])
+        expect(code == 0, f"verify passes it anchored at request a's head, a later request admitted (exit {code})")
         try:
             ledger.append(led, private, a_id, a)
             expect(False, "a request_id already written is refused")
@@ -1613,7 +1618,7 @@ def p9_ledger_tamper() -> bool:
 
         def tampered(name: str, act) -> None:
             act()
-            code, out = _verify_cli(led, private)
+            code, out = _verify_cli(led, private, anchor)
             print(f"  {name}: " + out.replace("\n", "\n    "))
             expect(code == 1, f"{name}: verification fails (exit {code})")
             led.write_bytes(snapshot[led.name])
@@ -1645,10 +1650,13 @@ def p9_ledger_tamper() -> bool:
             + b"\n"))
         tampered("request_removed", lambda: led.write_bytes(lines(lambda i: i < len(a))))
         tampered("forged_head", forged_head)
+        tampered("last_request_truncated", lambda: (led.write_bytes(first), (private / "heads.jsonl").write_bytes(
+            snapshot["heads.jsonl"].splitlines(keepends=True)[0])))
+        tampered("ledger_and_heads_deleted", lambda: (led.unlink(), (private / "heads.jsonl").unlink()))
         tampered("rechained_from_empty_with_key", lambda: _resigned(private, _rechained(rows, lambda rid: ""), led))
         tampered("dropped_and_resigned_with_key", lambda: _resigned(private, [r for i, r in enumerate(rows) if i != 1],
                                                                     led))
-        code, _ = _verify_cli(led, private)
+        code, _ = _verify_cli(led, private, anchor)
         expect(code == 0, f"the restored ledger verifies again (exit {code}), so each failure above was the tamper's")
     finally:
         shutil.rmtree(work, ignore_errors=True)
@@ -2074,7 +2082,7 @@ def p17_evaluate() -> bool:
                            f"{rt.name} episode {r['episode']}: utility {r['utility']} is the size of its achievement "
                            f"set {r['achievements']}")
                     expect(not _keys(r) & {"seed", "seeds", "key"}, f"{rt.name} episode {r['episode']}: no seed")
-                expect(ledger.verify(led, private) == [] and ledger._lines(led) == got,
+                expect(ledger.verify(led, private, got[-1]["sha256"]) == [] and ledger._lines(led) == got,
                        f"{rt.name}: the ledger verifies and holds exactly the request's records")
                 issued = seeds.records(private, "crafter")
                 expect([r["request_id"] for r in issued] == ["p17-a"] * EVALUATE_EPISODES,
@@ -2303,13 +2311,15 @@ PINS = [
         p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
                           Mutant("realised_row_only", _edits("P13_realised_row_only")),
                           Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed")))),
-    Pin("P9", "a ledger record dropped, altered or rechained, or a head forged, fails the judge's verification",
+    Pin("P9", "a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's "
+              "verification",
         p9_ledger_tamper, (Mutant("record_dropped", _edits("P9_record_dropped")),
                            Mutant("utility_altered", _edits("P9_utility_altered")),
                            Mutant("chain_update_skipped", _edits("P9_chain_update_skipped")),
                            Mutant("opened_for_rewrite", _edits("P9_opened_for_rewrite")),
                            Mutant("genesis_empty", _edits("P9_genesis_empty")),
-                           Mutant("signature_unchecked", _edits("P9_signature_unchecked")))),
+                           Mutant("signature_unchecked", _edits("P9_signature_unchecked")),
+                           Mutant("independent_heads", _edits("P9_independent_heads")))),
     Pin("P16", "a candidate's proposer comes from the judge-issued credential that registered it, or it is refused",
         p16_proposer_from_credential, (Mutant("unattributed_admitted", _edits("P16_unattributed_admitted")),
                                        Mutant("any_credential", _edits("P16_any_credential")),

@@ -56,7 +56,8 @@ def pilot(private: Path, ledgers: Path, rt_name: str, out: Path, pilot_id: str, 
     targets = [t["name"] for t in binding.manifest()["targets"]]
     rep = run.report(played, cfg, targets, list(binding.crafter.constants.achievements), binding.hafner_score,
                      evidence=evidence)
-    findings = ledger.verify(evaluate.ledger_path(ledgers, world), private)
+    findings = (ledger.verify(evaluate.ledger_path(ledgers, world), private, played.records[-1]["sha256"])
+                if played.records else ["no request returned a record, so no head anchors the ledger's verification"])
     rep = rep | {"pilot_id": pilot_id, "ledger_findings": findings}
     if findings and not rep["verdict"].startswith("STOPPED"):
         rep["verdict"] = f"STOPPED: the ledger fails verification ({len(findings)} findings)"
