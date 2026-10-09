@@ -6,5 +6,5 @@ old = "    proposer = registry.proposer_of(private, image)\n    done = "
 new = "    done = "
 [[edit]]
 path = "judge/evaluate.py"
-old = "    m = binding.manifest()\n"
-new = "    proposer = registry.proposer_of(private, image)\n    m = binding.manifest()\n"
+old = "        raise\n    achieved: list = []\n"
+new = "        raise\n    proposer = registry.proposer_of(private, image)\n    achieved: list = []\n"
