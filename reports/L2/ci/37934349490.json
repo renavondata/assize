@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-09T13:05:05Z","event":"pull_request","head_branch":"instr-46-auditor-role","head_sha":"d11b2e82c4ca7cd699b62bcabd84159024589d59","html_url":"https://github.com/renavondata/assize/actions/runs/37934349490","id":37934349490,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
