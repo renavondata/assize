@@ -29,6 +29,7 @@ Each layer is built on the one below. A layer starts only after the previous lay
 - Corrections to reports are appended, never rewritten.
 - Edit `judge/` or `worlds/spec/` only under a brief that names them. After L2, never.
 - When in doubt, stop and report. A stopped session with a clear report is a success.
+- The law names scores and competitions, never competitors. Any model, prior, approximation, heuristic or constant through which agents' scores or forecasts pass is an entrant: it stands for election under the proper score, it can lose, and a pin witnesses that it can lose. The law itself may contain only what carries a proof: a proper scoring rule, an aggregation rule with a regret bound, a constant derived from such a bound. An amendment that installs an entrant as law is out of order; a review that finds one has found a standing-rule violation.
 
 ## Git
 - Work on a feature branch and open a pull request.
@@ -70,7 +71,7 @@ The court has been faster than the king. L0 met its pre-stated criteria four tim
 - **Builder.** A session that does the next unfinished item of the current brief, runs the pins, writes `STATUS.md` and opens or updates one pull request. It never merges.
 - **Reviewer.** A separate session with fresh context that reads the repository and the pull request, may run `make pins` and probes on a scratch copy, writes one review file, resolves forecasts, and either approves the pull request (as `assize-reviewer`) or records a blocking finding. It never edits the pull request's code and never adds criteria.
 
-The reviewer account holds a fine-grained token with Actions: read, Commit statuses: read, Contents: read and write, Metadata: read, Pull requests: read and write. Checks cannot be granted to such tokens, so a run's result is read through the Actions API, never `gh pr checks`. Pull requests touching an entrenched path are opened by the reviewer account, so that Guy can approve them as code owner.
+The reviewer account holds a fine-grained token with Actions: read, Commit statuses: read, Contents: read and write, Metadata: read, Pull requests: read and write. Checks cannot be granted to such tokens, so a run's result is read through the Actions API, never `gh pr checks`. The builder account's token additionally holds Actions: read and write, so a Builder can re-run CI. Pull requests touching an entrenched path are opened by the reviewer account, so that Guy can approve them as code owner.
 
 The same session never plays both roles. A Builder reads the latest review file before doing anything else.
 
@@ -89,7 +90,7 @@ Criteria are committed before the run; a review does not add them afterwards. A 
 - Every other decision the session takes itself and records under `decided (not asked)` with its probability that the decision stands on review. A session that stops for a decision it could have taken and recorded has failed the session.
 - Guy reads, by default, only layer-boundary `STATUS.md` files and `DISPUTE` entries. He may sample anything else.
 
-A NEEDS YOU on master with no pull request to carry it becomes an issue assigned to Guy; closing it and dispatching the build workflow is the acknowledgement. Three review rounds on one branch without approval hand the branch to Guy.
+A session that stops on master without opening a pull request, for any reason, files an issue assigned to Guy stating the reason, unless an open issue already states it; closing it and dispatching the build workflow is the acknowledgement. Three review rounds on one branch without approval hand the branch to Guy.
 
 ### A1.6 Forecasts
 Every Builder session, before its first `make pins`, appends to `reports/L<n>/forecasts.jsonl` one record per claim: `{"id", "ts", "proposer": {"kind", "model", "session"}, "sha_before", "claim", "p", "resolves_by"}`, with `id` the first 12 hex characters of the SHA-256 of `claim + ts`. Minimum claims: `pins` green on the first CI run of the pull request head; Reviewer verdict ACCEPT with no blocking finding; on a layer with host measurement, the host verdict (FIT, MARGINAL or UNFIT). The Reviewer appends a resolution record `{"id", "ts", "proposer", "outcome"}` for every open forecast it can resolve. `STATUS.md` reports cumulative log-loss against the base rate (the empirical frequency of that claim type to date; 0.5 before any resolution). Forecasts are never edited; a wrong forecast is data. Resolutions are appended, never edited; a resolution that later looks wrong is answered by a further record, not a change.
@@ -113,6 +114,7 @@ NEEDS YOU (at most 1): <item or none>
 next: <first item of the next session>
 DISPUTE: <only if the Builder rejects a blocking finding: the finding, the criterion it cites, the Builder's objection, both in one line each>
 ```
+No merge replaces STATUS.md with one whose header date is older; a Builder resolving a conflict in STATUS.md keeps the newer.
 
 ### A1.9 Review file
 `reports/L<n>/review-<sha>.md`, written by the Reviewer:
