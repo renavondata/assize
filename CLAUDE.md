@@ -131,3 +131,16 @@ The last deliverable of every layer is a draft of the next layer's brief, writte
 
 ### A1.11 Counsel
 External advice reaches this repository only as (a) text Guy pastes into a brief or an amendment, which then stands or falls on its own, or (b) forecasts tagged `proposer.kind = counsel`, scored like any other. Counsel has no authority a brief does not give it.
+
+## Amendment 2 — Audit (appended; instruction #46)
+
+The Reviewer checks diffs; the Auditor checks the whole. An audit runs on every push to master that adds a verdict line to the root REPORT.md, on every issue opened by failed.yml, on every DISPUTE, and on dispatch. The Auditor is a fresh session on a model different from both the Builder's and the Reviewer's, reads the repository at master, changes no code, and writes `reports/L<n>/audit-<sha>.md`. Before reading, it records in forecasts.jsonl a distribution over its own finding count {0, 1–3, 4–8, 9+}, proposer kind `auditor`. Each finding names the criterion it fails, the file and line, and a proposed pin with a seeded mutant. Findings are appended to the current brief as an amendment titled 'Audit findings at <sha>', opened as a pull request under the Builder's procedure, so they become items. The Auditor also re-reviews, cold, the three merged pull requests since the last audit whose Builder forecasts carried the largest log-loss; a finding there that the Reviewer passed is recorded against the Reviewer's record in the ledger. A finding later confirmed by a KILLED mutant scores for the Auditor; one the Builder and Reviewer jointly record as 'not a finding' scores against it.
+
+Audit criteria, verbatim:
+1. Every check kills a mutant.
+2. The law names scores and competitions, never competitors: every model, prior, approximation, heuristic or constant through which scores or forecasts pass is an entrant that can lose, a derived bound, or a pre-stated criterion.
+3. Every exit routes somewhere: every way a session or job can end produces a pull request, an issue assigned to Guy, or a labelled PR state.
+4. Declaration, not inference: no component infers state another component knew and could have recorded.
+5. No unscored actor: every party whose outputs enter the ledger or repository has a forecast or a proper score attached.
+6. Reach: no path to judge-private storage, the ledger or an entrenched path except through the mechanisms the law names.
+7. Monotone trusted base: the set of things outside every loop is listed and has not grown since the last audit.

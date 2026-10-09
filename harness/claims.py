@@ -28,7 +28,7 @@ class Finding:
 
 FORECAST_KEYS = ("id", "ts", "proposer", "sha_before", "claim", "p", "resolves_by")
 RESOLUTION_KEYS = ("id", "ts", "proposer", "outcome")
-PROPOSER_KINDS = frozenset({"builder", "reviewer", "guy", "counsel"})
+PROPOSER_KINDS = frozenset({"builder", "reviewer", "guy", "counsel", "auditor"})  # auditor: CLAUDE.md Amendment 2
 
 
 def forecast_id(claim: str, ts: str) -> str:
@@ -151,7 +151,7 @@ def load_runs(root: Path) -> dict[int, dict]:
 
 # ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
 
-PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel) \S+ \S+)$")
+PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor) \S+ \S+)$")
 TRAILER_SEP = "\x1e"
 
 

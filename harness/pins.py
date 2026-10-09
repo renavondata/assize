@@ -405,6 +405,9 @@ def p0k_forecast_ledger() -> bool:
     forecast, resolution = _ledger_fixture()
     got = claims.ledger_findings(_ledger(forecast, resolution))
     expect(not got, f"well-formed forecast and Reviewer resolution accepted ({[str(f) for f in got]})")
+    auditor = _ledger_fixture()[0] | {"proposer": LEDGER_PROPOSER | {"kind": "auditor"}}
+    got = claims.ledger_findings(_ledger(auditor))
+    expect(not got, f"a forecast proposed by the Auditor accepted (CLAUDE.md Amendment 2) ({[str(f) for f in got]})")
     for key in ("id", "ts", "proposer", "outcome"):  # stated by 7a, independently of the checker
         got = claims.ledger_findings(_ledger(forecast, {k: v for k, v in resolution.items() if k != key}))
         expect(("row 2", "missing_key") in _codes(got) and any(key in f.detail for f in got),
@@ -491,6 +494,7 @@ TRAILER_FIXTURE = (  # (label, path written, Proposer trailer lines, finding cod
     ("guy then builder, CLAUDE.md", "CLAUDE.md", ("guy", "builder m s"), set()),
     ("builder then guy, .github/", ".github/x.yml", ("builder m s", "guy"), set()),
     ("malformed party", "docs/y.md", ("builder m",), {"bad_party"}),
+    ("auditor, ordinary path", "docs/a.md", ("auditor m s",), set()),
 )
 EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exempted or None, parties, findings wanted)
     ("body-only Proposer, not exempted", "docs/z.md", "reviewer m s", None, (), {"no_proposer"}),
@@ -635,6 +639,84 @@ def p0m_commit_proposers() -> bool:
         print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
     expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
                       f"{[str(f) for f in found]}")
+    return ok()
+
+
+def _forecast(claim: str, p: float, kind: str = "builder") -> dict:
+    ts = "2026-01-01T00:00:00Z"
+    return {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": LEDGER_PROPOSER | {"kind": kind},
+            "sha_before": "0" * 40, "claim": claim, "p": p, "resolves_by": "r"}
+
+
+def _resolved(f: dict, outcome: bool) -> dict:
+    return {"id": f["id"], "ts": "2026-01-02T00:00:00Z", "proposer": LEDGER_PROPOSER, "outcome": outcome}
+
+
+F_OLD, F_A, F_R, F_B, F_C = (_forecast("old", 0.99), _forecast("a", 0.9), _forecast("r", 0.99, "reviewer"),
+                             _forecast("b", 0.6), _forecast("c", 0.99))
+SURPRISE_FIXTURE = (  # (PR number, ledger, rows its branch appends); PR 1 merges before `since`
+    (1, "reports/L1/forecasts.jsonl", (F_OLD,)),
+    (2, "reports/L2/forecasts.jsonl", (F_A, F_R)),
+    (3, "reports/L2/forecasts.jsonl", (F_B, _resolved(F_A, False), _resolved(F_R, False), _resolved(F_OLD, False),
+                                       _resolved(F_B, False), _resolved(F_B, True))),
+    (4, "reports/L1/forecasts.jsonl", (F_C,)),
+)
+# (PR number, Builder's cumulative log-loss, resolved, made), by the definition: A's 0.9 resolved false, B's 0.6
+# resolved true by its last resolution, C unresolved; R is the Reviewer's and PR 1 merged before `since`.
+SURPRISE_WANT = ((2, -math.log(1 - 0.9), 1, 1), (3, -math.log(0.6), 1, 1), (4, 0.0, 0, 1))
+
+
+def _surprise_repo(repo: Path) -> str:
+    """A fixture repository whose master merges one `Merge pull request #<n>` branch per SURPRISE_FIXTURE case, each
+    appending its rows to its ledger. Returns the sha of PR 1's merge."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    git("commit", "-q", "--allow-empty", "-m", "base")
+    merges = []
+    for n, ledger, rows in SURPRISE_FIXTURE:
+        git("checkout", "-q", "-b", f"pr{n}")
+        target = repo / ledger
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("a") as f:
+            f.writelines(json.dumps(r) + "\n" for r in rows)
+        git("add", "-A")
+        git("commit", "-q", "-m", f"pr {n}")
+        git("checkout", "-q", "master")
+        git("merge", "-q", "--no-ff", "-m", f"Merge pull request #{n} from f/pr{n}", f"pr{n}")
+        merges.append(git("rev-parse", "HEAD"))
+    return merges[0]
+
+
+def p0n_surprise_ranking() -> bool:
+    """`python -m harness.ledger surprise --since <sha>` lists the pull requests merged since <sha>, ranked by the
+    Builder's cumulative log-loss on the forecasts each added, largest first, with its resolved and made counts
+    (instruction #46 item 5)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0n-", dir=context.scratch))
+    since = _surprise_repo(work / "repo")
+    ranked = ledger.surprise(ledger.merged_since(work / "repo", since), ledger.outcomes(ledger.ledger_rows(work / "repo")))
+    for r in ranked:
+        print(f"    {r}")
+    got = [(r.number, r.resolved, r.made) for r in ranked]
+    expect(got == [(n, res, made) for n, _, res, made in SURPRISE_WANT],
+           f"ranked (PR, resolved, made) {got}, want {[(n, res, made) for n, _, res, made in SURPRISE_WANT]}")
+    expect(all(math.isclose(r.loss, loss) for r, (_, loss, _, _) in zip(ranked, SURPRISE_WANT)),
+           f"losses {[r.loss for r in ranked]}, want {[w[1] for w in SURPRISE_WANT]}")
+    expect(all(r.sessions == ("s",) for r in ranked), f"builder sessions {[r.sessions for r in ranked]}, want ('s',)")
+    out = subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "surprise", "--since", since,
+                          "--repo", str(work / "repo")], cwd=ROOT, capture_output=True, text=True)
+    listed = [line.split()[0] for line in out.stdout.splitlines() if line.startswith("#") and not line.startswith("# ")]
+    expect(out.returncode == 0 and listed == [f"#{n}" for n, *_ in SURPRISE_WANT],
+           f"the command lists {listed} (exit {out.returncode}; {out.stderr.strip()[-200:]!r})")
+    shutil.rmtree(work, ignore_errors=True)
     return ok()
 
 
@@ -2308,6 +2390,8 @@ PINS = [
                                 Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")),
                                 Mutant("instruction_author_unchecked", _edits("P0m_instruction_author_unchecked")),
                                 Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")))),
+    Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
+        p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),)),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
