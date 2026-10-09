@@ -1,0 +1,6 @@
+# P0b's second mutant (brief 1 A2 item 3, A3 item 2): the judge's code gains a reference to `harness.mutants`. In L1 the
+# judge is not yet an image; it runs from the tree that `judge_sha256` covers, which P0b's scan reads.
+[[edit]]
+path = "judge/evaluate.py"
+old = "Refused = registry.Refused\n"
+new = "Refused = registry.Refused\nfrom harness import mutants\n"

@@ -1,0 +1,14 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-ugj5ztir/assize-copy-i7e7e4t8/repo
+applied 1 edit(s) from harness/edits/P0b_judge_imports_mutants.toml
+pin:       P0b
+protects:  no code reads a mutant or test variable from the environment
+role:      mutant
+tree:      /tmp/assize-scratch-ugj5ztir/assize-copy-i7e7e4t8/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-ugj5ztir
+scanned 59 code files under /tmp/assize-scratch-ugj5ztir/assize-copy-i7e7e4t8/repo (top-level exclusions: ['.git', '.mypy_cache', '.pytest_cache', '.ruff_cache', '.venv', '__pycache__', 'out', 'reports'])
+  VIOLATION judge/evaluate.py:38: from harness import mutants
+  [ok] scan is non-vacuous
+  [FAIL] no switch found (1 violations)
+result:    FAIL
