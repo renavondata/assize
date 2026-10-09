@@ -1,7 +1,9 @@
 """Compute priced in the World's utility (brief 1 A4 item 4).
 
 An episode's measured compute (`compute.py`, `episodes.py`) is converted into units of the World's per-episode utility
-at the rates `[price.<world>]` of `config.toml` commits, by one rule:
+at the rates the World's manifest commits in its `price` block, with their derivation in its `rationale`, by one rule.
+A World whose manifest commits no price has none: the judge refuses to evaluate it (`Unpriced`), never borrowing
+another World's rates (brief 2 A2, P20):
 
 - CPU: the episode's measured `cpu_s`, plus its `unmeasured_s` at the configured CPUs. What the judge could not
   measure (a crashed container takes its cgroup with it) is charged at the most the candidate could have used, so that
@@ -17,14 +19,11 @@ the episode's own peak, which no cgroup file reports, is never claimed."""
 
 from __future__ import annotations
 
-import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
 
 from judge import runtime
 
-CONFIG = runtime.CONFIG
 # The scope of every record's `peak_memory_bytes`, stated in the record beside it.
 PEAK_SCOPE = "container_since_start"
 GB = 1e9
@@ -38,8 +37,15 @@ class Price:
     memory_gb_s: float
 
 
-def of(world: str, path: Path = CONFIG) -> Price:
-    c = tomllib.loads(path.read_text())["price"][world]
+class Unpriced(ValueError):
+    """A World whose manifest commits no price."""
+
+
+def of(manifest: Mapping) -> Price:
+    """The rates `manifest` commits for its World."""
+    c = manifest.get("price")
+    if c is None:
+        raise Unpriced(f"{manifest['world']!r} commits no price in its manifest")
     return Price(float(c["cpu_s"]), float(c["memory_gb_s"]))
 
 

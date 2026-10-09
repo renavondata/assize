@@ -2,4 +2,4 @@
 # Each building session updates this file in the commit that changes the harness.
 kind = "builder"
 model = "claude-opus-5-5"
-session = "afb193a1-6114-4d73-87de-0b24f8570087"
+session = "1137b45d-2b48-40ec-8896-f3e4cb2a707a"

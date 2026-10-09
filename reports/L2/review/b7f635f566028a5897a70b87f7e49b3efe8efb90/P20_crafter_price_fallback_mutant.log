@@ -1,0 +1,16 @@
+copy of <scratch>
+  at /tmp/assize-scratch-93dzwg_n/assize-copy-ooiw06wv/repo
+applied 1 edit(s) from harness/edits/P20_crafter_price_fallback.toml
+pin:       P20
+protects:  a World is priced from its own manifest; evaluate() refuses one that commits no price
+role:      mutant
+tree:      /tmp/assize-scratch-93dzwg_n/assize-copy-ooiw06wv/repo
+invoked:   <scratch>
+scratch:   /tmp/assize-scratch-93dzwg_n
+  fixture Worlds in a copy of the tree: {"bound": ["crafter", "fx", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unknown_runtime", "bare": "unknown_world"}, "fx_binding": "fx", "seed_stores": []}
+  [FAIL] evaluate('unpriced') refused unpriced (unknown_runtime)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  [ok] crafter/manifest.json commits a price and conforms to manifest.schema.json
+  [ok] manifest.schema.json rejects crafter/manifest.json without its price
+result:    FAIL

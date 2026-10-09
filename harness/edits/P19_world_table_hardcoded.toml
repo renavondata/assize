@@ -1,0 +1,6 @@
+# P19's mutant `world_table_hardcoded` (brief 2 A2): the judge binds the Worlds of a table it keeps, as at L1, so a
+# World added by its directory alone is not bound without a judge edit.
+[[edit]]
+path = "judge/evaluate.py"
+old = '''    return sorted(d.name for d in worlds.iterdir() if (d / "manifest.json").is_file() and (d / "binding.py").is_file())'''
+new = '''    return sorted({"crafter": "worlds.crafter.binding"})'''

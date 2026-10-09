@@ -1,0 +1,34 @@
+pin:       P0m
+protects:  a commit touching an entrenched path without a guy Proposer is rejected; every party is read
+role:      clean
+tree:      /tmp/rev35b
+invoked:   /tmp/rev35b
+scratch:   /tmp/assize-scratch-7sbsips0
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: the last 6 commits read as merges and no other
+  [ok] fixture: 15 branch commits read, want 15
+  [ok] builder, ordinary path: parties reported ['builder m s'], findings []; want ['builder m s'], []
+  [ok] no trailer: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], findings ['entrenched_without_guy']; want ['builder m s'], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], findings []; want ['guy', 'builder m s'], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], findings []; want ['builder m s', 'guy'], []
+  [ok] malformed party: parties reported ['builder m'], findings ['bad_party']; want ['builder m'], ['bad_party']
+  [ok] body-only Proposer, not exempted: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] body-only Proposer, exempted: parties reported ['reviewer m s'], findings []; want ['reviewer m s'], []
+  [ok] body-only Proposer, another party exempted: parties reported [], findings ['no_proposer']; want [], ['no_proposer']
+  [ok] merge by gfrmin's noreply: parties reported ['guy'], findings []; want ['guy'], []
+  [ok] merge by gfrmin's own address, CLAUDE.md: parties reported ['guy'], findings []; want ['guy'], []
+  [ok] merge by assize-builder: parties reported ['builder'], findings []; want ['builder'], []
+  [ok] merge by assize-reviewer, .github/: parties reported ['reviewer'], findings ['entrenched_without_guy']; want ['reviewer'], ['entrenched_without_guy']
+  [ok] merge by an unknown author: parties reported [], findings ['unknown_merge_author']; want [], ['unknown_merge_author']
+  [ok] merge by an unknown author, Proposer: guy trailer: parties reported [], findings ['unknown_merge_author']; want [], ['unknown_merge_author']
+  [ok] real branch: base resolved (4204e2e6385068229897852d574c49181ce7d027)
+    ea4604e788ee parties ['builder claude-opus-5-5 beefe8ec-111e-41e8-a86a-fce5fd32e7ad']
+    592e1d80352c parties ['builder claude-opus-5-5 beefe8ec-111e-41e8-a86a-fce5fd32e7ad']
+    b7f635f56602 parties ['builder claude-opus-5-5 beefe8ec-111e-41e8-a86a-fce5fd32e7ad']
+    b7eafee0ca57 parties ['reviewer claude-opus-5-5 cba02c1d-8bbd-4c1d-951f-804edc546db7']
+    0a4f2b8aa612 parties ['builder claude-opus-5-5 1137b45d-2b48-40ec-8896-f3e4cb2a707a']
+    0885b8bd7584 parties ['builder claude-opus-5-5 1137b45d-2b48-40ec-8896-f3e4cb2a707a']
+    ecbea74da388 parties ['builder claude-opus-5-5 1137b45d-2b48-40ec-8896-f3e4cb2a707a']
+  [ok] real branch 4204e2e63850..HEAD: 7 commits; findings []
+result:    PASS

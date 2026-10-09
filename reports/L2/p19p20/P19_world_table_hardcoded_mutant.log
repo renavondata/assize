@@ -1,0 +1,17 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-jgygld6p/assize-copy-xipzbit2/repo
+applied 1 edit(s) from harness/edits/P19_world_table_hardcoded.toml
+pin:       P19
+protects:  a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding
+role:      mutant
+tree:      /tmp/assize-scratch-jgygld6p/assize-copy-xipzbit2/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-jgygld6p
+  fixture Worlds in a copy of the tree: {"bound": ["crafter"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_world", "unpriced": "unknown_world", "bare": "unknown_world"}, "fx_binding": "unknown_world", "seed_stores": []}
+  [FAIL] bound: every directory with a manifest and a binding, and only those (['crafter'])
+  [FAIL] fx's own binding is imported (unknown_world)
+  [FAIL] evaluate('fx') refused unknown_runtime (unknown_world)
+  [ok] evaluate('crafter') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('bare') refused unknown_world (unknown_world)
+  [ok] no seed issued to a refused request ([])
+result:    FAIL

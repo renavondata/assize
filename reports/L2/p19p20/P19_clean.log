@@ -1,0 +1,14 @@
+pin:       P19
+protects:  a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding
+role:      clean
+tree:      /home/g/actions-runner/_work/assize/assize
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-h008c7gb
+  fixture Worlds in a copy of the tree: {"bound": ["crafter", "fx", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unpriced", "bare": "unknown_world"}, "fx_binding": "fx", "seed_stores": []}
+  [ok] bound: every directory with a manifest and a binding, and only those (['crafter', 'fx', 'unpriced'])
+  [ok] fx's own binding is imported (fx)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('crafter') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('bare') refused unknown_world (unknown_world)
+  [ok] no seed issued to a refused request ([])
+result:    PASS

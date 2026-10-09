@@ -1,0 +1,4 @@
+{'world': 'x', 'price': {}} -> KeyError 'cpu_s'
+{'world': 'x', 'price': {'cpu_s': -1, 'memory_gb_s': -1}} -> Price(cpu_s=-1.0, memory_gb_s=-1.0)
+{'world': 'x', 'price': None} -> Unpriced 'x' commits no price in its manifest
+{'world': 'x', 'price': {'cpu_s': 'nan', 'memory_gb_s': 0}} -> Price(cpu_s=nan, memory_gb_s=0.0)

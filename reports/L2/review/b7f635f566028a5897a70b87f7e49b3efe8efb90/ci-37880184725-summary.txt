@@ -1,0 +1,12 @@
+2026-10-09T03:38:19.3582603Z   clean: true
+2026-10-09T03:49:07.6504457Z [clean ] P0l: observed fail -> FAILED (0.334s) out/pins/runs/P0l/clean/transcript.log
+2026-10-09T03:49:07.6505563Z CLEAN FAILED: P0l (observed fail)
+2026-10-09T03:49:07.6527469Z [clean ] P19: observed pass -> ok (1.188s) out/pins/runs/P19/clean/transcript.log
+2026-10-09T03:49:07.6528716Z [clean ] P20: observed pass -> ok (1.289s) out/pins/runs/P20/clean/transcript.log
+2026-10-09T03:49:07.6538670Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.357s + 0.356s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-09T03:49:07.6570785Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.356s + 0.355s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+2026-10-09T03:49:07.6572365Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+2026-10-09T04:02:23.9919932Z [mutant] P19/world_table_hardcoded: mutant fail, twin pass -> KILLED (1.159s + 1.158s) out/pins/runs/P19/world_table_hardcoded/mutant/transcript.log
+2026-10-09T04:02:23.9921780Z [mutant] P20/crafter_price_fallback: mutant fail, twin pass -> KILLED (1.259s + 1.258s) out/pins/runs/P20/crafter_price_fallback/mutant/transcript.log
+2026-10-09T04:02:23.9938626Z clean: 31/32 passed, 1/32 failed
+2026-10-09T04:02:23.9939633Z mutants: 82/83 killed, 0/83 survived, 0/83 inconclusive, 0/83 stale, 1/83 non-causal, 0 leaked (clean and mutant)

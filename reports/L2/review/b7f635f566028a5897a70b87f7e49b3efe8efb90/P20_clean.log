@@ -1,0 +1,13 @@
+pin:       P20
+protects:  a World is priced from its own manifest; evaluate() refuses one that commits no price
+role:      clean
+tree:      <scratch>
+invoked:   <scratch>
+scratch:   /tmp/assize-scratch-_7a_puct
+  fixture Worlds in a copy of the tree: {"bound": ["crafter", "fx", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unpriced", "bare": "unknown_world"}, "fx_binding": "fx", "seed_stores": []}
+  [ok] evaluate('unpriced') refused unpriced (unpriced)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  [ok] crafter/manifest.json commits a price and conforms to manifest.schema.json
+  [ok] manifest.schema.json rejects crafter/manifest.json without its price
+result:    PASS
