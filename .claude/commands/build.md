@@ -8,6 +8,7 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 - Acting as GitHub account: !`gh api user -q .login`
 - Own session id: !`cat .claude/.session_id 2>/dev/null || echo unknown`
 - Acknowledgement flag (set only on a manual dispatch by Guy): !`echo "${ASSIZE_ACK:-no}"`
+- Dispatched PR (if any): !`echo "${ASSIZE_PR:-none}"`
 - Branch: !`git branch --show-current || true` at !`git rev-parse --short HEAD || true`; changed files: !`git status --porcelain | wc -l || true`
 - Current layer: !`grep -m1 'Current layer' CLAUDE.md || true`
 - Brief: !`ls docs/briefs/brief-$(grep -oP 'Current layer: L\K[0-9]+' CLAUDE.md)-*.md 2>/dev/null || true`
@@ -17,11 +18,12 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 
 ## Guards
 - If the account above is not `assize-builder`, stop and report: a Builder runs only as the builder account. Do nothing else.
-- If the checked-out branch is `master` and the last STATUS has a `NEEDS YOU` that is not `none`, and the acknowledgement flag is `no`: do not build. If no open issue has that line as its title, create one: `gh issue create --title "<the NEEDS YOU line>" --assignee gfrmin --body "From $(git rev-parse --short HEAD) STATUS. Close this issue and run the build workflow (gh workflow run build.yml) to acknowledge."` Then stop and report.
+- If a dispatched PR is set, check it out with `gh pr checkout` before anything else and treat this as a PR-branch session.
+- If the checked-out branch is `master` and you will not open a pull request this session, for any reason: before stopping, create an issue assigned to gfrmin whose title is the reason in one line and whose body says what would unblock it, unless an open issue already says so. Then stop and report.
 - If the checked-out branch is a PR branch and the newest review's VERDICT is BLOCK: your first and only item is that finding. If this branch already has three review files, do not build: label the PR `awaits-guy`, request Guy's review (`gh pr edit <n> --add-reviewer gfrmin`), write STATUS with `NEEDS YOU: three review rounds without approval; decide`, push, and stop.
 
 ## Procedure
-1. On `master`: start from STATUS's `next` line, else from the brief's first unfinished item, on a new branch. On a PR branch: work the finding.
+1. On `master`: start from STATUS's `next` line, else from the brief's first unfinished item, on a new branch. On a PR branch, first step: if the branch conflicts with master (`gh pr view --json mergeStateStatus` is DIRTY), merge origin/master first: append-only files keep every line from both sides; STATUS.md keeps the newer-dated; other conflicts resolved minimally and listed in the commit message. Then work the finding.
 2. Before your first commit, write `harness/proposer.toml` with `kind = "builder"`, your model, and your own session id. Before your first `make pins`, append your forecasts to `reports/L<n>/forecasts.jsonl` per A1.6: pins green on the first CI run of this PR head; reviewer ACCEPT with no blocking finding; and, on a layer whose exit gate names a host verdict, the host verdict.
 3. Do one item of the brief, or the smallest group the brief states together. Never start the next layer. Never edit an entrenched path (A1.1) unless the brief names it.
 4. Run `make pins`. Witness under the A3 hygiene rule. Every pin proves it can fail.

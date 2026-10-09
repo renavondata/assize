@@ -5,6 +5,8 @@ on:
   pull_request:
     types: [labeled]
   workflow_dispatch:
+    inputs:
+      pr: { description: "PR number to build on; empty builds master", required: false, type: string }
 concurrency:
   group: build
   cancel-in-progress: false
@@ -17,15 +19,16 @@ jobs:
       GH_TOKEN: ${{ secrets.ASSIZE_BUILDER_TOKEN }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       ASSIZE_ACK: ${{ github.event_name == 'workflow_dispatch' && 'yes' || 'no' }}
+      ASSIZE_PR: ${{ inputs.pr }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with: { ref: master, fetch-depth: 0, persist-credentials: false }
       - run: gh auth setup-git
-      - if: github.event_name == 'pull_request'
-        run: gh pr checkout ${{ github.event.pull_request.number }}
+      - if: github.event_name == 'pull_request' || inputs.pr != ''
+        run: gh pr checkout ${{ github.event.pull_request.number || inputs.pr }}
       - run: claude -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
       - if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-${{ github.run_id }}
           path: build.log

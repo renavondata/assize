@@ -17,12 +17,12 @@ jobs:
       GH_TOKEN: ${{ secrets.ASSIZE_REVIEWER_TOKEN }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with: { ref: master, fetch-depth: 0, persist-credentials: false }
       - run: gh auth setup-git
-      - run: claude -p "/review ${{ github.event.pull_request.number || inputs.pr }}" --max-turns 250 --output-format stream-json --verbose > review.log 2>&1
+      - run: claude --model sonnet -p "/review ${{ github.event.pull_request.number || inputs.pr }}" --max-turns 250 --output-format stream-json --verbose > review.log 2>&1
       - if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: review-${{ github.run_id }}
           path: review.log
