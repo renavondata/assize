@@ -502,10 +502,13 @@ EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exem
     ("body-only Proposer, another party exempted", "docs/z.md", "reviewer m s", "reviewer m t", (), {"no_proposer"}),
 )
 INSTRUCTION_ISSUES = {  # the issues INSTRUCTION_FIXTURE cites, as claims.load_issues would read them
-    1: claims.Issue("gfrmin", ("instruction",), "open"),
-    2: claims.Issue("gfrmin", ("instruction", "constitution"), "closed"),
-    3: claims.Issue("assize-builder", ("instruction",), "open"),
-    4: claims.Issue("gfrmin", ("constitution",), "open"),
+    1: claims.Issue("gfrmin", ("instruction",), "open", "gfrmin"),
+    2: claims.Issue("gfrmin", ("instruction", "constitution"), "closed", "gfrmin"),
+    3: claims.Issue("assize-builder", ("instruction",), "open", "gfrmin"),
+    4: claims.Issue("gfrmin", ("constitution",), "open", "gfrmin"),  # a timeline read that disagrees with the labels
+    5: claims.Issue("assize-vizier", ("draft", "instruction"), "open", "gfrmin"),
+    6: claims.Issue("assize-vizier", ("draft", "instruction"), "open", "assize-vizier"),
+    7: claims.Issue("gfrmin", ("instruction",), "open", "assize-builder"),
 }
 INSTRUCTION_FIXTURE = (  # (label, path, Proposer trailer lines, Instruction trailer lines, issues cited, findings wanted)
     ("builder, Instruction of gfrmin's open instruction issue, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#1",),
@@ -519,7 +522,31 @@ INSTRUCTION_FIXTURE = (  # (label, path, Proposer trailer lines, Instruction tra
     ("builder, Instruction of an issue not read, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#9",), (9,),
      {"entrenched_without_guy"}),
     ("builder, malformed Instruction, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("1",), (), {"entrenched_without_guy"}),
+    ("builder, Instruction of a draft gfrmin signed, .claude/", ".claude/d.md", ("builder m s",), ("#5",), (5,), set()),
+    ("builder, Instruction of a draft the Vizier labelled itself, .claude/", ".claude/d.md", ("builder m s",), ("#6",),
+     (6,), {"entrenched_without_guy"}),
+    ("builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md", "CLAUDE.md", ("builder m s",),
+     ("#7",), (7,), {"entrenched_without_guy"}),
 )
+TIMELINE_FIXTURE = (  # (label, timeline events, who the standing `instruction` label was applied by)
+    ("gfrmin labels", (("labeled", "instruction", "gfrmin"),), "gfrmin"),
+    ("the Vizier labels", (("labeled", "draft", "assize-vizier"), ("labeled", "instruction", "assize-vizier")),
+     "assize-vizier"),
+    ("the Vizier labels, gfrmin relabels", (("labeled", "instruction", "assize-vizier"),
+                                             ("unlabeled", "instruction", "gfrmin"),
+                                             ("labeled", "instruction", "gfrmin")), "gfrmin"),
+    ("gfrmin labels, another account relabels", (("labeled", "instruction", "gfrmin"),
+                                                  ("unlabeled", "instruction", "assize-builder"),
+                                                  ("labeled", "instruction", "assize-builder")), "assize-builder"),
+    ("gfrmin labels, then unlabels", (("labeled", "instruction", "gfrmin"), ("unlabeled", "instruction", "gfrmin")),
+     None),
+    ("only other labels and events", (("labeled", "draft", "gfrmin"), ("commented", None, "gfrmin")), None),
+)
+
+
+def _timeline(events: tuple) -> list[dict]:
+    """Timeline events in the shape the GitHub API returns them."""
+    return [{"event": e, "actor": {"login": a}} | ({"label": {"name": n}} if n else {}) for e, n, a in events]
 MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
     ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
     ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
@@ -601,7 +628,8 @@ def p0m_commit_proposers() -> bool:
     (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
     author is rejected, whatever trailer it carries (brief 1 A9). `Instruction: #<n>` carries Guy's authority on an
     entrenched path when issue <n>, read through the GitHub API, is authored by gfrmin and labelled `instruction`, open
-    or closed (CLAUDE.md A1.5, instruction #38)."""
+    or closed (CLAUDE.md A1.5, instruction #38), and only if its timeline shows gfrmin applied the label; a `draft` the
+    Vizier posted counts once gfrmin applies it (CLAUDE.md Amendment 3, instruction #49)."""
     expect, ok = _expecter()
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
@@ -621,6 +649,9 @@ def p0m_commit_proposers() -> bool:
                f"{label}: parties reported {list(c.parties)}, instructions {list(c.instructions)}, findings "
                f"{sorted(got)}; want {list(trailers)}, {list(cited)}, {sorted(want)}")
     shutil.rmtree(work, ignore_errors=True)
+    for label, events, want in TIMELINE_FIXTURE:
+        got = claims.instruction_labeler(_timeline(events))
+        expect(got == want, f"timeline, {label}: `instruction` label applied by {got!r}, want {want!r}")
 
     root = _real_root()
     shallow = claims._git(root, "rev-parse", "--is-shallow-repository").strip() == "true"
@@ -715,6 +746,60 @@ def p0n_surprise_ranking() -> bool:
                           "--repo", str(work / "repo")], cwd=ROOT, capture_output=True, text=True)
     listed = [line.split()[0] for line in out.stdout.splitlines() if line.startswith("#") and not line.startswith("# ")]
     expect(out.returncode == 0 and listed == [f"#{n}" for n, *_ in SURPRISE_WANT],
+           f"the command lists {listed} (exit {out.returncode}; {out.stderr.strip()[-200:]!r})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _vizier(claim: str, p: float, cls: str, mode: str) -> dict:
+    return _forecast(claim, p, "vizier") | {"class": cls, "mode": mode}
+
+
+V_REC1, V_REC2, V_ACT1, V_ACT2, V_OPEN = (_vizier("r1", 0.8, "relabel", "recommend"),
+                                          _vizier("r2", 0.7, "relabel", "recommend"),
+                                          _vizier("a1", 0.9, "close-failed", "act"),
+                                          _vizier("a2", 0.6, "close-failed", "act"),
+                                          _vizier("o", 0.5, "relabel", "recommend"))
+PROPOSER_FIXTURE = (V_REC1, V_REC2, V_ACT1, V_ACT2, V_OPEN, F_A, _resolved(V_REC1, True), _resolved(V_REC2, True),
+                    _resolved(V_ACT1, True), _resolved(V_ACT2, False), _resolved(F_A, False))
+# (class, made, resolved, correct, overturned, log-loss, unbroken), by the definition: both relabel recommendations
+# resolved true, the third open; one close-failed act stood (0.9, true) and one was overturned (0.6, false); F_A is the
+# Builder's and is not the Vizier's record.
+PROPOSER_WANT = (("close-failed", 2, 2, 1, 1, -math.log(0.9) - math.log(1 - 0.6), False),
+                 ("relabel", 3, 2, 2, 0, -math.log(0.8) - math.log(0.7), True))
+
+
+def p0o_proposer_record() -> bool:
+    """`python -m harness.ledger proposer vizier` reports the Vizier's record per class: made, resolved, correct,
+    overturned acts, cumulative log-loss, and whether the class is correct on every resolved case; an overturned act
+    is never a success (instruction #49 §4)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    got = ledger.record(list(PROPOSER_FIXTURE), "vizier")
+    for r in got:
+        print(f"    {r}")
+    expect([(r.cls, r.made, r.resolved, r.correct, r.overturned, r.unbroken) for r in got]
+           == [(c, m, res, cor, ov, u) for c, m, res, cor, ov, _, u in PROPOSER_WANT],
+           f"records {[(r.cls, r.made, r.resolved, r.correct, r.overturned, r.unbroken) for r in got]}, want "
+           f"{[(c, m, res, cor, ov, u) for c, m, res, cor, ov, _, u in PROPOSER_WANT]}")
+    expect(all(math.isclose(r.loss, w[5]) for r, w in zip(got, PROPOSER_WANT)),
+           f"losses {[r.loss for r in got]}, want {[w[5] for w in PROPOSER_WANT]}")
+    later = ledger.record(list(PROPOSER_FIXTURE), "vizier", since="2026-01-01T00:00:01Z")
+    expect(later == [], f"no Vizier forecast at or after a later --since: {later}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0o-", dir=context.scratch))
+    repo = work / "repo"
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+    (repo / "reports/L2").mkdir(parents=True)
+    (repo / "reports/L2/forecasts.jsonl").write_text("".join(json.dumps(r) + "\n" for r in PROPOSER_FIXTURE))
+    for args in (("init", "-q", "-b", "master"), ("add", "-A"), ("commit", "-q", "-m", "ledger")):
+        subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, env=env)
+    out = subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "proposer", "vizier", "--repo", str(repo)],
+                         cwd=ROOT, capture_output=True, text=True)
+    listed = [line.split()[:5] for line in out.stdout.splitlines() if not line.startswith("#")]
+    want = [[c, f"made={m}", f"resolved={res}", f"correct={cor}/{res}", f"overturned={ov}"]
+            for c, m, res, cor, ov, _, _ in PROPOSER_WANT]
+    expect(out.returncode == 0 and listed == want,
            f"the command lists {listed} (exit {out.returncode}; {out.stderr.strip()[-200:]!r})")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
@@ -2389,9 +2474,12 @@ PINS = [
                                 Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")),
                                 Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")),
                                 Mutant("instruction_author_unchecked", _edits("P0m_instruction_author_unchecked")),
-                                Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")))),
+                                Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")),
+                                Mutant("instruction_labeler_unchecked", _edits("P0m_instruction_labeler_unchecked")))),
     Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
         p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),)),
+    Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",
+        p0o_proposer_record, (Mutant("overturned_scored_success", _edits("P0o_overturned_scored_success")),)),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

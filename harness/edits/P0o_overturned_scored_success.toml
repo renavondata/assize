@@ -1,0 +1,5 @@
+# P0o's mutant (instruction #49 §4): every resolved forecast counts as correct, so an overturned act scores as success.
+[[edit]]
+path = "harness/ledger.py"
+old = "sum(1 for _, o in known if o),"
+new = "len(known),"

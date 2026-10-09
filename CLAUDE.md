@@ -144,3 +144,19 @@ Audit criteria, verbatim:
 5. No unscored actor: every party whose outputs enter the ledger or repository has a forecast or a proper score attached.
 6. Reach: no path to judge-private storage, the ledger or an entrenched path except through the mechanisms the law names.
 7. Monotone trusted base: the set of things outside every loop is listed and has not grown since the last audit.
+
+## Amendment 3 — The sovereign (appended; instruction #49; replaces nothing, narrows A1.5 in practice)
+
+Guy's role is three things: wishes, judgement at layer boundaries, and signatures the law reserves to him (approval of entrenched pull requests, merge of layer boundaries, the `instruction` label). Every one of these reaches him through the Vizier with a recommendation and a probability, and he answers with a tap, a word, or a wish. No other act is asked of him; a session or workflow that needs something else from him has found a defect, and files it as an obligation.
+
+A wish is an issue labelled `wish`, in Guy's own words, at any level of generality. The Vizier turns it into one or more draft instructions or brief amendments, posted as issues labelled `draft`, each citing the wish. Guy signs a draft by applying the `instruction` label; the Builder verifies through the issue timeline that the label was applied by gfrmin, and otherwise refuses it. A draft Guy does not sign within the next layer is closed by the Vizier with the reason.
+
+The Vizier's authority is the act-alone list below, which only an entrenched change widens or narrows. Everything else it recommends. Every recommendation is a forecast of Guy's answer; every act-alone is a forecast that Guy does not overturn it before the next audit; both are scored in the ledger under proposer kind `vizier`. A class the Vizier recommends correctly on every resolved case since the last audit is proposed for the act-alone list in the audit's amendment; a class it acts on and is overturned in returns to recommendation at once.
+
+Act-alone list (initial):
+- close an issue filed by failed.yml whose run had zero steps and whose branch has a later successful run of the same workflow;
+- close a `NEEDS YOU` issue that the merge of the pull request named in its STATUS header has satisfied;
+- relabel a pull request `needs-review` or `blocked` to send it back to the loop when its head has changed since the last review;
+- re-run a failed `pins` run whose failure was infrastructure (cancelled, no runner, GitHub incident), at most once per head;
+- dispatch `build.yml` after an acknowledgement it was permitted to make;
+- disable `build.yml` and `review.yml` on a runaway (three builder sessions on one PR in an hour, or a build that opens no PR three times running) and file an issue to Guy.

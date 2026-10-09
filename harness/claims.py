@@ -4,11 +4,14 @@ list means accepted. Readers of git and of committed files are kept apart from t
 
 from __future__ import annotations
 
+import argparse
+import functools
 import hashlib
 import json
 import os
 import re
 import subprocess
+import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,7 +31,8 @@ class Finding:
 
 FORECAST_KEYS = ("id", "ts", "proposer", "sha_before", "claim", "p", "resolves_by")
 RESOLUTION_KEYS = ("id", "ts", "proposer", "outcome")
-PROPOSER_KINDS = frozenset({"builder", "reviewer", "guy", "counsel", "auditor"})  # auditor: CLAUDE.md Amendment 2
+# auditor: CLAUDE.md Amendment 2; vizier: Amendment 3
+PROPOSER_KINDS = frozenset({"builder", "reviewer", "guy", "counsel", "auditor", "vizier"})
 
 
 def forecast_id(claim: str, ts: str) -> str:
@@ -151,7 +155,7 @@ def load_runs(root: Path) -> dict[int, dict]:
 
 # ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
 
-PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor) \S+ \S+)$")
+PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor|vizier) \S+ \S+)$")
 TRAILER_SEP = "\x1e"
 
 
@@ -181,6 +185,9 @@ PROPOSER_EXEMPTIONS: Mapping[str, str] = {
     # PR #35 and the Builder's F1 fix after it; both pushed, so they are exempted rather than reworded.
     "b7eafee0ca572971b799cd6899e632fac7a6e30f": "reviewer claude-opus-5-5 cba02c1d-8bbd-4c1d-951f-804edc546db7",
     "0a4f2b8aa612d799b526a458c8f850669e122a98": "builder claude-opus-5-5 1137b45d-2b48-40ec-8896-f3e4cb2a707a",
+    # P0m clean on instr-49-vizier (stacked on PR #48): the same blank line, in the review commit of PR #48; pushed,
+    # and the head of a pull request awaiting Guy, so it is exempted rather than reworded.
+    "e37357ed2d398cc3c1e16d65576d688e57c040c2": "reviewer claude-sonnet-5-5 a5caecbb-729c-4885-b5bf-40f1f55e76cc",
 }
 
 
@@ -194,9 +201,11 @@ def instructions(trailer_values: str) -> tuple[int, ...]:
 
 # CLAUDE.md A1.5: Guy's instructions enter the court as issues labelled `instruction`, authored by gfrmin. A commit
 # citing one by `Instruction: #<n>` carries Guy's authority on an entrenched path as `Proposer: guy` does (instruction
-# #38). The issue is read through the GitHub API; a closed issue still counts.
+# #38). The issue is read through the GitHub API; a closed issue still counts. Amendment 3: Guy also signs a `draft`
+# the Vizier posted by applying `instruction`, and the label counts only if its timeline shows gfrmin applied it.
 INSTRUCTION_AUTHOR = "gfrmin"
 INSTRUCTION_LABEL = "instruction"
+DRAFT_LABEL = "draft"
 
 
 @dataclass(frozen=True)
@@ -204,11 +213,25 @@ class Issue:
     author: str
     labels: tuple[str, ...]
     state: str = ""
+    labeled_by: str | None = None  # the account that applied the standing `instruction` label, from the timeline
+
+
+def instruction_labeler(events: Sequence[Mapping]) -> str | None:
+    """The account whose `labeled instruction` event stands at the end of an issue timeline: the actor of the last
+    such event with no `unlabeled instruction` after it, or None."""
+    def step(by: str | None, e: Mapping) -> str | None:
+        if (e.get("label") or {}).get("name") != INSTRUCTION_LABEL:
+            return by
+        return {"labeled": (e.get("actor") or {}).get("login"), "unlabeled": None}.get(e.get("event"), by)
+
+    return functools.reduce(step, events, None)
 
 
 def authorises(issue: Issue | None) -> bool:
-    """An issue carries Guy's authority if gfrmin authored it and it is labelled `instruction`, open or closed."""
-    return issue is not None and issue.author == INSTRUCTION_AUTHOR and INSTRUCTION_LABEL in issue.labels
+    """An issue carries Guy's authority if it is labelled `instruction`, gfrmin applied that label, and gfrmin authored
+    it or it is a `draft` (Amendment 3), open or closed."""
+    return (issue is not None and INSTRUCTION_LABEL in issue.labels and issue.labeled_by == INSTRUCTION_AUTHOR
+            and (issue.author == INSTRUCTION_AUTHOR or DRAFT_LABEL in issue.labels))
 
 
 def exempt_parties(sha: str, message: str, exemptions: Mapping[str, str]) -> tuple[str, ...]:
@@ -305,18 +328,45 @@ def branch_commits(repo: Path, base: str, head: str = "HEAD",
 
 
 def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
-    """The issues `numbers` name, read through the GitHub API (`gh api`, from `repo`'s remote). One that cannot be
-    read is left out, so it authorises nothing."""
+    """The issues `numbers` name, with their timelines, read through the GitHub API (`gh api`, from `repo`'s remote).
+    One that cannot be read is left out, so it authorises nothing."""
+    def gh(path: str, *args: str) -> str:
+        return subprocess.run(["gh", "api", path, *args], cwd=repo, check=True, capture_output=True, text=True,
+                              timeout=60).stdout
+
     def read(n: int) -> Issue | None:
         try:
-            out = subprocess.run(["gh", "api", f"repos/{{owner}}/{{repo}}/issues/{n}", "--jq",
-                                  "{author: .user.login, labels: [.labels[].name], state: .state}"],
-                                 cwd=repo, check=True, capture_output=True, text=True, timeout=60).stdout
+            out = gh(f"repos/{{owner}}/{{repo}}/issues/{n}", "--jq",
+                     "{author: .user.login, labels: [.labels[].name], state: .state}")
+            timeline = gh(f"repos/{{owner}}/{{repo}}/issues/{n}/timeline?per_page=100", "--paginate", "--jq", ".[]")
         except (OSError, subprocess.SubprocessError) as e:
             print(f"    issue #{n}: not read ({e})")
             return None
         row = json.loads(out)
-        return Issue(str(row["author"]), tuple(row["labels"]), str(row["state"]))
+        events = [json.loads(line) for line in timeline.splitlines() if line.strip()]
+        return Issue(str(row["author"]), tuple(row["labels"]), str(row["state"]), instruction_labeler(events))
 
     read_ = {n: read(n) for n in sorted(set(numbers))}
     return {n: i for n, i in read_.items() if i is not None}
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """`python -m harness.claims signed <n>...`: whether each issue carries Guy's authority (Amendment 3). The Builder
+    acts only on an issue printed `signed`."""
+    ap = argparse.ArgumentParser(prog="python -m harness.claims")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("signed", help="whether each issue is an instruction Guy signed")
+    s.add_argument("numbers", type=int, nargs="*")
+    s.add_argument("--repo", type=Path, default=Path("."))
+    a = ap.parse_args(argv)
+    issues = load_issues(a.repo, a.numbers)
+    for n in a.numbers:
+        i = issues.get(n)
+        verdict = "signed" if authorises(i) else "refused"
+        why = f"author {i.author}, labels {list(i.labels)}, instruction label applied by {i.labeled_by}" if i else ""
+        print(f"#{n} {verdict}: {why or 'not read'}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

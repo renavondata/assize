@@ -1,7 +1,11 @@
 """`python -m harness.ledger surprise --since <sha>`: the pull requests merged into master since <sha>, ranked by the
 Builder's cumulative log-loss on the forecasts each added (instruction #46 item 5). A pull request's forecasts are the
 forecast rows its merge adds to any `reports/L*/forecasts.jsonl`, read from git; a forecast's outcome is the last
-resolution of its id in the ledgers at the head. Unresolved forecasts add no loss and are counted, never dropped."""
+resolution of its id in the ledgers at the head. Unresolved forecasts add no loss and are counted, never dropped.
+
+`python -m harness.ledger proposer <kind>`: that proposer's record per class (instruction #49 §4). The Vizier's forecast
+rows carry `class` and `mode`: `recommend` forecasts Guy's answer, `act` forecasts that Guy does not overturn the act;
+either is correct when it resolves true, and an `act` resolved false is an overturn."""
 
 from __future__ import annotations
 
@@ -79,6 +83,43 @@ def surprise(merged: Sequence[Merged], resolved: Mapping[str, bool]) -> list[Sur
     return sorted(map(score, merged), key=lambda s: (-s.loss, s.number))
 
 
+@dataclass(frozen=True)
+class Record:
+    cls: str
+    made: int
+    resolved: int
+    correct: int
+    overturned: int
+    loss: float
+
+    @property
+    def unbroken(self) -> bool:
+        """Correct on every resolved case: a recommended class the next audit proposes for the act-alone list."""
+        return self.resolved > 0 and self.correct == self.resolved
+
+    def __str__(self) -> str:
+        return (f"{self.cls} made={self.made} resolved={self.resolved} correct={self.correct}/{self.resolved} "
+                f"overturned={self.overturned} loss={self.loss:.4f} unbroken={'yes' if self.unbroken else 'no'}")
+
+
+def record(rows: Sequence[dict], kind: str, since: str = "") -> list[Record]:
+    """`kind`'s forecasts with `ts` at or after `since`, per class (`class`, else `unclassed`), with each class's
+    resolved and correct counts, its overturned acts and its cumulative log-loss, classes in name order."""
+    resolved = outcomes(rows)
+    mine = [r for r in rows if "claim" in r and isinstance(r.get("p"), (int, float))
+            and isinstance(r.get("proposer"), dict) and r["proposer"].get("kind") == kind
+            and str(r.get("ts", "")) >= since]
+
+    def tally(cls: str) -> Record:
+        rs = [r for r in mine if str(r.get("class", "unclassed")) == cls]
+        known = [(r, resolved[r["id"]]) for r in rs if r.get("id") in resolved]
+        return Record(cls, len(rs), len(known), sum(1 for _, o in known if o),
+                      sum(1 for r, o in known if r.get("mode") == "act" and not o),
+                      sum(log_loss(r["p"], o) for r, o in known))
+
+    return [tally(c) for c in sorted({str(r.get("class", "unclassed")) for r in mine})]
+
+
 def merged_since(repo: Path, since: str, head: str = "HEAD") -> list[Merged]:
     """Merges of pull requests on head's first-parent line after `since`, oldest first, each with the Builder's
     forecast rows it added to a ledger (the lines its diff against its first parent adds)."""
@@ -110,7 +151,19 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--since", required=True)
     s.add_argument("--head", default="HEAD")
     s.add_argument("--repo", type=Path, default=Path("."))
+    k = sub.add_parser("proposer", help="a proposer kind's record per class")
+    k.add_argument("kind")
+    k.add_argument("--since", default="", help="count forecasts with ts at or after this ISO timestamp")
+    k.add_argument("--head", default="HEAD")
+    k.add_argument("--repo", type=Path, default=Path("."))
     a = ap.parse_args(argv)
+    if a.cmd == "proposer":
+        classes = record(ledger_rows(a.repo, a.head), a.kind, a.since)
+        print(f"# {a.kind}: {sum(c.made for c in classes)} forecasts in {len(classes)} classes since "
+              f"{a.since or 'the first'}, at {a.head}")
+        for c in classes:
+            print(c)
+        return 0
     ranked = surprise(merged_since(a.repo, a.since, a.head), outcomes(ledger_rows(a.repo, a.head)))
     print(f"# {len(ranked)} merged pull requests in {a.since}..{a.head}, by the Builder's cumulative log-loss")
     for r in ranked:
