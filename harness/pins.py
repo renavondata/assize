@@ -1331,11 +1331,11 @@ def p7_infinite_loss() -> bool:
 FIT_DELTA = 0.5
 
 
-def _priced(used: dict, cfg: dict) -> dict:
-    """What the judge must charge for `used`, derived here from `judge/config.toml` and the rule `judge/price.py`
-    states, independently of that module: the unmeasured stretch at the configured CPUs and memory, the peak memory
-    over the rest, in gigabytes of 1e9 bytes."""
-    rate, lim = cfg["price"]["crafter"], cfg["candidate"]
+def _priced(used: dict, cfg: dict, rate: dict) -> dict:
+    """What the judge must charge for `used` at the manifest's `rate`, derived here from `judge/config.toml` and the
+    rule `judge/price.py` states, independently of that module: the unmeasured stretch at the configured CPUs and
+    memory, the peak memory over the rest, in gigabytes of 1e9 bytes."""
+    lim = cfg["candidate"]
     unmeasured = used["unmeasured_s"]
     cpu = rate["cpu_s"] * (used["cpu_s"] + lim["cpus"] * unmeasured)
     memory = rate["memory_gb_s"] * (used["peak_memory_bytes"] * max(used["wall_s"] - unmeasured, 0.0)
@@ -1351,7 +1351,7 @@ def _same(a: dict | None, b: dict) -> bool:
 
 def p12_compute_price() -> bool:
     """Under every usable runtime, every episode record carries its compute priced in Crafter achievements at the
-    rates `judge/config.toml` commits, which equal their stated derivation. The peak memory's scope is stated in the
+    rates Crafter's manifest commits, which equal their stated derivation. The peak memory's scope is stated in the
     record as the container's since its start, and the price follows that scope: a fixture filling a block in its first
     episode only is charged that block's high-water mark in its second episode too. What the judge could not measure,
     the stretch after a crashed container's last read, is charged at the configured CPUs and memory (brief 1 A4 item 4;
@@ -1364,7 +1364,8 @@ def p12_compute_price() -> bool:
 
     expect, ok = _expecter()
     cfg = tomllib.loads((ROOT / "judge" / "config.toml").read_text())
-    rate, lim, t = cfg["price"]["crafter"], cfg["candidate"], cfg["timeouts"]
+    rate = {k: binding.manifest()["price"][k] for k in ("cpu_s", "memory_gb_s")}
+    lim, t = cfg["candidate"], cfg["timeouts"]
     derived = {"cpu_s": FIT_DELTA / 2 / (lim["cpus"] * t["episode_s"]),
                "memory_gb_s": FIT_DELTA / 2 / (lim["memory_mib"] * 2 ** 20 / 1e9 * t["episode_s"])}
     print(f"  committed price {rate}; derived {derived}")
@@ -1390,7 +1391,7 @@ def p12_compute_price() -> bool:
             expect(used.get("wall_s", -1) > used.get("unmeasured_s", 0) == 0,
                    f"{n}: measured throughout ({used.get('wall_s')} s wall, {used.get('unmeasured_s')} s unmeasured)")
         for r in records + crashed:
-            want = _priced(r["compute"], cfg) if "peak_memory_bytes" in r.get("compute", {}) else {}
+            want = _priced(r["compute"], cfg, rate) if "peak_memory_bytes" in r.get("compute", {}) else {}
             expect(_same(r.get("price"), want),
                    f"{rt.name} {r['termination']} episode {r['episode']}: price {r.get('price')}, derived {want}")
         used = crashed[0].get("compute", {}) if crashed else {}
@@ -1400,6 +1401,115 @@ def p12_compute_price() -> bool:
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
 
     _each_runtime(usable, case, expect)
+    return ok()
+
+# P19 and P20 (brief 2 A2): fixture Worlds added to a copy of the tree by their directories alone, no judge edit. `fx`
+# has a manifest, a price and a binding; `unpriced` has a manifest without a price; `bare` has a binding and no
+# manifest. Each is asked of `evaluate()` under a runtime that does not exist, so a World the judge binds and prices is
+# refused only `unknown_runtime`, after its binding and price are settled and before any seed is issued.
+FIXTURE_WORLD_BINDING = '''import json
+from pathlib import Path
+
+MARK = Path(__file__).parent.name
+
+
+def manifest():
+    return json.loads(Path(__file__).with_name("manifest.json").read_text())
+
+
+def world_seed(seed):
+    return seed
+
+
+class Episode:
+    def __init__(self, seed, m=None):
+        raise AssertionError("a fixture World is never played")
+'''
+FIXTURE_WORLDS_RUN = """
+import json, sys
+from pathlib import Path
+from judge import evaluate, registry
+private, ledgers = Path(sys.argv[1]), Path(sys.argv[2])
+image = "sha256:" + "d" * 64
+registry.register(private, image, registry.credential(private, json.loads(sys.argv[3])))
+out = {"bound": evaluate.bound(), "refused": {}}
+for w in json.loads(sys.argv[4]):
+    try:
+        evaluate.evaluate(image, w, 1, "fixture-" + w, private=private, ledgers=ledgers, runtime_name="no-such-runtime")
+        out["refused"][w] = None
+    except registry.Refused as e:
+        out["refused"][w] = e.code
+try:
+    out["fx_binding"] = getattr(evaluate._binding("fx"), "MARK", None)
+except registry.Refused as e:
+    out["fx_binding"] = e.code
+out["seed_stores"] = sorted(p.name for p in private.glob("*.seeds.jsonl"))
+print(json.dumps(out))
+"""
+FIXTURE_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p19-fixture-party"}
+FIXTURE_ASKED = ("crafter", "fx", "unpriced", "bare")
+
+
+def _fixture_worlds() -> dict:
+    """FIXTURE_WORLDS_RUN in a copy of the running tree with the fixture Worlds' directories added; its findings."""
+    with tree.disposable_copy() as copy:
+        m = json.loads((copy / "worlds" / "crafter" / "manifest.json").read_text())
+        for name, manifest in (("fx", m | {"world": "fx"}),
+                               ("unpriced", {k: v for k, v in m.items() if k != "price"} | {"world": "unpriced"}),
+                               ("bare", None)):
+            d = copy / "worlds" / name
+            d.mkdir()
+            (d / "binding.py").write_text(FIXTURE_WORLD_BINDING)
+            if manifest is not None:
+                (d / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        state = Path(tempfile.mkdtemp(prefix="fixture-worlds-", dir=context.scratch))
+        r = subprocess.run(proc.python("-c", FIXTURE_WORLDS_RUN, str(state / "private"), str(state / "ledgers"),
+                                       json.dumps(FIXTURE_PARTY), json.dumps(FIXTURE_ASKED)),
+                           cwd=copy, env=proc.child_env(), capture_output=True, text=True)
+        if r.returncode:
+            raise RuntimeError(f"fixture-worlds child exited {r.returncode}: {r.stderr.strip()[-500:]}")
+        got = json.loads(r.stdout)
+        print(f"  fixture Worlds in a copy of the tree: {json.dumps(got)}")
+        return got
+
+
+def p19_world_discovery() -> bool:
+    """The judge binds a World by its directory alone: a fixture directory with a manifest and a binding, added to a copy
+    of the tree with no edit to `judge/`, is bound under its name, its own binding is the one imported, and `evaluate()`
+    takes it past the World check to the runtime check; a directory with a binding but no manifest is not bound, and is
+    refused `unknown_world`. Crafter stays bound. No seed is issued to any fixture request (brief 2 A2)."""
+    expect, ok = _expecter()
+    got = _fixture_worlds()
+    expect(got["bound"] == ["crafter", "fx", "unpriced"],
+           f"bound: every directory with a manifest and a binding, and only those ({got['bound']})")
+    expect(got["fx_binding"] == "fx", f"fx's own binding is imported ({got['fx_binding']})")
+    for w, want in (("fx", "unknown_runtime"), ("crafter", "unknown_runtime"), ("bare", "unknown_world")):
+        expect(got["refused"][w] == want, f"evaluate({w!r}) refused {want} ({got['refused'][w]})")
+    expect(not got["seed_stores"], f"no seed issued to a refused request ({got['seed_stores']})")
+    return ok()
+
+
+def p20_world_price() -> bool:
+    """A World is priced from its own manifest: `evaluate()` refuses `unpriced`, before any seed is issued, a World whose
+    manifest commits no price, and takes a World whose manifest commits one past the price check; every manifest in
+    the tree commits one, and the manifest schema requires it (brief 2 A2)."""
+    import jsonschema
+    import referencing
+    from worlds.spec import purity
+
+    expect, ok = _expecter()
+    got = _fixture_worlds()
+    for w, want in (("unpriced", "unpriced"), ("fx", "unknown_runtime")):
+        expect(got["refused"][w] == want, f"evaluate({w!r}) refused {want} ({got['refused'][w]})")
+    expect(not got["seed_stores"], f"no seed issued to a refused request ({got['seed_stores']})")
+    schemas, manifests = purity.load(purity.schema_files()), purity.load(purity.manifest_files())
+    registry = referencing.Registry().with_resources(
+        (s["$id"], referencing.Resource.from_contents(s)) for s in schemas.values())
+    v = jsonschema.Draft202012Validator(schemas["manifest.schema.json"], registry=registry)
+    for name, m in manifests.items():
+        expect("price" in m and v.is_valid(m), f"{name} commits a price and conforms to manifest.schema.json")
+        unpriced = {k: x for k, x in m.items() if k != "price"}
+        expect(not v.is_valid(unpriced), f"manifest.schema.json rejects {name} without its price")
     return ok()
 
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
@@ -2221,6 +2331,10 @@ PINS = [
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
+    Pin("P19", "a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding",
+        p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),)),
+    Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
+        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),)),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

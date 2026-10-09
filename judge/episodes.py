@@ -25,7 +25,7 @@ its cgroup with it, so its last stretch cannot be read: `unmeasured_s` is the wa
 to the episode's end, zero when the last attempt read, and the candidate's CPU in that stretch is at most the configured
 CPUs times it. CPU a candidate spends after its last episode's last sample, before removal, is charged to no episode.
 
-Every record carries `price`, its compute in the World's utility at the rates `config.toml` commits (`price.py`): the
+Every record carries `price`, its compute in the World's utility at the rates its manifest commits (`price.py`): the
 unmeasured stretch is charged at the configured limits, and the peak memory's scope is stated in the record as
 `peak_memory_scope`."""
 
@@ -223,7 +223,7 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
     """Play every World of `worlds` with the candidate `image`, one record per World, in order. A container serves
     episodes until one fails; it is then torn down, and the next episode starts in a fresh container."""
     lim, t = lim or runtime.limits(), t or timeouts()
-    rate, bins = price.of(manifest["world"]), calibration_bins()
+    rate, bins = price.of(manifest), calibration_bins()
     records: list[dict] = []
     c: Container | None = None
     for i, world in enumerate(worlds):

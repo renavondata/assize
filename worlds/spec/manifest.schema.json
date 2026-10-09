@@ -5,7 +5,7 @@
   "title": "World manifest",
   "description": "Declares, as data, every name a World uses: observation fields, the action set and prediction targets. No such name appears in an interface schema (brief 1 section 1; P6).",
   "type": "object",
-  "required": ["schema_version", "world", "source", "observation", "actions", "targets", "utility"],
+  "required": ["schema_version", "world", "source", "observation", "actions", "targets", "utility", "price"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {"const": "1.0.0"},
@@ -55,6 +55,17 @@
           "uniqueItems": true,
           "items": {"$ref": "#/$defs/identifier"}
         }
+      }
+    },
+    "price": {
+      "description": "The exchange rate of compute into the per-episode utility: utility per CPU-second and per gigabyte-second (1e9 bytes) of peak memory, committed with its derivation.",
+      "type": "object",
+      "required": ["cpu_s", "memory_gb_s", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "cpu_s": {"type": "number", "exclusiveMinimum": 0},
+        "memory_gb_s": {"type": "number", "exclusiveMinimum": 0},
+        "rationale": {"type": "string", "minLength": 1}
       }
     },
     "rationale": {"type": "string"}

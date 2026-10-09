@@ -22,20 +22,6 @@ teardown_s = 30.0
 # probability list per target, a few kilobytes; 1 MiB bounds the judge's memory against a candidate that never ends a line.
 reply_bytes = 1048576
 
-[price.crafter]
-# The exchange rate of compute into the World's per-episode utility (brief 1 A4 item 4), in Crafter achievements per
-# CPU-second and per gigabyte-second (1e9 bytes) of peak memory. Committed before the first scored run; never tuned after
-# a score is seen. Derivation: an episode that exhausts every allowance of [candidate] and [timeouts] (cpus CPUs and
-# memory_mib MiB for episode_s seconds) is charged delta = 0.5 achievements, half for each resource. 0.5 is the
-# smallest effect brief 1's FIT criterion requires the court to detect: priced lower, a candidate's whole allowance
-# would cost less than any difference the court resolves, and compute would be free in every adoption decision;
-# priced higher, compute would outweigh utility differences the court does resolve. So:
-#   cpu_s       = (delta / 2) / (cpus * episode_s)                     = 0.25 / 600
-#   memory_gb_s = (delta / 2) / (memory_mib * 2**20 / 1e9 * episode_s) = 0.25 / (1.073741824 * 600)
-# The pricing rule is `judge/price.py`'s: what the judge could not measure is charged at the configured limit.
-cpu_s = 0.0004166666666666667
-memory_gb_s = 0.00038805107275644935
-
 [calibration]
 # Bins of predicted probability in each target's reliability table (brief 1 A4 item 3): `bins` equal bins of [0, 1].
 # Committed before the first scored run; never tuned after a score is seen. The table is a report, not a decision: no
