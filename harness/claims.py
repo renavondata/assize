@@ -176,6 +176,10 @@ PROPOSER_EXEMPTIONS: Mapping[str, str] = {
     # review aa993f4 F1 (= bb7b387 F1): a blank line separates `Proposer:` from `Co-Authored-By:`, so git reads no
     # trailer. A reviewer commit on PR #19's branch, followed by 11 others; rewording it would rewrite all of them.
     "bb7b3875f8f6b91ee88f89ca964598f5e6c5385b": "reviewer claude-opus-5-5 fa0fb7b4-c85c-4c89-a70a-8f059dc787cc",
+    # make pins at 0a4f2b8 (reports/L2/make-pins-0a4f2b8.txt), P0m clean: the same blank line, in the review commit of
+    # PR #35 and the Builder's F1 fix after it; both pushed, so they are exempted rather than reworded.
+    "b7eafee0ca572971b799cd6899e632fac7a6e30f": "reviewer claude-opus-5-5 cba02c1d-8bbd-4c1d-951f-804edc546db7",
+    "0a4f2b8aa612d799b526a458c8f850669e122a98": "builder claude-opus-5-5 1137b45d-2b48-40ec-8896-f3e4cb2a707a",
 }
 
 
