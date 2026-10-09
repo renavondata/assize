@@ -161,3 +161,64 @@ Stop and report if:
 - `reports/L2/REPORT.md` recording the baseline sha.
 - The seal's image digest.
 - A draft of brief 3 (A1.10).
+
+---
+
+## Amendment A3: the suite's own cost is measured, priced and tuned under the same law (appended)
+
+### 1. Invariants (unchanged, restated so nothing below erodes them)
+Every mutant KILLED with a passing twin. No STALE, INCONCLUSIVE, NON-CAUSAL or LEAKED in a clean run. A verdict that differs between two runs of the same tree and config is a flake, and a flake is a defect of the harness, recorded as such.
+
+### 2. Measurement
+- Every `pins.jsonl` run row records `wall_s` (wall-clock of the run) and, for pins with timed fixtures, `observed_s` for each timed event: how long the child actually took to die after the kill, how long the escapee actually held the scratch root, how long the non-cooperating grandchild survived the sweep, and so on. The summary row records the suite's total `wall_s` and the per-pin totals.
+- The Reviewer's reproduction of `make pins` and the Builder's run are two samples of the same suite; any disagreement in verdicts is recorded as a flake in the review file.
+- `STATUS.md` gains a line: `suite: wall <s> on CI (run <id>); slowest pins <name:s, name:s, name:s>; flakes <n>`.
+
+### 3. Price
+One second of suite wall-clock on CI is priced at the cycle latency it imposes: the Builder states the price in `harness/config.toml` as `ci_second_price`, in the same utility units as the compute price of A4 item 4, with the rationale (the number of PRs per day the suite bounds, given the tick interval and the review's reproduction). The price is committed before any tuning run and not revised after seeing results.
+
+### 4. Waits are derived, not typed
+Each timed wait in the fixture configs (`child_timeout_s`, `reap_grace_s`, the hold and hang durations) is set from the recorded `observed_s` distribution for that event: a stated upper quantile times a stated margin, both committed in config with rationale. The Builder may not lower a wait below what the recorded distribution supports. A wait with no recorded distribution keeps its current value until one exists.
+
+### 5. Adoption of a faster configuration (the switch rule applied to the harness)
+A candidate fixture config or job layout (including splitting `pins` into parallel CI jobs by pin family, each with its own orchestrator and sweep) is adopted only after it has run in shadow beside the incumbent for a stated number of PRs with zero flakes and all invariants held, and its priced wall-clock is lower. The first flake under the candidate reverts it and records why. The Builder forecasts, before the shadow period, the probability that the candidate survives it.
+
+### 6. Pins
+- P11 Timing recorded: a mutant that drops `wall_s` or `observed_s` from a run row is KILLED.
+- P12 Wait floor: a mutant that sets a wait below the recorded distribution's floor is KILLED by a check that reads the distribution.
+- The parallel-job layout, if adopted, carries a pin that a leaked process in one job is attributed to that job and fails it; seeded mutant: sweep disabled in one job only.
+
+### 7. Host lock
+`make pins` takes a host-wide lock (`flock` on a file under `$XDG_RUNTIME_DIR` or `/tmp`, keyed by host); a second invocation blocks until the first finishes and records `lock_wait_s` in its summary row. Pin: two invocations started together produce two clean runs with no spurious failure and one non-zero `lock_wait_s`; seeded mutant: lock removed, which must reproduce the P10 twin failure on the fixture.
+
+### 8. No target
+This amendment sets no duration target. The ledger decides what is fast enough: the priced wall-clock falls until the invariants or the recorded distributions stop it.
+
+---
+
+## Amendment A4: obligations carried from L1 into L2 (appended)
+These are L2 items. Each becomes a pin with a seeded mutant unless marked otherwise.
+1. Judge signing key: an encrypted copy of the judge's private storage is taken off the measurement host weekly by a scheduled job; a restore onto a scratch host is witnessed once, with the chain re-verified from the restored key. Mutant: backup job that writes an empty archive, KILLED.
+2. Code-scanning alerts: at every layer boundary the Builder lists open alerts (`gh api repos/renavondata/assize/code-scanning/alerts?state=open`) and either disposes of each in the boundary STATUS or records it as an obligation. No pin; a boundary STATUS without this line is a defect of the STATUS.
+3. Role credential separation: Builder and Reviewer jobs run under distinct runner users (or ephemeral runners), so a Builder cannot read a Reviewer's work directory or credential. Witness: a Builder job attempting to read the Reviewer user's home is denied by the OS. (see L1 obligation 55)
+4. Instrument identity: `host_facts.sh` records a stable host id; the Reviewer never compares throughput or time-to-learn across hosts; a second measurement host, if added, carries its own verdicts.
+5. P0m on CI: the real-branch check runs on CI with a full-depth clone (`fetch-depth: 0` in pins.yml, an entrenched change); the shallow-clone skip is removed. Mutant: shallow clone restored, KILLED by a pin that fails when the branch walk is skipped. (see L1 obligation 44)
+6. Exemption entries: every exemption's sha is verified to be on the branch being checked; a stale entry fails the check. Mutant: verification skipped, KILLED. (see L1 obligation 32)
+7. One-child-at-a-time: the orchestrator's single-child invariant has its own pin; seeded mutant runs two children concurrently, KILLED. P0i gains a variant that exercises the harness's verdict path rather than the fixture alone. (see L1 obligation 28)
+8. Seal: when the judge image is first sealed, `judge/` and `worlds/spec/` enter CODEOWNERS (entrenched change) in the same pull request as the seal.
+9. Housekeeping, in the first entrenched PR of L2: `actions/checkout@v5`, `actions/upload-artifact@v5`.
+10. For brief 3, not L2: Thompson sampling over the program mixture as the seed policy.
+11. Evil merges: a merge commit may be attributed by its author account (A9), but may not change an entrenched path relative to both of its parents. P0m gains that check; seeded mutant: evil merge accepted, KILLED.
+12. Signatures: a commit attributed to guy must verify (`git verify-commit`) against a key listed in an entrenched `allowed_signers` file; GitHub's own merges verify against its web-flow key. Seeded mutant: an unsigned guy-attributed commit accepted, KILLED.
+13. STATUS monotonic: no merge replaces `reports/L*/STATUS.md` with one whose header date is older. A pin checks master's STATUS is the newest-dated in history; seeded mutant: an older STATUS carried over, KILLED.
+15. Everything the L2c image build needs (Containerfile, entrypoint, the `verify` subcommand) is in place by the L2a baseline or lives outside `judge/` and `worlds/spec/`, so the seal changes nothing under them.
+
+---
+
+## Amendment A5: forecasts are aggregated by the switch rule (appended)
+1. Forecasters are entrants: the Builder's own probability; a pooled base-rate forecaster over all resolved claims; a per-claim-type base-rate forecaster; any entrant a later Builder adds under this amendment. Each is a function from the ledger's history to a probability, computed only from resolutions that preceded the claim.
+2. The scored forecast for a claim is the Hedge aggregate over entrants, weights proportional to exp(−η × cumulative log-loss on prior resolutions), η = sqrt(8 ln N / T) with N entrants and T prior resolutions (η = 1 before the first resolution). The Builder's p is recorded beside it; nothing else about it is required.
+3. STATUS reports each entrant's weight and cumulative log-loss.
+4. Pin P16: on a fixture ledger where one entrant is consistently worse, its weight must fall below the others'; seeded mutant: fixed equal weights, KILLED. A second mutant that lets an entrant see the resolution of the claim it is forecasting must be KILLED by a fixture where that leak would make it perfect.
+5. Only the aggregator produces a scored forecast; a static scan (as P0b) finds no other writer of the scored field. Seeded mutant: an entrant writing it directly, caught.
+14. A NEEDS YOU in a STATUS whose header names the PR that carried it to master is satisfied by that merge; a Builder on master treats it as `none`. Before filing an issue, a Builder fetches master again and re-reads STATUS; an issue is filed only against the current head.
