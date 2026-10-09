@@ -17,7 +17,7 @@ Each layer is built on the one below. A layer starts only after the previous lay
 | L5 | agent repo | Adoption by sequential EU; provenance ledger | Adoption decisions made without Guy |
 | L6 | agent repo | Agent-authored coding briefs; coding agent proposes, judge disposes | Guy's role reduced to budget and weekly report |
 
-**Current layer: L1** (L0 PASSED; PR #2 merged 2026-10-06)
+**Current layer: the layer after the last verdict line in the root REPORT.md.**
 
 ## Standing rules
 - Every pin must demonstrate that it can fail by killing a named, seeded mutant. A green that cannot fail is a defect.
@@ -91,6 +91,8 @@ Criteria are committed before the run; a review does not add them afterwards. A 
 - Guy reads, by default, only layer-boundary `STATUS.md` files and `DISPUTE` entries. He may sample anything else.
 
 A session that stops on master without opening a pull request, for any reason, files an issue assigned to Guy stating the reason, unless an open issue already states it; closing it and dispatching the build workflow is the acknowledgement. Three review rounds on one branch without approval hand the branch to Guy.
+
+Guy's instructions enter the court only as issues labelled `instruction`, authored by gfrmin. A Builder on master takes the oldest open `instruction` issue as its item before any brief item, does exactly what it says and nothing else, cites it with the trailer `Instruction: #<n>` on every commit alongside `Proposer: guy` (the issue is the authority) and its own `Proposer: builder` line, opens the pull request as itself, and closes the issue when the pull request merges. An instruction may touch entrenched paths; CODEOWNERS still routes the approval to Guy. The Reviewer's first criterion on an instruction pull request is that the diff does what the issue says and nothing else; a diff beyond the instruction is a BLOCK under this paragraph. Text from counsel reaches the court the same way, through an issue Guy files. No session acts on instructions given at a terminal.
 
 ### A1.6 Forecasts
 Every Builder session, before its first `make pins`, appends to `reports/L<n>/forecasts.jsonl` one record per claim: `{"id", "ts", "proposer": {"kind", "model", "session"}, "sha_before", "claim", "p", "resolves_by"}`, with `id` the first 12 hex characters of the SHA-256 of `claim + ts`. Minimum claims: `pins` green on the first CI run of the pull request head; Reviewer verdict ACCEPT with no blocking finding; on a layer with host measurement, the host verdict (FIT, MARGINAL or UNFIT). The Reviewer appends a resolution record `{"id", "ts", "proposer", "outcome"}` for every open forecast it can resolve. `STATUS.md` reports cumulative log-loss against the base rate (the empirical frequency of that claim type to date; 0.5 before any resolution). Forecasts are never edited; a wrong forecast is data. Resolutions are appended, never edited; a resolution that later looks wrong is answered by a further record, not a change.

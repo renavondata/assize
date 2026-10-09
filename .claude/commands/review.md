@@ -11,8 +11,8 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 - Fetched head: !`git fetch -q origin "$(gh pr view $ARGUMENTS --json headRefName -q .headRefName 2>/dev/null)" 2>&1 && git rev-parse --short FETCH_HEAD || true`
 - Files touched: !`gh pr view $ARGUMENTS --json files -q '[.files[].path] | join(", ")' 2>&1 || true`
 - Builder of record at head: !`git show FETCH_HEAD:harness/proposer.toml 2>&1 || true`
-- Current layer at head: !`git show FETCH_HEAD:CLAUDE.md | grep -m1 'Current layer' || true`
-- Brief at head: !`git ls-tree --name-only FETCH_HEAD docs/briefs/ | grep "brief-$(git show FETCH_HEAD:CLAUDE.md | grep -oP 'Current layer: L\K[0-9]+')-" || true`
+- Current layer at head: !`L=$(( $(git show FETCH_HEAD:REPORT.md | grep -oP '^- L\K[0-9]+' | sort -n | tail -1) + 1 )); echo "L$L" || true`
+- Brief at head: !`L=$(( $(git show FETCH_HEAD:REPORT.md | grep -oP '^- L\K[0-9]+' | sort -n | tail -1) + 1 )); git ls-tree --name-only FETCH_HEAD docs/briefs/ | grep "brief-$L-" || true`
 - Open forecasts at head: !`f=$(git ls-tree -r --name-only FETCH_HEAD | grep 'forecasts.jsonl$' | sort | tail -1); [ -n "$f" ] && git show "FETCH_HEAD:$f" | python3 -c 'import sys,json; r=[json.loads(l) for l in sys.stdin if l.strip()]; c={x["id"] for x in r if "claim" in x}; o={x["id"] for x in r if "outcome" in x}; print(len(c-o))' || echo none`
 
 ## Guards
@@ -24,7 +24,7 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 1. `gh pr checkout` the PR. Reproduce `make pins` on a scratch copy; probes run on scratch copies only; transcripts go under `reports/L<n>/review/<reviewed head sha>/`. Leave no process and no copy behind, and show that you didn't. Read the head's `pins` run through the Actions API, never `gh pr checks`:
    `gh api "repos/renavondata/assize/actions/runs?head_sha=<sha>&event=pull_request" -q '.workflow_runs[] | select(.name=="pins") | "\(.status) \(.conclusion) \(.id) \(.html_url)"'`
    If the PR carries the `measure` label, read the `measure-host` run and its artefact the same way; they are the host witness.
-2. Write `reports/L<n>/review-<reviewed head sha>.md` in the shape of A1.9. A finding is BLOCK only if it demonstrates that a named pre-stated criterion of the brief, or a named standing rule of CLAUDE.md, is not met; quote it verbatim beside the finding. Every other finding is an OBLIGATION on the next layer. Earlier review files for this PR stand as records; never edit or delete them. Record any verdict that differs between your reproduction and the Builder's as a flake.
+2. If the PR cites `Instruction: #<n>`, read the issue; the first criterion is that the diff does what the issue says and nothing else (CLAUDE.md A1.5). Beyond-instruction changes are BLOCK. Write `reports/L<n>/review-<reviewed head sha>.md` in the shape of A1.9. A finding is BLOCK only if it demonstrates that a named pre-stated criterion of the brief, or a named standing rule of CLAUDE.md, is not met; quote it verbatim beside the finding. Every other finding is an OBLIGATION on the next layer. Earlier review files for this PR stand as records; never edit or delete them. Record any verdict that differs between your reproduction and the Builder's as a flake.
 3. Resolve every open forecast this review can resolve: append resolution records per A1.6, re-resolving from witnesses anything the Builder resolved itself. Never edit a forecast or an existing resolution.
 4. Commit the review file and resolutions as yourself and push to the PR branch. That is the only thing you write to the PR. Never edit its code, its briefs, its reports beyond your file, or any entrenched path.
 5. Your push moved the head. Poll the Actions API until `pins` on the new head concludes. Then, exactly one of:
