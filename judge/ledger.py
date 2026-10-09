@@ -9,7 +9,14 @@ After every request the judge appends to `heads.jsonl` in its private storage th
 file name, the `request_id`, its record count, its last `sha256` and the ledger's length in bytes after the request.
 Each head is signed by an HMAC-SHA256 under a key the judge generates on first start, in the same private storage, and
 never exports; only the judge, holding the key, verifies. `verify` recomputes every chain and checks every signature:
-the ledger must be exactly the signed requests, in order, ending at the last head's length."""
+the ledger must be exactly the signed requests, in order, ending at the last head's length.
+
+Each signed head stands alone, so the ledger and `heads.jsonl` cannot commit to how many requests there were: a party
+who can write both could remove the last request and its head, or both files, and leave a ledger that is exactly what
+remains signed (review 2817eb7 F2). The commitment lives with the caller instead. `append` returns a request's records
+as written, so the caller holds its head, the last record's `sha256`; `verify` requires that anchor to be the head of a
+signed request of the ledger. Every request up to the anchor is then committed; requests after it are admitted, and
+only a later anchor commits to them."""
 
 from __future__ import annotations
 
@@ -115,9 +122,9 @@ def _chain_findings(request_id: str, records: Sequence[dict]) -> list[str]:
     return found
 
 
-def verify(ledger: Path, private: Path) -> list[str]:
+def verify(ledger: Path, private: Path, anchor: str) -> list[str]:
     """Every finding against `ledger`; empty if and only if it is exactly the requests the judge signed, in order,
-    each chained from its request_id, and nothing else."""
+    each chained from its request_id, and nothing else, and `anchor`, a head the caller retained, is one of them."""
     key_path = private / KEY
     if not key_path.exists():
         return [f"no signing key in {private}"]
@@ -125,6 +132,8 @@ def verify(ledger: Path, private: Path) -> list[str]:
     heads = [h for h in _lines(private / HEADS) if h.get("ledger") == ledger.name]
     found = [f"head of {h.get('request_id')!r}: signature invalid" for h in heads
              if not hmac.compare_digest(str(h.get("mac")), _mac(key, h))]
+    if anchor not in [h.get("head") for h in heads]:
+        found.append(f"the anchor {anchor} is the head of no signed request of {ledger.name}")
     if not ledger.exists():
         return found + ([f"{ledger.name} missing; {len(heads)} heads signed"] if heads else [])
     size, signed = ledger.stat().st_size, heads[-1].get("bytes") if heads else 0

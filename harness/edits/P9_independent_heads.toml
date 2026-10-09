@@ -1,0 +1,7 @@
+# P9's mutant `independent_heads` (review 2817eb7 F2; reports/L1/REPORT.md obligation 1 on L2): verification ignores
+# the anchor the caller holds, so each signed head stands alone, as before L2a, and a ledger truncated with its heads,
+# or deleted with them, is exactly what remains signed.
+[[edit]]
+path = "judge/ledger.py"
+old = '    if anchor not in [h.get("head") for h in heads]:'
+new = '    if False and anchor not in [h.get("head") for h in heads]:'
