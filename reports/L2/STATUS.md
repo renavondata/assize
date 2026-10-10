@@ -1,17 +1,16 @@
-# STATUS — L2 — 2026-10-10 — d88e20f — PR #60
+# STATUS — L2 — 2026-10-10 — c12e5cf — PR #79
 VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in root REPORT.md, adds or opens no brief)
-pins: clean 39/39; mutants 99/99 KILLED; twins 99/99; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at d88e20f: reports/L2/make-pins-d88e20f.txt; pins CI run 38017379523 on d88e20f: success, attempt 1; record reports/L2/ci/38017379523.json)
-changed: harness/pins.py, harness/proposer.toml; reports/L2/
-did: closed #48, #52, #54 (satisfied by the merge of PR #56); #46 and #49 were already closed
-did: L2a obligation 2 (reports/L1/REPORT.md, R 2817eb747815 F3): P9 now compares request a's bytes before parsing the ledger
-did: witness reports/L2/p9b/opened_for_rewrite-mutant.log: mutant `opened_for_rewrite` fails the byte line first ("request a's 1093 bytes unchanged"), then the parse line; before, the parse error alone killed it
-did: first local make pins failed P0m (my Proposer trailer sat in its own paragraph, so git read none); amended, reran clean
-decided (not asked): pins and mutants unchanged in number (the kill is the same mutant, the failure line moved earlier); no new mutant — p(stands on review)=0.7
-decided (not asked): forecast args say PR #58 (predicted from highest number 57, +1); the PR took #60 because #58 and #59 were taken meanwhile. Forecasts are never edited; both resolve against the wrong PR and are data (the L3 obligation already filed) — p=0.6
-decided (not asked): auto-merge enabled: no entrenched path, not a layer boundary — p=0.9
-forecasts: made 2 (pins_green PR #58 p=0.8; review_accept PR #58 p=0.6); resolved 0; cumulative log-loss not recomputed this session, last line 45.055 vs base rate 41.445 over 113
-price: guy-items 15; guy-latency median 3.3h max 23.3h; sessions 41; runner-min 2128 (since 25f36e6: reports/L2/price-since-25f36e6-d88e20f.txt)
-obligations added: L3: a PR number predicted before opening can be taken by a concurrent issue or PR; forecasts then resolve against another item (second occurrence)
+pins: clean 39/39; mutants 101/101 KILLED; twins 101/101; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at c12e5cf: reports/L2/make-pins-c12e5cf.txt; pins CI run 38031824780 on c12e5cf1c85a5388b9c7f7ba1edbbe8a832266dd: success, attempt 1; record reports/L2/ci/38031824780.json)
+changed: harness/ledger.py, harness/pins.py, harness/entrants.toml, harness/README.md, harness/edits/, harness/proposer.toml; reports/L2/
+did: instruction #64 (Elect by EXP3, not Hedge): elect now replays resolved rounds as EXP3 with bandit feedback, importance-weighted, gamma from the regret bound
+did: B pre-stated in harness/entrants.toml [bound] loss; clips and unknown-entrant rounds counted and reported on stderr
+did: P0u rewritten against an EXP3 written by definition; mutants hedge_election and unweighted_estimate KILLED (transcripts out/pins/runs/P0u/*, in make-pins-c12e5cf.txt)
+decided (not asked): B = 5.0 (loss of p = e^-5 on the realised outcome); the instruction asked for B stated, not its value — p(stands on review)=0.6
+decided (not asked): horizon T = resolved rounds + 1; ledger order is round order; a forecast of exactly 0 or 1 that was wrong is +inf, clipped — p=0.7
+decided (not asked): left .github/workflows comments and CLAUDE.md rule 7 saying "Hedge" (entrenched, not named by #64) — p=0.8
+forecasts: made 2 (pins_green PR #79 p=0.7; review_accept PR #79 p=0.6); resolved 0; cumulative log-loss not recomputed this session, last line 45.055 vs base rate 41.445 over 113
+price: guy-items 15; guy-latency median 3.3h max 27.5h; sessions 81; runner-min 2885 (since 25f36e6)
+obligations added: L3: CLAUDE.md rule 7 and workflow comments still say Hedge; amend under a constitution PR
 NEEDS YOU (at most 1): none
-next: L2a obligation 3 of reports/L1/REPORT.md (replay returns ledger lines unchecked against the signed head, R 6debf231b630 F2)
+next: L2a obligation 3 of reports/L1/REPORT.md (replay returns ledger lines unchecked against the signed head, R 6debf231b630 F2), after the remaining signed instructions #65, #66, #68, #70, #73
