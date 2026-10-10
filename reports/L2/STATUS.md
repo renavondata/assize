@@ -1,14 +1,17 @@
-# STATUS — L2 — 2026-10-11 — d5f9e35 — PR #93
-VERDICT: SESSION DONE (instruction #64: EXP3 on recorded draws, fresh attempt from master)
+# STATUS — L2 — 2026-10-11 — da525ee — PR #93
+VERDICT: SESSION DONE (review 22d0279 F1, instruction #64 (b): draws now reach the next election)
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: CI-witnessed only (a full make pins exceeds the cloud's 10-minute cap); pins CI run 38076937378 on d5f9e35: success, attempt 1, 102 KILLED lines, 0 NON-CAUSAL/FAILED/INCONCLUSIVE/LEAKED/STALE lines in its log; P0u mutants argmin_election, hedge_election, unweighted_estimate and P0q draws_not_append_only KILLED; record reports/L2/ci/38076937378.json
-changed: harness/ledger.py, harness/pins.py, harness/claims.py, harness/entrants.toml, harness/edits/ (P0u x3, P0q x1), harness/README.md, harness/proposer.toml, reports/L2/ (forecasts, STATUS, ci record)
-did: elect is loss-form EXP3: p=(1-g)w+g/K, w~exp(-g L/(K B)), g=min(1,sqrt(K ln K/((e-1)t))), B=5 in entrants.toml [bound]; only the drawn model is updated, by its clipped round loss over the probability recorded with the draw
-did: each draw is appended to reports/draws.jsonl (append-only under P0q); entrants.toml is read from the checkout, not --head; unknown, unobserved and clipped rounds are counted and printed to stderr
-did: README states the bound (Auer et al. 2002 Cor. 4.2; proved there for the gain estimator, loss form per #64, pin witnesses the definition)
-decided (not asked): B=5.0 (holds every forecast p>=0.0068 unclipped) — p(stands on review)=0.7; a round's loss is the mean log-loss of the drawn model's resolved forecasts between its draw and its next draw — p=0.6; draw ledger is reports/draws.jsonl, added to claims.APPEND_ONLY — p=0.7; did not edit .github/ or CLAUDE.md comments saying "by Hedge" (#64 says nothing else) — p=0.8
-forecasts: made 2; resolved 0; cumulative log-loss not recomputed this session
+pins: clean 39/39; mutants 104/104 KILLED; twins 104/104; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38082201566 on da525ee: success, attempt 1; record reports/L2/ci/38082201566.json; P0u draw_not_published and draw_push_forced KILLED there
+changed: harness/ledger.py, harness/pins.py, harness/edits/ (P0u x2), harness/README.md, harness/proposer.toml, .github/workflows/build.yml, .github/workflows/review.yml (entrenched, under instruction #64), reports/L2/ (STATUS, ci record)
+did: `elect --publish <remote>` reads the draws from, and commits each draw onto, the remote's `ledger/draws` branch (plumbing commit, never force-pushed; a rejected push re-reads the tip and appends the same row; failure to publish fails the step)
+did: build.yml and review.yml call elect with `--publish origin`; their "by Hedge" comments now say EXP3
+did: P0u: an election from a second checkout of a fixture remote reads the first's published draw (rounds 0 then 1); a push from a stale tip loses no row
+decided (not asked): draw ledger lives on its own unprotected branch `ledger/draws`, not master (no session can push master; committing rows into PR branches drops every draw of a session that opens no PR) — p(stands on review)=0.7
+decided (not asked): with --publish, draws come from the branch only, not also from master's reports/draws.jsonl (no double counting) — p=0.8
+decided (not asked): no new forecasts this session: rule 2 (P0r) makes any forecast row added to PR #93 after its first pins run `late_forecast`; the prior Builder's two PR #93 forecasts stand, both resolved — p=0.75
+decided (not asked): edited the Hedge comments on the two lines touched in each workflow (part of "replace Hedge"); CLAUDE.md rule 7 wording left to Guy — p=0.75
+forecasts: made 0 (see decided); resolved 0; cumulative log-loss not recomputed this session
 price: guy-items not recomputed; guy-latency not recomputed; sessions not recomputed; runner-min not recomputed
-obligations added: L3: nothing commits the draw row elect writes (build.yml/review.yml and the /build skill are entrenched); until a workflow commits reports/draws.jsonl, a draw is an unrecorded round. L3: attribution of forecasts to a draw is by model and ts, not by a session id on the draw row. L3: CLAUDE.md rule 7 and the workflow comments still say Hedge
-NEEDS YOU (at most 1): none
+obligations added: L3: a Builder re-working a blocked PR cannot forecast its next pins run or review without tripping P0r; rule 2 needs a per-head or per-review-round reading. L3: this session's own draw (build run 38081800353) was made before the fix and is unrecorded. L3: draw rows are ordered by push, not ts, under concurrent publishes
+NEEDS YOU (at most 1): approve PR #93 (touches .github/, entrenched; CODEOWNERS routes it to you)
 next: after review of PR #93, the next signed instruction (#65, then #66)
