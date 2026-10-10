@@ -1,0 +1,8 @@
+# reports/L0/forecasts.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts.jsonl: 1 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts.jsonl: 12 open, 5 typed; resolved 1, unreadable 2
+resolved a4ba37bfde6f False — reports/L2/review-b2a173f827c7bdafa79642a3a733ebdf649ee1b1.md at 8a3e113e7ced: BLOCK
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404)
+)
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404)
+)
