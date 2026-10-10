@@ -1,0 +1,12 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-py1r1yft/assize-copy-z572slhs/repo
+applied 1 edit(s) from harness/edits/P9_opened_for_rewrite.toml
+pin:       P9
+protects:  a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's verification
+role:      mutant
+tree:      /tmp/assize-scratch-py1r1yft/assize-copy-z572slhs/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-py1r1yft
+  [FAIL] request a's 1093 bytes unchanged by request b (never rewritten)
+  [FAIL] the ledger parses as JSONL (JSONDecodeError: Extra data: line 1 column 2 (char 1))
+result:    FAIL

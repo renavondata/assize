@@ -1,0 +1,12 @@
+copy of /tmp/rev60-ntcb/repo
+  at /tmp/assize-scratch-_7rw4cp9/assize-copy-0bzhcsns/repo
+applied 1 edit(s) from harness/edits/P9_opened_for_rewrite.toml
+pin:       P9
+protects:  a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's verification
+role:      mutant
+tree:      /tmp/assize-scratch-_7rw4cp9/assize-copy-0bzhcsns/repo
+invoked:   /tmp/rev60-ntcb/repo
+scratch:   /tmp/assize-scratch-_7rw4cp9
+  [FAIL] request a's 1093 bytes unchanged by request b (never rewritten)
+  [FAIL] the ledger parses as JSONL (JSONDecodeError: Extra data: line 1 column 2 (char 1))
+result:    FAIL

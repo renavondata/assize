@@ -1,0 +1,11 @@
+2026-10-10T02:54:17.7749536Z   clean: true
+2026-10-10T02:54:25.1872350Z ##[group]Run make pins PINS_OUT=out/pins
+2026-10-10T02:54:25.1872584Z make pins PINS_OUT=out/pins
+2026-10-10T02:59:32.3924498Z [clean ] P0r: observed pass -> ok (0.927s) out/pins/runs/P0r/clean/transcript.log
+2026-10-10T02:59:32.3970455Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.239s + 0.239s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-10T02:59:32.3996528Z [mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (0.691s + 0.691s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+2026-10-10T03:07:45.1304854Z [mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.24s + 3.144s) out/pins/runs/P9/opened_for_rewrite/mutant/transcript.log
+2026-10-10T03:09:58.4310076Z clean: 39/39 passed, 0/39 failed
+2026-10-10T03:09:58.4310329Z mutants: 99/99 killed, 0/99 survived, 0/99 inconclusive, 0/99 stale, 0/99 non-causal, 0 leaked (clean and mutant)
+2026-10-10T03:09:58.4310571Z twins: 99/99 passed
+2026-10-10T03:09:58.4310828Z PINS PASSED

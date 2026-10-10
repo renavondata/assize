@@ -1,0 +1,9 @@
+== master f736535 judge/ledger.py: 1 1 judge/ledger.py
+  [FAIL] the judge writes two requests to a ledger that parses as JSONL (JSONDecodeError: Extra data: line 1 column 2 (char 1))
+result:    FAIL
+exit 1
+== head 6461e73 judge/ledger.py: 1 1 judge/ledger.py
+  [FAIL] request a's 1093 bytes unchanged by request b (never rewritten)
+  [FAIL] the ledger parses as JSONL (JSONDecodeError: Extra data: line 1 column 2 (char 1))
+result:    FAIL
+exit 1
