@@ -1,0 +1,5 @@
+gamma 0.5234637776601604 rounds 6 observed 5 unknown 1 clipped 1
+head (gain-form estimate):      {'m-a': 0.347406, 'm-b': 0.381619, 'm-c': 0.270975}
+instruction (loss/p, 0 else):   {'m-a': 0.325721, 'm-b': 0.352046, 'm-c': 0.322233}
+max |diff| 0.05125740828148623
+one near-perfect m-a round, head: {'m-a': 0.338252, 'm-b': 0.330874, 'm-c': 0.330874}
