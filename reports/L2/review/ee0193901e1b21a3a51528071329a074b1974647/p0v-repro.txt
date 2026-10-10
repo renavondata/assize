@@ -1,0 +1,4 @@
+Scratch copy of git archive ee01939 (removed after). harness.pins.p0v_reviewer_events():
+clean: all six synthetic events ok -> True
+mutant reviewer_sender_excluded (edit applied to the copy): "[FAIL] reviewer-applied needs-review" -> False (killed)
+Full make pins not reproduced here (exceeds the 10-minute cloud cap, CLAUDE.md); witness is pins CI run 38088422168 on d5d4b56 (success, attempt 1; the head ee01939 differs from d5d4b56 only in reports/L2/STATUS.md and reports/L2/ci/38088422168.json) and run 38090083987 on the head.
