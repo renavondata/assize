@@ -1,7 +1,12 @@
 # The ground, rule 7 (instruction #54 item 7): the model ids eligible for each procedure, a pre-stated constant.
-# `python -m harness.ledger elect <procedure> --seed <run id>` draws one by Hedge over their cumulative log-loss on that
-# procedure's resolved forecasts; every `claude` invocation in .github/workflows/ takes its model from that draw.
+# `python -m harness.ledger elect <procedure> --seed <run id>` draws one by EXP3 over their log-loss on that
+# procedure's resolved forecasts (instruction #64: only the drawn entrant is observed); every `claude` invocation in .github/workflows/ takes its model from that draw.
 build = ["claude-opus-5-5", "claude-sonnet-5-5"]
 review = ["claude-opus-5-5", "claude-sonnet-5-5"]
 audit = ["claude-opus-5-5", "claude-sonnet-5-5"]
 vizier = ["claude-opus-5-5", "claude-sonnet-5-5"]
+
+# The loss bound B of EXP3's regret bound, a pre-stated constant: each observed round's log-loss is clipped to [0, B],
+# the clips counted and reported by `elect`. B = 5 is the loss of a forecast that gave the realised outcome p = e^-5.
+[bound]
+loss = 5.0

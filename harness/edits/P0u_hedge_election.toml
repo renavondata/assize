@@ -1,0 +1,10 @@
+# P0u's mutant (instruction #64 item 4a): Hedge over the same data, exp(-eta L_m) with eta = sqrt(8 ln K / t) on each
+# entrant's cumulative log-loss, as if every entrant were observed every round, in place of EXP3.
+[[edit]]
+path = "harness/ledger.py"
+old = "    return draw(election(rows, procedure, entrants, bound).probs, seed)"
+new = """    history = plays(rows, procedure)
+    loss = {m: sum(min(x, bound) for n, x in history if n == m) for m in entrants}
+    eta = math.sqrt(8 * math.log(len(entrants)) / max(len(history), 1))
+    raw = {m: math.exp(-eta * (v - min(loss.values()))) for m, v in loss.items()}
+    return draw({m: w / sum(raw.values()) for m, w in raw.items()}, seed)"""

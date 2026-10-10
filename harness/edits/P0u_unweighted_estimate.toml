@@ -1,0 +1,6 @@
+# P0u's mutant (instruction #64 item 4b): the observed gain is not divided by the probability the replay gave the
+# drawn entrant, so the estimate is biased towards the entrants drawn often.
+[[edit]]
+path = "harness/ledger.py"
+old = "        seen = (1 - c / bound) / probabilities(gain, gamma)[model]"
+new = "        seen = (1 - c / bound)"

@@ -15,12 +15,14 @@ proposed by the mechanism. A forecast without `type` is `free`, and the mechanis
 what reached Guy and how long he took, sessions run and runner-minutes.
 
 `python -m harness.ledger elect <procedure> --seed <run id>`: rule 7 of the ground (instruction #54 item 7), a model
-drawn by Hedge over the entrants of `harness/entrants.toml`."""
+drawn by EXP3 over the entrants of `harness/entrants.toml` (instruction #64): only the entrant that ran is observed, its
+log-loss clipped to [0, B] and importance-weighted by the probability the election gave it."""
 
 from __future__ import annotations
 
 import argparse
 import datetime
+import functools
 import json
 import math
 import re
@@ -557,22 +559,76 @@ DRAWS = 1 << 16  # the draw's resolution: a sweep of DRAWS consecutive seeds tak
 STRIDE = 40503  # odd, so seed -> seed * STRIDE mod DRAWS is a bijection
 
 
-def losses(rows: Sequence[dict], procedure: str, entrants: Sequence[str]) -> tuple[dict[str, float], int]:
-    """Each entrant's cumulative log-loss on the procedure's resolved forecasts (0 with no record), and the number of
-    the procedure's resolved forecasts, its rounds."""
+ELECTION_HORIZON = 1  # the round being drawn is the last of a fixed-horizon run of (resolved rounds + this one)
+
+
+@dataclass(frozen=True)
+class Election:
+    """What `elect` knew: the draw's probabilities and the denominators of the run that produced them."""
+    probs: Mapping[str, float]
+    rounds: int  # the procedure's resolved forecasts, every one of them
+    observed: int  # rounds whose drawn entrant is one of the entrants, so it updated its estimate
+    unknown: int  # rounds whose drawn entrant is unrecorded or not an entrant: counted in `rounds`, no update
+    clipped: int  # observed rounds whose log-loss fell outside [0, B] and was clipped to it
+
+
+def exploration(k: int, horizon: int) -> float:
+    """EXP3's gamma = min(1, sqrt(K ln K / ((e - 1) T))), the value minimising its regret bound (Auer et al. 2002,
+    Thm 3.1): regret <= 2 sqrt((e - 1) T K ln K) in units of the loss bound B."""
+    return min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * horizon)))
+
+
+def probabilities(gain: Mapping[str, float], gamma: float) -> dict[str, float]:
+    """EXP3: p_m = (1 - gamma) w_m + gamma / K with w_m proportional to exp(gamma G_m / K), G_m the importance-weighted
+    cumulative gain estimate; with no rounds, every G_m is 0."""
+    k = len(gain)
+    top = max(gain.values())
+    raw = {m: math.exp(gamma / k * (g - top)) for m, g in gain.items()}
+    return {m: (1 - gamma) * r / sum(raw.values()) + gamma / k for m, r in raw.items()}
+
+
+def bound_of(text: str) -> float:
+    """B, the loss bound pre-stated in `[bound] loss` of harness/entrants.toml."""
+    b = tomllib.loads(text).get("bound", {}).get("loss")
+    if not isinstance(b, (int, float)) or isinstance(b, bool) or not b > 0:
+        raise ValueError(f"{ENTRANTS}: no positive [bound] loss")
+    return float(b)
+
+
+def _loss(p: float, outcome: bool) -> float:
+    try:
+        return log_loss(p, outcome)
+    except ValueError:  # a forecast of exactly 0 or 1 that was wrong: +inf, to be clipped and counted
+        return math.inf
+
+
+def plays(rows: Sequence[dict], procedure: str) -> list[tuple[str | None, float]]:
+    """The procedure's resolved forecasts in ledger order, each as (the model that ran, its log-loss)."""
     resolved = outcomes(rows)
-    mine = [r for r in rows if "claim" in r and isinstance(r.get("p"), (int, float)) and r.get("id") in resolved
+    return [(r["proposer"].get("model") if isinstance(r["proposer"].get("model"), str) else None,
+             _loss(r["p"], resolved[r["id"]]))
+            for r in rows if "claim" in r and isinstance(r.get("p"), (int, float)) and r.get("id") in resolved
             and isinstance(r.get("proposer"), dict) and r["proposer"].get("kind") == PROCEDURES[procedure]]
-    return ({m: sum(log_loss(r["p"], resolved[r["id"]]) for r in mine if r["proposer"].get("model") == m)
-             for m in entrants}, len(mine))
 
 
-def weights(loss: Mapping[str, float], rounds: int) -> dict[str, float]:
-    """Hedge: w_m proportional to exp(-eta L_m), eta = sqrt(8 ln K / t); with no rounds, every L_m is 0."""
-    eta = math.sqrt(8 * math.log(len(loss)) / rounds) if rounds else 0.0
-    low = min(loss.values())
-    raw = {m: math.exp(-eta * (v - low)) for m, v in loss.items()}
-    return {m: w / sum(raw.values()) for m, w in raw.items()}
+def election(rows: Sequence[dict], procedure: str, entrants: Sequence[str], bound: float) -> Election:
+    """Replay the procedure's resolved rounds as EXP3 with bandit feedback: in each, only the entrant that ran is
+    observed, and its gain 1 - clip(loss, 0, B) / B is divided by the probability the replay gave it; every other
+    entrant's estimate is 0."""
+    history = plays(rows, procedure)
+    gamma = exploration(len(entrants), len(history) + ELECTION_HORIZON)
+
+    def step(state: tuple[dict[str, float], int, int], play: tuple[str | None, float]):
+        gain, unknown, clipped = state
+        model, loss = play
+        if model not in gain:
+            return gain, unknown + 1, clipped
+        c = min(max(loss, 0.0), bound)
+        seen = (1 - c / bound) / probabilities(gain, gamma)[model]
+        return {m: g + (seen if m == model else 0.0) for m, g in gain.items()}, unknown, clipped + (c != loss)
+
+    gain, unknown, clipped = functools.reduce(step, history, ({m: 0.0 for m in entrants}, 0, 0))
+    return Election(probabilities(gain, gamma), len(history), len(history) - unknown, unknown, clipped)
 
 
 def draw(w: Mapping[str, float], seed: int) -> str:
@@ -582,9 +638,8 @@ def draw(w: Mapping[str, float], seed: int) -> str:
     return next((m for m, c in edges if u < c), edges[-1][0])
 
 
-def elect(rows: Sequence[dict], procedure: str, entrants: Sequence[str], seed: int) -> str:
-    loss, rounds = losses(rows, procedure, entrants)
-    return draw(weights(loss, rounds), seed)
+def elect(rows: Sequence[dict], procedure: str, entrants: Sequence[str], bound: float, seed: int) -> str:
+    return draw(election(rows, procedure, entrants, bound).probs, seed)
 
 
 def entrants_of(text: str, procedure: str) -> list[str]:
@@ -614,7 +669,7 @@ def main(argv: list[str] | None = None) -> int:
     q.add_argument("--until", default=None, help="ISO timestamp; now if absent")
     q.add_argument("--head", default="HEAD")
     q.add_argument("--repo", type=Path, default=Path("."))
-    e = sub.add_parser("elect", help="draw a model for a procedure by Hedge over its entrants")
+    e = sub.add_parser("elect", help="draw a model for a procedure by EXP3 over its entrants")
     e.add_argument("procedure", choices=sorted(PROCEDURES))
     e.add_argument("--seed", type=int, required=True)
     e.add_argument("--head", default="HEAD")
@@ -640,8 +695,13 @@ def main(argv: list[str] | None = None) -> int:
         print(got.status_line())
         return 0
     if a.cmd == "elect":
-        models = entrants_of(_git(a.repo, "show", f"{a.head}:{ENTRANTS}"), a.procedure)
-        print(elect(ledger_rows(a.repo, a.head), a.procedure, models, a.seed))
+        text = _git(a.repo, "show", f"{a.head}:{ENTRANTS}")
+        models, bound = entrants_of(text, a.procedure), bound_of(text)
+        got = election(ledger_rows(a.repo, a.head), a.procedure, models, bound)
+        print(f"# {a.procedure}: EXP3 over {len(models)} entrants, B={bound}, {got.rounds} rounds "
+              f"({got.observed} observed, {got.unknown} unknown drawn entrant, {got.clipped} clipped); "
+              f"probabilities {dict(got.probs)}", file=sys.stderr)
+        print(draw(got.probs, a.seed))
         return 0
     ranked = surprise(merged_since(a.repo, a.since, a.head), outcomes(ledger_rows(a.repo, a.head)))
     print(f"# {len(ranked)} merged pull requests in {a.since}..{a.head}, by the Builder's cumulative log-loss")
