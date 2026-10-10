@@ -16,10 +16,14 @@ on:
 concurrency:
   group: review-${{ github.event.pull_request.number || inputs.pr || github.event.issue.number || github.event_name }}
   cancel-in-progress: false
+# Instruction #65: a review session's own label changes never start a review. They are recognised by the label: a session
+# only removes `needs-review` and adds `blocked` or `awaits-guy` (.claude/commands/review.md), so a `needs-review` label
+# applied by assize-reviewer (an audit-findings PR, the Vizier sending a changed head back) is not its own and starts one.
 jobs:
   review:
     if: >-
-      github.event.sender.login != 'assize-reviewer' && (
+      (github.event.sender.login != 'assize-reviewer' ||
+        (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && (
         github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'schedule' ||
         (github.event_name == 'pull_request' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) ||
         (github.event_name == 'issues' && github.event.action == 'labeled' && contains(fromJSON('["failed-run","wish"]'), github.event.label.name)) ||

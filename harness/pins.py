@@ -1322,6 +1322,48 @@ def p0u_election() -> bool:
     return ok()
 
 
+REVIEW_EVENTS = (  # (what, sender, event, action, label, must start a review) -- instruction #65
+    ("a needs-review label applied by the reviewer account (an audit PR, the Vizier sending a changed head back)",
+     "assize-reviewer", "pull_request", "labeled", "needs-review", True),
+    ("an awaits-guy label applied by a review session", "assize-reviewer", "pull_request", "labeled", "awaits-guy",
+     False),
+    ("a needs-review label applied by the builder", "assize-builder", "pull_request", "labeled", "needs-review", True),
+)
+
+
+def _review_condition(text: str) -> str | None:
+    """The `if:` of the review job in `.github/workflows/review.yml`, its folded lines joined."""
+    m = re.search(r"^  review:\n    if: >-\n((?:      .*\n)+)", text, re.M)
+    return " ".join(x.strip() for x in m.group(1).splitlines()) if m else None
+
+
+def _github_condition(condition: str, context_: dict[str, str]) -> bool:
+    """Evaluates the subset of the Actions expression language the review condition uses (`==`, `!=`, `&&`, `||`,
+    `contains(fromJSON('[..]'), x)`, and `github.*` names, null when the event does not carry one)."""
+    py = re.sub(r"contains\(fromJSON\('(\[[^']*\])'\),\s*([^()]*?)\)", r"(\2 in \1)", condition)
+    py = re.sub(r"github(?:\.\w+)+", lambda m: f"ctx.get({m.group(0)!r})", py)
+    return bool(eval(py.replace("&&", " and ").replace("||", " or "), {"__builtins__": {}}, {"ctx": context_}))
+
+
+def p0v_review_trigger() -> bool:
+    """The review job starts on a `needs-review` label applied by the reviewer account (an audit-findings pull request,
+    the Vizier sending a changed head back), on one applied by the builder, and not on an `awaits-guy` label a review
+    session applied (instruction #65)."""
+    expect, ok = _expecter()
+    text = (ROOT / ".github" / "workflows" / "review.yml").read_text()
+    condition = _review_condition(text)
+    expect(condition is not None, "the review job's `if:` is found")
+    for what, sender, event, action, label, want in REVIEW_EVENTS:
+        got = condition is not None and _github_condition(condition, {
+            "github.event.sender.login": sender, "github.event_name": event, "github.event.action": action,
+            "github.event.label.name": label})
+        expect(got is want, f"{what}: {'starts' if got else 'does not start'} a review (must "
+                            f"{'start' if want else 'not start'})")
+    expect("awaits-guy" in text.split("jobs:")[0] and "recognised" in text.split("jobs:")[0],
+           "the workflow states how a review session's own label changes are recognised")
+    return ok()
+
+
 PURITY_FIXTURE = (  # (label, schema, tokens wanted) against a fixture manifest's vocabulary
     ("clean", {"type": "object", "description": "a generic field"}, set()),
     ("as a key", {"properties": {"semantic": {}}}, {"semantic"}),
@@ -3024,6 +3066,8 @@ PINS = [
                        Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
                        Mutant("draw_not_published", _edits("P0u_draw_not_published")),
                        Mutant("draw_push_forced", _edits("P0u_draw_push_forced")))),
+    Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
+        p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),)),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
