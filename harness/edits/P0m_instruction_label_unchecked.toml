@@ -1,5 +1,5 @@
 # P0m's seventh mutant (instruction #38 (b)): an `Instruction:` trailer is accepted when the issue lacks the label.
 [[edit]]
 path = "harness/claims.py"
-old = "issue is not None and issue.author == INSTRUCTION_AUTHOR and INSTRUCTION_LABEL in issue.labels"
-new = "issue is not None and issue.author == INSTRUCTION_AUTHOR"
+old = "issue is not None and INSTRUCTION_LABEL in issue.labels and issue.labeled_by"
+new = "issue is not None and issue.labeled_by"

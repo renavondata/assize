@@ -390,7 +390,8 @@ def _ledger_fixture() -> tuple[dict, dict]:
     claim, ts = "pins green on the first CI run", "2026-01-01T00:00:00Z"
     forecast = {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": LEDGER_PROPOSER | {"kind": "builder"},
                 "sha_before": "0" * 40, "claim": claim, "p": 0.8, "resolves_by": "first run"}
-    resolution = {"id": forecast["id"], "ts": "2026-01-02T00:00:00Z", "proposer": LEDGER_PROPOSER, "outcome": True}
+    resolution = {"id": forecast["id"], "ts": "2026-01-02T00:00:00Z", "proposer": LEDGER_PROPOSER | {"session": "t"},
+                  "outcome": True}
     return forecast, resolution
 
 
@@ -400,11 +401,15 @@ def _ledger(*rows: dict) -> list[str]:
 
 def p0k_forecast_ledger() -> bool:
     """A forecasts.jsonl resolution row lacking id, ts, proposer or outcome, matching no earlier forecast, or not
-    proposed by the Reviewer is rejected (brief 1 A4 item 7a, CLAUDE.md A1.6); every real ledger is validated."""
+    proposed by the Reviewer or the resolver is rejected (brief 1 A4 item 7a, CLAUDE.md A1.6), and so is one proposed
+    by its forecast's own session (rule 4 of the ground, instruction #54 item 4); every real ledger is validated."""
     expect, ok = _expecter()
     forecast, resolution = _ledger_fixture()
     got = claims.ledger_findings(_ledger(forecast, resolution))
     expect(not got, f"well-formed forecast and Reviewer resolution accepted ({[str(f) for f in got]})")
+    auditor = _ledger_fixture()[0] | {"proposer": LEDGER_PROPOSER | {"kind": "auditor"}}
+    got = claims.ledger_findings(_ledger(auditor))
+    expect(not got, f"a forecast proposed by the Auditor accepted (CLAUDE.md Amendment 2) ({[str(f) for f in got]})")
     for key in ("id", "ts", "proposer", "outcome"):  # stated by 7a, independently of the checker
         got = claims.ledger_findings(_ledger(forecast, {k: v for k, v in resolution.items() if k != key}))
         expect(("row 2", "missing_key") in _codes(got) and any(key in f.detail for f in got),
@@ -416,6 +421,14 @@ def p0k_forecast_ledger() -> bool:
     for label, row, code in cases:
         got = claims.ledger_findings(_ledger(forecast, row))
         expect(("row 2", code) in _codes(got), f"{label} resolution rejected with {code} ({[str(f) for f in got]})")
+    own = resolution | {"proposer": LEDGER_PROPOSER | {"session": forecast["proposer"]["session"]}}
+    got = claims.ledger_findings(_ledger(forecast, own))
+    expect(_codes(got) == {("row 2", "self_resolution")},
+           f"a resolution by its forecast's own session rejected with self_resolution only ({[str(f) for f in got]})")
+    mechanism = resolution | {"proposer": {"kind": "mechanism", "model": "harness.ledger",
+                                           "session": forecast["proposer"]["session"]}}
+    got = claims.ledger_findings(_ledger(forecast, mechanism))
+    expect(not got, f"a mechanism's resolution accepted, whatever its session ({[str(f) for f in got]})")
     got = claims.ledger_findings(_ledger(resolution, forecast))
     expect(("row 1", "orphan") in _codes(got), "a resolution before its forecast matches no earlier forecast")
     got = claims.ledger_findings(_ledger(forecast | {"id": "ffffffffffff"}))
@@ -491,17 +504,29 @@ TRAILER_FIXTURE = (  # (label, path written, Proposer trailer lines, finding cod
     ("guy then builder, CLAUDE.md", "CLAUDE.md", ("guy", "builder m s"), set()),
     ("builder then guy, .github/", ".github/x.yml", ("builder m s", "guy"), set()),
     ("malformed party", "docs/y.md", ("builder m",), {"bad_party"}),
+    ("auditor, ordinary path", "docs/a.md", ("auditor m s",), set()),
 )
 EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exempted or None, parties, findings wanted)
     ("body-only Proposer, not exempted", "docs/z.md", "reviewer m s", None, (), {"no_proposer"}),
     ("body-only Proposer, exempted", "docs/z.md", "reviewer m s", "reviewer m s", ("reviewer m s",), set()),
     ("body-only Proposer, another party exempted", "docs/z.md", "reviewer m s", "reviewer m t", (), {"no_proposer"}),
 )
+SIGNED_AT, BEFORE, AFTER = "2026-01-01T12:00:00Z", "2026-01-01T11:00:00Z", "2026-01-01T13:00:00Z"
 INSTRUCTION_ISSUES = {  # the issues INSTRUCTION_FIXTURE cites, as claims.load_issues would read them
-    1: claims.Issue("gfrmin", ("instruction",), "open"),
-    2: claims.Issue("gfrmin", ("instruction", "constitution"), "closed"),
-    3: claims.Issue("assize-builder", ("instruction",), "open"),
-    4: claims.Issue("gfrmin", ("constitution",), "open"),
+    1: claims.Issue("gfrmin", ("instruction",), "open", "gfrmin", SIGNED_AT, ()),
+    2: claims.Issue("gfrmin", ("instruction", "constitution"), "closed", "gfrmin", SIGNED_AT, ()),
+    3: claims.Issue("assize-builder", ("instruction",), "open", "gfrmin", SIGNED_AT, ()),
+    4: claims.Issue("gfrmin", ("constitution",), "open", "gfrmin", SIGNED_AT, ()),  # a timeline read at odds with labels
+    5: claims.Issue("assize-vizier", ("draft", "instruction"), "open", "gfrmin", SIGNED_AT, ()),
+    6: claims.Issue("assize-vizier", ("draft", "instruction"), "open", "assize-vizier", SIGNED_AT, ()),
+    7: claims.Issue("gfrmin", ("instruction",), "open", "assize-builder", SIGNED_AT, ()),
+    # instruction #54 item 5: the signature binds its text
+    12: claims.Issue("gfrmin", ("instruction",), "open", "gfrmin", SIGNED_AT, (claims.Edit("gfrmin", AFTER),)),
+    13: claims.Issue("gfrmin", ("instruction",), "open", "gfrmin", SIGNED_AT, (claims.Edit("gfrmin", BEFORE),
+                                                                                claims.Edit("assize-builder", AFTER))),
+    14: claims.Issue("assize-vizier", ("draft", "instruction"), "open", "gfrmin", SIGNED_AT,
+                     (claims.Edit("assize-vizier", BEFORE),)),
+    15: claims.Issue("gfrmin", ("instruction",), "open", "gfrmin", SIGNED_AT, None),
 }
 INSTRUCTION_FIXTURE = (  # (label, path, Proposer trailer lines, Instruction trailer lines, issues cited, findings wanted)
     ("builder, Instruction of gfrmin's open instruction issue, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#1",),
@@ -515,7 +540,41 @@ INSTRUCTION_FIXTURE = (  # (label, path, Proposer trailer lines, Instruction tra
     ("builder, Instruction of an issue not read, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("#9",), (9,),
      {"entrenched_without_guy"}),
     ("builder, malformed Instruction, CLAUDE.md", "CLAUDE.md", ("builder m s",), ("1",), (), {"entrenched_without_guy"}),
+    ("builder, Instruction of a draft gfrmin signed, .claude/", ".claude/d.md", ("builder m s",), ("#5",), (5,), set()),
+    ("builder, Instruction of a draft the Vizier labelled itself, .claude/", ".claude/d.md", ("builder m s",), ("#6",),
+     (6,), {"entrenched_without_guy"}),
+    ("builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md", "CLAUDE.md", ("builder m s",),
+     ("#7",), (7,), {"entrenched_without_guy"}),
+    ("builder, Instruction of an issue gfrmin edited after signing, CLAUDE.md", "CLAUDE.md", ("builder m s",),
+     ("#12",), (12,), set()),
+    ("builder, Instruction of an issue another account edited after signing, CLAUDE.md", "CLAUDE.md",
+     ("builder m s",), ("#13",), (13,), {"entrenched_without_guy"}),
+    ("builder, Instruction of a draft its poster edited before signing, .claude/", ".claude/d.md", ("builder m s",),
+     ("#14",), (14,), set()),
+    ("builder, Instruction of an issue whose edits were not read, CLAUDE.md", "CLAUDE.md", ("builder m s",),
+     ("#15",), (15,), {"entrenched_without_guy"}),
 )
+TIMELINE_FIXTURE = (  # (label, timeline events, who the standing `instruction` label was applied by)
+    ("gfrmin labels", (("labeled", "instruction", "gfrmin"),), "gfrmin"),
+    ("the Vizier labels", (("labeled", "draft", "assize-vizier"), ("labeled", "instruction", "assize-vizier")),
+     "assize-vizier"),
+    ("the Vizier labels, gfrmin relabels", (("labeled", "instruction", "assize-vizier"),
+                                             ("unlabeled", "instruction", "gfrmin"),
+                                             ("labeled", "instruction", "gfrmin")), "gfrmin"),
+    ("gfrmin labels, another account relabels", (("labeled", "instruction", "gfrmin"),
+                                                  ("unlabeled", "instruction", "assize-builder"),
+                                                  ("labeled", "instruction", "assize-builder")), "assize-builder"),
+    ("gfrmin labels, then unlabels", (("labeled", "instruction", "gfrmin"), ("unlabeled", "instruction", "gfrmin")),
+     None),
+    ("only other labels and events", (("labeled", "draft", "gfrmin"), ("commented", None, "gfrmin")), None),
+)
+
+
+def _timeline(events: tuple) -> list[dict]:
+    """Timeline events in the shape the GitHub API returns them, the i-th made at hour i."""
+    return [{"event": e, "actor": {"login": a}, "created_at": f"2026-01-01T{i:02d}:00:00Z"}
+            | ({"label": {"name": n}} if n else {}) for i, (e, n, a) in enumerate(events)]
+
 MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
     ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
     ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
@@ -597,7 +656,10 @@ def p0m_commit_proposers() -> bool:
     (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
     author is rejected, whatever trailer it carries (brief 1 A9). `Instruction: #<n>` carries Guy's authority on an
     entrenched path when issue <n>, read through the GitHub API, is authored by gfrmin and labelled `instruction`, open
-    or closed (CLAUDE.md A1.5, instruction #38)."""
+    or closed (CLAUDE.md A1.5, instruction #38), and only if its timeline shows gfrmin applied the label; a `draft` the
+    Vizier posted counts once gfrmin applies it (CLAUDE.md Amendment 3, instruction #49); and only if no account but
+    gfrmin edited its body after his signature, its edits read (instruction #54 item 5). An exemption reachable from
+    master is inert and a finding; the real branch is checked in CI too, never skipped."""
     expect, ok = _expecter()
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     expect("CLAUDE.md" in patterns and ".github/" in patterns, f"entrenched paths from CODEOWNERS: {patterns}")
@@ -616,16 +678,27 @@ def p0m_commit_proposers() -> bool:
         expect(got == want and c.parties == trailers and c.instructions == cited,
                f"{label}: parties reported {list(c.parties)}, instructions {list(c.instructions)}, findings "
                f"{sorted(got)}; want {list(trailers)}, {list(cited)}, {sorted(want)}")
+    inert = claims.inert_exemptions(work / "repo", "master", exemptions)
+    expect(bool(exemptions) and {f.where for f in inert} == {f"exemption {s[:12]}" for s in exemptions}
+           and all(f.code == "inert_exemption" for f in inert),
+           f"fixture: every exemption reachable from master is inert ({[str(f) for f in inert]})")
+    expect(not claims.inert_exemptions(work / "repo", shas[0], exemptions),
+           "fixture: an exemption not reachable from the base is not inert")
     shutil.rmtree(work, ignore_errors=True)
+    for label, events, want in TIMELINE_FIXTURE:
+        got = claims.instruction_labeler(_timeline(events))
+        at = claims.instruction_labeled_at(_timeline(events))
+        want_at = next((f"2026-01-01T{i:02d}:00:00Z" for i, (e, n, _) in reversed(list(enumerate(events)))
+                        if n == "instruction"), None) if want else None
+        expect(got == want and at == want_at, f"timeline, {label}: `instruction` label applied by {got!r} at {at}, "
+                                               f"want {want!r} at {want_at}")
 
     root = _real_root()
-    shallow = claims._git(root, "rev-parse", "--is-shallow-repository").strip() == "true"
     base = _branch_base(root)
-    if base is None and shallow:
-        print(f"  [skip] real branch at {root}: shallow clone without master, base unresolvable; not checked in "
-              f"this run (checked by every make pins in a full clone)")
-        return ok()
     expect(base is not None, f"real branch: base resolved ({base})")
+    inert = claims.inert_exemptions(root, base) if base else []
+    expect(not inert, f"real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from {base and base[:12]} "
+                      f"({[str(f) for f in inert]})")
     real = claims.branch_commits(root, base) if base else []
     # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
     # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
@@ -635,6 +708,517 @@ def p0m_commit_proposers() -> bool:
         print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
     expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
                       f"{[str(f) for f in found]}")
+    return ok()
+
+
+def _forecast(claim: str, p: float, kind: str = "builder") -> dict:
+    ts = "2026-01-01T00:00:00Z"
+    return {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": LEDGER_PROPOSER | {"kind": kind},
+            "sha_before": "0" * 40, "claim": claim, "p": p, "resolves_by": "r"}
+
+
+def _resolved(f: dict, outcome: bool) -> dict:
+    return {"id": f["id"], "ts": "2026-01-02T00:00:00Z", "proposer": LEDGER_PROPOSER, "outcome": outcome}
+
+
+F_OLD, F_A, F_R, F_B, F_C = (_forecast("old", 0.99), _forecast("a", 0.9), _forecast("r", 0.99, "reviewer"),
+                             _forecast("b", 0.6), _forecast("c", 0.99))
+SURPRISE_FIXTURE = (  # (PR number, ledger, rows its branch appends); PR 1 merges before `since`
+    (1, "reports/L1/forecasts.jsonl", (F_OLD,)),
+    (2, "reports/L2/forecasts.jsonl", (F_A, F_R)),
+    (3, "reports/L2/forecasts.jsonl", (F_B, _resolved(F_A, False), _resolved(F_R, False), _resolved(F_OLD, False),
+                                       _resolved(F_B, False), _resolved(F_B, True))),
+    (4, "reports/L1/forecasts.jsonl", (F_C,)),
+)
+# (PR number, Builder's cumulative log-loss, resolved, made), by the definition: A's 0.9 resolved false, B's 0.6
+# resolved true by its last resolution, C unresolved; R is the Reviewer's and PR 1 merged before `since`.
+SURPRISE_WANT = ((2, -math.log(1 - 0.9), 1, 1), (3, -math.log(0.6), 1, 1), (4, 0.0, 0, 1))
+
+
+def _surprise_repo(repo: Path) -> str:
+    """A fixture repository whose master merges one `Merge pull request #<n>` branch per SURPRISE_FIXTURE case, each
+    appending its rows to its ledger. Returns the sha of PR 1's merge."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    git("commit", "-q", "--allow-empty", "-m", "base")
+    merges = []
+    for n, ledger, rows in SURPRISE_FIXTURE:
+        git("checkout", "-q", "-b", f"pr{n}")
+        target = repo / ledger
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("a") as f:
+            f.writelines(json.dumps(r) + "\n" for r in rows)
+        git("add", "-A")
+        git("commit", "-q", "-m", f"pr {n}")
+        git("checkout", "-q", "master")
+        git("merge", "-q", "--no-ff", "-m", f"Merge pull request #{n} from f/pr{n}", f"pr{n}")
+        merges.append(git("rev-parse", "HEAD"))
+    return merges[0]
+
+
+def p0n_surprise_ranking() -> bool:
+    """`python -m harness.ledger surprise --since <sha>` lists the pull requests merged since <sha>, ranked by the
+    Builder's cumulative log-loss on the forecasts each added, largest first, with its resolved and made counts
+    (instruction #46 item 5)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0n-", dir=context.scratch))
+    since = _surprise_repo(work / "repo")
+    ranked = ledger.surprise(ledger.merged_since(work / "repo", since), ledger.outcomes(ledger.ledger_rows(work / "repo")))
+    for r in ranked:
+        print(f"    {r}")
+    got = [(r.number, r.resolved, r.made) for r in ranked]
+    expect(got == [(n, res, made) for n, _, res, made in SURPRISE_WANT],
+           f"ranked (PR, resolved, made) {got}, want {[(n, res, made) for n, _, res, made in SURPRISE_WANT]}")
+    expect(all(math.isclose(r.loss, loss) for r, (_, loss, _, _) in zip(ranked, SURPRISE_WANT)),
+           f"losses {[r.loss for r in ranked]}, want {[w[1] for w in SURPRISE_WANT]}")
+    expect(all(r.sessions == ("s",) for r in ranked), f"builder sessions {[r.sessions for r in ranked]}, want ('s',)")
+    out = subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "surprise", "--since", since,
+                          "--repo", str(work / "repo")], cwd=ROOT, capture_output=True, text=True)
+    listed = [line.split()[0] for line in out.stdout.splitlines() if line.startswith("#") and not line.startswith("# ")]
+    expect(out.returncode == 0 and listed == [f"#{n}" for n, *_ in SURPRISE_WANT],
+           f"the command lists {listed} (exit {out.returncode}; {out.stderr.strip()[-200:]!r})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _vizier(claim: str, p: float, cls: str, mode: str) -> dict:
+    return _forecast(claim, p, "vizier") | {"class": cls, "mode": mode}
+
+
+V_REC1, V_REC2, V_ACT1, V_ACT2, V_OPEN = (_vizier("r1", 0.8, "relabel", "recommend"),
+                                          _vizier("r2", 0.7, "relabel", "recommend"),
+                                          _vizier("a1", 0.9, "close-failed", "act"),
+                                          _vizier("a2", 0.6, "close-failed", "act"),
+                                          _vizier("o", 0.5, "relabel", "recommend"))
+PROPOSER_FIXTURE = (V_REC1, V_REC2, V_ACT1, V_ACT2, V_OPEN, F_A, _resolved(V_REC1, True), _resolved(V_REC2, True),
+                    _resolved(V_ACT1, True), _resolved(V_ACT2, False), _resolved(F_A, False))
+# (class, made, resolved, correct, overturned, log-loss, unbroken), by the definition: both relabel recommendations
+# resolved true, the third open; one close-failed act stood (0.9, true) and one was overturned (0.6, false); F_A is the
+# Builder's and is not the Vizier's record.
+PROPOSER_WANT = (("close-failed", 2, 2, 1, 1, -math.log(0.9) - math.log(1 - 0.6), False),
+                 ("relabel", 3, 2, 2, 0, -math.log(0.8) - math.log(0.7), True))
+
+
+def p0o_proposer_record() -> bool:
+    """`python -m harness.ledger proposer vizier` reports the Vizier's record per class: made, resolved, correct,
+    overturned acts, cumulative log-loss, and whether the class is correct on every resolved case; an overturned act
+    is never a success (instruction #49 §4)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    got = ledger.record(list(PROPOSER_FIXTURE), "vizier")
+    for r in got:
+        print(f"    {r}")
+    expect([(r.cls, r.made, r.resolved, r.correct, r.overturned, r.unbroken) for r in got]
+           == [(c, m, res, cor, ov, u) for c, m, res, cor, ov, _, u in PROPOSER_WANT],
+           f"records {[(r.cls, r.made, r.resolved, r.correct, r.overturned, r.unbroken) for r in got]}, want "
+           f"{[(c, m, res, cor, ov, u) for c, m, res, cor, ov, _, u in PROPOSER_WANT]}")
+    expect(all(math.isclose(r.loss, w[5]) for r, w in zip(got, PROPOSER_WANT)),
+           f"losses {[r.loss for r in got]}, want {[w[5] for w in PROPOSER_WANT]}")
+    later = ledger.record(list(PROPOSER_FIXTURE), "vizier", since="2026-01-01T00:00:01Z")
+    expect(later == [], f"no Vizier forecast at or after a later --since: {later}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0o-", dir=context.scratch))
+    repo = work / "repo"
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+    (repo / "reports/L2").mkdir(parents=True)
+    (repo / "reports/L2/forecasts.jsonl").write_text("".join(json.dumps(r) + "\n" for r in PROPOSER_FIXTURE))
+    for args in (("init", "-q", "-b", "master"), ("add", "-A"), ("commit", "-q", "-m", "ledger")):
+        subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, env=env)
+    out = subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "proposer", "vizier", "--repo", str(repo)],
+                         cwd=ROOT, capture_output=True, text=True)
+    listed = [line.split()[:5] for line in out.stdout.splitlines() if not line.startswith("#")]
+    want = [[c, f"made={m}", f"resolved={res}", f"correct={cor}/{res}", f"overturned={ov}"]
+            for c, m, res, cor, ov, _, _ in PROPOSER_WANT]
+    expect(out.returncode == 0 and listed == want,
+           f"the command lists {listed} (exit {out.returncode}; {out.stderr.strip()[-200:]!r})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _git_fixture(repo: Path):
+    """A `git` for a fixture repository, reading no user or system configuration."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    return git
+
+
+def _append(repo: Path, path: str, text: str) -> None:
+    target = repo / path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a") as f:
+        f.write(text)
+
+
+def _append_only_repo(repo: Path) -> tuple[str, dict[str, str]]:
+    """A fixture repository: a base commit holding a ledger, a review file and REPORT.md; then on master an appending
+    commit, a rewriting commit, and a merge of two branches each appending to another append-only path. Returns the
+    base and the shas by role."""
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    _append(repo, "reports/L1/forecasts.jsonl", '{"id": "a"}\n')
+    _append(repo, "reports/L1/review-abc.md", "VERDICT: ACCEPT\n")
+    _append(repo, "REPORT.md", "# report\n- L0 — PASSED\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    _append(repo, "reports/L1/forecasts.jsonl", '{"id": "b"}\n')
+    git("commit", "-qam", "appends")
+    shas = {"appending": git("rev-parse", "HEAD")}
+    (repo / "REPORT.md").write_text("# report\n- L0 — FAILED\n")
+    git("commit", "-qam", "rewrites")
+    shas["rewriting"] = git("rev-parse", "HEAD")
+    git("checkout", "-q", "-b", "x")
+    _append(repo, "reports/L1/forecasts.jsonl", '{"id": "c"}\n')
+    git("commit", "-qam", "x appends")
+    git("checkout", "-q", "-b", "y", shas["rewriting"])
+    _append(repo, "reports/L1/review-abc.md", "F1: appended\n")
+    git("commit", "-qam", "y appends")
+    git("checkout", "-q", "x")
+    git("merge", "-q", "--no-ff", "-m", "merge y", "y")
+    shas["merge"] = git("rev-parse", "HEAD")
+    return base, shas
+
+
+def p0q_append_only() -> bool:
+    """Every commit on the branch only adds lines to the ledgers, review and audit files and the root REPORT.md, and
+    a merge only adds lines relative to each of its parents (rule 1 of the ground, instruction #54 item 1)."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0q-", dir=context.scratch))
+    base, shas = _append_only_repo(work / "repo")
+    got = claims.append_only(work / "repo", base)
+    for f in got:
+        print(f"    fixture: {f}")
+    expect({(f.where, f.code) for f in got} == {(f"commit {shas['rewriting'][:12]}", "ledger_rewrite")}
+           and any("REPORT.md" in f.detail for f in got),
+           "fixture: the rewriting commit, and only it, is found; the appending commit and the merge of two appending "
+           "branches pass")
+    shutil.rmtree(work, ignore_errors=True)
+
+    root = _real_root()
+    base = _branch_base(root)
+    expect(base is not None, f"real branch: base resolved ({base})")
+    real = claims.append_only(root, base) if base else []
+    n = len(claims._git(root, "rev-list", f"{base}..HEAD").split()) if base else 0
+    expect(not real, f"real branch {base and base[:12]}..HEAD: {n} commits; findings {[str(f) for f in real]}")
+    return ok()
+
+
+def _late_repo(repo: Path) -> tuple[str, str, str]:
+    """A fixture repository: master with an empty ledger, then a branch of two commits whose forecast appears only in
+    the second. Returns the base and the two commits."""
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    _append(repo, "reports/L2/forecasts.jsonl", "")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    git("checkout", "-q", "-b", "pr")
+    _append(repo, "harness/x.py", "x = 1\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "code")
+    first = git("rev-parse", "HEAD")
+    _append(repo, "reports/L2/forecasts.jsonl", json.dumps(_forecast("late", 0.5)) + "\n")
+    git("commit", "-qam", "forecast")
+    return base, first, git("rev-parse", "HEAD")
+
+
+def _pins_run(run_id: int, sha: str, created: str, event: str = "pull_request") -> dict:
+    return {"id": run_id, "head_sha": sha, "created_at": created, "event": event, "path": claims.PINS_WORKFLOW}
+
+
+def _ledgers_at(repo: Path, sha: str, paths) -> dict[str, str | None]:
+    def text(path: str) -> str | None:
+        try:
+            return claims._git(repo, "show", f"{sha}:{path}")
+        except subprocess.CalledProcessError:
+            return None
+    return {p: text(p) for p in paths}
+
+
+def p0r_claims_precede_scoring() -> bool:
+    """The forecast rows a pull request adds are present in the tree at the head of the first `pins` run on its
+    branch; a row first present in a later head is `late_forecast` (rule 2 of the ground, instruction #54 item 2). The
+    real branch's runs are read through `gh api`; an unreadable record is a failure, not a skip."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0r-", dir=context.scratch))
+    base, first, second = _late_repo(work / "repo")
+    added = claims.forecast_rows_added(work / "repo", base, second)
+    expect(list(added) == ["reports/L2/forecasts.jsonl"] and len(added["reports/L2/forecasts.jsonl"]) == 1,
+           f"fixture: the branch adds one forecast row ({added})")
+    runs = [_pins_run(2, second, "2026-01-02T00:00:00Z"), _pins_run(1, first, "2026-01-01T00:00:00Z"),
+            _pins_run(0, base, "2025-12-31T00:00:00Z", "push")]
+    run = claims.first_pins_run(runs)
+    expect(run is not None and run["id"] == 1, f"fixture: the first pull_request pins run is run 1 ({run})")
+    got = claims.late_forecasts(added, _ledgers_at(work / "repo", run["head_sha"], added), run["head_sha"]) \
+        if run else []
+    expect([f.code for f in got] == ["late_forecast"], f"fixture: a forecast first present in the second commit, "
+                                                        f"after the first run's head, is late ({[str(f) for f in got]})")
+    got = claims.late_forecasts(added, _ledgers_at(work / "repo", second, added), second)
+    expect(not got, f"fixture: the same forecast present at the first run's head is not late ({[str(f) for f in got]})")
+    shutil.rmtree(work, ignore_errors=True)
+
+    root = _real_root()
+    base = _branch_base(root)
+    expect(base is not None, f"real branch: base resolved ({base})")
+    added = claims.forecast_rows_added(root, base) if base else {}
+    print(f"    real branch adds {sum(map(len, added.values()))} forecast rows in {sorted(added)}")
+    if not added:
+        return ok()
+    branch = os.environ.get("GITHUB_HEAD_REF") or claims._git(root, "branch", "--show-current").strip()
+    expect(bool(branch), f"real branch: name resolved ({branch!r}; GITHUB_HEAD_REF in CI, else the checked-out branch)")
+    try:
+        out = subprocess.run(["gh", "api", "--paginate", f"repos/{{owner}}/{{repo}}/actions/workflows/pins.yml/runs?"
+                              f"event=pull_request&branch={branch}&per_page=100", "--jq",
+                              ".workflow_runs[] | {id, head_sha, created_at, event, path}"], cwd=root, check=True,
+                             capture_output=True, text=True, timeout=120).stdout
+        runs = [json.loads(line) for line in out.splitlines() if line.strip()]
+    except (OSError, subprocess.SubprocessError) as e:
+        expect(False, f"real branch: pins runs on {branch!r} read through gh api ({getattr(e, 'stderr', '') or e})")
+        return ok()
+    run = claims.first_pins_run(runs)
+    if run is None:
+        print(f"    real branch {branch}: {len(runs)} pins runs; none yet, so the first will run on a head that holds "
+              f"these rows")
+        return ok()
+    sha = str(run["head_sha"])
+    try:
+        texts = {p: _ledger_text(root, sha, p) for p in added}
+    except (OSError, subprocess.SubprocessError) as e:
+        expect(False, f"real branch: ledgers at {sha[:12]}, the first pins run's head, read ({e})")
+        return ok()
+    got = claims.late_forecasts(added, texts, sha)
+    expect(not got, f"real branch {branch}: first pins run {run['id']} on {sha[:12]} of {len(runs)}; findings "
+                    f"{[str(f) for f in got]}")
+    return ok()
+
+
+def _ledger_text(root: Path, sha: str, path: str) -> str | None:
+    """A ledger's text at `sha`: from git if this clone holds the commit, else through the contents API; None if the
+    file is absent there."""
+    if subprocess.run(["git", "-C", str(root), "cat-file", "-e", f"{sha}^{{commit}}"], capture_output=True,
+                      env=os.environ | claims.GIT_ENV).returncode == 0:
+        return _ledgers_at(root, sha, [path])[path]
+    got = subprocess.run(["gh", "api", f"repos/{{owner}}/{{repo}}/contents/{path}?ref={sha}", "-H",
+                          "Accept: application/vnd.github.raw"], cwd=root, capture_output=True, text=True, timeout=60)
+    if got.returncode != 0 and "404" in got.stderr:
+        return None
+    if got.returncode != 0:
+        raise subprocess.CalledProcessError(got.returncode, "gh api contents", got.stdout, got.stderr)
+    return got.stdout
+
+
+def _typed(claim: str, p: float, ftype: str | None, args: dict, ts: str = "2026-01-10T00:00:00Z") -> dict:
+    f = {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": LEDGER_PROPOSER | {"kind": "builder"},
+         "sha_before": "0" * 40, "claim": claim, "p": p, "resolves_by": "the resolver"}
+    return f | ({"type": ftype, "args": args} if ftype else {})
+
+
+BEFORE_TS, AFTER_TS, LATER_TS = "2026-01-09T00:00:00Z", "2026-01-11T00:00:00Z", "2026-01-12T00:00:00Z"
+REVIEW_BLOCKED = "VERDICT: ACCEPT WITH OBLIGATIONS\nF1: x — severity: BLOCK (rule) — witness: w\n"
+# (forecast, outcome wanted: True, False, or None for not observable / never resolved by the mechanism)
+OUTCOME_FIXTURE = (
+    (_typed("pins: first run after the forecast failed", 0.8, "pins_green", {"pr": 1}), False),
+    (_typed("review: first file after the forecast carries a BLOCK", 0.7, "review_accept", {"pr": 2}), False),
+    (_typed("review: accepted", 0.7, "review_accept", {"pr": 3}), True),
+    (_typed("merged", 0.9, "merged", {"pr": 4}), True),
+    (_typed("still open", 0.9, "merged", {"pr": 5}), None),
+    (_typed("host FIT, the line says UNFIT", 0.4, "host_verdict", {"layer": 2, "verdict": "FIT"}), False),
+    (_typed("host UNFIT", 0.4, "host_verdict", {"layer": 2, "verdict": "UNFIT"}), True),
+    (_typed("no L3 line yet", 0.4, "host_verdict", {"layer": 3, "verdict": "FIT"}), None),
+    (_typed("Guy approves", 0.6, "guy_answers", {"item": 6, "answer": "approved"}), True),
+    (_typed("Guy signs; closed unsigned", 0.6, "guy_answers", {"item": 7, "answer": "labeled:instruction"}), False),
+    (_typed("act stands", 0.9, "not_overturned", {"item": 8, "until": LATER_TS}), True),
+    (_typed("act reversed", 0.9, "not_overturned", {"item": 9, "until": LATER_TS}), False),
+    (_typed("act, until not reached", 0.9, "not_overturned", {"item": 8, "until": "2027-01-01T00:00:00Z"}), None),
+    (_typed("two findings in 1-3", 0.5, "finding_count", {"sha": "abc123", "bin": "1–3"}), True),
+    (_typed("two findings in 0", 0.2, "finding_count", {"sha": "abc123", "bin": "0"}), False),
+    (_typed("guy-items at most 3", 0.5, "price", {"quantity": "guy-items", "layer": 2, "bound": 3}), False),
+    (_typed("free text, untyped", 0.5, None, {}), None),
+    (_typed("free text, typed free", 0.5, "free", {}), None),
+)
+OUTCOME_UNREAD = (_typed("no such type", 0.5, "nonsense", {}),)
+OUTCOME_ANSWERS = {  # what the GitHub API and the tree answer, in the shapes the real observer returns
+    ("pins_runs", 1): [_pins_run(10, "a" * 40, BEFORE_TS), _pins_run(12, "c" * 40, LATER_TS),
+                       _pins_run(11, "b" * 40, AFTER_TS)],
+    ("run_attempt", 10): {"status": "completed", "conclusion": "success"},
+    ("run_attempt", 11): {"status": "completed", "conclusion": "failure"},
+    ("run_attempt", 12): {"status": "completed", "conclusion": "success"},
+    ("review_files", 2): [{"sha": "d" * 40, "date": BEFORE_TS, "path": "reports/L2/review-d.md",
+                           "text": "VERDICT: ACCEPT\n"},
+                          {"sha": "e" * 40, "date": AFTER_TS, "path": "reports/L2/review-e.md", "text": REVIEW_BLOCKED}],
+    ("review_files", 3): [{"sha": "f" * 40, "date": AFTER_TS, "path": "reports/L2/review-f.md",
+                           "text": "VERDICT: ACCEPT\nF1: fine — severity: OBLIGATION on L3 — witness: w\n"}],
+    ("pr", 4): {"state": "closed", "merged": True, "merged_at": AFTER_TS},
+    ("pr", 5): {"state": "open", "merged": False},
+    ("report",): "# REPORT\n- L1 — **SEALED; Crafter FIT**\n- L2 — **NetHack MARGINAL**\n- L2 — **NetHack UNFIT**\n",
+    ("timeline", 6): [{"event": "reviewed", "user": {"login": "gfrmin"}, "state": "commented", "submitted_at": AFTER_TS},
+                      {"event": "reviewed", "user": {"login": "gfrmin"}, "state": "approved", "submitted_at": LATER_TS}],
+    ("timeline", 7): [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"},
+                       "created_at": BEFORE_TS},
+                      {"event": "closed", "actor": {"login": "assize-reviewer"}, "created_at": AFTER_TS}],
+    ("timeline", 8): [{"event": "merged", "actor": {"login": "gfrmin"}, "created_at": AFTER_TS},
+                      {"event": "closed", "actor": {"login": "gfrmin"}, "created_at": AFTER_TS},
+                      {"event": "unlabeled", "actor": {"login": "assize-reviewer"}, "created_at": AFTER_TS}],
+    ("timeline", 9): [{"event": "reopened", "actor": {"login": "gfrmin"}, "created_at": AFTER_TS}],
+    ("audit", "abc123"): ("reports/L2/audit-abc123.md", "AUDIT: abc123\nFINDINGS: 2\nF1: a\nF2: b\nre-reviewed: none\n"),
+    ("price", 2): {"guy-items": 5.0},
+}
+OUTCOME_NOW = "2026-06-01T00:00:00Z"
+
+
+def _observe(kind: str, *key: object) -> object:
+    from harness import ledger
+
+    if (kind, *key) not in OUTCOME_ANSWERS:
+        raise ledger.Unreadable(f"fixture has no answer to {(kind, *key)}")
+    return OUTCOME_ANSWERS[(kind, *key)]
+
+
+def p0s_outcomes_by_code() -> bool:
+    """`python -m harness.ledger resolve` resolves every open typed forecast whose outcome is observable, by its
+    type's definition, from fixture API answers for every type, with a resolution proposed by the mechanism; leaves
+    the unobservable open; never resolves a `free` one; and names, never drops, one it cannot read (rule 3 of the
+    ground, instruction #54 item 3)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    rows = [f for f, _ in OUTCOME_FIXTURE] + list(OUTCOME_UNREAD)
+    got, unread = ledger.resolve(rows, _observe, OUTCOME_NOW, "p0s")
+    by_id = {r["id"]: r["outcome"] for r in got}
+    for (f, want) in OUTCOME_FIXTURE:
+        expect(by_id.get(f["id"]) == want, f"{f.get('type', 'untyped')} {f['claim']!r}: resolved "
+                                           f"{by_id.get(f['id'], 'open')}, want {'open' if want is None else want}")
+    expect(len(got) == sum(1 for _, w in OUTCOME_FIXTURE if w is not None), f"{len(got)} resolutions, one per "
+                                                                           f"observable typed forecast")
+    expect(all(r["proposer"] == {"kind": "mechanism", "model": "harness.ledger", "session": "p0s"} and r["ts"] ==
+               OUTCOME_NOW and r.get("witness") for r in got), "every resolution is the mechanism's, now, witnessed")
+    expect(len(unread) == 1 and OUTCOME_UNREAD[0]["id"] in unread[0], f"the unknown type is named, not dropped "
+                                                                      f"({unread})")
+    findings = claims.ledger_findings(_ledger(*rows, *got))
+    expect(not findings, f"forecasts and resolutions pass the ledger check ({[str(f) for f in findings]})")
+    again, _ = ledger.resolve(rows + got, _observe, OUTCOME_NOW, "p0s")
+    expect(not again, f"a resolved forecast is not resolved again ({again})")
+    return ok()
+
+
+T0 = "2026-02-01T00:00:00Z"
+
+
+def _h(hours: float) -> str:
+    import datetime
+    return (datetime.datetime.fromisoformat(T0.replace("Z", "+00:00")) + datetime.timedelta(hours=hours)) \
+        .strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+PRICE_REACHED = (  # (item, route, hour it reached Guy)
+    (1, "awaits-guy", 1), (2, "assigned", 2), (3, "needs-you", 3), (3, "awaits-guy", 4), (4, "awaits-guy", -5))
+PRICE_ACTIONS = {1: (0.5, 3), 3: (5,), 4: (-4,)}  # hours of gfrmin's actions per item
+PRICE_RUNS = (  # (workflow, conclusion, start hour, minutes)
+    (".github/workflows/build.yml", "success", 1, 30), (".github/workflows/review.yml", "failure", 2, 60),
+    (".github/workflows/review.yml", "skipped", 2, 1), (claims.PINS_WORKFLOW, "success", 3, 10),
+    (".github/workflows/build.yml", "success", -10, 99))
+PRICE_UNTIL = 10
+# by the definition, over [T0, T0 + 10h): items 1, 2, 3 (4 reached before the window; 3 once, at its first arrival);
+# latencies 1 -> 3 is 2h, 2 unanswered is 10 - 2 = 8h (open, never dropped), 3 -> 5 is 2h; sessions: the build and
+# the failed review (the skipped one never ran); runner-minutes 30 + 60 + 10, pins 10.
+PRICE_WANT = {"items": (1, 2, 3), "latencies": (2.0, 8.0, 2.0), "open": (2,), "sessions": 2, "runner": 100.0,
+              "pins": 10.0}
+
+
+def p0t_price() -> bool:
+    """`python -m harness.ledger price` counts every item that reached Guy by an `awaits-guy` label, an assignment or
+    a NEEDS YOU line, once, with its latency to his first action after it, or to the window's end if none yet; and
+    sessions and runner-minutes per workflow (rule 6 of the ground, instruction #54 item 6)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    reached = [{"item": n, "route": r, "at": _h(h)} for n, r, h in PRICE_REACHED]
+    actions = {n: [_h(h) for h in hs] for n, hs in PRICE_ACTIONS.items()}
+    runs = [{"path": w, "conclusion": c, "created_at": _h(h), "run_started_at": _h(h), "updated_at": _h(h + m / 60)}
+            for w, c, h, m in PRICE_RUNS]
+    got = ledger.price(reached, actions, runs, T0, _h(PRICE_UNTIL))
+    print(f"    {got}")
+    print(f"    {got.status_line()}")
+    expect(got.items == PRICE_WANT["items"], f"items {got.items}, want {PRICE_WANT['items']}")
+    expect(len(got.latencies_h) == len(got.items) and all(
+        math.isclose(a, b) for a, b in zip(got.latencies_h, PRICE_WANT["latencies"])),
+        f"latencies {got.latencies_h}, want {PRICE_WANT['latencies']}")
+    expect(got.open_items == PRICE_WANT["open"], f"open items {got.open_items}, want {PRICE_WANT['open']}")
+    expect(got.sessions == PRICE_WANT["sessions"], f"sessions {got.sessions}, want {PRICE_WANT['sessions']}")
+    expect(math.isclose(sum(got.runner_min.values()), PRICE_WANT["runner"]) and math.isclose(got.pins_min,
+                                                                                            PRICE_WANT["pins"]),
+           f"runner-minutes {dict(got.runner_min)}, pins {got.pins_min}; want {PRICE_WANT['runner']}, "
+           f"{PRICE_WANT['pins']}")
+    expect(got.status_line() == "price: guy-items 3; guy-latency median 2.0h max 8.0h; sessions 2; runner-min 100",
+           f"STATUS line {got.status_line()!r}")
+    return ok()
+
+
+def _elector(model: str, p: float, outcome: bool | None, kind: str = "reviewer") -> list[dict]:
+    f = _forecast(f"{kind} {model} {p} {outcome}", p, kind)
+    f["proposer"] = f["proposer"] | {"model": model}
+    return [f] + ([_resolved(f, outcome)] if outcome is not None else [])
+
+
+ELECTION_ENTRANTS = ("m-a", "m-b", "m-c")
+ELECTION_FIXTURE = (_elector("m-a", 0.9, True) + _elector("m-a", 0.2, True) + _elector("m-b", 0.5, False)
+                    + _elector("m-a", 0.01, False, "builder") + _elector("m-b", 0.3, None))
+
+
+def p0u_election() -> bool:
+    """`python -m harness.ledger elect <procedure> --seed <run id>` draws an entrant by Hedge over the entrants'
+    cumulative log-loss on that procedure's resolved forecasts: weights exp(-eta L_m), eta = sqrt(8 ln K / t), no
+    record meaning L = 0; over a sweep of every seed residue the draw's frequencies equal the weights (rule 7 of the
+    ground, instruction #54 item 7)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    rows = list(ELECTION_FIXTURE)
+    loss = {"m-a": -math.log(0.9) - math.log(0.2), "m-b": -math.log(1 - 0.5), "m-c": 0.0}  # by the definition
+    t, k = 3, len(ELECTION_ENTRANTS)
+    eta = math.sqrt(8 * math.log(k) / t)
+    raw = {m: math.exp(-eta * v) for m, v in loss.items()}
+    want = {m: w / sum(raw.values()) for m, w in raw.items()}
+    counts = {m: 0 for m in ELECTION_ENTRANTS}
+    for seed in range(ledger.DRAWS):
+        m = ledger.elect(rows, "review", ELECTION_ENTRANTS, seed + 123456789)
+        counts[m] = counts.get(m, 0) + 1
+    print(f"    weights {want}; draws over {ledger.DRAWS} seeds {counts}")
+    expect(all(abs(counts[m] - want[m] * ledger.DRAWS) <= 1 for m in ELECTION_ENTRANTS) and sum(counts.values())
+           == ledger.DRAWS, f"every entrant drawn its weight's share of the sweep, to one draw ({counts})")
+    expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, 0) in ELECTION_ENTRANTS,
+           "a procedure with no record draws among its entrants")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0u-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    _append(repo, "reports/L2/forecasts.jsonl", "".join(json.dumps(r) + "\n" for r in rows))
+    _append(repo, ledger.ENTRANTS, f"review = {json.dumps(list(ELECTION_ENTRANTS))}\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "ledger")
+    seeds = (7, 40000, 65535)
+    out = [subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "elect", "review", "--seed", str(s), "--repo",
+                           str(repo)], cwd=ROOT, capture_output=True, text=True) for s in seeds]
+    printed = [o.stdout.strip() for o in out]
+    expect(all(o.returncode == 0 for o in out) and printed == [ledger.elect(rows, "review", ELECTION_ENTRANTS, s)
+                                                               for s in seeds],
+           f"the command prints the draw for its seed: {printed} ({[o.stderr.strip()[-200:] for o in out]})")
+    shutil.rmtree(work, ignore_errors=True)
     return ok()
 
 
@@ -2295,8 +2879,10 @@ PINS = [
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset")))),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),)),
-    Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, or matching no forecast, is rejected",
-        p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),)),
+    Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
+        "forecast's session, is rejected",
+        p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),
+                              Mutant("self_resolution_admitted", _edits("P0k_self_resolution_admitted")))),
     Pin("P0l", "a verdict citing a pins run on another sha, or one not concluded success, is rejected",
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),)),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
@@ -2307,7 +2893,26 @@ PINS = [
                                 Mutant("exemption_party_unchecked", _edits("P0m_exemption_party_unchecked")),
                                 Mutant("unknown_merge_author", _edits("P0m_unknown_merge_author")),
                                 Mutant("instruction_author_unchecked", _edits("P0m_instruction_author_unchecked")),
-                                Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")))),
+                                Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")),
+                                Mutant("instruction_labeler_unchecked", _edits("P0m_instruction_labeler_unchecked")),
+                                Mutant("body_edit_unchecked", _edits("P0m_body_edit_unchecked")),
+                                Mutant("inert_exemption_admitted", _edits("P0m_inert_exemption_admitted")))),
+    Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
+        p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),)),
+    Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",
+        p0o_proposer_record, (Mutant("overturned_scored_success", _edits("P0o_overturned_scored_success")),)),
+    Pin("P0q", "a commit removing a line of a ledger, review, audit or REPORT.md is rejected; a merge of appends is not",
+        p0q_append_only, (Mutant("ledger_rewrite_admitted", _edits("P0q_ledger_rewrite_admitted")),)),
+    Pin("P0r", "a forecast row a pull request adds after the head of its first pins run is late",
+        p0r_claims_precede_scoring, (Mutant("late_forecast_admitted", _edits("P0r_late_forecast_admitted")),)),
+    Pin("P0s", "typed forecasts are resolved by code from what the API shows; free ones never by the mechanism",
+        p0s_outcomes_by_code, (Mutant("outcome_inverted", _edits("P0s_outcome_inverted")),
+                               Mutant("free_resolved_by_mechanism", _edits("P0s_free_resolved_by_mechanism")))),
+    Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
+        p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
+                    Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")))),
+    Pin("P0u", "a procedure's model is drawn by Hedge over its entrants' log-loss, never by argmin",
+        p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),)),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

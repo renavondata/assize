@@ -1,0 +1,5 @@
+# P0m's eighth mutant (instruction #49): an `Instruction:` trailer is accepted whoever applied the `instruction` label.
+[[edit]]
+path = "harness/claims.py"
+old = " and issue.labeled_by == INSTRUCTION_AUTHOR"
+new = ""

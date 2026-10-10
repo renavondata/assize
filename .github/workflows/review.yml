@@ -1,26 +1,68 @@
 name: review
+# Instruction #54 item 8: /review, /audit and /vizier are procedures of the reviewer account, chosen from the event.
 on:
   pull_request:
     types: [labeled]
+  push:
+    branches: [master]
+    paths: [REPORT.md]
+  issues:
+    types: [labeled, assigned]
+  schedule:
+    - cron: '0 5 * * *'        # daily
   workflow_dispatch:
     inputs:
       pr: { description: "PR number", required: true }
 concurrency:
-  group: review-${{ github.event.pull_request.number || inputs.pr }}
+  group: review-${{ github.event.pull_request.number || inputs.pr || github.event.issue.number || github.event_name }}
   cancel-in-progress: false
 jobs:
   review:
-    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'needs-review'
+    if: >-
+      github.event.sender.login != 'assize-reviewer' && (
+        github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'schedule' ||
+        (github.event_name == 'pull_request' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) ||
+        (github.event_name == 'issues' && github.event.action == 'labeled' && contains(fromJSON('["failed-run","wish"]'), github.event.label.name)) ||
+        (github.event_name == 'issues' && github.event.action == 'assigned' && github.event.assignee.login == 'gfrmin'))
     runs-on: [self-hosted, agent]
     timeout-minutes: 120
     env:
       GH_TOKEN: ${{ secrets.ASSIZE_REVIEWER_TOKEN }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      VIZIER_EVENT: ${{ github.event_name }}
+      VIZIER_ACTION: ${{ github.event.action }}
+      VIZIER_LABEL: ${{ github.event.label.name }}
+      VIZIER_ITEM: ${{ github.event.pull_request.number || github.event.issue.number }}
     steps:
       - uses: actions/checkout@v5
         with: { ref: master, fetch-depth: 0, persist-credentials: false }
       - run: gh auth setup-git
-      - run: claude --model sonnet -p "/review ${{ github.event.pull_request.number || inputs.pr }}" --max-turns 250 --output-format stream-json --verbose > review.log 2>&1
+      - id: choose
+        env:
+          EVENT: ${{ github.event_name }}
+          LABEL: ${{ github.event.label.name }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
+        run: |
+          set -euo pipefail
+          case "$EVENT:$LABEL" in
+            workflow_dispatch:*|pull_request:needs-review) run="review /review $PR" ;;
+            push:*|issues:failed-run) run="vizier /vizier;audit /audit" ;;
+            *) run="vizier /vizier" ;;
+          esac
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+      # Instruction #54 item 7: each procedure's model is elected by Hedge over harness/entrants.toml, never named here.
+      - env:
+          RUN: ${{ steps.choose.outputs.run }}
+        run: |
+          set -euo pipefail
+          IFS=';' read -ra procs <<< "$RUN"
+          for p in "${procs[@]}"; do
+            proc=${p%% *}; cmd=${p#* }
+            model=$(uv run --frozen python -m harness.ledger elect "$proc" --seed ${{ github.run_id }} --head origin/master)
+            echo "$proc: elected $model" | tee -a review.log
+            git checkout -q master
+            claude --model "$model" -p "$cmd" --max-turns 250 --output-format stream-json --verbose >> review.log 2>&1
+          done
       - if: always()
         uses: actions/upload-artifact@v5
         with:

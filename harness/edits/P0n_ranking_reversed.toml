@@ -1,0 +1,5 @@
+# P0n's mutant (instruction #46 item 5): the surprise ranking is reversed, smallest log-loss first.
+[[edit]]
+path = "harness/ledger.py"
+old = "key=lambda s: (-s.loss, s.number))"
+new = "key=lambda s: (s.loss, s.number))"

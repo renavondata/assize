@@ -1,0 +1,5 @@
+# P0s's second mutant (instruction #54 item 3): the mechanism resolves `free` claims, as true.
+[[edit]]
+path = "harness/ledger.py"
+old = "    FREE: None,  # never resolved by the mechanism"
+new = "    FREE: lambda *_: (True, \"free\"),  # never resolved by the mechanism"

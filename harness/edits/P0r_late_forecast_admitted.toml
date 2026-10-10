@@ -1,0 +1,5 @@
+# P0r's mutant (instruction #54 item 2): a forecast row is compared with the head, not with the first pins run's tree.
+[[edit]]
+path = "harness/claims.py"
+old = "        return row in (at_first_run.get(path) or \"\").splitlines()"
+new = "        return True"

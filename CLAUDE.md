@@ -131,3 +131,47 @@ The last deliverable of every layer is a draft of the next layer's brief, writte
 
 ### A1.11 Counsel
 External advice reaches this repository only as (a) text Guy pastes into a brief or an amendment, which then stands or falls on its own, or (b) forecasts tagged `proposer.kind = counsel`, scored like any other. Counsel has no authority a brief does not give it.
+
+## Amendment 2 — Audit (appended; instruction #46)
+
+The Reviewer checks diffs; the Auditor checks the whole. An audit runs on every push to master that adds a verdict line to the root REPORT.md, on every issue opened by failed.yml, on every DISPUTE, and on dispatch. The Auditor is a fresh session on a model different from both the Builder's and the Reviewer's, reads the repository at master, changes no code, and writes `reports/L<n>/audit-<sha>.md`. Before reading, it records in forecasts.jsonl a distribution over its own finding count {0, 1–3, 4–8, 9+}, proposer kind `auditor`. Each finding names the criterion it fails, the file and line, and a proposed pin with a seeded mutant. Findings are appended to the current brief as an amendment titled 'Audit findings at <sha>', opened as a pull request under the Builder's procedure, so they become items. The Auditor also re-reviews, cold, the three merged pull requests since the last audit whose Builder forecasts carried the largest log-loss; a finding there that the Reviewer passed is recorded against the Reviewer's record in the ledger. A finding later confirmed by a KILLED mutant scores for the Auditor; one the Builder and Reviewer jointly record as 'not a finding' scores against it.
+
+Audit criteria, verbatim:
+1. Every check kills a mutant.
+2. The law names scores and competitions, never competitors: every model, prior, approximation, heuristic or constant through which scores or forecasts pass is an entrant that can lose, a derived bound, or a pre-stated criterion.
+3. Every exit routes somewhere: every way a session or job can end produces a pull request, an issue assigned to Guy, or a labelled PR state.
+4. Declaration, not inference: no component infers state another component knew and could have recorded.
+5. No unscored actor: every party whose outputs enter the ledger or repository has a forecast or a proper score attached.
+6. Reach: no path to judge-private storage, the ledger or an entrenched path except through the mechanisms the law names.
+7. Monotone trusted base: the set of things outside every loop is listed and has not grown since the last audit.
+
+## Amendment 3 — The sovereign (appended; instruction #49; replaces nothing, narrows A1.5 in practice)
+
+Guy's role is three things: wishes, judgement at layer boundaries, and signatures the law reserves to him (approval of entrenched pull requests, merge of layer boundaries, the `instruction` label). Every one of these reaches him through the Vizier with a recommendation and a probability, and he answers with a tap, a word, or a wish. No other act is asked of him; a session or workflow that needs something else from him has found a defect, and files it as an obligation.
+
+A wish is an issue labelled `wish`, in Guy's own words, at any level of generality. The Vizier turns it into one or more draft instructions or brief amendments, posted as issues labelled `draft`, each citing the wish. Guy signs a draft by applying the `instruction` label; the Builder verifies through the issue timeline that the label was applied by gfrmin, and otherwise refuses it. A draft Guy does not sign within the next layer is closed by the Vizier with the reason.
+
+The Vizier's authority is the act-alone list below, which only an entrenched change widens or narrows. Everything else it recommends. Every recommendation is a forecast of Guy's answer; every act-alone is a forecast that Guy does not overturn it before the next audit; both are scored in the ledger under proposer kind `vizier`. A class the Vizier recommends correctly on every resolved case since the last audit is proposed for the act-alone list in the audit's amendment; a class it acts on and is overturned in returns to recommendation at once.
+
+Act-alone list (initial):
+- close an issue filed by failed.yml whose run had zero steps and whose branch has a later successful run of the same workflow;
+- close a `NEEDS YOU` issue that the merge of the pull request named in its STATUS header has satisfied;
+- relabel a pull request `needs-review` or `blocked` to send it back to the loop when its head has changed since the last review;
+- re-run a failed `pins` run whose failure was infrastructure (cancelled, no runner, GitHub incident), at most once per head;
+- dispatch `build.yml` after an acknowledgement it was permitted to make;
+- disable `build.yml` and `review.yml` on a runaway (three builder sessions on one PR in an hour, or a build that opens no PR three times running) and file an issue to Guy.
+
+### Amendments 2 and 3, appended (instruction #54 item 8)
+The Auditor and the Vizier are procedures of the reviewer account, under rule 4 of the ground; they hold no account, model or scope of their own. The act-alone list and the ascent rule of Amendment 3 stand as the initial state of a rule that now applies to every procedure's every claim type.
+
+## Amendment 4 — The ground (appended; instruction #54)
+
+The law may contain only what carries a proof; everything else competes. Seven rules, each held by a pin that kills a named mutant:
+
+1. **Append-only.** Every non-merge commit only adds lines to `reports/L*/forecasts.jsonl`, `reports/L*/review-*.md`, `reports/L*/audit-*.md` and the root `REPORT.md`; a merge commit only adds lines relative to each of its parents (P0q).
+2. **Claims precede scoring.** The forecast rows a pull request adds are present in the tree at the head of the first `pins` run on its branch; a row first present in a later head is late (P0r).
+3. **Outcomes by code.** A1.6 amended: a forecast record carries `type` and `args`. Types: `pins_green {pr}`, `review_accept {pr}`, `merged {pr}`, `host_verdict {layer, verdict}`, `guy_answers {item, answer}`, `not_overturned {item, until}`, `finding_count {sha, bin}`, `price {quantity, layer, bound}`, `free`. `python -m harness.ledger resolve` appends a resolution for every open typed forecast whose outcome is observable, with proposer kind `mechanism`; it never resolves `free`. A forecast without `type` is `free`. Base rates (A1.6) are per `type` (P0s).
+4. **No self-judgement.** A resolution's proposer differs from its forecast's proposer in `session`; a mechanism's always differs (P0k). A1.3 amended: "A pull request is approved by a proposer account that did not author it" replaces the sentence "The Reviewer's approval is mechanical: it is given on every ACCEPT, after the review file is pushed and `pins` is green on the resulting head, except on a pull request the reviewer account itself authored."
+5. **The signature binds its text.** An instruction is signed only if no account other than gfrmin edited the issue body after the `labeled instruction` event by gfrmin standing at the end of its timeline; edits that cannot be read authorise nothing (P0m). P0m checks the real branch in CI, and an exemption reachable from master is a finding.
+6. **The price recorded.** `python -m harness.ledger price --since <sha>` reports the items that reached Guy (`awaits-guy` labels, issues assigned to gfrmin, `NEEDS YOU` lines), each one's latency to gfrmin's first action, sessions run and runner-minutes per workflow, and pins CI minutes. A1.8 amended: STATUS carries one line `price: guy-items <n>; guy-latency median <h>h max <h>h; sessions <n>; runner-min <n>` (P0t).
+7. **Models elected, not named.** `harness/entrants.toml` lists the model ids eligible for each procedure, a pre-stated constant. `python -m harness.ledger elect <procedure> --seed <run id>` draws one by Hedge over the entrants' cumulative log-loss on that procedure's resolved forecasts; every session's model is that draw (P0u).

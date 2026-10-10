@@ -1,0 +1,4 @@
+# 2026-10-10T01:10:11Z uv run --frozen python -m harness.ledger resolve --session local, at 397dcbc + this STATUS commit's reports
+# reports/L2/forecasts.jsonl: 10 open, 3 typed; resolved 1, unreadable 0
+resolved f74d66ca412f True — pins run 38010938616 attempt 1 on 397dcbcf5d7a: success
+# open typed, not observable: 7f7092a5b2ce (review_accept, no review file on PR #56), 5aabdd647f3b (host_verdict, no L2 verdict line)

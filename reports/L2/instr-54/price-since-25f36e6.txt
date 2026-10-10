@@ -1,0 +1,22 @@
+# price over [2026-10-08T23:35:47+03:00, 2026-10-10T01:10:11Z) since 25f36e6bed0d08a704ff9a71757928896c872c1a
+item #32 latency 4.1h
+item #34 latency 1.9h
+item #35 latency 21.5h (open: no gfrmin action yet)
+item #36 latency 2.5h
+item #37 latency 0.0h
+item #40 latency 16.7h (open: no gfrmin action yet)
+item #41 latency 16.7h (open: no gfrmin action yet)
+item #43 latency 3.3h
+item #48 latency 3.1h
+item #51 latency 10.9h (open: no gfrmin action yet)
+item #52 latency 1.9h
+item #53 latency 10.4h (open: no gfrmin action yet)
+item #55 latency 6.5h
+workflow .github/workflows/build.yml runner-min 504
+workflow .github/workflows/failed.yml runner-min 1
+workflow .github/workflows/pins.yml runner-min 860
+workflow .github/workflows/review.yml runner-min 515
+workflow .github/workflows/stale.yml runner-min 0
+workflow dynamic/github-code-scanning/codeql runner-min 56
+pins CI minutes 860
+price: guy-items 13; guy-latency median 4.1h max 21.5h; sessions 32; runner-min 1936

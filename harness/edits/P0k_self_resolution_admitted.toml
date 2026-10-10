@@ -1,0 +1,5 @@
+# P0k's second mutant (instruction #54 item 4): a resolution proposed by its forecast's own session is accepted.
+[[edit]]
+path = "harness/claims.py"
+old = "            and resolver.get(\"session\") == forecaster.get(\"session\"))"
+new = "            and False)"

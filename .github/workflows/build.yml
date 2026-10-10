@@ -28,7 +28,11 @@ jobs:
       - run: gh auth setup-git
       - if: github.event_name == 'pull_request' || inputs.pr != ''
         run: gh pr checkout ${{ github.event.pull_request.number || inputs.pr }}
-      - run: claude -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
+      # Instruction #54 item 7: the model is elected by Hedge over harness/entrants.toml, never named here.
+      - run: |
+          model=$(uv run --frozen python -m harness.ledger elect build --seed ${{ github.run_id }} --head origin/master)
+          echo "elected: $model"
+          claude --model "$model" -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
       - if: always()
         uses: actions/upload-artifact@v5
         with:
