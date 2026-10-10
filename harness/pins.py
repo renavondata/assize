@@ -2204,11 +2204,17 @@ def p9_ledger_tamper() -> bool:
             first = led.read_bytes()
             held_b = ledger.append(led, private, b_id, b)
             written = led.read_bytes()
-            rows = [json.loads(line) for line in written.splitlines()]
         except (ValueError, OSError) as e:
-            expect(False, f"the judge writes two requests to a ledger that parses as JSONL ({type(e).__name__}: {e})")
+            expect(False, f"the judge writes two requests to a ledger ({type(e).__name__}: {e})")
             return ok()
+        # Compared as bytes before anything parses them (review 2817eb7 F3): a rewrite is caught by its bytes, not by
+        # the parse error its garbage later causes.
         expect(written.startswith(first), f"request a's {len(first)} bytes unchanged by request b (never rewritten)")
+        try:
+            rows = [json.loads(line) for line in written.splitlines()]
+        except ValueError as e:
+            expect(False, f"the ledger parses as JSONL ({type(e).__name__}: {e})")
+            return ok()
         expect([{k: v for k, v in r.items() if k not in CHAIN_FIELDS} for r in rows] == a + b,
                f"the ledger holds exactly the {len(a) + len(b)} records given, in order, utilities included: "
                f"{[r.get('utility') for r in rows]}")
