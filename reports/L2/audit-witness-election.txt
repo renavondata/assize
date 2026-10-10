@@ -1,0 +1,7 @@
+elect seeds 1..6, build/review/audit/vizier (read-only):
+1 sonnet sonnet sonnet sonnet
+2 sonnet opus opus opus
+3 all sonnet
+4 sonnet opus opus opus
+5 sonnet opus opus opus
+6 all sonnet
