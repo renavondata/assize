@@ -1,13 +1,13 @@
-# STATUS — L2 — 2026-10-11 — ec7c9ee — PR #92
-VERDICT: SESSION DONE (review F1 of PR #92 fixed: STATUS now cites the pins run on the sha it names)
+# STATUS — L2 — 2026-10-11 — d5d4b56 — PR #96
+VERDICT: SESSION DONE (instruction #65: a needs-review label from the reviewer account starts a review; pin P0v)
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: CI-witnessed only (no local make pins completed this session: it exceeds the 10-minute cloud cap); pins CI run 38072903721 on ec7c9ee: success, attempt 1, 99 KILLED lines, 0 NON-CAUSAL/FAILED/INCONCLUSIVE/LEAKED/STALE lines in its log; record reports/L2/ci/38072903721.json
-changed: harness/proposer.toml, reports/L2/ (STATUS, ci record)
-did: F1 cause was 3f7deb6 installing a STATUS with no CI citation; restored master's valid STATUS as the intermediate head, then cited its CI run here
-did: my first fix commit put Proposer and Co-Authored-By in separate paragraphs (P0m: no_proposer); amended the unreviewed tip and force-pushed with lease
-decided (not asked): amend-and-force-push my own unreviewed tip rather than add an exemption to claims.PROPOSER_EXEMPTIONS — p(stands on review)=0.8; no new forecasts appended, because rows first present after the first pins run are late under P0r and the PR's two forecasts stand — p=0.7
-forecasts: made 0 this session (see above); resolved 0; cumulative log-loss not recomputed this session
-price: guy-items 4; guy-latency median 0.5h max 1.0h; sessions 63; runner-min not recomputed
-obligations added: L3: a STATUS replacement on a PR branch needs a CI run on a prior head, so two pushes are unavoidable; the brief should say so
-NEEDS YOU (at most 1): none
-next: after review of PR #92, the oldest signed instruction (#64 has PR #79 open; next is #65)
+pins: pins CI run 38088422168 on d5d4b56: success, attempt 1; clean 40/40; mutants 100/100 KILLED; twins 100/100; leaked 0; stale 0; inconclusive 0; non-causal 0; record reports/L2/ci/38088422168.json (local make pins not completed: exceeds the 10-minute cloud cap; P0v and its mutant run by hand)
+changed: .github/workflows/review.yml, harness/pins.py, harness/edits/P0v_reviewer_sender_excluded.toml, harness/README.md, harness/proposer.toml, reports/L2/
+did: review.yml now excludes the reviewer account's events except a needs-review label on a pull request; the comment states the recognition rule
+did: P0v evaluates the real condition on six synthetic events (the three named, plus reviewer-assigned issue, Guy-assigned issue, builder's unrelated label); mutant reviewer_sender_excluded restores the old condition
+decided (not asked): recognise a session's own events by label (a session never applies needs-review as a by-product) rather than a marker — p(stands on review)=0.75; P0v evaluates the condition with a small translator for the expression subset in use, not a full Actions evaluator — p=0.7
+forecasts: made 2 (PR #96: pins_green 0.6, review_accept 0.5); resolved 0; cumulative log-loss not recomputed this session
+price: not recomputed this session
+obligations added: L3: a STATUS needs a CI run on a prior head, so two pushes are unavoidable (carried from PR #92)
+NEEDS YOU (at most 1): none (PR #96 touches .github/: Guy approves as code owner, requested via CODEOWNERS)
+next: instruction #66 (#64 has PR #93 open)

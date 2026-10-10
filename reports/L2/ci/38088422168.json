@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-10T21:38:55Z","event":"pull_request","head_branch":"instr-65-review-sender","head_sha":"d5d4b56291d90d0c5ab3e3dc09f64a7fdea87425","html_url":"https://github.com/renavondata/assize/actions/runs/38088422168","id":38088422168,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
