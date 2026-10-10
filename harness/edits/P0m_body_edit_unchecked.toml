@@ -1,0 +1,5 @@
+# P0m's mutant (instruction #54 item 5): an instruction is signed whoever edited its body after gfrmin signed it.
+[[edit]]
+path = "harness/claims.py"
+old = "\n            and issue.labeled_at is not None and issue.edits is not None and refusing_edit(issue) is None)"
+new = ")"

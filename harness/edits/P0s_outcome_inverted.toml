@@ -1,0 +1,5 @@
+# P0s's first mutant (instruction #54 item 3): the resolver records the negation of the observed outcome.
+[[edit]]
+path = "harness/ledger.py"
+old = "\"outcome\": o, \"witness\": witness}"
+new = "\"outcome\": not o, \"witness\": witness}"

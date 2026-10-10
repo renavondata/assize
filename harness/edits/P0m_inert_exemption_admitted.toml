@@ -1,0 +1,5 @@
+# P0m's mutant (instruction #54 item 5): an exemption reachable from master, which P0m never reads, is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = "            for sha in exemptions if reachable(sha)]"
+new = "            for sha in exemptions if False]"

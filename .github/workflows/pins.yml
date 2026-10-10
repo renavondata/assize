@@ -3,8 +3,13 @@ name: pins
 on:
   pull_request:
 
+# Instruction #54 item 5: P0m, P0q and P0r read the real branch and the GitHub API here, so the checkout is full and the
+# job's token can read issues, pull requests and Actions runs.
 permissions:
   contents: read
+  issues: read
+  pull-requests: read
+  actions: read
 
 jobs:
   pins:
@@ -14,11 +19,14 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Install uv
         run: pipx install uv==0.8.17
       - name: Sync environment
         run: uv sync --frozen
       - name: make pins
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: make pins PINS_OUT=out/pins
       - name: Upload pins report
         if: always()

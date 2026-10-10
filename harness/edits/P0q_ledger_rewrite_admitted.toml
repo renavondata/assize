@@ -1,0 +1,5 @@
+# P0q's mutant (instruction #54 item 1): no commit is examined, so a rewritten ledger line is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = "    return [f for line in shas for f in findings(line)]"
+new = "    return []"

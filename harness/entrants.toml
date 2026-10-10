@@ -1,0 +1,7 @@
+# The ground, rule 7 (instruction #54 item 7): the model ids eligible for each procedure, a pre-stated constant.
+# `python -m harness.ledger elect <procedure> --seed <run id>` draws one by Hedge over their cumulative log-loss on that
+# procedure's resolved forecasts; every `claude` invocation in .github/workflows/ takes its model from that draw.
+build = ["claude-opus-5-5", "claude-sonnet-5-5"]
+review = ["claude-opus-5-5", "claude-sonnet-5-5"]
+audit = ["claude-opus-5-5", "claude-sonnet-5-5"]
+vizier = ["claude-opus-5-5", "claude-sonnet-5-5"]
