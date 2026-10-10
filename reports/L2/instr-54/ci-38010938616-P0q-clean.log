@@ -1,0 +1,11 @@
+pin:       P0q
+protects:  a commit removing a line of a ledger, review, audit or REPORT.md is rejected; a merge of appends is not
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-36m8h9x1
+    fixture: commit 48fd50e00337: ledger_rewrite: removes 1 lines of REPORT.md relative to 466ce15ce32b
+  [ok] fixture: the rewriting commit, and only it, is found; the appending commit and the merge of two appending branches pass
+  [ok] real branch: base resolved (6a2be44ff45446c27e1db97917929e422e6f1304)
+  [ok] real branch 6a2be44ff454..HEAD: 2 commits; findings []
+result:    PASS
