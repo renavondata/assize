@@ -1,17 +1,12 @@
-# STATUS — L2 — 2026-10-10 — d88e20f — PR #60
-VERDICT: SESSION DONE
-LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in root REPORT.md, adds or opens no brief)
-pins: clean 39/39; mutants 99/99 KILLED; twins 99/99; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local make pins at d88e20f: reports/L2/make-pins-d88e20f.txt; pins CI run 38017379523 on d88e20f: success, attempt 1; record reports/L2/ci/38017379523.json)
-changed: harness/pins.py, harness/proposer.toml; reports/L2/
-did: closed #48, #52, #54 (satisfied by the merge of PR #56); #46 and #49 were already closed
-did: L2a obligation 2 (reports/L1/REPORT.md, R 2817eb747815 F3): P9 now compares request a's bytes before parsing the ledger
-did: witness reports/L2/p9b/opened_for_rewrite-mutant.log: mutant `opened_for_rewrite` fails the byte line first ("request a's 1093 bytes unchanged"), then the parse line; before, the parse error alone killed it
-did: first local make pins failed P0m (my Proposer trailer sat in its own paragraph, so git read none); amended, reran clean
-decided (not asked): pins and mutants unchanged in number (the kill is the same mutant, the failure line moved earlier); no new mutant — p(stands on review)=0.7
-decided (not asked): forecast args say PR #58 (predicted from highest number 57, +1); the PR took #60 because #58 and #59 were taken meanwhile. Forecasts are never edited; both resolve against the wrong PR and are data (the L3 obligation already filed) — p=0.6
-decided (not asked): auto-merge enabled: no entrenched path, not a layer boundary — p=0.9
-forecasts: made 2 (pins_green PR #58 p=0.8; review_accept PR #58 p=0.6); resolved 0; cumulative log-loss not recomputed this session, last line 45.055 vs base rate 41.445 over 113
-price: guy-items 15; guy-latency median 3.3h max 23.3h; sessions 41; runner-min 2128 (since 25f36e6: reports/L2/price-since-25f36e6-d88e20f.txt)
-obligations added: L3: a PR number predicted before opening can be taken by a concurrent issue or PR; forecasts then resolve against another item (second occurrence)
-NEEDS YOU (at most 1): none
-next: L2a obligation 3 of reports/L1/REPORT.md (replay returns ledger lines unchecked against the signed head, R 6debf231b630 F2)
+# STATUS — L2 — 2026-10-10 — c575c86 — PR #87
+VERDICT: STOPPED: pins red on c575c86 (P0m: my three commits put the Proposer trailer in its own paragraph before Co-Authored-By, so git reads none); fixing needs a history rewrite on the audit branch, which the permission classifier denied
+LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
+pins: not green; pins CI run 38037293942 on c575c86: failure (P0m clean FAILED; 10 P0m mutants NON-CAUSAL as a consequence); record reports/L2/ci/38037293942.json
+changed: reports/L2/audit-8aae43c8c792583ad7f260aed4df3c63c332d90b.md, docs/briefs/brief-2-nethack.md, reports/L2/forecasts.jsonl; reports/L2/
+did: 4 finding_count forecasts then 14 vizier-ledger records transcribed; 3 cold re-reviews (PRs #19, #35, #24); audit file with 6 findings; findings appended to brief 2
+decided (not asked): PR #24's P1 CSPRNG finding and PR #35's malformed-price and P0m-CI findings not counted, already raised by the Reviewer as obligations — p(stands on review)=0.7
+forecasts: made 4 (finding_count; 6 findings falls in 4-8, p=0.5); resolved 0; cumulative log-loss not recomputed this session
+price: not recomputed this session
+obligations added: L3: trailer-paragraph rule for sessions whose commits carry both Proposer and Co-Authored-By (STATUS of PR #60 hit the same)
+NEEDS YOU (at most 1): none (the PR is not labelled needs-review; the next Builder/Auditor session should squash the three commits with Proposer and Co-Authored-By in one final paragraph, or the branch be replaced)
+next: replace audit-8aae43c8c792 by a branch with one correctly-trailered commit and re-run pins
