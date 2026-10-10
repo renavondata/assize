@@ -122,6 +122,27 @@ def _chain_findings(request_id: str, records: Sequence[dict]) -> list[str]:
     return found
 
 
+def request_records(ledger: Path, private: Path, request_id: str) -> tuple[list[dict], list[str]] | None:
+    """The records of `request_id` as the ledger holds them, with every finding against them: None if no head of
+    `request_id` is signed for this ledger; else the findings are empty if and only if the head's signature is valid
+    and the records are exactly as many as the head counts, chained from the request_id, ending at the head's `sha256`."""
+    heads = [h for h in _lines(private / HEADS) if h.get("ledger") == ledger.name and h.get("request_id") == request_id]
+    if not heads:
+        return None
+    head = heads[-1]
+    try:
+        rows = [r for r in _lines(ledger) if r.get("request_id") == request_id]
+    except ValueError as e:
+        return [], [f"{ledger.name}: not JSONL ({e})"]
+    found = [] if hmac.compare_digest(str(head.get("mac")), _mac((private / KEY).read_bytes(), head)) \
+        else [f"head of {request_id!r}: signature invalid"]
+    if len(rows) != head.get("records"):
+        found.append(f"{request_id!r}: {len(rows)} records held, the signed head counts {head.get('records')}")
+    if not rows or rows[-1].get("sha256") != head.get("head"):
+        found.append(f"{request_id!r}: the last record is not the signed head")
+    return rows, found + _chain_findings(request_id, rows)
+
+
 def verify(ledger: Path, private: Path, anchor: str) -> list[str]:
     """Every finding against `ledger`; empty if and only if it is exactly the requests the judge signed, in order,
     each chained from its request_id, and nothing else, and `anchor`, a head the caller retained, is one of them."""

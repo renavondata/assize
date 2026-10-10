@@ -5,7 +5,8 @@ Non-interactive and idempotent per `request_id`. In order:
 1. The image's proposer is `registry.proposer_of` it: the party whose judge-issued credential registered it. An image
    never registered is refused `unregistered` before anything else, so no seed is issued to it (A4 item 2).
 2. A `request_id` the ledger already holds under a signed head returns its records as written, running nothing and
-   issuing nothing; the same `request_id` asked of another image, World or episode count is refused `request_conflict`.
+   issuing nothing, once they are checked against the signed head (count, chain, last `sha256`; a mismatch is refused
+   `ledger_unverified`); the same `request_id` asked of another image, World or episode count is refused `request_conflict`.
    A `request_id` whose seeds were issued but whose records were never signed (a judge that died mid-request) is
    refused `interrupted`: its seeds are spent and never reissued, and a new `request_id` is needed.
 3. The World must be one the judge binds, its manifest must commit a price, `n_episodes` must be a positive integer, the
@@ -63,11 +64,15 @@ def ledger_path(ledgers: Path, world: str) -> Path:
 
 
 def _recorded(led: Path, private: Path, request_id: str) -> list[dict] | None:
-    """The records of `request_id` as written, if its head was signed; None if the ledger holds no such request."""
-    if not any(h["ledger"] == led.name and h["request_id"] == request_id
-               for h in ledger._lines(private / ledger.HEADS)):
+    """The records of `request_id` as written, if its head was signed and they match it; None if the ledger holds no
+    such request; refused `ledger_unverified` if they do not match."""
+    held = ledger.request_records(led, private, request_id)
+    if held is None:
         return None
-    return [r for r in ledger._lines(led) if r.get("request_id") == request_id]
+    rows, found = held
+    if found:
+        raise Refused("ledger_unverified", f"request {request_id!r} does not match its signed head: {found}")
+    return rows
 
 
 def bound(worlds: Path = WORLDS) -> list[str]:

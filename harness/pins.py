@@ -2126,6 +2126,64 @@ def p20_world_price() -> bool:
         expect(not v.is_valid(unpriced), f"manifest.schema.json rejects {name} without its price")
     return ok()
 
+def p21_replay_verified() -> bool:
+    """Replay checks a request's records against its signed head (brief 2 A2, L2a obligation 3; review 6debf231b630 F2).
+    Of two signed requests, `evaluate._recorded` returns the first's records exactly as written and an unknown request
+    as None; and refuses `ledger_unverified` when a utility is altered, a record is dropped, a record is added, or
+    the head's signature is forged."""
+    from judge import evaluate, ledger, registry
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p21-", dir=context.scratch))
+    try:
+        led, private = work / "ledger.jsonl", work / "private"
+        (a_id, a), (b_id, b) = P9_REQUESTS
+        held_a = ledger.append(led, private, a_id, a)
+        ledger.append(led, private, b_id, b)
+        written, heads = led.read_bytes(), (private / "heads.jsonl").read_bytes()
+        rows = [json.loads(line) for line in written.splitlines()]
+
+        def replay(name: str, want) -> None:
+            try:
+                got = evaluate._recorded(led, private, a_id)
+            except registry.Refused as e:
+                got = e.code
+            expect(got == want, f"{name}: replay gives {want if isinstance(want, str) else 'the records as written'} "
+                                f"(got {got if isinstance(got, str) else 'records'})")
+
+        def tampered(name: str, act) -> None:
+            act()
+            replay(name, "ledger_unverified")
+            led.write_bytes(written)
+            (private / "heads.jsonl").write_bytes(heads)
+
+        def put(out: list[dict]) -> None:
+            led.write_bytes(b"".join(ledger.canonical(r) + b"\n" for r in out))
+
+        def utility_altered() -> None:
+            put([r | {"utility": r["utility"] + 99} if i == 0 else r for i, r in enumerate(rows)])
+
+        def record_dropped() -> None:
+            put([r for i, r in enumerate(rows) if i != 1])
+
+        def record_added() -> None:
+            put(rows[:3] + [rows[0]] + rows[3:])
+
+        def head_forged() -> None:
+            forged = [json.loads(h) | {"mac": "0" * 64} for h in heads.splitlines()]
+            (private / "heads.jsonl").write_bytes(b"".join(ledger.canonical(h) + b"\n" for h in forged))
+
+        replay("untouched", held_a)
+        expect(evaluate._recorded(led, private, "p21-unknown") is None, "a request never signed replays as None")
+        for name, act in (("a utility altered", utility_altered), ("a record dropped", record_dropped),
+                          ("a record added", record_added),
+                          ("the head's signature forged", head_forged)):
+            tampered(name, act)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -2989,6 +3047,8 @@ PINS = [
         p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),)),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
         p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),)),
+    Pin("P21", "replay returns a request's records only if they match its signed head, else refuses ledger_unverified",
+        p21_replay_verified, (Mutant("replay_unchecked", _edits("P21_replay_unchecked")),)),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
