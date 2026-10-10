@@ -16,7 +16,8 @@ what reached Guy and how long he took, sessions run and runner-minutes.
 
 `python -m harness.ledger elect <procedure> --seed <run id>`: rule 7 of the ground (instruction #54 item 7), a model
 drawn by EXP3 over the entrants of `harness/entrants.toml` (instruction #64): bandit feedback, only the drawn entrant is
-scored, and its probability is the one recorded in `reports/draws.jsonl` when it was drawn."""
+scored, and its probability is the one recorded in `reports/draws.jsonl` when it was drawn; with `--publish <remote>`
+that ledger is the one on the remote's `ledger/draws` branch, onto which the draw is committed."""
 
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ import argparse
 import datetime
 import json
 import math
+import os
 import re
 import statistics
 import subprocess
@@ -565,6 +567,48 @@ def draw_rows(repo: Path, head: str = "HEAD") -> list[dict]:
     return _rows(_git(repo, "show", f"{head}:{DRAW_LEDGER}").splitlines()) if present else []
 
 
+# Review of 22d0279 F1: a row appended to the runner's working tree never reaches a later election, so a published draw
+# is committed onto its own branch of the remote, which no pull request merges and every later `--publish` election
+# reads. The push is never forced: a rejected push re-reads the branch and appends the same row to its new tip.
+DRAW_BRANCH = "ledger/draws"
+DRAW_AUTHOR = {"GIT_AUTHOR_NAME": "harness.ledger", "GIT_AUTHOR_EMAIL": "ledger@assize.invalid",
+               "GIT_COMMITTER_NAME": "harness.ledger", "GIT_COMMITTER_EMAIL": "ledger@assize.invalid"}
+PUBLISH_ATTEMPTS = 5
+
+
+def _net(repo: Path, *args: str, stdin: str = "", env: Mapping[str, str] = {}) -> str:
+    """git under the user's configuration: the remote's credential helper (`gh auth setup-git`) lives there."""
+    return subprocess.run(["git", "-C", str(repo), *args], input=stdin, check=True, capture_output=True, text=True,
+                          env={**os.environ, **env}).stdout
+
+
+def draw_tip(repo: Path, remote: str) -> str | None:
+    """The remote's draw-branch tip, fetched; None when the branch does not exist yet. An unreachable remote raises."""
+    ref = f"refs/heads/{DRAW_BRANCH}"
+    if not _net(repo, "ls-remote", remote, ref).strip():
+        return None
+    _net(repo, "fetch", "-q", remote, f"+{ref}:refs/remotes/{remote}/{DRAW_BRANCH}")
+    return _net(repo, "rev-parse", f"refs/remotes/{remote}/{DRAW_BRANCH}").strip()
+
+
+def publish_draw(repo: Path, remote: str, row: Mapping, tip: str | None) -> str:
+    """Commit `row` appended to the draw ledger at `tip` onto the remote's draw branch; returns the pushed commit."""
+    for _ in range(PUBLISH_ATTEMPTS):
+        text = (_git(repo, "show", f"{tip}:{DRAW_LEDGER}") if tip else "") + json.dumps(row) + "\n"
+        blob = _net(repo, "hash-object", "-w", "--stdin", stdin=text).strip()
+        sub = _net(repo, "mktree", stdin=f"100644 blob {blob}\t{Path(DRAW_LEDGER).name}\n").strip()
+        tree = _net(repo, "mktree", stdin=f"040000 tree {sub}\t{Path(DRAW_LEDGER).parent}\n").strip()
+        commit = _net(repo, "commit-tree", tree, *(["-p", tip] if tip else []), "-m",
+                      f"draw: {row['procedure']} run {row['run']} drew {row['drawn']}\n\nProposer: mechanism",
+                      env=DRAW_AUTHOR).strip()
+        try:
+            _net(repo, "push", "-q", remote, f"{commit}:refs/heads/{DRAW_BRANCH}")
+            return commit
+        except subprocess.CalledProcessError:
+            tip = draw_tip(repo, remote)
+    raise RuntimeError(f"draw not published to {remote} {DRAW_BRANCH} after {PUBLISH_ATTEMPTS} attempts")
+
+
 @dataclass(frozen=True)
 class Election:
     """One draw: the entrant drawn, the distribution it was drawn from, and what the rounds before it showed."""
@@ -683,6 +727,8 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--seed", type=int, required=True)
     e.add_argument("--head", default="HEAD")
     e.add_argument("--repo", type=Path, default=Path("."))
+    e.add_argument("--publish", metavar="REMOTE", default=None,
+                   help=f"read the draws from, and commit this draw onto, REMOTE's {DRAW_BRANCH} branch")
     a = ap.parse_args(argv)
     if a.cmd == "proposer":
         classes = record(ledger_rows(a.repo, a.head), a.kind, a.since)
@@ -705,9 +751,16 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "elect":
         models, bound = entrants_of((a.repo / ENTRANTS).read_text(), a.procedure)
-        got = elect(ledger_rows(a.repo, a.head) + draw_rows(a.repo, a.head), a.procedure, models, bound, a.seed)
-        with (a.repo / DRAW_LEDGER).open("a") as f:
-            f.write(json.dumps(draw_row(got, a.procedure, a.seed, now_utc())) + "\n")
+        tip = draw_tip(a.repo, a.publish) if a.publish else None
+        draws = (draw_rows(a.repo, tip) if tip else []) if a.publish else draw_rows(a.repo, a.head)
+        got = elect(ledger_rows(a.repo, a.head) + draws, a.procedure, models, bound, a.seed)
+        row = draw_row(got, a.procedure, a.seed, now_utc())
+        if a.publish:
+            print(f"draw published as {publish_draw(a.repo, a.publish, row, tip)} on {a.publish} {DRAW_BRANCH}",
+                  file=sys.stderr)
+        else:
+            with (a.repo / DRAW_LEDGER).open("a") as f:
+                f.write(json.dumps(row) + "\n")
         print(got.report(), file=sys.stderr)
         print(got.model)
         return 0

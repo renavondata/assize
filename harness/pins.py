@@ -7,6 +7,7 @@ import json
 import math
 import os
 import py_compile
+import re
 import shutil
 import signal
 import subprocess
@@ -1289,6 +1290,34 @@ def p0u_election() -> bool:
     rows2 = [json.loads(x) for x in (repo / ledger.DRAW_LEDGER).read_text().splitlines()[len(ELECTION_DRAWS) + 3:]]
     expect(all(o.returncode == 0 for o in out) and all(set(r["probabilities"]) == {"m-a", "m-b"} for r in rows2)
            and len(rows2) == 3, f"entrants are read from the checkout, not from head: {rows2}")
+    # Review of 22d0279 F1: a published draw reaches the next election, run from another checkout of the same remote
+    # (a fresh runner workspace), and a push from a stale tip appends to the new one instead of replacing it.
+    git("init", "-q", "--bare", str(work / "remote.git"))
+    git("remote", "add", "origin", str(work / "remote.git"))
+    git("push", "-q", "origin", "master")
+    git("clone", "-q", str(work / "remote.git"), str(work / "other"))
+
+    def publish(where: Path, seed: int):
+        return subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "elect", "review", "--seed", str(seed),
+                               "--repo", str(where), "--publish", "origin"], cwd=ROOT, capture_output=True, text=True)
+
+    def published() -> list[dict]:
+        tip = ledger.draw_tip(repo, "origin")
+        return ledger.draw_rows(repo, tip) if tip else []
+
+    local = (repo / ledger.DRAW_LEDGER).read_text()
+    first, second = publish(repo, 11), publish(work / "other", 12)
+    rounds = [re.search(r"^rounds (\d+)", o.stderr, re.M) for o in (first, second)]
+    print(f"    published elections: {[o.stderr.strip().splitlines()[-1:] for o in (first, second)]}")
+    expect(first.returncode == second.returncode == 0 and [int(r.group(1)) if r else None for r in rounds] == [0, 1]
+           and [r["run"] for r in published()] == [11, 12] and (repo / ledger.DRAW_LEDGER).read_text() == local,
+           f"a published draw is read by the next election from another checkout: rounds "
+           f"{[r and r.group(1) for r in rounds]}, branch {published()}")
+    stale = ledger.draw_tip(work / "other", "origin")
+    publish(repo, 13)
+    ledger.publish_draw(work / "other", "origin", ledger.draw_row(got, "review", 14, "2026-01-01T00:00:00Z"), stale)
+    expect([r["run"] for r in published()] == [11, 12, 13, 14],
+           f"a draw pushed from a stale tip is appended, none lost: {[r['run'] for r in published()]}")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -2992,7 +3021,9 @@ PINS = [
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),
-                       Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")))),
+                       Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
+                       Mutant("draw_not_published", _edits("P0u_draw_not_published")),
+                       Mutant("draw_push_forced", _edits("P0u_draw_push_forced")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

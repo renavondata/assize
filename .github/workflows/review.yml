@@ -50,7 +50,8 @@ jobs:
             *) run="vizier /vizier" ;;
           esac
           echo "run=$run" >> "$GITHUB_OUTPUT"
-      # Instruction #54 item 7: each procedure's model is elected by Hedge over harness/entrants.toml, never named here.
+      # Instruction #54 item 7: each procedure's model is elected by EXP3 over harness/entrants.toml, never named here
+      # (instruction #64). Each draw is read from and committed onto origin's ledger/draws branch.
       - env:
           RUN: ${{ steps.choose.outputs.run }}
         run: |
@@ -58,7 +59,7 @@ jobs:
           IFS=';' read -ra procs <<< "$RUN"
           for p in "${procs[@]}"; do
             proc=${p%% *}; cmd=${p#* }
-            model=$(uv run --frozen python -m harness.ledger elect "$proc" --seed ${{ github.run_id }} --head origin/master)
+            model=$(uv run --frozen python -m harness.ledger elect "$proc" --seed ${{ github.run_id }} --head origin/master --publish origin)
             echo "$proc: elected $model" | tee -a review.log
             git checkout -q master
             claude --model "$model" -p "$cmd" --max-turns 250 --output-format stream-json --verbose >> review.log 2>&1
