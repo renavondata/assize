@@ -15,7 +15,8 @@ proposed by the mechanism. A forecast without `type` is `free`, and the mechanis
 what reached Guy and how long he took, sessions run and runner-minutes.
 
 `python -m harness.ledger elect <procedure> --seed <run id>`: rule 7 of the ground (instruction #54 item 7), a model
-drawn by Hedge over the entrants of `harness/entrants.toml`."""
+drawn by EXP3 over the entrants of `harness/entrants.toml` (instruction #64): bandit feedback, only the drawn entrant is
+scored, and its probability is the one recorded in `reports/draws.jsonl` when it was drawn."""
 
 from __future__ import annotations
 
@@ -553,45 +554,108 @@ def layer_price(repo: Path, head: str = "HEAD") -> Callable[[int], Mapping | Non
 
 PROCEDURES: Mapping[str, str] = {"build": "builder", "review": "reviewer", "audit": "auditor", "vizier": "vizier"}
 ENTRANTS = "harness/entrants.toml"
+DRAW_LEDGER = "reports/draws.jsonl"  # append-only (claims.APPEND_ONLY): one row per draw, written when it is made
 DRAWS = 1 << 16  # the draw's resolution: a sweep of DRAWS consecutive seeds takes every value of u once
 STRIDE = 40503  # odd, so seed -> seed * STRIDE mod DRAWS is a bijection
 
 
-def losses(rows: Sequence[dict], procedure: str, entrants: Sequence[str]) -> tuple[dict[str, float], int]:
-    """Each entrant's cumulative log-loss on the procedure's resolved forecasts (0 with no record), and the number of
-    the procedure's resolved forecasts, its rounds."""
-    resolved = outcomes(rows)
-    mine = [r for r in rows if "claim" in r and isinstance(r.get("p"), (int, float)) and r.get("id") in resolved
-            and isinstance(r.get("proposer"), dict) and r["proposer"].get("kind") == PROCEDURES[procedure]]
-    return ({m: sum(log_loss(r["p"], resolved[r["id"]]) for r in mine if r["proposer"].get("model") == m)
-             for m in entrants}, len(mine))
+def draw_rows(repo: Path, head: str = "HEAD") -> list[dict]:
+    """Every draw recorded in the draw ledger at `head` (none when the file does not exist there yet)."""
+    present = _git(repo, "ls-tree", "--name-only", head, DRAW_LEDGER).strip()
+    return _rows(_git(repo, "show", f"{head}:{DRAW_LEDGER}").splitlines()) if present else []
 
 
-def weights(loss: Mapping[str, float], rounds: int) -> dict[str, float]:
-    """Hedge: w_m proportional to exp(-eta L_m), eta = sqrt(8 ln K / t); with no rounds, every L_m is 0."""
-    eta = math.sqrt(8 * math.log(len(loss)) / rounds) if rounds else 0.0
-    low = min(loss.values())
-    raw = {m: math.exp(-eta * (v - low)) for m, v in loss.items()}
-    return {m: w / sum(raw.values()) for m, w in raw.items()}
+@dataclass(frozen=True)
+class Election:
+    """One draw: the entrant drawn, the distribution it was drawn from, and what the rounds before it showed."""
+    model: str
+    gamma: float
+    probabilities: Mapping[str, float]
+    rounds: int  # the procedure's recorded draws; unknown and unobserved ones are among them
+    unknown: int  # rounds whose recorded draw names no current entrant or carries no readable probability
+    unobserved: int  # rounds with no resolved forecast of the drawn model after the draw: estimate zero, kept
+    clipped: int  # rounds whose loss exceeded the bound and was clipped to it
+
+    def report(self) -> str:
+        return (f"rounds {self.rounds} (unknown entrant {self.unknown}, unobserved {self.unobserved}, clipped "
+                f"{self.clipped}); gamma {self.gamma:.6f}; probabilities "
+                + ", ".join(f"{m} {p:.6f}" for m, p in self.probabilities.items()) + f"; drew {self.model}")
+
+
+def draws_of(rows: Sequence[dict], procedure: str) -> list[dict]:
+    """The procedure's recorded draws, in ledger order: rows carrying `drawn`."""
+    return [r for r in rows if "drawn" in r and r.get("procedure") == procedure]
+
+
+def round_loss(draw_row: Mapping, later: Sequence[Mapping], forecasts: Sequence[dict], resolved: Mapping[str, bool],
+               kind: str) -> float | None:
+    """The mean log-loss of the resolved forecasts the draw's model made after the draw and before that model's next
+    draw, or None when there are none. A forecast belongs to the latest draw at or before its ts that drew its model."""
+    stop = next((d["ts"] for d in later if d.get("drawn") == draw_row.get("drawn")), "\uffff")
+    mine = [r for r in forecasts if r.get("id") in resolved and r["proposer"].get("kind") == kind
+            and r["proposer"].get("model") == draw_row.get("drawn") and draw_row["ts"] <= r["ts"] < stop]
+    return sum(log_loss(r["p"], resolved[r["id"]]) for r in mine) / len(mine) if mine else None
+
+
+def gamma(k: int, t: int) -> float:
+    """Auer et al. 2002, Cor. 4.2: the exploration rate min(1, sqrt(K ln K / ((e - 1) t))) at round t, for K entrants."""
+    return min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * t)))
+
+
+def probabilities(estimate: Mapping[str, float], g: float, bound: float) -> dict[str, float]:
+    """EXP3 on losses: p_m = (1 - g) w_m + g / K, w_m proportional to exp(-g L^_m / (K B))."""
+    k = len(estimate)
+    low = min(estimate.values())
+    raw = {m: math.exp(-g * (v - low) / (k * bound)) for m, v in estimate.items()}
+    return {m: (1 - g) * w / sum(raw.values()) + g / k for m, w in raw.items()}
 
 
 def draw(w: Mapping[str, float], seed: int) -> str:
-    """The entrant whose cumulative-weight interval holds u = ((seed * STRIDE mod DRAWS) + 1/2) / DRAWS."""
+    """The entrant whose cumulative-probability interval holds u = ((seed * STRIDE mod DRAWS) + 1/2) / DRAWS."""
     u = ((seed * STRIDE) % DRAWS + 0.5) / DRAWS
     edges = [(m, sum(list(w.values())[:i + 1])) for i, m in enumerate(w)]
     return next((m for m, c in edges if u < c), edges[-1][0])
 
 
-def elect(rows: Sequence[dict], procedure: str, entrants: Sequence[str], seed: int) -> str:
-    loss, rounds = losses(rows, procedure, entrants)
-    return draw(weights(loss, rounds), seed)
+def elect(rows: Sequence[dict], procedure: str, entrants: Sequence[str], bound: float, seed: int) -> Election:
+    """EXP3 over `entrants` at round (recorded draws + 1). Only the model a round drew is updated, by the clipped loss
+    of its resolved forecasts divided by the probability *recorded* with that draw; every other entrant, and a round
+    with nothing observed, gets an estimate of zero. A round that cannot be read is counted, not dropped."""
+    resolved = outcomes(rows)
+    forecasts = [r for r in rows if "claim" in r and isinstance(r.get("p"), (int, float))
+                 and isinstance(r.get("proposer"), dict)]
+    past = draws_of(rows, procedure)
+
+    def readable(d: Mapping) -> bool:
+        pr = d.get("probabilities")
+        return (d.get("drawn") in entrants and isinstance(pr, dict) and isinstance(pr.get(d["drawn"]), (int, float))
+                and pr[d["drawn"]] > 0 and isinstance(d.get("ts"), str))
+
+    seen = [(d, round_loss(d, past[i + 1:], forecasts, resolved, PROCEDURES[procedure]))
+            for i, d in enumerate(past) if readable(d)]
+    scored = [(d, l) for d, l in seen if l is not None]
+    estimate = {m: sum(min(l, bound) / d["probabilities"][m] for d, l in scored if d["drawn"] == m) for m in entrants}
+    g = gamma(len(entrants), len(past) + 1)
+    p = probabilities(estimate, g, bound)
+    return Election(draw(p, seed), g, p, len(past), len(past) - len(seen), len(seen) - len(scored),
+                    sum(1 for _, l in scored if l > bound))
 
 
-def entrants_of(text: str, procedure: str) -> list[str]:
-    models = tomllib.loads(text).get(procedure)
+def draw_row(e: Election, procedure: str, seed: int, ts: str) -> dict:
+    """The ledger row written when a draw is made: what the drawn model was drawn from."""
+    return {"procedure": procedure, "ts": ts, "run": seed, "gamma": e.gamma, "probabilities": dict(e.probabilities),
+            "drawn": e.model}
+
+
+def entrants_of(text: str, procedure: str) -> tuple[list[str], float]:
+    """The procedure's entrants and the loss bound B, both pre-stated constants of the checkout's entrants file."""
+    table = tomllib.loads(text)
+    models, bound = table.get(procedure), table.get("bound", {}).get("loss")
     if not isinstance(models, list) or not models or not all(isinstance(m, str) and m for m in models):
         raise ValueError(f"{ENTRANTS}: no entrants for procedure {procedure!r}")
-    return models
+    if isinstance(bound, bool) or not isinstance(bound, (int, float)) or bound <= 0:
+        raise ValueError(f"{ENTRANTS}: no [bound] loss")
+    return models, float(bound)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -614,7 +678,7 @@ def main(argv: list[str] | None = None) -> int:
     q.add_argument("--until", default=None, help="ISO timestamp; now if absent")
     q.add_argument("--head", default="HEAD")
     q.add_argument("--repo", type=Path, default=Path("."))
-    e = sub.add_parser("elect", help="draw a model for a procedure by Hedge over its entrants")
+    e = sub.add_parser("elect", help="draw a model for a procedure by EXP3 over its entrants")
     e.add_argument("procedure", choices=sorted(PROCEDURES))
     e.add_argument("--seed", type=int, required=True)
     e.add_argument("--head", default="HEAD")
@@ -640,8 +704,12 @@ def main(argv: list[str] | None = None) -> int:
         print(got.status_line())
         return 0
     if a.cmd == "elect":
-        models = entrants_of(_git(a.repo, "show", f"{a.head}:{ENTRANTS}"), a.procedure)
-        print(elect(ledger_rows(a.repo, a.head), a.procedure, models, a.seed))
+        models, bound = entrants_of((a.repo / ENTRANTS).read_text(), a.procedure)
+        got = elect(ledger_rows(a.repo, a.head) + draw_rows(a.repo, a.head), a.procedure, models, bound, a.seed)
+        with (a.repo / DRAW_LEDGER).open("a") as f:
+            f.write(json.dumps(draw_row(got, a.procedure, a.seed, now_utc())) + "\n")
+        print(got.report(), file=sys.stderr)
+        print(got.model)
         return 0
     ranked = surprise(merged_since(a.repo, a.since, a.head), outcomes(ledger_rows(a.repo, a.head)))
     print(f"# {len(ranked)} merged pull requests in {a.since}..{a.head}, by the Builder's cumulative log-loss")

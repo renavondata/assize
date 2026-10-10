@@ -1,0 +1,6 @@
+# P0u's mutant (instruction #64 item 4b): the importance weight is removed -- the drawn entrant's clipped loss is
+# added as observed, not divided by the probability of its draw.
+[[edit]]
+path = "harness/ledger.py"
+old = 'min(l, bound) / d["probabilities"][m] for'
+new = "min(l, bound) for"

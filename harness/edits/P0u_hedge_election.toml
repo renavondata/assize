@@ -1,0 +1,9 @@
+# P0u's mutant (instruction #64 item 4a): Hedge over the same data replaces EXP3 -- full-information weights
+# exp(-eta L), eta = sqrt(8 ln K / t), and no exploration.
+[[edit]]
+path = "harness/ledger.py"
+old = "    p = probabilities(estimate, g, bound)\n"
+new = """    eta = math.sqrt(8 * math.log(len(entrants)) / (len(past) + 1))
+    raw = {m: math.exp(-eta * v) for m, v in estimate.items()}
+    p = {m: w / sum(raw.values()) for m, w in raw.items()}
+"""

@@ -393,7 +393,8 @@ def inert_exemptions(repo: Path, base: str,
 
 # ------------------------------------------------------ the ground, rules 1 and 2 (instruction #54 items 1 and 2)
 
-APPEND_ONLY = ("reports/L*/forecasts.jsonl", "reports/L*/review-*.md", "reports/L*/audit-*.md", "REPORT.md")
+APPEND_ONLY = ("reports/L*/forecasts.jsonl", "reports/L*/review-*.md", "reports/L*/audit-*.md", "REPORT.md",
+               "reports/draws.jsonl")
 
 
 def append_only_path(path: str) -> bool:
