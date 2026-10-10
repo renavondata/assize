@@ -97,6 +97,36 @@ def append(ledger: Path, private: Path, request_id: str, records: Sequence[Mappi
     return chained
 
 
+class Unverified(ValueError):
+    """The ledger's lines for a signed request are not what its signed head says."""
+
+    def __init__(self, findings: Sequence[str]):
+        super().__init__("; ".join(findings))
+        self.findings = list(findings)
+
+
+def recorded(ledger: Path, private: Path, request_id: str) -> list[dict] | None:
+    """The records of `request_id` as written, if its head was signed and they are what it signed: the head's
+    signature, record count, last `sha256` and every link of the chain (review 6debf23 F2). None if the ledger holds no
+    signed request of that id; `Unverified` if they differ."""
+    key_path = private / KEY
+    heads = [h for h in _lines(private / HEADS) if h.get("ledger") == ledger.name and h.get("request_id") == request_id]
+    if not heads:
+        return None
+    head = heads[-1]
+    mine = [r for r in _lines(ledger) if r.get("request_id") == request_id]
+    found = (([] if key_path.exists() and hmac.compare_digest(str(head.get("mac")), _mac(key_path.read_bytes(), head))
+              else [f"head of {request_id!r}: signature invalid or no signing key"])
+             + ([] if len(mine) == head.get("records") else
+                [f"{request_id!r}: {len(mine)} records in {ledger.name}, the signed head says {head.get('records')}"])
+             + ([] if mine and mine[-1].get("sha256") == head.get("head") else
+                [f"{request_id!r}: last record's sha256 is not the signed head"])
+             + _chain_findings(request_id, mine))
+    if found:
+        raise Unverified(found)
+    return mine
+
+
 def _requests(records: Iterable[dict]) -> list[tuple[str, list[dict]]]:
     """Consecutive records grouped by `request_id`, in ledger order."""
     groups: list[tuple[str, list[dict]]] = []

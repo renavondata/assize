@@ -2189,7 +2189,9 @@ def p9_ledger_tamper() -> bool:
     request removed, a forged head without the key, the last request truncated with its head, the ledger and its heads
     both deleted (review 2817eb7 F2: verified against the head the caller holds, the last record's `sha256`), and,
     with the key in a forger's hands, a chain rebuilt from the empty string or with a record left out. An earlier
-    request's head still anchors the ledger after later requests. A request_id is written once."""
+    request's head still anchors the ledger after later requests. A request_id is written once. Replay returns a
+    signed request's records only if they are what its head signed: an altered, dropped or removed record is refused
+    (review 6debf23 F2)."""
     import hashlib
 
     from judge import ledger
@@ -2276,6 +2278,29 @@ def p9_ledger_tamper() -> bool:
         tampered("rechained_from_empty_with_key", lambda: _resigned(private, _rechained(rows, lambda rid: ""), led))
         tampered("dropped_and_resigned_with_key", lambda: _resigned(private, [r for i, r in enumerate(rows) if i != 1],
                                                                     led))
+        # Replay (review 6debf23 F2): `recorded` returns a signed request's records only if they are what its head
+        # signed; the unsigned are None.
+        try:
+            replayed = (ledger.recorded(led, private, a_id), ledger.recorded(led, private, b_id),
+                        ledger.recorded(led, private, "p9-unsigned"))
+        except ledger.Unverified as e:
+            replayed = (e,)
+        expect(replayed == (held_a, held_b, None),
+               f"recorded returns each signed request's records as written, and None for an unsigned one ({replayed})")
+
+        def replay_refused(name: str, rid: str, act) -> None:
+            act()
+            try:
+                got = f"returned {len(ledger.recorded(led, private, rid) or [])} records"
+            except ledger.Unverified as e:
+                got = "Unverified"
+                print(f"  replay {name}: {e}")
+            expect(got == "Unverified", f"replay {name}: refused Unverified, not returned (got {got})")
+            led.write_bytes(snapshot[led.name])
+
+        replay_refused("utility_altered", a_id, utility_altered)
+        replay_refused("record_dropped", a_id, lambda: led.write_bytes(lines(lambda i: i != 1)))
+        replay_refused("last_request_dropped", b_id, lambda: led.write_bytes(lines(lambda i: i < len(a))))
         code, _ = _verify_cli(led, private, anchor)
         expect(code == 0, f"the restored ledger verifies again (exit {code}), so each failure above was the tamper's")
     finally:
@@ -2963,7 +2988,8 @@ PINS = [
                            Mutant("opened_for_rewrite", _edits("P9_opened_for_rewrite")),
                            Mutant("genesis_empty", _edits("P9_genesis_empty")),
                            Mutant("signature_unchecked", _edits("P9_signature_unchecked")),
-                           Mutant("independent_heads", _edits("P9_independent_heads")))),
+                           Mutant("independent_heads", _edits("P9_independent_heads")),
+                           Mutant("replay_unchecked", _edits("P9_replay_unchecked")))),
     Pin("P16", "a candidate's proposer comes from the judge-issued credential that registered it, or it is refused",
         p16_proposer_from_credential, (Mutant("unattributed_admitted", _edits("P16_unattributed_admitted")),
                                        Mutant("any_credential", _edits("P16_any_credential")),

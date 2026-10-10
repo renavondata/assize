@@ -63,11 +63,13 @@ def ledger_path(ledgers: Path, world: str) -> Path:
 
 
 def _recorded(led: Path, private: Path, request_id: str) -> list[dict] | None:
-    """The records of `request_id` as written, if its head was signed; None if the ledger holds no such request."""
-    if not any(h["ledger"] == led.name and h["request_id"] == request_id
-               for h in ledger._lines(private / ledger.HEADS)):
-        return None
-    return [r for r in ledger._lines(led) if r.get("request_id") == request_id]
+    """The records of `request_id` as written, if its head was signed and they are what it signed; None if the ledger
+    holds no such request; refused `ledger_unverified` if they differ from the signed head."""
+    try:
+        return ledger.recorded(led, private, request_id)
+    except ledger.Unverified as e:
+        raise Refused("ledger_unverified", f"request {request_id!r} is signed but its records in {led.name} are not "
+                                           f"what was signed ({e})") from e
 
 
 def bound(worlds: Path = WORLDS) -> list[str]:

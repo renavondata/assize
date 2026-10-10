@@ -1,0 +1,8 @@
+# P9's mutant `replay_unchecked` (review 6debf23 F2): replay returns the ledger's lines for a signed request without
+# comparing them to the signed head, so an altered or truncated request is replayed as if it were what was signed.
+[[edit]]
+path = "judge/ledger.py"
+old = '''    if found:
+        raise Unverified(found)'''
+new = '''    if False:
+        raise Unverified(found)'''
