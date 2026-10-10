@@ -1,0 +1,5 @@
+# P0u's mutant (review of 22d0279 F1): the draw is force-pushed, so a push from a stale tip replaces another's draw.
+[[edit]]
+path = "harness/ledger.py"
+old = '''f"{commit}:refs/heads/{DRAW_BRANCH}"'''
+new = '''f"+{commit}:refs/heads/{DRAW_BRANCH}"'''

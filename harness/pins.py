@@ -7,6 +7,7 @@ import json
 import math
 import os
 import py_compile
+import re
 import shutil
 import signal
 import subprocess
@@ -871,6 +872,7 @@ def _append_only_repo(repo: Path) -> tuple[str, dict[str, str]]:
     _append(repo, "reports/L1/forecasts.jsonl", '{"id": "a"}\n')
     _append(repo, "reports/L1/review-abc.md", "VERDICT: ACCEPT\n")
     _append(repo, "REPORT.md", "# report\n- L0 — PASSED\n")
+    _append(repo, "reports/draws.jsonl", '{"drawn": "m-a"}\n')
     git("add", "-A")
     git("commit", "-q", "-m", "base")
     base = git("rev-parse", "HEAD")
@@ -878,6 +880,7 @@ def _append_only_repo(repo: Path) -> tuple[str, dict[str, str]]:
     git("commit", "-qam", "appends")
     shas = {"appending": git("rev-parse", "HEAD")}
     (repo / "REPORT.md").write_text("# report\n- L0 — FAILED\n")
+    (repo / "reports/draws.jsonl").write_text('{"drawn": "m-b"}\n')
     git("commit", "-qam", "rewrites")
     shas["rewriting"] = git("rev-parse", "HEAD")
     git("checkout", "-q", "-b", "x")
@@ -893,7 +896,8 @@ def _append_only_repo(repo: Path) -> tuple[str, dict[str, str]]:
 
 
 def p0q_append_only() -> bool:
-    """Every commit on the branch only adds lines to the ledgers, review and audit files and the root REPORT.md, and
+    """Every commit on the branch only adds lines to the ledgers, the draw ledger, review and audit files and the root
+    REPORT.md, and
     a merge only adds lines relative to each of its parents (rule 1 of the ground, instruction #54 item 1)."""
     expect, ok = _expecter()
     work = Path(tempfile.mkdtemp(prefix="assize-p0q-", dir=context.scratch))
@@ -902,7 +906,7 @@ def p0q_append_only() -> bool:
     for f in got:
         print(f"    fixture: {f}")
     expect({(f.where, f.code) for f in got} == {(f"commit {shas['rewriting'][:12]}", "ledger_rewrite")}
-           and any("REPORT.md" in f.detail for f in got),
+           and any("REPORT.md" in f.detail for f in got) and any("reports/draws.jsonl" in f.detail for f in got),
            "fixture: the rewriting commit, and only it, is found; the appending commit and the merge of two appending "
            "branches pass")
     shutil.rmtree(work, ignore_errors=True)
@@ -1168,56 +1172,152 @@ def p0t_price() -> bool:
     return ok()
 
 
-def _elector(model: str, p: float, outcome: bool | None, kind: str = "reviewer") -> list[dict]:
-    f = _forecast(f"{kind} {model} {p} {outcome}", p, kind)
-    f["proposer"] = f["proposer"] | {"model": model}
-    return [f] + ([_resolved(f, outcome)] if outcome is not None else [])
-
-
 ELECTION_ENTRANTS = ("m-a", "m-b", "m-c")
-ELECTION_FIXTURE = (_elector("m-a", 0.9, True) + _elector("m-a", 0.2, True) + _elector("m-b", 0.5, False)
-                    + _elector("m-a", 0.01, False, "builder") + _elector("m-b", 0.3, None))
+ELECTION_BOUND = 2.0
+ELECTION_TS = [f"2026-01-0{i}T00:00:00Z" for i in range(1, 9)]
+
+
+def _scored(model: str, p: float, outcome: bool, ts: str, kind: str = "reviewer") -> list[dict]:
+    f = _forecast(f"{kind} {model} {p} {outcome} {ts}", p, kind)
+    f["proposer"] = f["proposer"] | {"model": model}
+    f["ts"] = ts
+    return [f, _resolved(f, outcome)]
+
+
+def _drew(model: str, probabilities: dict, ts: str, procedure: str = "review") -> dict:
+    return {"procedure": procedure, "ts": ts, "run": 1, "gamma": 0.5, "probabilities": probabilities, "drawn": model}
+
+
+# The recorded draws and what followed them. Draw 3 re-draws m-a (so m-a's forecasts after it belong to it alone), draw 4
+# is of m-c, which made no forecast (observed nothing), draw 5 names a model that is no entrant (unknown). The recorded
+# probabilities are not what a replay would compute: the estimate must divide by these. One m-a round is clipped.
+ELECTION_DRAWS = [_drew("m-a", {"m-a": .5, "m-b": .25, "m-c": .25}, ELECTION_TS[0]),
+                  _drew("m-b", {"m-a": .25, "m-b": .5, "m-c": .25}, ELECTION_TS[2]),
+                  _drew("m-a", {"m-a": .4, "m-b": .3, "m-c": .3}, ELECTION_TS[4]),
+                  _drew("m-c", {"m-a": .3, "m-b": .3, "m-c": .4}, ELECTION_TS[5]),
+                  _drew("m-x", {"m-x": .5, "m-a": .5}, ELECTION_TS[6]),
+                  _drew("m-a", {"m-a": 1.0}, ELECTION_TS[0], "build")]
+ELECTION_FIXTURE = (_scored("m-a", .9, True, ELECTION_TS[1]) + _scored("m-a", .2, True, ELECTION_TS[1])
+                    + _scored("m-b", .5, False, ELECTION_TS[3]) + _scored("m-b", .1, True, ELECTION_TS[1])
+                    + _scored("m-a", .01, True, ELECTION_TS[4]) + _scored("m-a", .01, False, ELECTION_TS[1], "builder")
+                    + [_forecast("open", .5, "reviewer") | {"ts": ELECTION_TS[1]}
+                       | {"proposer": LEDGER_PROPOSER | {"kind": "reviewer", "model": "m-a"}}])
+
+
+def _exp3_by_definition(rows: list[dict], draws: list[dict], procedure: str, entrants: tuple, bound: float):
+    """EXP3 on losses written out from the definition: each round of `procedure` that drew a known model adds, to that
+    model alone, min(mean log-loss of its resolved forecasts from the draw to its next draw, B) over the probability
+    recorded with the draw; gamma = min(1, sqrt(K ln K / ((e - 1) t))), t = rounds + 1; w proportional to
+    exp(-gamma L^ / (K B)); p = (1 - gamma) w + gamma / K. Returns p, then (unknown, unobserved, clipped) round counts."""
+    mine = [d for d in draws if d["procedure"] == procedure]
+    resolved = {r["id"]: r["outcome"] for r in rows if "outcome" in r}
+    loss = {m: 0.0 for m in entrants}
+    unknown = unobserved = clipped = 0
+    for i, d in enumerate(mine):
+        if d["drawn"] not in entrants:
+            unknown += 1
+            continue
+        nxt = min([e["ts"] for e in mine[i + 1:] if e["drawn"] == d["drawn"]], default="9")
+        got = [-math.log(f["p"] if resolved[f["id"]] else 1 - f["p"]) for f in rows
+               if "claim" in f and f["id"] in resolved and f["proposer"]["kind"] == "reviewer"
+               and f["proposer"]["model"] == d["drawn"] and d["ts"] <= f["ts"] < nxt]
+        if not got:
+            unobserved += 1
+            continue
+        mean = sum(got) / len(got)
+        clipped += mean > bound
+        loss[d["drawn"]] += min(mean, bound) / d["probabilities"][d["drawn"]]
+    k, t = len(entrants), len(mine) + 1
+    g = min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * t)))
+    raw = {m: math.exp(-g * loss[m] / (k * bound)) for m in entrants}
+    return {m: (1 - g) * raw[m] / sum(raw.values()) + g / k for m in entrants}, (unknown, unobserved, clipped)
 
 
 def p0u_election() -> bool:
-    """`python -m harness.ledger elect <procedure> --seed <run id>` draws an entrant by Hedge over the entrants'
-    cumulative log-loss on that procedure's resolved forecasts: weights exp(-eta L_m), eta = sqrt(8 ln K / t), no
-    record meaning L = 0; over a sweep of every seed residue the draw's frequencies equal the weights (rule 7 of the
-    ground, instruction #54 item 7)."""
+    """`python -m harness.ledger elect <procedure> --seed <run id>` draws an entrant by EXP3 over the entrants (bandit
+    feedback: only the drawn model of a round is updated, by its clipped loss over the probability recorded with that
+    draw, 0 for the rest), over a sweep of every seed residue the frequencies equal the probabilities, rounds that name
+    no entrant, observed nothing or were clipped are counted, and the command records the draw it makes and reads
+    `harness/entrants.toml` from the checkout (rule 7 of the ground, instruction #54 item 7; instruction #64)."""
     from harness import ledger
 
     expect, ok = _expecter()
-    rows = list(ELECTION_FIXTURE)
-    loss = {"m-a": -math.log(0.9) - math.log(0.2), "m-b": -math.log(1 - 0.5), "m-c": 0.0}  # by the definition
-    t, k = 3, len(ELECTION_ENTRANTS)
-    eta = math.sqrt(8 * math.log(k) / t)
-    raw = {m: math.exp(-eta * v) for m, v in loss.items()}
-    want = {m: w / sum(raw.values()) for m, w in raw.items()}
+    rows = list(ELECTION_FIXTURE) + ELECTION_DRAWS
+    want, (unknown, unobserved, clipped) = _exp3_by_definition(rows, ELECTION_DRAWS, "review", ELECTION_ENTRANTS,
+                                                              ELECTION_BOUND)
     counts = {m: 0 for m in ELECTION_ENTRANTS}
     for seed in range(ledger.DRAWS):
-        m = ledger.elect(rows, "review", ELECTION_ENTRANTS, seed + 123456789)
+        m = ledger.elect(rows, "review", ELECTION_ENTRANTS, ELECTION_BOUND, seed + 123456789).model
         counts[m] = counts.get(m, 0) + 1
-    print(f"    weights {want}; draws over {ledger.DRAWS} seeds {counts}")
+    print(f"    probabilities {want}; draws over {ledger.DRAWS} seeds {counts}")
     expect(all(abs(counts[m] - want[m] * ledger.DRAWS) <= 1 for m in ELECTION_ENTRANTS) and sum(counts.values())
-           == ledger.DRAWS, f"every entrant drawn its weight's share of the sweep, to one draw ({counts})")
-    expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, 0) in ELECTION_ENTRANTS,
+           == ledger.DRAWS, f"every entrant drawn its probability's share of the sweep, to one draw ({counts})")
+    got = ledger.elect(rows, "review", ELECTION_ENTRANTS, ELECTION_BOUND, 0)
+    expect((got.rounds, got.unknown, got.unobserved, got.clipped) == (5, unknown, unobserved, clipped) == (5, 1, 1, 1),
+           f"rounds counted, none dropped: {got.report()}")
+    expect(all(math.isclose(got.probabilities[m], want[m]) for m in ELECTION_ENTRANTS),
+           f"probabilities {dict(got.probabilities)}, by definition {want}")
+    expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, ELECTION_BOUND, 0).model in ELECTION_ENTRANTS,
            "a procedure with no record draws among its entrants")
     work = Path(tempfile.mkdtemp(prefix="assize-p0u-", dir=context.scratch))
     repo = work / "repo"
     git = _git_fixture(repo)
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
-    _append(repo, "reports/L2/forecasts.jsonl", "".join(json.dumps(r) + "\n" for r in rows))
-    _append(repo, ledger.ENTRANTS, f"review = {json.dumps(list(ELECTION_ENTRANTS))}\n")
+    _append(repo, "reports/L2/forecasts.jsonl", "".join(json.dumps(r) + "\n" for r in ELECTION_FIXTURE))
+    _append(repo, ledger.DRAW_LEDGER, "".join(json.dumps(r) + "\n" for r in ELECTION_DRAWS))
+    _append(repo, ledger.ENTRANTS, f"review = {json.dumps(list(ELECTION_ENTRANTS))}\n[bound]\nloss = {ELECTION_BOUND}\n")
     git("add", "-A")
     git("commit", "-q", "-m", "ledger")
+
+    def run(seed: int):
+        return subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "elect", "review", "--seed", str(seed),
+                               "--repo", str(repo)], cwd=ROOT, capture_output=True, text=True)
+
     seeds = (7, 40000, 65535)
-    out = [subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "elect", "review", "--seed", str(s), "--repo",
-                           str(repo)], cwd=ROOT, capture_output=True, text=True) for s in seeds]
+    out = [run(s) for s in seeds]
     printed = [o.stdout.strip() for o in out]
-    expect(all(o.returncode == 0 for o in out) and printed == [ledger.elect(rows, "review", ELECTION_ENTRANTS, s)
-                                                               for s in seeds],
+    expect(all(o.returncode == 0 for o in out) and printed == [ledger.elect(rows, "review", ELECTION_ENTRANTS,
+                                                                            ELECTION_BOUND, s).model for s in seeds],
            f"the command prints the draw for its seed: {printed} ({[o.stderr.strip()[-200:] for o in out]})")
+    recorded = [json.loads(x) for x in (repo / ledger.DRAW_LEDGER).read_text().splitlines()[len(ELECTION_DRAWS):]]
+    expect([r["drawn"] for r in recorded] == printed and [r["run"] for r in recorded] == list(seeds)
+           and all(r["procedure"] == "review" and math.isclose(r["gamma"], got.gamma)
+                   and all(math.isclose(r["probabilities"][m], want[m]) for m in ELECTION_ENTRANTS)
+                   for r in recorded), f"each draw is recorded with the distribution it was drawn from: {recorded}")
+    (repo / ledger.ENTRANTS).write_text('review = ["m-a", "m-b"]\n[bound]\nloss = 3.0\n')  # the checkout, not head
+    out = [run(s) for s in seeds]
+    rows2 = [json.loads(x) for x in (repo / ledger.DRAW_LEDGER).read_text().splitlines()[len(ELECTION_DRAWS) + 3:]]
+    expect(all(o.returncode == 0 for o in out) and all(set(r["probabilities"]) == {"m-a", "m-b"} for r in rows2)
+           and len(rows2) == 3, f"entrants are read from the checkout, not from head: {rows2}")
+    # Review of 22d0279 F1: a published draw reaches the next election, run from another checkout of the same remote
+    # (a fresh runner workspace), and a push from a stale tip appends to the new one instead of replacing it.
+    git("init", "-q", "--bare", str(work / "remote.git"))
+    git("remote", "add", "origin", str(work / "remote.git"))
+    git("push", "-q", "origin", "master")
+    git("clone", "-q", str(work / "remote.git"), str(work / "other"))
+
+    def publish(where: Path, seed: int):
+        return subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "elect", "review", "--seed", str(seed),
+                               "--repo", str(where), "--publish", "origin"], cwd=ROOT, capture_output=True, text=True)
+
+    def published() -> list[dict]:
+        tip = ledger.draw_tip(repo, "origin")
+        return ledger.draw_rows(repo, tip) if tip else []
+
+    local = (repo / ledger.DRAW_LEDGER).read_text()
+    first, second = publish(repo, 11), publish(work / "other", 12)
+    rounds = [re.search(r"^rounds (\d+)", o.stderr, re.M) for o in (first, second)]
+    print(f"    published elections: {[o.stderr.strip().splitlines()[-1:] for o in (first, second)]}")
+    expect(first.returncode == second.returncode == 0 and [int(r.group(1)) if r else None for r in rounds] == [0, 1]
+           and [r["run"] for r in published()] == [11, 12] and (repo / ledger.DRAW_LEDGER).read_text() == local,
+           f"a published draw is read by the next election from another checkout: rounds "
+           f"{[r and r.group(1) for r in rounds]}, branch {published()}")
+    stale = ledger.draw_tip(work / "other", "origin")
+    publish(repo, 13)
+    ledger.publish_draw(work / "other", "origin", ledger.draw_row(got, "review", 14, "2026-01-01T00:00:00Z"), stale)
+    expect([r["run"] for r in published()] == [11, 12, 13, 14],
+           f"a draw pushed from a stale tip is appended, none lost: {[r['run'] for r in published()]}")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -2908,7 +3008,8 @@ PINS = [
     Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",
         p0o_proposer_record, (Mutant("overturned_scored_success", _edits("P0o_overturned_scored_success")),)),
     Pin("P0q", "a commit removing a line of a ledger, review, audit or REPORT.md is rejected; a merge of appends is not",
-        p0q_append_only, (Mutant("ledger_rewrite_admitted", _edits("P0q_ledger_rewrite_admitted")),)),
+        p0q_append_only, (Mutant("ledger_rewrite_admitted", _edits("P0q_ledger_rewrite_admitted")),
+                          Mutant("draws_not_append_only", _edits("P0q_draws_not_append_only")))),
     Pin("P0r", "a forecast row a pull request adds after the head of its first pins run is late",
         p0r_claims_precede_scoring, (Mutant("late_forecast_admitted", _edits("P0r_late_forecast_admitted")),)),
     Pin("P0s", "typed forecasts are resolved by code from what the API shows; free ones never by the mechanism",
@@ -2917,8 +3018,12 @@ PINS = [
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")))),
-    Pin("P0u", "a procedure's model is drawn by Hedge over its entrants' log-loss, never by argmin",
-        p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),)),
+    Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
+        p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
+                       Mutant("hedge_election", _edits("P0u_hedge_election")),
+                       Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
+                       Mutant("draw_not_published", _edits("P0u_draw_not_published")),
+                       Mutant("draw_push_forced", _edits("P0u_draw_push_forced")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

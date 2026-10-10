@@ -1,0 +1,6 @@
+# P0q's mutant (instruction #64 item 4b's ledger): the draw ledger is not append-only, so a rewritten draw is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = """"REPORT.md",
+               "reports/draws.jsonl")"""
+new = """"REPORT.md")"""

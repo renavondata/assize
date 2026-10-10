@@ -1,0 +1,6 @@
+# P0u's mutant (review of 22d0279 F1): `--publish` commits the draw but never pushes it, so no later election reads it.
+[[edit]]
+path = "harness/ledger.py"
+old = '''            _net(repo, "push", "-q", remote, f"{commit}:refs/heads/{DRAW_BRANCH}")
+            return commit'''
+new = '''            return commit'''
