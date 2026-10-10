@@ -1,5 +1,5 @@
-# P0u's mutant (instruction #54 item 7): the entrant with the least cumulative log-loss is named, not drawn.
+# P0u's mutant (instruction #54 item 7): the entrant with the least estimated loss is named, not drawn.
 [[edit]]
 path = "harness/ledger.py"
-old = "    return draw(weights(loss, rounds), seed)"
-new = "    return min(loss, key=loss.get)"
+old = "    return draw(election(rows, procedure, entrants, bound).probabilities, seed)"
+new = "    e = election(rows, procedure, entrants, bound).probabilities\n    return max(e, key=e.get)"

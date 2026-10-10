@@ -1,0 +1,11 @@
+# P0u's mutant (instruction #64 item 4a): EXP3 replaced by Hedge over the same data: no exploration, eta = sqrt(8 ln K / t),
+# the full-information rate, and the drawn entrant's loss unweighted (the data Hedge would see).
+[[edit]]
+path = "harness/ledger.py"
+old = "    gamma = min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * t)))\n    eta = gamma / k"
+new = "    gamma = 0.0\n    eta = math.sqrt(8 * math.log(k) / t)"
+
+[[edit]]
+path = "harness/ledger.py"
+old = "        estimate[m] += loss / bound / probabilities(estimate, t)[m]"
+new = "        estimate[m] += loss / bound"

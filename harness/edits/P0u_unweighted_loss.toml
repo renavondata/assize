@@ -1,0 +1,5 @@
+# P0u's mutant (instruction #64 item 4b): importance weighting removed; the drawn entrant's loss is added as observed.
+[[edit]]
+path = "harness/ledger.py"
+old = "        estimate[m] += loss / bound / probabilities(estimate, t)[m]"
+new = "        estimate[m] += loss / bound"

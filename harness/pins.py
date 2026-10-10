@@ -1175,32 +1175,45 @@ def _elector(model: str, p: float, outcome: bool | None, kind: str = "reviewer")
 
 
 ELECTION_ENTRANTS = ("m-a", "m-b", "m-c")
+ELECTION_BOUND = 1.0  # B; the fixture's second round (loss -ln 0.2 = 1.609) is clipped to it
 ELECTION_FIXTURE = (_elector("m-a", 0.9, True) + _elector("m-a", 0.2, True) + _elector("m-b", 0.5, False)
-                    + _elector("m-a", 0.01, False, "builder") + _elector("m-b", 0.3, None))
+                    + _elector("m-a", 0.01, False, "builder") + _elector("m-b", 0.3, None)
+                    + _elector("m-z", 0.6, True))
 
 
 def p0u_election() -> bool:
-    """`python -m harness.ledger elect <procedure> --seed <run id>` draws an entrant by Hedge over the entrants'
-    cumulative log-loss on that procedure's resolved forecasts: weights exp(-eta L_m), eta = sqrt(8 ln K / t), no
-    record meaning L = 0; over a sweep of every seed residue the draw's frequencies equal the weights (rule 7 of the
-    ground, instruction #54 item 7)."""
+    """`python -m harness.ledger elect <procedure> --seed <run id>` draws an entrant by EXP3 (rule 7 of the ground,
+    instruction #64): the procedure's resolved forecasts are rounds, only the entrant that ran a round is updated, by
+    its log-loss clipped to [0, B] over B and over the probability it was drawn with; p_m = (1 - g) w_m / sum w + g / K,
+    w_m = exp(-(g / K) L_m), g = min(1, sqrt(K ln K / ((e - 1) t))); over a sweep of every seed residue the draw's
+    frequencies equal p to one draw; clipped and unknown-entrant rounds are counted in the denominator and reported."""
     from harness import ledger
 
     expect, ok = _expecter()
     rows = list(ELECTION_FIXTURE)
-    loss = {"m-a": -math.log(0.9) - math.log(0.2), "m-b": -math.log(1 - 0.5), "m-c": 0.0}  # by the definition
-    t, k = 3, len(ELECTION_ENTRANTS)
-    eta = math.sqrt(8 * math.log(k) / t)
-    raw = {m: math.exp(-eta * v) for m, v in loss.items()}
-    want = {m: w / sum(raw.values()) for m, w in raw.items()}
+    k, bound = len(ELECTION_ENTRANTS), ELECTION_BOUND
+
+    def prob(est: dict, t: int) -> dict:  # by the definition
+        g = min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * t)))
+        raw = {m: math.exp(-g / k * v) for m, v in est.items()}
+        return {m: (1 - g) * w / sum(raw.values()) + g / k for m, w in raw.items()}
+
+    est = {m: 0.0 for m in ELECTION_ENTRANTS}  # the rounds: (t, model, p, outcome), m-z not an entrant
+    for t, (m, p, o) in enumerate((("m-a", 0.9, True), ("m-a", 0.2, True), ("m-b", 0.5, False), ("m-z", 0.6, True)), 1):
+        if m in est:
+            est[m] += min(-math.log(p if o else 1 - p), bound) / bound / prob(est, t)[m]
+    want = prob(est, 5)
     counts = {m: 0 for m in ELECTION_ENTRANTS}
     for seed in range(ledger.DRAWS):
-        m = ledger.elect(rows, "review", ELECTION_ENTRANTS, seed + 123456789)
+        m = ledger.elect(rows, "review", ELECTION_ENTRANTS, seed + 123456789, bound)
         counts[m] = counts.get(m, 0) + 1
-    print(f"    weights {want}; draws over {ledger.DRAWS} seeds {counts}")
+    print(f"    probabilities {want}; draws over {ledger.DRAWS} seeds {counts}")
     expect(all(abs(counts[m] - want[m] * ledger.DRAWS) <= 1 for m in ELECTION_ENTRANTS) and sum(counts.values())
-           == ledger.DRAWS, f"every entrant drawn its weight's share of the sweep, to one draw ({counts})")
-    expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, 0) in ELECTION_ENTRANTS,
+           == ledger.DRAWS, f"every entrant drawn its probability's share of the sweep, to one draw ({counts})")
+    e = ledger.election(rows, "review", ELECTION_ENTRANTS, bound)
+    expect((e.rounds, e.unknown, e.clipped) == (4, 1, 1),
+           f"4 rounds, 1 of an unknown entrant and 1 clipped, none dropped from the denominator ({e})")
+    expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, 0, bound) in ELECTION_ENTRANTS,
            "a procedure with no record draws among its entrants")
     work = Path(tempfile.mkdtemp(prefix="assize-p0u-", dir=context.scratch))
     repo = work / "repo"
@@ -1208,16 +1221,18 @@ def p0u_election() -> bool:
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
     _append(repo, "reports/L2/forecasts.jsonl", "".join(json.dumps(r) + "\n" for r in rows))
-    _append(repo, ledger.ENTRANTS, f"review = {json.dumps(list(ELECTION_ENTRANTS))}\n")
+    _append(repo, ledger.ENTRANTS, f"loss_bound = {bound}\nreview = {json.dumps(list(ELECTION_ENTRANTS))}\n")
     git("add", "-A")
     git("commit", "-q", "-m", "ledger")
     seeds = (7, 40000, 65535)
     out = [subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "elect", "review", "--seed", str(s), "--repo",
                            str(repo)], cwd=ROOT, capture_output=True, text=True) for s in seeds]
     printed = [o.stdout.strip() for o in out]
-    expect(all(o.returncode == 0 for o in out) and printed == [ledger.elect(rows, "review", ELECTION_ENTRANTS, s)
+    expect(all(o.returncode == 0 for o in out) and printed == [ledger.elect(rows, "review", ELECTION_ENTRANTS, s, bound)
                                                                for s in seeds],
            f"the command prints the draw for its seed: {printed} ({[o.stderr.strip()[-200:] for o in out]})")
+    expect(all("rounds 4; unknown 1; clipped 1 (B=1.0)" in o.stderr for o in out),
+           f"the command reports rounds, unknown and clipped on stderr ({[o.stderr.strip()[-200:] for o in out]})")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -2917,8 +2932,10 @@ PINS = [
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")))),
-    Pin("P0u", "a procedure's model is drawn by Hedge over its entrants' log-loss, never by argmin",
-        p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),)),
+    Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants' importance-weighted log-loss, never by argmin",
+        p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
+                       Mutant("hedge_election", _edits("P0u_hedge_election")),
+                       Mutant("unweighted_loss", _edits("P0u_unweighted_loss")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
