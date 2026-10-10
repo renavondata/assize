@@ -73,3 +73,4 @@
 {"id": "8b76db9b3841", "ts": "2026-10-10T17:05:09Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "local"}, "outcome": true, "witness": "#83: gfrmin closed at 2026-10-10T07:43:36Z"}
 {"id": "6091067a0504", "ts": "2026-10-10T17:05:09Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "local"}, "outcome": true, "witness": "#84: gfrmin closed at 2026-10-10T08:12:53Z"}
 {"id": "0d4721c26e4b", "ts": "2026-10-10T17:05:09Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "local"}, "outcome": false, "witness": "pins run 38068557858 attempt 1 on 3f7deb64c9dc: failure"}
+{"id": "7f6d33a96749", "ts": "2026-10-10T18:20:24Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38074318965"}, "outcome": false, "witness": "reports/L2/review-3f7deb64c9dca6de58a45339d5741347b227945b.md at e144546cff5b: BLOCK"}
