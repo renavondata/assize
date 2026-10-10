@@ -1222,6 +1222,63 @@ def p0u_election() -> bool:
     return ok()
 
 
+REVIEW_WORKFLOW = ".github/workflows/review.yml"
+REVIEW_EVENTS = (  # (what, event, must start the review job)
+    ("reviewer-applied needs-review (audit PR, Vizier relabel)",
+     {"event_name": "pull_request", "action": "labeled", "label": "needs-review", "sender": "assize-reviewer"}, True),
+    ("reviewer-applied awaits-guy from a review session",
+     {"event_name": "pull_request", "action": "labeled", "label": "awaits-guy", "sender": "assize-reviewer"}, False),
+    ("builder-applied needs-review",
+     {"event_name": "pull_request", "action": "labeled", "label": "needs-review", "sender": "assize-builder"}, True),
+    ("reviewer-assigned issue to gfrmin",
+     {"event_name": "issues", "action": "assigned", "assignee": "gfrmin", "sender": "assize-reviewer"}, False),
+    ("guy-assigned issue to gfrmin", {"event_name": "issues", "action": "assigned", "assignee": "gfrmin",
+                                      "sender": "gfrmin"}, True),
+    ("builder-applied unrelated label", {"event_name": "pull_request", "action": "labeled", "label": "blocked",
+                                         "sender": "assize-builder"}, False),
+)
+
+
+def _job_condition(text: str) -> str:
+    """The folded `if: >-` scalar of the review job, joined as YAML folds it."""
+    lines = text.splitlines()
+    i = next(n for n, line in enumerate(lines) if line == "    if: >-")
+    body = []
+    for line in lines[i + 1:]:
+        if not line.startswith("      "):
+            break
+        body.append(line.strip())
+    return " ".join(body)
+
+
+def _starts(condition: str, event: dict) -> bool:
+    """Evaluate the GitHub expression subset the condition uses (&&, ||, ==, !=, contains, fromJSON) on an event."""
+    import re
+    ctx = {"sender": event.get("sender"), "label": event.get("label"), "action": event.get("action"),
+           "assignee": event.get("assignee"), "event_name": event["event_name"]}
+    fields = {"github.event.sender.login": "sender", "github.event.label.name": "label",
+              "github.event.action": "action", "github.event.assignee.login": "assignee",
+              "github.event_name": "event_name"}
+    py = condition
+    for src in sorted(fields, key=len, reverse=True):
+        py = py.replace(src, f"ctx[{fields[src]!r}]")
+    py = py.replace("&&", " and ").replace("||", " or ").replace("fromJSON", "json.loads")
+    py = re.sub(r"contains\(", "_contains(", py)
+    return bool(eval(py, {"ctx": ctx, "json": json, "_contains": lambda xs, x: x in xs}))
+
+
+def p0v_reviewer_events() -> bool:
+    """The review job starts on a `needs-review` label the reviewer account applies (an audit PR, a Vizier relabel) and
+    on a builder's, and not on the reviewer's other events (`awaits-guy` from a review session, an issue it assigns):
+    the real condition, read from the workflow file, evaluated on synthetic events (instruction #65)."""
+    expect, ok = _expecter()
+    condition = _job_condition((ROOT / REVIEW_WORKFLOW).read_text())
+    print(f"    condition: {condition}")
+    for what, event, want in REVIEW_EVENTS:
+        expect(_starts(condition, event) is want, f"{what}: {'starts' if want else 'does not start'} a review")
+    return ok()
+
+
 PURITY_FIXTURE = (  # (label, schema, tokens wanted) against a fixture manifest's vocabulary
     ("clean", {"type": "object", "description": "a generic field"}, set()),
     ("as a key", {"properties": {"semantic": {}}}, {"semantic"}),
@@ -2919,6 +2976,8 @@ PINS = [
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")))),
     Pin("P0u", "a procedure's model is drawn by Hedge over its entrants' log-loss, never by argmin",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),)),
+    Pin("P0v", "a needs-review label the reviewer account applies starts a review; its other events do not",
+        p0v_reviewer_events, (Mutant("reviewer_sender_excluded", _edits("P0v_reviewer_sender_excluded")),)),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

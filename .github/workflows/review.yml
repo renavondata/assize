@@ -18,8 +18,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   review:
+    # A review session's own events are excluded: anything the reviewer account does that is not a `needs-review` label
+    # on a pull request. A session never applies `needs-review` as a by-product of reviewing (it applies `awaits-guy`
+    # or `blocked`, or assigns an issue); the label is applied by the reviewer account only on purpose, by the Auditor
+    # on its findings pull request and by the Vizier when a head changed, and that label is the declaration that a
+    # review is wanted (Audit criterion 4). Pinned by P0v.
     if: >-
-      github.event.sender.login != 'assize-reviewer' && (
+      (github.event.sender.login != 'assize-reviewer' ||
+       (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && (
         github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'schedule' ||
         (github.event_name == 'pull_request' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) ||
         (github.event_name == 'issues' && github.event.action == 'labeled' && contains(fromJSON('["failed-run","wish"]'), github.event.label.name)) ||
