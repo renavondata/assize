@@ -573,17 +573,18 @@ class Election:
 
 
 def exploration(k: int, horizon: int) -> float:
-    """EXP3's gamma = min(1, sqrt(K ln K / ((e - 1) T))), the value minimising its regret bound (Auer et al. 2002,
-    Thm 3.1): regret <= 2 sqrt((e - 1) T K ln K) in units of the loss bound B."""
-    return min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * horizon)))
+    """EXP3's explicit exploration on losses in [0, 1], learning rate gamma / K: expected regret against the best single
+    entrant is at most 3 gamma T + K ln K / gamma for gamma <= 1/2 (README), minimised by gamma = sqrt(K ln K / (3 T)),
+    giving 2 sqrt(3 T K ln K), in units of the loss bound B."""
+    return min(0.5, math.sqrt(k * math.log(k) / (3 * horizon)))
 
 
-def probabilities(gain: Mapping[str, float], gamma: float) -> dict[str, float]:
-    """EXP3: p_m = (1 - gamma) w_m + gamma / K with w_m proportional to exp(gamma G_m / K), G_m the importance-weighted
-    cumulative gain estimate; with no rounds, every G_m is 0."""
-    k = len(gain)
-    top = max(gain.values())
-    raw = {m: math.exp(gamma / k * (g - top)) for m, g in gain.items()}
+def probabilities(loss: Mapping[str, float], gamma: float) -> dict[str, float]:
+    """EXP3: p_m = (1 - gamma) w_m + gamma / K with w_m proportional to exp(-gamma L_m / K), L_m the importance-weighted
+    cumulative loss estimate in units of B; with no rounds, every L_m is 0."""
+    k = len(loss)
+    low = min(loss.values())
+    raw = {m: math.exp(-gamma / k * (l - low)) for m, l in loss.items()}
     return {m: (1 - gamma) * r / sum(raw.values()) + gamma / k for m, r in raw.items()}
 
 
@@ -613,22 +614,22 @@ def plays(rows: Sequence[dict], procedure: str) -> list[tuple[str | None, float]
 
 def election(rows: Sequence[dict], procedure: str, entrants: Sequence[str], bound: float) -> Election:
     """Replay the procedure's resolved rounds as EXP3 with bandit feedback: in each, only the entrant that ran is
-    observed, and its gain 1 - clip(loss, 0, B) / B is divided by the probability the replay gave it; every other
+    observed, and its loss clip(loss, 0, B) / B is divided by the probability the replay gave it; every other
     entrant's estimate is 0."""
     history = plays(rows, procedure)
     gamma = exploration(len(entrants), len(history) + ELECTION_HORIZON)
 
     def step(state: tuple[dict[str, float], int, int], play: tuple[str | None, float]):
-        gain, unknown, clipped = state
+        est, unknown, clipped = state
         model, loss = play
-        if model not in gain:
-            return gain, unknown + 1, clipped
+        if model not in est:
+            return est, unknown + 1, clipped
         c = min(max(loss, 0.0), bound)
-        seen = (1 - c / bound) / probabilities(gain, gamma)[model]
-        return {m: g + (seen if m == model else 0.0) for m, g in gain.items()}, unknown, clipped + (c != loss)
+        seen = (c / bound) / probabilities(est, gamma)[model]
+        return {m: l + (seen if m == model else 0.0) for m, l in est.items()}, unknown, clipped + (c != loss)
 
-    gain, unknown, clipped = functools.reduce(step, history, ({m: 0.0 for m in entrants}, 0, 0))
-    return Election(probabilities(gain, gamma), len(history), len(history) - unknown, unknown, clipped)
+    est, unknown, clipped = functools.reduce(step, history, ({m: 0.0 for m in entrants}, 0, 0))
+    return Election(probabilities(est, gamma), len(history), len(history) - unknown, unknown, clipped)
 
 
 def draw(w: Mapping[str, float], seed: int) -> str:

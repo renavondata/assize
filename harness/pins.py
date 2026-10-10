@@ -1182,24 +1182,24 @@ ELECTION_FIXTURE = (_elector("m-a", 0.9, True) + _elector("m-a", 0.2, True) + _e
 
 
 def _exp3_by_definition(rounds: list[tuple[str, float]], entrants: tuple[str, ...], bound: float) -> tuple[dict, int, int]:
-    """EXP3 with bandit feedback (Auer et al. 2002), written out round by round: gamma = min(1, sqrt(K ln K / ((e-1) T)))
-    for T = rounds + 1; p_m = (1-gamma) w_m + gamma/K, w_m proportional to exp(gamma G_m / K); the entrant that ran gets
-    gain 1 - clip(loss, 0, B)/B divided by its p_m, every other entrant 0; an entrant outside the list updates nothing.
-    Returns the final probabilities, the unknown rounds and the clipped rounds."""
-    k, gain, unknown, clipped = len(entrants), {m: 0.0 for m in entrants}, 0, 0
-    gamma = min(1.0, math.sqrt(k * math.log(k) / ((math.e - 1) * (len(rounds) + 1))))
+    """EXP3 with bandit feedback on losses, written out round by round: gamma = min(1/2, sqrt(K ln K / (3 T))) for
+    T = rounds + 1; p_m = (1-gamma) w_m + gamma/K, w_m proportional to exp(-gamma L_m / K); the entrant that ran gets
+    loss estimate clip(loss, 0, B)/B divided by its p_m, every other entrant 0; an entrant outside the list updates
+    nothing. Returns the final probabilities, the unknown rounds and the clipped rounds."""
+    k, est, unknown, clipped = len(entrants), {m: 0.0 for m in entrants}, 0, 0
+    gamma = min(0.5, math.sqrt(k * math.log(k) / (3 * (len(rounds) + 1))))
 
     def probs() -> dict[str, float]:
-        w = {m: math.exp(gamma * g / k) for m, g in gain.items()}
+        w = {m: math.exp(-gamma * l / k) for m, l in est.items()}
         return {m: (1 - gamma) * w[m] / sum(w.values()) + gamma / k for m in entrants}
 
     for model, loss in rounds:
-        if model not in gain:
+        if model not in est:
             unknown += 1
             continue
         clip = min(max(loss, 0.0), bound)
         clipped += clip != loss
-        gain[model] += (1 - clip / bound) / probs()[model]
+        est[model] += (clip / bound) / probs()[model]
     return probs(), unknown, clipped
 
 
