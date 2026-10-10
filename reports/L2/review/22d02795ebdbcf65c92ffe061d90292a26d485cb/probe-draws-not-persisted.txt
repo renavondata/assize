@@ -1,0 +1,21 @@
+## probe: elect as build.yml calls it, twice (seeds 1, 2), --head HEAD
+$ git ls-tree HEAD reports/draws.jsonl
+(empty: no committed draw ledger at head)
+$ uv run --frozen python -m harness.ledger elect build --seed 1 --head HEAD
+rounds 0 (unknown entrant 0, unobserved 0, clipped 0); gamma 0.898215; probabilities claude-opus-5-5 0.500000, claude-sonnet-5-5 0.500000; drew claude-sonnet-5-5
+claude-sonnet-5-5
+$ uv run --frozen python -m harness.ledger elect build --seed 2 --head HEAD
+rounds 0 (unknown entrant 0, unobserved 0, clipped 0); gamma 0.898215; probabilities claude-opus-5-5 0.500000, claude-sonnet-5-5 0.500000; drew claude-opus-5-5
+claude-opus-5-5
+$ git status --porcelain
+?? reports/draws.jsonl
+$ cat reports/draws.jsonl
+{"procedure": "build", "ts": "2026-10-10T19:11:32Z", "run": 1, "gamma": 0.89821546804543, "probabilities": {"claude-opus-5-5": 0.5, "claude-sonnet-5-5": 0.5}, "drawn": "claude-sonnet-5-5"}
+{"procedure": "build", "ts": "2026-10-10T19:11:32Z", "run": 2, "gamma": 0.89821546804543, "probabilities": {"claude-opus-5-5": 0.5, "claude-sonnet-5-5": 0.5}, "drawn": "claude-opus-5-5"}
+## same, after committing the draw rows: the second round now reads them
+rounds 2 (unknown entrant 0, unobserved 2, clipped 0); gamma 0.518585; probabilities claude-opus-5-5 0.500000, claude-sonnet-5-5 0.500000; drew claude-sonnet-5-5
+claude-sonnet-5-5
+$ git grep -n 'harness.ledger elect\|draws.jsonl' 22d0279 -- .github/ .claude/
+22d02795ebdbcf65c92ffe061d90292a26d485cb:.github/workflows/build.yml:33:          model=$(uv run --frozen python -m harness.ledger elect build --seed ${{ github.run_id }} --head origin/master)
+22d02795ebdbcf65c92ffe061d90292a26d485cb:.github/workflows/review.yml:61:            model=$(uv run --frozen python -m harness.ledger elect "$proc" --seed ${{ github.run_id }} --head origin/master)
+(no step or command adds, commits or pushes reports/draws.jsonl)
