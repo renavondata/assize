@@ -1,0 +1,13 @@
+pin:       P21
+protects:  replay returns a request's records only if they match its signed head, else refuses ledger_unverified
+role:      clean
+tree:      /tmp/assize-review63-Bvqv/wt
+invoked:   /tmp/assize-review63-Bvqv/wt
+scratch:   /tmp/assize-scratch-7g5h49y_
+  [ok] untouched: replay gives the records as written (got records)
+  [ok] a request never signed replays as None
+  [ok] a utility altered: replay gives ledger_unverified (got ledger_unverified)
+  [ok] a record dropped: replay gives ledger_unverified (got ledger_unverified)
+  [ok] a record added: replay gives ledger_unverified (got ledger_unverified)
+  [ok] the head's signature forged: replay gives ledger_unverified (got ledger_unverified)
+result:    PASS

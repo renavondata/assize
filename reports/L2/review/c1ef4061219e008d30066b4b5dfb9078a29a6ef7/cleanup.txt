@@ -1,0 +1,11 @@
+after removal (2026-10-10T04:44:22Z):
+/home/g/Downloads/actions-runner/_work/assize/assize c1ef406 [l2a-o3-replay-verified]
+my scratch dirs (/tmp/assize-review63-*, /tmp/assize-probe63-*, make pins scratch /tmp/assize-scratch-q1qqb7e2):
+ls: cannot access '/tmp/assize-review63-*': No such file or directory
+ls: cannot access '/tmp/assize-probe63-*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-q1qqb7e2': No such file or directory
+harness processes:
+2841023 (the pgrep call matching its own shell; gone on re-check: no harness process)
+assize containers (podman, docker):
+0
+/tmp/assize-scratch-0o4l8qmb predates this session (mtime 2026-10-09T08:21Z); not mine, left alone

@@ -1,0 +1,8 @@
+2026-10-10T04:28:52.8086491Z CLEAN FAILED: P0l (observed fail)
+2026-10-10T04:28:52.8331778Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.358s + 0.358s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-10T04:28:52.8362389Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.358s + 0.357s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+2026-10-10T04:28:52.8364011Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+2026-10-10T04:46:59.7157765Z clean: 39/40 passed, 1/40 failed
+2026-10-10T04:46:59.7158638Z mutants: 99/100 killed, 0/100 survived, 0/100 inconclusive, 0/100 stale, 1/100 non-causal, 0 leaked (clean and mutant)
+2026-10-10T04:46:59.7159526Z twins: 99/100 passed
+2026-10-10T04:46:59.7160404Z PINS FAILED

@@ -1,0 +1,6 @@
+untouched: records
+r1 rechained without key: ledger_unverified
+r1 records reordered: ledger_unverified
+requests swapped in order (r1 untouched): records
+r1 dropped first + head count edited without key: ledger_unverified
+garbage line appended: ledger_unverified
