@@ -1,0 +1,12 @@
+condition: (github.event.sender.login != 'assize-reviewer' || (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && ( github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'schedule' || (github.event_name == 'pull_request' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) || (github.event_name == 'issues' && github.event.action == 'labeled' && contains(fromJSON('["failed-run","wish"]'), github.event.label.name)) || (github.event_name == 'issues' && github.event.action == 'assigned' && github.event.assignee.login == 'gfrmin'))
+ok  reviewer labels PR needs-review: starts=True expected=True
+ok  reviewer labels PR awaits-guy: starts=False expected=False
+ok  reviewer labels PR blocked: starts=False expected=False
+ok  reviewer labels issue wish: starts=False expected=False
+ok  reviewer labels issue needs-review: starts=False expected=False
+ok  reviewer assigns issue to gfrmin: starts=False expected=False
+ok  reviewer-armed automerge push to master: starts=False expected=False
+ok  builder labels PR needs-review: starts=True expected=True
+ok  builder labels PR awaits-guy: starts=True expected=True
+ok  gfrmin labels issue wish: starts=True expected=True
+mismatches: 0

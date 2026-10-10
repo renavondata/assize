@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-10T23:26:24Z","event":"pull_request","head_branch":"instr-65-reviewer-needs-review-starts-review","head_sha":"c7785eaaf4b3c3d5ae382b4e3041acb173844f12","html_url":"https://github.com/renavondata/assize/actions/runs/38095027274","id":38095027274,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
