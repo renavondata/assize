@@ -1025,9 +1025,10 @@ def _ledger_text(root: Path, sha: str, path: str) -> str | None:
     return got.stdout
 
 
-def _typed(claim: str, p: float, ftype: str | None, args: dict, ts: str = "2026-01-10T00:00:00Z") -> dict:
+def _typed(claim: str, p: float, ftype: str | None, args: dict, ts: str = "2026-01-10T00:00:00Z",
+           resolves_by: str = "the resolver") -> dict:
     f = {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": LEDGER_PROPOSER | {"kind": "builder"},
-         "sha_before": "0" * 40, "claim": claim, "p": p, "resolves_by": "the resolver"}
+         "sha_before": "0" * 40, "claim": claim, "p": p, "resolves_by": resolves_by}
     return f | ({"type": ftype, "args": args} if ftype else {})
 
 
@@ -1051,6 +1052,13 @@ OUTCOME_FIXTURE = (
     (_typed("two findings in 1-3", 0.5, "finding_count", {"sha": "abc123", "bin": "1–3"}), True),
     (_typed("two findings in 0", 0.2, "finding_count", {"sha": "abc123", "bin": "0"}), False),
     (_typed("guy-items at most 3", 0.5, "price", {"quantity": "guy-items", "layer": 2, "bound": 3}), False),
+    # instruction #66: bound by branch, the pull request whose head ref it is, not the most recently opened one
+    (_typed("pins, by branch", 0.8, "pins_green", {"branch": "b/pins"}), False),
+    (_typed("review, by branch", 0.7, "review_accept", {"branch": "b/review"}), True),
+    (_typed("still open, by branch", 0.9, "merged", {"branch": "b/open"}), None),
+    (_typed("merged, by a reused branch", 0.9, "merged", {"branch": "b/reused"}), True),
+    (_typed("no PR by resolves_by", 0.9, "merged", {"branch": "b/never"}, resolves_by=LATER_TS), False),
+    (_typed("no PR yet", 0.9, "merged", {"branch": "b/never"}, resolves_by="2027-01-01T00:00:00Z"), None),
     (_typed("free text, untyped", 0.5, None, {}), None),
     (_typed("free text, typed free", 0.5, "free", {}), None),
 )
@@ -1068,6 +1076,13 @@ OUTCOME_ANSWERS = {  # what the GitHub API and the tree answer, in the shapes th
                            "text": "VERDICT: ACCEPT\nF1: fine — severity: OBLIGATION on L3 — witness: w\n"}],
     ("pr", 4): {"state": "closed", "merged": True, "merged_at": AFTER_TS},
     ("pr", 5): {"state": "open", "merged": False},
+    ("pr", 13): {"state": "closed", "merged": False, "closed_at": BEFORE_TS},
+    ("prs",): [{"number": 1, "head_ref": "b/pins", "created_at": AFTER_TS, "closed_at": None},
+               {"number": 3, "head_ref": "b/review", "created_at": AFTER_TS, "closed_at": None},
+               {"number": 5, "head_ref": "b/open", "created_at": AFTER_TS, "closed_at": None},
+               {"number": 13, "head_ref": "b/reused", "created_at": BEFORE_TS, "closed_at": BEFORE_TS},
+               {"number": 4, "head_ref": "b/reused", "created_at": AFTER_TS, "closed_at": AFTER_TS},
+               {"number": 14, "head_ref": "b/other", "created_at": LATER_TS, "closed_at": None}],
     ("report",): "# REPORT\n- L1 — **SEALED; Crafter FIT**\n- L2 — **NetHack MARGINAL**\n- L2 — **NetHack UNFIT**\n",
     ("timeline", 6): [{"event": "reviewed", "user": {"login": "gfrmin"}, "state": "commented", "submitted_at": AFTER_TS},
                       {"event": "reviewed", "user": {"login": "gfrmin"}, "state": "approved", "submitted_at": LATER_TS}],
@@ -3056,7 +3071,8 @@ PINS = [
         p0r_claims_precede_scoring, (Mutant("late_forecast_admitted", _edits("P0r_late_forecast_admitted")),)),
     Pin("P0s", "typed forecasts are resolved by code from what the API shows; free ones never by the mechanism",
         p0s_outcomes_by_code, (Mutant("outcome_inverted", _edits("P0s_outcome_inverted")),
-                               Mutant("free_resolved_by_mechanism", _edits("P0s_free_resolved_by_mechanism")))),
+                               Mutant("free_resolved_by_mechanism", _edits("P0s_free_resolved_by_mechanism")),
+                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr")))),
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")))),

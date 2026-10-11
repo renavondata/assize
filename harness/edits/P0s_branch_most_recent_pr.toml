@@ -1,0 +1,6 @@
+# P0s's third mutant (instruction #66 item 3): a forecast bound by `branch` resolves against the most recently opened
+# pull request, whatever its head ref.
+[[edit]]
+path = "harness/ledger.py"
+old = """    prs = sorted(filter(live, observe("prs")), key=lambda p: (_t(p["created_at"]), int(p["number"])))"""
+new = """    prs = sorted(observe("prs"), key=lambda p: _t(p["created_at"]), reverse=True)"""
