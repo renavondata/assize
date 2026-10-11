@@ -1,0 +1,5 @@
+# P0x's first mutant (instruction #70): an instruction, or a Part of a batch, with no `Price:` line is accepted.
+[[edit]]
+path = "harness/claims.py"
+old = "for name, lines, want in counted if len(lines) != want]"
+new = "for name, lines, want in counted if len(lines) > want]"

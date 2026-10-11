@@ -1,0 +1,18 @@
+# probe on scratch copy /tmp/rev114.EjHg/tree at a921c3777af925d445803ea5ed6e2a53b4f67a26; script:
+    import sys; sys.path.insert(0, sys.argv[1])
+    from harness import claims
+    print("PRICE_FROM =", claims.PRICE_FROM, "(constant; instruction #70 item 4: 'read from the merge commit's committer time in git')")
+    print("PRICE_EXEMPT =", sorted(claims.PRICE_EXEMPT), "(instruction #70 item 4: 'never from an issue number or an enumerated set')")
+    batch = "Batch.\n## Part A\nDo a.\nPrice: sessions; down; 1\n## Part B\nDo b.\nPrice: none (recording-only)\n"
+    f = claims.price_findings(500, batch, "2999-01-01T00:00:00Z")
+    print("batch, one Price line per `## Part`, signed after merge:", [str(x) for x in f] or "admitted")
+    f = claims.price_findings(500, "Batch.\n## Part A\nDo a.\n## Part B\nDo b.\nPrice: sessions; down; 1\n", "2999-01-01T00:00:00Z")
+    print("batch, two Parts, one Price line total:", [str(x) for x in f] or "admitted")
+    f = claims.price_findings(115, "No price.", "2026-10-11T12:00:00Z")
+    print("issue signed 12:00Z today, before any merge of #114:", [str(x) for x in f] or "admitted")
+# output:
+PRICE_FROM = 2026-10-11T08:30:25Z (constant; instruction #70 item 4: 'read from the merge commit's committer time in git')
+PRICE_EXEMPT = [108, 110, 111, 112, 113] (instruction #70 item 4: 'never from an issue number or an enumerated set')
+batch, one Price line per `## Part`, signed after merge: ['issue #500: price_line: 2 `Price:` lines, want exactly one']
+batch, two Parts, one Price line total: admitted
+issue signed 12:00Z today, before any merge of #114: ['issue #115: price_line: 0 `Price:` lines, want exactly one']

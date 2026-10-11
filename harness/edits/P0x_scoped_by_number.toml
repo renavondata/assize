@@ -1,0 +1,5 @@
+# P0x's third mutant (instruction #70 item 4): the check is scoped by issue number instead of the merge's committer time, so an old draft signed after the merge is admitted unpriced and a new one signed before it is refused.
+[[edit]]
+path = "harness/claims.py"
+old = "    if since is None or labeled_at is None or not _after(labeled_at, since):"
+new = "    if since is None or labeled_at is None or n < 113:"

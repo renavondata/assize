@@ -1360,6 +1360,102 @@ def _github_condition(condition: str, context_: dict[str, str]) -> bool:
     return bool(eval(py.replace("&&", " and ").replace("||", " or "), {"__builtins__": {}}, {"ctx": context_}))
 
 
+PRICE_BEFORE, PRICE_MERGED, PRICE_AFTER = "2000-01-01T00:00:00Z", "2026-10-11T00:00:00Z", "2999-01-01T00:00:00Z"
+PRICE_N = 200
+PRICE_MERGE_DATE = "2030-01-01T00:00:00+00:00"  # the fixture merge's committer time, later than its branch commit's
+PRICE_WORKFLOW_COMMIT = claims.Commit("a" * 40, ("guy",), (".github/workflows/build.yml",),
+                                      instructions=(PRICE_N + 5, PRICE_N + 16))
+PRICE_DOC_COMMIT = claims.Commit("b" * 40, ("guy",), ("harness/ledger.py",), instructions=(PRICE_N + 6,))
+PRICE_ISSUES = (  # (issue, body, signed at, rule merged at, commits, finding codes wanted)
+    (PRICE_N + 1, "Do it.\nPrice: guy-latency; down; 2.5\nNothing else.", PRICE_AFTER, PRICE_MERGED, (), set()),
+    (PRICE_N + 2, "Do it.\nPrice: none (recording-only)", PRICE_AFTER, PRICE_MERGED, (), set()),
+    (PRICE_N + 3, "Do it, no price.", PRICE_AFTER, PRICE_MERGED, (), {"price_line"}),
+    (PRICE_N + 4, "Price: sessions; down; 1\nPrice: none (recording-only)", PRICE_AFTER, PRICE_MERGED, (),
+     {"price_line"}),
+    (PRICE_N + 5, "Price: none (recording-only)", PRICE_AFTER, PRICE_MERGED, (PRICE_WORKFLOW_COMMIT,),
+     {"price_none_on_workflow"}),
+    (PRICE_N + 6, "Price: none (recording-only)", PRICE_AFTER, PRICE_MERGED, (PRICE_DOC_COMMIT, PRICE_WORKFLOW_COMMIT),
+     set()),
+    (PRICE_N + 7, "Price: sessions; down; 1", PRICE_AFTER, PRICE_MERGED, (PRICE_WORKFLOW_COMMIT,), set()),
+    (PRICE_N + 8, "Price: happiness; up; 3", PRICE_AFTER, PRICE_MERGED, (), {"price_form"}),
+    (PRICE_N + 9, "Price: sessions; sideways; 3", PRICE_AFTER, PRICE_MERGED, (), {"price_form"}),
+    (PRICE_N + 10, "Price: sessions; down", PRICE_AFTER, PRICE_MERGED, (), {"price_form"}),
+    (PRICE_N + 11, "Signed before the rule merged, no price.", PRICE_BEFORE, PRICE_MERGED, (), set()),
+    (PRICE_N + 12, "Never signed, no price.", None, PRICE_MERGED, (), set()),
+    (PRICE_N + 13, "Signed, but the rule has not merged, no price.", PRICE_AFTER, None, (), set()),
+    (67, "An old draft by number, signed after the rule merged, no price.", PRICE_AFTER, PRICE_MERGED, (),
+     {"price_line"}),
+    (900, "A new draft by number, signed before the rule merged, no price.", PRICE_BEFORE, PRICE_MERGED, (), set()),
+    (PRICE_N + 14, "Batch.\n## Part A\nDo a.\nPrice: sessions; down; 1\n## Part B\nDo b.\nPrice: none (recording-only)\n",
+     PRICE_AFTER, PRICE_MERGED, (), set()),
+    (PRICE_N + 15, "Batch.\n## Part A\nDo a.\n## Part B\nDo b.\nPrice: sessions; down; 1\n", PRICE_AFTER, PRICE_MERGED, (),
+     {"price_line"}),
+    (PRICE_N + 16, "Batch.\n## Part A\nPrice: none (recording-only)\n## Part B\nPrice: none (recording-only)\n",
+     PRICE_AFTER, PRICE_MERGED, (PRICE_WORKFLOW_COMMIT,), {"price_none_on_workflow"}),
+    (PRICE_N + 17, "Batch.\nPrice: sessions; down; 1\n## Part A\nPrice: sessions; down; 1\n", PRICE_AFTER, PRICE_MERGED,
+     (), {"price_line"}),
+)
+
+
+def _price_repo(repo: Path) -> tuple[str, str, str]:
+    """A fixture repository: master without the rule, a branch adding it, and master's merge of that branch.
+    Returns master before the merge, the branch head, and the merge."""
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    _append(repo, claims.PRICE_PATH, "# no rule yet\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    before = git("rev-parse", "HEAD")
+    git("checkout", "-q", "-b", "rule")
+    _append(repo, claims.PRICE_PATH, f"{claims.PRICE_MARK}n, body): ...\n")
+    git("commit", "-q", "-am", "rule")
+    branch = git("rev-parse", "HEAD")
+    git("checkout", "-q", "master")
+    _append(repo, "other", "x\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "other")
+    subprocess.run(["git", "-C", str(repo), "merge", "-q", "--no-ff", "-m", "Merge pull request #1", "rule"], check=True,
+                   capture_output=True, env=os.environ | claims.GIT_ENV | FIXTURE_GIT | {"GIT_COMMITTER_DATE": PRICE_MERGE_DATE})
+    return before, branch, git("rev-parse", "HEAD")
+
+
+def p0x_price_declared() -> bool:
+    """Every `instruction` issue signed after the rule merged (claims.price_from: the committer time of the merge
+    that brought claims.PRICE_MARK onto master's first-parent line, read from git; before it exists, no issue) carries
+    exactly one `Price:` line, or one per `## Part` of a batch, `<quantity>; down|up; <bound>` with a quantity of
+    `python -m harness.ledger price`, or `none (recording-only)`; and a commit citing an issue whose every line is of
+    the second kind touches no workflow (instruction #70). The real issues are read in CI once the rule has merged."""
+    expect, ok = _expecter()
+    for n, body, at, since, commits, want in PRICE_ISSUES:
+        got = {f.code for f in claims.price_findings(n, body, at, since, commits)}
+        expect(got == want, f"issue #{n} (signed {at}, rule merged {since}): findings {sorted(got)}, want {sorted(want)}")
+    repo = Path(tempfile.mkdtemp(prefix="assize-p0x-", dir=context.scratch)) / "repo"
+    before, branch, merge = _price_repo(repo)
+    merged_at = _git_fixture(repo)("log", "-1", "--format=%cI", merge)
+    branched_at = _git_fixture(repo)("log", "-1", "--format=%cI", branch)
+    got = {k: claims.price_from(repo, sha) for k, sha in (("before", before), ("merge", merge))}
+    expect(got == {"before": None, "merge": merged_at} and claims._after(merged_at, branched_at),
+           f"rule merged at {got}: none before the merge; after it the merge's committer time {merged_at}, not the "
+           f"branch commit's {branched_at}")
+    root = _real_root()
+    base = _branch_base(root)
+    since = claims.price_from(root, base) if base else None
+    expect(base is not None, f"master's merge base with HEAD read ({base})")
+    if since is None:
+        print("    real: the rule has not merged on master's first-parent line; the real-tree check covers no issue")
+        return ok()
+    try:
+        real = claims.load_priced(root, since)
+    except (OSError, subprocess.SubprocessError) as e:
+        real, _ = {}, expect(False, f"real issues not read ({e})")
+    commits = claims.branch_commits(root, base)
+    found = [f for n, (body, at) in sorted(real.items()) for f in claims.price_findings(n, body, at, since, commits)]
+    print(f"    real: rule merged {since}; {len(real)} instruction issues updated since: {sorted(real)}")
+    expect(not found, f"real instruction issues: findings {[str(f) for f in found]}")
+    return ok()
+
+
 def p0v_review_trigger() -> bool:
     """The review job starts on a `needs-review` label applied by the reviewer account (an audit-findings pull request,
     the Vizier sending a changed head back), on one applied by the builder, and not on an `awaits-guy` label a review
@@ -3084,6 +3180,10 @@ PINS = [
                        Mutant("draw_push_forced", _edits("P0u_draw_push_forced")))),
     Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
         p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),)),
+    Pin("P0x", "an instruction signed after instruction #70 merged declares the price quantity it moves, or that it only records",
+        p0x_price_declared, (Mutant("price_line_dropped", _edits("P0x_price_line_dropped")),
+                             Mutant("none_on_workflow_admitted", _edits("P0x_none_on_workflow_admitted")),
+                             Mutant("scoped_by_number", _edits("P0x_scoped_by_number")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
