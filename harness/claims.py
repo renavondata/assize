@@ -508,41 +508,58 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
 
 # Instruction #70: a change to how work is done names the quantity of `python -m harness.ledger price` it moves, in what
 # direction and by what bound, before the run; one that cannot says `Price: none (recording-only)` and changes no
-# workflow. Every `instruction` issue signed after PRICE_FROM, except those enumerated in PRICE_EXEMPT, carries
-# exactly one such line.
-PRICE_FROM = "2026-10-11T08:30:25Z"  # a pre-stated constant: the time instruction #70's branch was committed
-# Issues signed after PRICE_FROM but before this rule merged, which cannot comply: #108 (no line) and batches #110-#113
-# (a line per part, which "exactly one" refuses). Enumerated, not bounded by number: an unsigned draft (#67) is not
-# reached.
-PRICE_EXEMPT = frozenset({108, 110, 111, 112, 113})
+# workflow. Every `instruction` issue signed after the rule merged carries exactly one such line, or one per `## Part`
+# of a batch. "After" is the committer time of the first commit on master's first-parent line whose tree has the rule
+# (`price_from`), read from git: never an issue number, an enumerated set or a committed time. Before that merge exists
+# it is None and the check covers no issue.
+PRICE_MARK = "def price_findings("
+PRICE_PATH = "harness/claims.py"
 PRICE_QUANTITIES = ("guy-items", "guy-latency", "sessions", "runner-min", "wish-latency")
 PRICE_NONE = "none (recording-only)"
 PRICE_LINE = re.compile(r"^Price: (.*?)\s*$", re.M)
+PRICE_PART = re.compile(r"^## Part\b", re.M)
 PRICE_DECLARED = re.compile(r"(\S+); (down|up); -?\d+(?:\.\d+)?")
 WORKFLOWS = ".github/workflows/"
 
 
-def price_findings(n: int, body: str, labeled_at: str | None, commits: Sequence[Commit] = ()) -> list[Finding]:
-    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`): signed after PRICE_FROM and not in PRICE_EXEMPT, exactly one `Price:`
-    line, of the form `<quantity>; down|up; <bound>` or `none (recording-only)`; and no commit citing the issue under
-    the second form touches a workflow."""
+def price_from(repo: Path, base: str) -> str | None:
+    """The committer time of the first commit on `base`'s first-parent line that adds PRICE_MARK to PRICE_PATH (a merge
+    is read against its first parent), or None if there is none: the merge of instruction #70's rule, read from git."""
+    out = _git(repo, "log", "--first-parent", "--diff-merges=first-parent", "--reverse", "--format=%cI",
+               f"-S{PRICE_MARK}", base, "--", PRICE_PATH).split()
+    return out[0] if out else None
+
+
+def price_findings(n: int, body: str, labeled_at: str | None, since: str | None,
+                   commits: Sequence[Commit] = ()) -> list[Finding]:
+    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`), if the rule merged at `since` and the
+    issue was signed after it: exactly one `Price:` line, or in a batch exactly one in each `## Part` and none before
+    the first, of the form `<quantity>; down|up; <bound>` or `none (recording-only)`; and, if every line is the second
+    form, no commit citing the issue touches a workflow."""
     where = f"issue #{n}"
-    if n in PRICE_EXEMPT or labeled_at is None or not _after(labeled_at, PRICE_FROM):
+    if since is None or labeled_at is None or not _after(labeled_at, since):
         return []
-    lines = PRICE_LINE.findall(body)
-    if len(lines) != 1:
-        return [Finding(where, "price_line", f"{len(lines)} `Price:` lines, want exactly one")]
-    declared = PRICE_DECLARED.fullmatch(lines[0])
-    if lines[0] != PRICE_NONE and not (declared and declared.group(1) in PRICE_QUANTITIES):
-        return [Finding(where, "price_form", f"`Price: {lines[0]}` is neither `<quantity>; down|up; <bound>` with a "
+    starts = [m.start() for m in PRICE_PART.finditer(body)]
+    sections = ([("before the first `## Part`", body[:starts[0]], 0)]
+                + [(f"`## Part` {i + 1}", body[a:b], 1) for i, (a, b) in enumerate(zip(starts, starts[1:] + [len(body)]))]
+                if starts else [("the instruction", body, 1)])
+    counted = [(name, PRICE_LINE.findall(text), want) for name, text, want in sections]
+    wrong = [f"{name}: {len(lines)}, want {want}" for name, lines, want in counted if len(lines) != want]
+    if wrong:
+        return [Finding(where, "price_line", f"`Price:` lines {'; '.join(wrong)}")]
+    lines = [line for _, found, _ in counted for line in found]
+    bad = [line for line in lines if line != PRICE_NONE and not (
+        (declared := PRICE_DECLARED.fullmatch(line)) and declared.group(1) in PRICE_QUANTITIES)]
+    if bad:
+        return [Finding(where, "price_form", f"`Price: {bad[0]}` is neither `<quantity>; down|up; <bound>` with a "
                                              f"quantity of {PRICE_QUANTITIES} nor `{PRICE_NONE}`")]
     touching = [c.sha[:12] for c in commits if n in c.instructions and any(p.startswith(WORKFLOWS) for p in c.paths)]
     return ([Finding(where, "price_none_on_workflow", f"`Price: {PRICE_NONE}` but commits {touching} touch {WORKFLOWS}")]
-            if lines[0] == PRICE_NONE and touching else [])
+            if all(line == PRICE_NONE for line in lines) and touching else [])
 
 
-def load_priced(repo: Path) -> dict[int, tuple[str, str | None]]:
-    """Every `instruction` issue, open or closed, updated since PRICE_FROM (signing updates it): number -> (body, when
+def load_priced(repo: Path, since: str) -> dict[int, tuple[str, str | None]]:
+    """Every `instruction` issue, open or closed, updated since `since` (signing updates it): number -> (body, when
     gfrmin's standing label was applied). Raises if the issues or a timeline cannot be read: unread authorises nothing."""
     def gh(path: str, *args: str) -> str:
         return subprocess.run(["gh", "api", path, *args], cwd=repo, check=True, capture_output=True, text=True,
@@ -554,7 +571,7 @@ def load_priced(repo: Path) -> dict[int, tuple[str, str | None]]:
     return {e["n"]: (e["body"] or "", instruction_labeled_at(
         [json.loads(line) for line in gh(f"repos/{{owner}}/{{repo}}/issues/{e['n']}/timeline?per_page=100",
                                          "--paginate", "--jq", ".[]").splitlines() if line.strip()]))
-            for e in listed if _after(e["updated"], PRICE_FROM)}
+            for e in listed if _after(e["updated"], since)}
 
 
 def _edits_said(i: Issue) -> str:

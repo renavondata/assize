@@ -1,5 +1,0 @@
-# P0x's third mutant (instruction #70, review of 0f89aa9 F1): the exemption reaches issues by number, so an old unsigned draft signed later is admitted.
-[[edit]]
-path = "harness/claims.py"
-old = "if n in PRICE_EXEMPT or labeled_at"
-new = "if n in PRICE_EXEMPT or n < 113 or labeled_at"
