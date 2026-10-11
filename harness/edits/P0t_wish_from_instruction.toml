@@ -1,0 +1,5 @@
+# P0t's third mutant (instruction #68): wish latency measured from the instruction's creation, not the wish's own.
+[[edit]]
+path = "harness/ledger.py"
+old = "    return (tuple(filed), tuple(_hours(created[n], done[n]) for n in filed if done[n]),"
+new = "    return (tuple(filed), tuple(_hours(max(created[i] for i, w in cited.items() if w == n), done[n]) for n in filed if done[n]),"
