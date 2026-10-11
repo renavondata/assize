@@ -511,7 +511,7 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
 # workflow. Every `instruction` issue numbered from PRICE_FIRST_ISSUE and signed after PRICE_FROM carries exactly one
 # such line.
 PRICE_FROM = "2026-10-11T08:30:25Z"  # a pre-stated constant: the time instruction #70's branch was committed
-PRICE_FIRST_ISSUE = 110  # drafts filed before this pull request (#109) could not have complied, signed or not
+PRICE_FIRST_ISSUE = 113  # issues filed before this one (batches #110-#112 carry a `Price:` line per part) could not comply
 PRICE_QUANTITIES = ("guy-items", "guy-latency", "sessions", "runner-min", "wish-latency")
 PRICE_NONE = "none (recording-only)"
 PRICE_LINE = re.compile(r"^Price: (.*?)\s*$", re.M)
