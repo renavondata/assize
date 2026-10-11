@@ -1,0 +1,5 @@
+# P0af's mutant (instruction #111 Part B item 9d): a sovereign list without fixed-order is accepted.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    if FIXED not in sovereign:'''
+new = '''    if False:'''

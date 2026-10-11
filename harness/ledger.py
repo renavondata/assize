@@ -86,7 +86,8 @@ def outcomes(rows: Sequence[dict]) -> dict[str, bool]:
     """The last resolution of each forecast id, in ledger order (A1.6: a later record answers an earlier one). The two
     L0 resolutions written before A1.6 was enforced name their forecast by `resolves` (claims.L0_PRE_RULE's rows)."""
     return {r.get("id", r.get("resolves")): r["outcome"] for r in rows
-            if "claim" not in r and isinstance(r.get("outcome"), bool) and ("id" in r or "resolves" in r)}
+            if "claim" not in r and isinstance(r.get("outcome"), bool) and ("id" in r or "resolves" in r)
+            and not r.get("void")}
 
 
 def surprise(merged: Sequence[Merged], resolved: Mapping[str, bool]) -> list[Surprise]:
@@ -167,7 +168,7 @@ def ledger_rows(repo: Path, head: str = "HEAD") -> list[dict]:
 # ("review_files", pr), ("report",), ("timeline", item), ("audit", sha), ("price", layer). The real one reads the
 # GitHub API and the working tree; P0s's reads fixture answers. A query it cannot answer raises Unreadable.
 Observe = Callable[..., object]
-Outcome = tuple[bool, str]  # the outcome and its witness
+Outcome = tuple  # the outcome and its witness, and optionally a dict of further fields for the resolution row
 
 
 class Unreadable(Exception):
@@ -284,6 +285,8 @@ def answer(e: Mapping) -> str | None:
 def _guy_answers(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """True once gfrmin gives `answer` on the item at or after the forecast; false once the item is closed without
     his giving it; open otherwise."""
+    if args["answer"] == SILENT:
+        return _silent(args["item"], list(observe("timeline", int(args["item"]))), f, str(args["until"]), now)
     events = [e for e in observe("timeline", int(args["item"])) if _at_or_after(_when(e), f["ts"])]
     given = [e for e in events if _actor(e) == GUY and answer(e) == args["answer"]]
     if given:
@@ -292,17 +295,46 @@ def _guy_answers(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outco
     return (False, f"#{args['item']}: closed at {_when(closed[-1])} without gfrmin {args['answer']}") if closed else None
 
 
+SILENT = "silent-default"  # the answer of an item Guy saw and did not overturn (instruction #111 Part B)
+SEEN, NEXT, LATER = "labeled:seen", "labeled:next", "labeled:later"
+VOID_UNEXPOSED = "unexposed"
+
+
 def reverses(e: Mapping, events: Sequence[Mapping]) -> bool:
-    """gfrmin reopens, unlabels, or closes the item other than by merging it."""
+    """gfrmin reopens, unlabels, or closes the item other than by merging it, or labels it `later`."""
     if _actor(e) != GUY:
         return False
     merged = {_when(m) for m in events if m.get("event") == "merged"}
-    return e.get("event") in ("reopened", "unlabeled") or (e.get("event") == "closed" and _when(e) not in merged)
+    return (e.get("event") in ("reopened", "unlabeled") or answer(e) == LATER
+            or (e.get("event") == "closed" and _when(e) not in merged))
+
+
+def exposed(events: Sequence[Mapping], since: str, until: str) -> bool:
+    """Guy declared he saw the item: a `seen` label he applied in [since, until). Nothing infers exposure -- not the
+    time that has passed, not a comment, not another account's label."""
+    return any(_actor(e) == GUY and answer(e) == SEEN and _at_or_after(_when(e), since)
+               and not _at_or_after(_when(e), until) for e in events)
+
+
+def _silent(item: object, events: Sequence[Mapping], f: Mapping, until: str, now: str) -> Outcome | None:
+    """Silence after a declared exposure resolves true; a reversal resolves false; silence without exposure is void
+    (counted, never scored); before `until`, open."""
+    rev = [e for e in events if _at_or_after(_when(e), f["ts"]) and not _at_or_after(_when(e), until)
+           and reverses(e, events)]
+    if rev:
+        return False, f"#{item}: gfrmin {answer(rev[0]) or rev[0].get('event')} at {_when(rev[0])}"
+    if not _at_or_after(now, until):
+        return None
+    if exposed(events, f["ts"], until):
+        return True, f"#{item}: seen by gfrmin, no reversal before {until}"
+    return False, f"#{item}: void, no `seen` label by gfrmin before {until}", {"void": VOID_UNEXPOSED}
 
 
 def _not_overturned(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """True once `until` passes with no gfrmin reversal of the item at or after the forecast; false at a reversal."""
     events = list(observe("timeline", int(args["item"])))
+    if args.get("exposure") == "seen":  # made under the regime where silence counts only after a declared exposure
+        return _silent(args["item"], events, f, str(args["until"]), now)
     before = [e for e in events if _at_or_after(_when(e), f["ts"]) and not _at_or_after(_when(e), args["until"])]
     rev = [e for e in before if reverses(e, events)]
     if rev:
@@ -342,11 +374,72 @@ def _price(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | N
     return got <= float(args["bound"]), f"price of L{args['layer']}: {args['quantity']} {got}"
 
 
+ITEM = re.compile(r"#(\d+)\b")
+
+
+def _guy_picks(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+    """Guy's pick among the candidates a chooser declared (instruction #111 Part B). The labels he applies resolve it:
+    `next` on a candidate X picks X; `later` on X picks something other than X; the earliest after the forecast
+    wins. Failing both, once `until` has passed, silence picks the item shown if he declared he saw it (`seen`) and is
+    void otherwise. The outcome is whether the forecast's own `chose` stood; the resolution carries the `pick` and the
+    `answer`, from which the forecast's log-loss is scored over its whole `dist`. Free-text comments resolve nothing."""
+    timelines = {c: list(observe("timeline", int(m.group(1)))) for c in args["candidates"]
+                 if (m := ITEM.fullmatch(c))}
+    verbs = sorted((_t(w), c, a) for c, es in timelines.items() for e in es
+                   if _actor(e) == GUY and (a := answer(e)) in (NEXT, LATER) and (w := _when(e)) is not None
+                   and _at_or_after(w, f["ts"]))
+    if verbs:
+        when, c, a = verbs[0]
+        picked = ("item", c) if a == NEXT else ("not", c)
+        stood = (c == args["chose"]) if a == NEXT else (c != args["chose"])
+        return stood, f"{c}: gfrmin {a.split(':')[1]} at {when.isoformat()}", \
+            {"pick": {"kind": picked[0], "item": c}, "answer": a.split(":")[1]}
+    shown, until = str(args["shown"]), str(args["until"])
+    if not _at_or_after(now, until):
+        return None
+    if exposed(timelines.get(shown, []), f["ts"], until):
+        return args["chose"] == shown, f"{shown}: seen by gfrmin, no next or later before {until}", \
+            {"pick": {"kind": "item", "item": shown}, "answer": SILENT}
+    return False, f"{shown}: void, no `seen` label by gfrmin before {until}", {"void": VOID_UNEXPOSED}
+
+
+def voided(rows: Sequence[dict]) -> set[str]:
+    """Forecasts whose last resolution is void: answered, never scored, counted by the report."""
+    last = {r["id"]: r for r in rows if "claim" not in r and "id" in r}
+    return {i for i, r in last.items() if r.get("void")}
+
+
+def pick_counts(rows: Sequence[dict]) -> dict[str, int]:
+    """The denominator of the chooser's record: every `guy_picks` forecast is scored, void or still open, and the three
+    counts sum to the number made (instruction #111 Part B item 2: a void is counted, never dropped)."""
+    mine = [f["id"] for f in rows if f.get("type") == "guy_picks" and "claim" in f]
+    void = voided(rows)
+    scored = outcomes(rows).keys()
+    return {"scored": sum(1 for i in mine if i in scored), "void": sum(1 for i in mine if i in void),
+            "open": sum(1 for i in mine if i not in scored and i not in void)}
+
+
+def pick_rounds(rows: Sequence[dict], sovereign: Sequence[str]) -> list:
+    """The resolved choices in the ledger, oldest first, as `chooser.Round`s: the `guy_picks` rows of sovereign
+    entrants grouped by `args.round`, with the pick their resolutions carry. A void round is no round."""
+    from harness import chooser
+
+    last = {r["id"]: r for r in rows if "claim" not in r and "id" in r and "pick" in r and not r.get("void")}
+    groups: dict[str, dict] = {}
+    for f in rows:
+        a = f.get("args") or {}
+        if f.get("type") == "guy_picks" and "claim" in f and a.get("entrant") in sovereign and f["id"] in last:
+            g = groups.setdefault(a["round"], {"ts": f["ts"], "dists": {}, "res": last[f["id"]]})
+            g["dists"][a["entrant"]] = a["dist"]
+    return [chooser.Round(g["ts"], g["dists"], (g["res"]["pick"]["kind"], g["res"]["pick"]["item"]),
+                          g["res"].get("answer") != SILENT) for g in sorted(groups.values(), key=lambda g: g["ts"])]
+
+
 FREE = "free"
 OUTCOMES: Mapping[str, Callable[..., Outcome | None] | None] = {
     "pins_green": _bound(_pins_green), "review_accept": _bound(_review_accept), "merged": _bound(_merged), "host_verdict": _host_verdict,
     "guy_answers": _guy_answers, "not_overturned": _not_overturned, "finding_count": _finding_count,
-    "price": _price,
+    "price": _price, "guy_picks": _guy_picks,
     FREE: None,  # never resolved by the mechanism; the Reviewer resolves it by hand, with its witness
 }
 
@@ -357,7 +450,7 @@ def forecast_type(f: Mapping) -> str:
 
 
 def open_forecasts(rows: Sequence[dict]) -> list[dict]:
-    resolved = outcomes(rows)
+    resolved = outcomes(rows).keys() | voided(rows)
     return [r for r in rows if "claim" in r and r.get("id") not in resolved]
 
 
@@ -378,8 +471,9 @@ def resolve(rows: Sequence[dict], observe: Observe, now: str, session: str) -> t
             return None, f"{f['id']}: {forecast_type(f)} {f.get('args')}: not read ({type(e).__name__}: {e})"
         if got is None:
             return None, None
-        o, witness = got
-        return {"id": f["id"], "ts": now, "proposer": proposer, "outcome": o, "witness": witness}, None
+        o, witness, *extra = got
+        return {"id": f["id"], "ts": now, "proposer": proposer, "outcome": o, "witness": witness,
+                **(extra[0] if extra else {})}, None
 
     done = [one(f) for f in open_forecasts(rows)]
     return [r for r, _ in done if r is not None], [e for _, e in done if e is not None]

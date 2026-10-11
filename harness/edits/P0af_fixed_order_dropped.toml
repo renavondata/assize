@@ -1,0 +1,6 @@
+# P0af's mutant (instruction #111 Part B item 9d): fixed-order is not the choice when no sovereign act has followed the
+# last change-point; the mixture chooses.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    if regime == FIXED or not acts:'''
+new = '''    if regime == FIXED:'''

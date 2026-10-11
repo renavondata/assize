@@ -1690,6 +1690,417 @@ def p0ab_session_logs() -> bool:
     return ok()
 
 
+DRAFT_SINCE, DRAFT_AFTER, DRAFT_BEFORE = "2026-03-01T00:00:00Z", "2026-03-02T00:00:00Z", "2026-02-01T00:00:00Z"
+DRAFT_AMEND = "Wish: #{w}\nBrief amendment to `docs/briefs/brief-2-nethack.md`, titled `Wish #{t}`:\n\n## Amendment: x\n"
+DRAFT_BECAUSE = "Instruction because: it blocks the queue today.\n"
+DRAFT_FIXTURE = (  # (what, body, opened, rule merged, findings wanted) -- instruction #111 Part A
+    ("a brief amendment", DRAFT_AMEND.format(w=5, t=5), DRAFT_AFTER, DRAFT_SINCE, set()),
+    ("an instruction with its reason", "Wish: #6\n" + DRAFT_BECAUSE + "Do the thing.\n", DRAFT_AFTER, DRAFT_SINCE, set()),
+    ("neither form", "Wish: #7\nDo the thing.\n", DRAFT_AFTER, DRAFT_SINCE, {"no_form"}),
+    ("both forms", DRAFT_AMEND.format(w=8, t=8) + DRAFT_BECAUSE, DRAFT_AFTER, DRAFT_SINCE, {"both_forms"}),
+    ("no wish on the first line", DRAFT_BECAUSE, DRAFT_AFTER, DRAFT_SINCE, {"no_wish"}),
+    ("an amendment titled for another wish", DRAFT_AMEND.format(w=9, t=10), DRAFT_AFTER, DRAFT_SINCE, {"wrong_wish"}),
+    ("the reason twice", "Wish: #11\n" + DRAFT_BECAUSE * 2, DRAFT_AFTER, DRAFT_SINCE, {"repeated_form"}),
+    ("opened before the rule merged", "Wish: #12\nDo the thing.\n", DRAFT_BEFORE, DRAFT_SINCE, set()),
+    ("the rule has not merged", "Do the thing.\n", DRAFT_AFTER, None, set()),
+)
+
+
+def p0ac_draft_form() -> bool:
+    """A `draft` issue opened after the rule merged (claims.draft_from, the merge dated from git as the price rule's is)
+    opens `Wish: #<n>` and carries exactly one of an `Instruction because:` line and a brief amendment titled for that
+    wish; a draft with neither or both is out of order (instruction #111 Part A item 4). The real drafts are read in CI
+    once the rule has merged."""
+    expect, ok = _expecter()
+    for what, body, at, since, want in DRAFT_FIXTURE:
+        got = {f.code for f in claims.draft_findings(1, body, at, since)}
+        expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
+    root = _real_root()
+    base = _branch_base(root)
+    since = claims.draft_from(root, base) if base else None
+    expect(base is not None, f"master's merge base with HEAD read ({base})")
+    if since is None:
+        print("    real: the draft rule has not merged on master's first-parent line; the real-tree check covers no draft")
+        return ok()
+    try:
+        real = claims.load_drafts(root, since)
+    except (OSError, subprocess.SubprocessError) as e:
+        real, _ = {}, expect(False, f"real drafts not read ({e})")
+    found = [f for n, (body, at) in sorted(real.items()) for f in claims.draft_findings(n, body, at, since)]
+    print(f"    real: rule merged {since}; {len(real)} drafts opened since: {sorted(real)}")
+    expect(not found, f"real drafts: findings {[str(f) for f in found]}")
+    return ok()
+
+
+PICK_PROPOSER = {"kind": "mechanism", "model": "chooser:p0", "session": "p0"}
+PICK_TS, PICK_UNTIL, PICK_WITHIN, PICK_AFTER = ("2026-01-10T00:00:00Z", "2026-01-20T00:00:00Z", "2026-01-15T00:00:00Z",
+                                                "2026-01-25T00:00:00Z")
+PICK_NOW = "2026-02-01T00:00:00Z"
+
+
+def _pick(entrant: str, cands: list, chose: str, shown: str | None = None, rid: str = "r", dist: dict | None = None,
+          ts: str = PICK_TS) -> dict:
+    from harness import chooser
+
+    return chooser.pick_row(entrant, cands, dist or chooser.point(cands, chose), chose, shown or chose, PICK_UNTIL, rid,
+                            ts, "0" * 40, PICK_PROPOSER)
+
+
+def _commit(git, message: str = "x") -> str:
+    git("add", "-A")
+    git("commit", "-q", "-m", message)
+    return git("rev-parse", "HEAD")
+
+
+def _status_with(row: dict, over: list | None = None, chose: str | None = None) -> str:
+    from harness import chooser
+
+    a = row["args"]
+    return ("# STATUS — L2 — 2026-10-12 — abc1234 — PR #1\n"
+            + chooser.chose_line(chose or a["chose"], over or a["candidates"], {"fixed-order": 0.5, "priorities-literal": 0.5},
+                                 a["hash"], "chooser") + "\n")
+
+
+def _chose_repo(repo: Path):
+    """A fixture history of `chose:` lines: R1 sealed before its line; R2 added in the same commit as its line; R3
+    added after its line; R4's line omits a candidate; R5 has no forecast at all; R6's line chose outside the
+    candidates. Returns the git helper and the rows by name."""
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    status, ledger_path = "reports/L2/STATUS.md", "reports/L2/forecasts.jsonl"
+    rows = {n: _pick("mixture", ["#1", "#2", "#3"], "#1", rid=n) for n in ("R1", "R2", "R3", "R4", "R6")}
+    rows["R5"] = _pick("mixture", ["#1", "#2", "#3"], "#1", rid="R5")
+    _append(repo, ledger_path, json.dumps(rows["R1"]) + "\n")
+    _commit(git, "forecast R1")
+    (repo / status).write_text(_status_with(rows["R1"]))
+    _commit(git, "act on R1")
+    _append(repo, ledger_path, json.dumps(rows["R2"]) + "\n")
+    (repo / status).write_text(_status_with(rows["R2"]))
+    _commit(git, "forecast and act on R2")
+    (repo / status).write_text(_status_with(rows["R3"]))
+    _commit(git, "act on R3")
+    _append(repo, ledger_path, json.dumps(rows["R3"]) + "\n")
+    _commit(git, "forecast R3, late")
+    _append(repo, ledger_path, json.dumps(rows["R4"]) + "\n")
+    _commit(git, "forecast R4")
+    (repo / status).write_text(_status_with(rows["R4"], over=["#1", "#2"]))
+    _commit(git, "act on R4, omitting #3")
+    (repo / status).write_text(_status_with(rows["R5"]))
+    _commit(git, "act on R5, never forecast")
+    _append(repo, ledger_path, json.dumps(rows["R6"]) + "\n")
+    _commit(git, "forecast R6")
+    (repo / status).write_text(_status_with(rows["R6"], chose="#9"))
+    _commit(git, "act on R6, choosing outside the candidates")
+    return git, rows
+
+
+CHOSE_WANT = {"R1": set(), "R2": {"late"}, "R3": {"late"}, "R4": {"candidates"}, "R5": {"no_forecast"},
+              "R6": {"not_a_candidate"}}
+
+
+def p0ad_chooser_sealed() -> bool:
+    """A `guy_picks` forecast row is first present in a strict ancestor of the commit where the STATUS `chose:` line
+    citing its hash first appears; a row first present in the same commit or later is late. The line lists exactly the
+    candidates its forecast declares and chooses one of them. `python -m harness.chooser choose` prints rows that
+    pass the ledger check, a mixture row whose hash the line cites, and a line that passes all of these once committed
+    in order (instruction #111 Part B items 1, 3 and 9a, 9e)."""
+    import contextlib
+    import io
+
+    from harness import chooser
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ad-", dir=context.scratch))
+    repo = work / "repo"
+    _, rows = _chose_repo(repo)
+    by_hash = {r["args"]["hash"][:12]: n for n, r in rows.items()}
+    got: dict[str, set] = {n: set() for n in rows}
+    for f in chooser.chose_findings(repo):
+        got[by_hash[f.where.split()[1]]].add(f.code)
+    for n, want in CHOSE_WANT.items():
+        expect(got[n] == want, f"{n}: findings {sorted(got[n])}, want {sorted(want)}")
+    cli = work / "cli"
+    git = _git_fixture(cli)
+    cli.mkdir()
+    git("init", "-q", "-b", "master")
+    _append(cli, "harness/entrants.toml", 'sovereign = ["fixed-order", "priorities-literal"]\n[bound]\nloss = 5.0\n')
+    _append(cli, chooser.SEED_PATH, "seed0\n")
+    _append(cli, "reports/L2/forecasts.jsonl", json.dumps(_forecast("open", 0.5)) + "\n")
+    _commit(git)
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = chooser.main(["choose", "#1", "#2", "#3", "--until", PICK_UNTIL, "--ts", PICK_TS, "--session", "p0ad",
+                           "--repo", str(cli)])
+    lines = out.getvalue().splitlines()
+    printed = [json.loads(line) for line in lines[:-1]]
+    line = chooser.CHOSE.match(lines[-1]) if lines else None
+    expect(rc == 0 and line is not None and len(printed) == 2, f"choose exits 0 and prints two rows and a line ({rc}, "
+                                                              f"{len(printed)} rows)")
+    if line is None or len(printed) != 2:
+        return False
+    mixture = next(r for r in printed if r["args"]["entrant"] == chooser.MIXTURE)
+    expect([f.code for f in claims.ledger_findings([json.dumps(r) for r in printed])] == [],
+           "the printed rows pass the ledger check")
+    expect(all(r["args"]["hash"] == chooser.forecast_hash(r["args"]) for r in printed), "each row's hash is its SHA-256")
+    expect(line["hash"] == mixture["args"]["hash"] and [c.strip() for c in line["over"].split(",")] == ["#1", "#2", "#3"],
+           "the line cites the mixture row's hash and lists every candidate")
+    expect(line["regime"] == chooser.regime_at("seed0", 0), "the line names the regime the seed assigns the first choice")
+    _append(cli, "reports/L2/forecasts.jsonl", "".join(json.dumps(r) + "\n" for r in printed))
+    _commit(git, "forecasts")
+    (cli / "reports/L2/STATUS.md").write_text("# STATUS — L2 — 2026-10-12 — abc1234 — PR #1\n" + lines[-1] + "\n")
+    _commit(git, "act")
+    found = chooser.chose_findings(cli)
+    expect(not found, f"the printed rows, committed first, then the line, pass the check ({[str(f) for f in found]})")
+    root = _real_root()
+    found = chooser.chose_findings(root)
+    print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
+    expect(not found, f"real chose lines: findings {[str(f) for f in found]}")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _ev(event: str, actor: str, at: str, label: str | None = None) -> dict:
+    return {"event": event, "actor": {"login": actor}, "created_at": at} | ({"label": {"name": label}} if label else {})
+
+
+def _picks_case(base: int, events: dict[int, list]) -> tuple[dict, dict]:
+    cands = [f"#{base + 1}", f"#{base + 2}"]
+    return _pick("fixed-order", cands, cands[0], rid=f"c{base}"), {("timeline", base + i): events.get(i, []) for i in (1, 2)}
+
+
+# (what, item number base, events by offset, resolution wanted); None = open
+PICKS_FIXTURE = (
+    ("next on another candidate", 110, {2: [_ev("labeled", "gfrmin", PICK_WITHIN, "next")]},
+     {"outcome": False, "answer": "next", "pick": {"kind": "item", "item": "#112"}}),
+    ("later on the item chosen", 120, {1: [_ev("labeled", "gfrmin", PICK_WITHIN, "later")]},
+     {"outcome": False, "answer": "later", "pick": {"kind": "not", "item": "#121"}}),
+    ("next on the item chosen", 130, {1: [_ev("labeled", "gfrmin", PICK_WITHIN, "next")]},
+     {"outcome": True, "answer": "next", "pick": {"kind": "item", "item": "#131"}}),
+    ("silence after he saw it", 140, {1: [_ev("labeled", "gfrmin", PICK_WITHIN, "seen")]},
+     {"outcome": True, "answer": "silent-default", "pick": {"kind": "item", "item": "#141"}}),
+    ("silence, never seen", 150, {}, {"outcome": False, "void": "unexposed"}),
+    ("seen by another account", 160, {1: [_ev("labeled", "assize-reviewer", PICK_WITHIN, "seen")]},
+     {"outcome": False, "void": "unexposed"}),
+    ("seen after the silence was counted", 170, {1: [_ev("labeled", "gfrmin", PICK_AFTER, "seen")]},
+     {"outcome": False, "void": "unexposed"}),
+    ("a next by another account", 180, {2: [_ev("labeled", "assize-reviewer", PICK_WITHIN, "next")]},
+     {"outcome": False, "void": "unexposed"}),
+    ("a comment saying next", 190, {1: [_ev("commented", "gfrmin", PICK_WITHIN)]}, {"outcome": False, "void": "unexposed"}),
+)
+SILENT_FIXTURE = (  # (forecast type, args, events by item, resolution wanted)
+    ("guy_answers", {"item": 31, "answer": "silent-default", "until": PICK_UNTIL}, {31: [_ev("labeled", "gfrmin", PICK_WITHIN, "seen")]},
+     {"outcome": True}),
+    ("guy_answers", {"item": 32, "answer": "silent-default", "until": PICK_UNTIL}, {32: []},
+     {"outcome": False, "void": "unexposed"}),
+    ("guy_answers", {"item": 33, "answer": "silent-default", "until": PICK_UNTIL},
+     {33: [_ev("labeled", "gfrmin", PICK_TS, "seen"), _ev("reopened", "gfrmin", PICK_WITHIN)]}, {"outcome": False}),
+    ("not_overturned", {"item": 41, "until": PICK_UNTIL, "exposure": "seen"}, {41: [_ev("labeled", "gfrmin", PICK_WITHIN, "seen")]},
+     {"outcome": True}),
+    ("not_overturned", {"item": 42, "until": PICK_UNTIL, "exposure": "seen"}, {42: []}, {"outcome": False, "void": "unexposed"}),
+    ("not_overturned", {"item": 43, "until": PICK_UNTIL, "exposure": "seen"},
+     {43: [_ev("labeled", "gfrmin", PICK_TS, "seen"), _ev("labeled", "gfrmin", PICK_WITHIN, "later")]}, {"outcome": False}),
+    ("not_overturned", {"item": 44, "until": PICK_UNTIL}, {44: []}, {"outcome": True}),  # made before the regime
+)
+
+
+def p0ae_exposure_and_labels() -> bool:
+    """Guy's pick is resolved by code from the labels he applies (`next`, `later`), never by a comment; silence picks the
+    item shown only if gfrmin applied `seen` before it was counted, and otherwise is void -- answered, not scored, and
+    counted in the denominator; the same holds for `silent-default` on `guy_answers` and for a `not_overturned`
+    forecast made under the exposure regime (instruction #111 Part B items 2 and 5, 9b)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    rows, answers = [], {}
+    for what, base, events, want in PICKS_FIXTURE:
+        f, seen_by_api = _picks_case(base, events)
+        rows.append(f)
+        answers.update(seen_by_api)
+    for n, (ftype, args, events, want) in enumerate(SILENT_FIXTURE):
+        rows.append(_typed(f"{ftype} {n}", 0.7, ftype, args))
+        answers.update({("timeline", item): ev for item, ev in events.items()})
+    early = _pick("fixed-order", ["write the brief", "audit"], "write the brief", rid="early")
+
+    def observe(kind: str, *key: object) -> object:
+        if (kind, *key) not in answers:
+            raise ledger.Unreadable(f"fixture has no answer to {(kind, *key)}")
+        return answers[(kind, *key)]
+
+    got, unread = ledger.resolve(rows + [early], observe, PICK_NOW, "p0ae")
+    by_id = {r["id"]: r for r in got}
+    wants = [(f["claim"], f["id"], w) for f, (_, _, _, w) in zip(rows[:len(PICKS_FIXTURE)], PICKS_FIXTURE)]
+    wants += [(f["claim"], f["id"], w) for f, (_, _, _, w) in zip(rows[len(PICKS_FIXTURE):], SILENT_FIXTURE)]
+    for claim, i, want in wants:
+        r = by_id.get(i, {})
+        have = {k: r.get(k) for k in want}
+        expect(have == want, f"{claim}: resolved {have}, want {want}")
+    expect(not unread, f"nothing unread ({unread})")
+    expect(all(r["proposer"]["kind"] == "mechanism" and r.get("witness") for r in got), "each is the mechanism's, witnessed")
+    expect(early["id"] in by_id and by_id[early["id"]].get("void") == "unexposed",
+           "silence on an item with no issue to be seen on is void")
+    before, _ = ledger.resolve([early], observe, PICK_WITHIN, "p0ae")
+    expect(not before, f"silence before the count is open ({before})")
+    all_rows = rows + [early] + got
+    voids = {r["id"] for r in got if r.get("void")}
+    expect(voids and not (voids & ledger.outcomes(all_rows).keys()), "a void resolution is not a scored outcome")
+    again, _ = ledger.resolve(all_rows, observe, PICK_NOW, "p0ae")
+    expect(not again, f"a void forecast is answered, not resolved again ({again})")
+    counts = ledger.pick_counts(all_rows)
+    made = sum(1 for r in all_rows if r.get("type") == "guy_picks" and "claim" in r)
+    expect(counts == {"scored": 4, "void": 6, "open": 0} and sum(counts.values()) == made,
+           f"guy_picks: {counts} over {made} made (voids counted in the denominator)")
+    findings = claims.ledger_findings(_ledger(*rows, early, *got))
+    expect(not findings, f"forecasts and resolutions pass the ledger check ({[str(f) for f in findings]})")
+    return ok()
+
+
+def _fixed_share_by_definition(entrants: list, rounds: list, alpha: float) -> dict:
+    """The forward algorithm of the hidden Markov model whose state is the best entrant: stay with probability 1 -
+    alpha + alpha / K, move to each other entrant with alpha / K. Per round the state's weight is multiplied by the
+    likelihood of Guy's pick under that entrant's forecast (an abstainer by that of the mixture of those that made
+    one), renormalised (left alone if every likelihood is zero), then pushed through the transition matrix."""
+    k = len(entrants)
+    trans = [[(1 - alpha) * (i == j) + alpha / k for j in range(k)] for i in range(k)]
+    w = [1.0 / k] * k
+    for r in rounds:
+        live = [i for i, e in enumerate(entrants) if e in r.dists]
+        if not live:
+            continue
+        z = sum(w[i] for i in live)
+
+        def lik(e: str) -> float:
+            kind, x = r.pick
+            m = r.dists[e].get(x, 0.0)
+            return m if kind == "item" else 1 - m
+
+        mixed = sum(w[i] / z * lik(entrants[i]) for i in live)
+        v = [w[i] * (lik(e) if e in r.dists else mixed) for i, e in enumerate(entrants)]
+        if sum(v) > 0:
+            w = [x / sum(v) for x in v]
+        w = [sum(w[i] * trans[i][j] for i in range(k)) for j in range(k)]
+    return dict(zip(entrants, w))
+
+
+def p0af_fixed_share() -> bool:
+    """The chooser's weights are Fixed Share over the sovereign entrants' log-loss on Guy's resolved picks, with alpha
+    derived from the switching-regret bound (s / (T - 1), s the declared change-points); `fixed-order` is a required
+    entrant and the choice until a sovereign act follows the last change-point; the priorities entrant abstains
+    without an ordering (instruction #111 Part B items 4, 7 and 9c, 9d)."""
+    import contextlib
+    import io
+    import tomllib
+
+    from harness import chooser, ledger
+
+    expect, ok = _expecter()
+    for (s, t), want in (((1, 11), 0.1), ((2, 5), 0.5), ((0, 11), 0.1), ((5, 3), 1.0), ((1, 1), 1.0)):
+        expect(math.isclose(chooser.derived_alpha(s, t), want), f"alpha(s={s}, T={t}) = {chooser.derived_alpha(s, t)}, want {want}")
+    a, b = chooser.point(["a", "b"], "a"), chooser.point(["a", "b"], "b")
+    half = {"a": 0.5, "b": 0.5}
+    entrants = [chooser.FIXED, chooser.PRIORITIES, "llm"]
+    day = "2026-01-{:02d}T00:00:00Z".format
+    both = {chooser.FIXED: a, chooser.PRIORITIES: b}
+    rounds = [chooser.Round(day(1), both | {"llm": half}, ("item", "b"), True), chooser.Round(day(2), both, ("item", "b"), True),
+              chooser.Round(day(3), both, ("item", "b"), True), chooser.Round(day(4), both | {"llm": half}, ("item", "a"), True),
+              chooser.Round(day(5), both, ("not", "b"), True),
+              chooser.Round(day(6), {chooser.FIXED: a, chooser.PRIORITIES: a, "llm": a}, ("item", "b"), True)]
+    alpha = 2 / (len(rounds) - 1)
+    want = _fixed_share_by_definition(entrants, rounds, alpha)
+    have = chooser.weights(entrants, rounds, chooser.derived_alpha(2, len(rounds)))
+    expect(all(math.isclose(have[e], want[e], abs_tol=1e-12) for e in entrants),
+           f"weights {have}, by the definition at alpha {alpha}: {want}")
+    expect(all(w >= alpha / len(entrants) - 1e-12 for w in have.values()) and math.isclose(sum(have.values()), 1.0),
+           "every entrant keeps at least alpha / K of the weight, and the weights sum to 1: one that was wrong "
+           "(with infinite loss) can come back")
+    # (d) fixed-order is the choice until a sovereign act follows the last change-point
+    past = [chooser.Round(day(i), both, ("item", "b"), True) for i in (1, 2, 3)]
+    silent = [chooser.Round(day(7), both, ("item", "b"), False)]
+    for what, rs, cps, regime, wantc, via in (
+            ("no act since the change-point", past, [day(5)], "chooser", "a", chooser.FIXED),
+            ("an act after the change-point", past, [day(1)], "chooser", "b", chooser.MIXTURE),
+            ("the fixed-order regime", past, [day(1)], chooser.FIXED, "a", chooser.FIXED),
+            ("silence is no act", silent, [day(5)], "chooser", "a", chooser.FIXED)):
+        got = chooser.choose(["a", "b"], both, rs, cps, regime)
+        expect((got.chose, got.via) == (wantc, via), f"{what}: chose {got.chose} via {got.via}, want {wantc} via {via}")
+    ordering = chooser.ordering_of("Priorities\n1. #12 the chooser\n- #7\n* later\n")
+    expect(ordering == ["#12 the chooser", "#7", "later"], f"ordering read from list items: {ordering}")
+    expect(chooser.priorities_literal(["#7", "#9", "#12"], ordering) == chooser.point(["#7", "#9", "#12"], "#12")
+           and chooser.priorities_literal(["#9"], ordering) is None and chooser.priorities_literal(["#9"], []) is None,
+           "priorities-literal puts all the mass on the first candidate the ordering names, and abstains otherwise")
+    root = _real_root()
+    listed = tomllib.loads((root / ledger.ENTRANTS).read_text()).get(chooser.SOVEREIGN)
+    expect(isinstance(listed, list) and chooser.FIXED in listed, f"the checkout's sovereign list ({listed}) holds {chooser.FIXED}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0af-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir()
+    git("init", "-q", "-b", "master")
+    _append(repo, ledger.ENTRANTS, 'sovereign = ["priorities-literal"]\n[bound]\nloss = 5.0\n')
+    _commit(git)
+    err = io.StringIO()
+    with contextlib.redirect_stderr(err):
+        rc = chooser.main(["choose", "a", "--until", PICK_UNTIL, "--ts", PICK_TS, "--session", "p0af", "--repo", str(repo)])
+    expect(rc == 2 and "is not a sovereign entrant" in err.getvalue(), f"a sovereign list without {chooser.FIXED} is refused "
+                                                                      f"({rc}: {err.getvalue().strip()})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def p0ag_switchback() -> bool:
+    """The switchback's schedule is recomputed from the committed seed -- the parity of its SHA-256 fixes the first
+    regime and the rest alternate -- and equals the regimes the STATUS `chose:` lines record; a choice with no seed, or
+    a seed committed after the first choice, fails (instruction #111 Part C, the pin)."""
+    from harness import chooser
+
+    expect, ok = _expecter()
+    import hashlib
+
+    def parity(s: str) -> int:  # the definition, written out here: the first regime is the SHA-256's parity
+        return int(hashlib.sha256(s.encode()).hexdigest(), 16) % 2
+
+    seeds = {r: next(s for s in (f"seed{i}" for i in range(64)) if chooser.REGIMES[parity(s)] == r)
+             for r in chooser.REGIMES}
+    for r, s in seeds.items():
+        schedule = [chooser.regime_at(s, i) for i in range(5)]
+        expect(schedule[0] == r and all(schedule[i] != schedule[i + 1] for i in range(4)),
+               f"seed {s!r} starts with {r} and alternates: {schedule}")
+        lines = [{"regime": x} for x in schedule]
+        expect(not chooser.switchback_findings(s, lines), f"{s!r}: the recorded regimes equal the schedule")
+        swapped = [lines[0] | {"regime": schedule[1]}] + lines[1:]
+        expect({f.code for f in chooser.switchback_findings(s, swapped)} == {"regime"},
+               f"{s!r}: a first choice in the other regime is a finding")
+    expect({f.code for f in chooser.switchback_findings(None, [{"regime": "chooser"}])} == {"unseeded"}
+           and not chooser.switchback_findings(None, []), "a choice with no seed is unseeded; no choice, no finding")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ag-", dir=context.scratch))
+    for name, seed_first, want in (("seed_first", True, set()), ("seed_late", False, {"late"})):
+        repo = work / name
+        git = _git_fixture(repo)
+        repo.mkdir()
+        git("init", "-q", "-b", "master")
+        row = _pick("mixture", ["#1", "#2"], "#1", rid=name)
+        seed = seeds["chooser"]
+        _append(repo, "reports/L2/forecasts.jsonl", json.dumps(row) + "\n")
+        _commit(git, "forecast")
+        if seed_first:
+            _append(repo, chooser.SEED_PATH, seed + "\n")
+            _commit(git, "seed")
+        text = _status_with(row).replace("regime chooser", f"regime {chooser.regime_at(seed, 0)}")
+        (repo / "reports/L2/STATUS.md").write_text(text)
+        _commit(git, "act")
+        if not seed_first:
+            _append(repo, chooser.SEED_PATH, seed + "\n")
+            _commit(git, "seed, after the act")
+        got = {f.code for f in chooser.seed_findings(repo)}
+        expect(got == want, f"{name}: findings {sorted(got)}, want {sorted(want)}")
+    root = _real_root()
+    found = chooser.seed_findings(root)
+    print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
+    expect(not found, f"real switchback: findings {[str(f) for f in found]}")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 PURITY_FIXTURE = (  # (label, schema, tokens wanted) against a fixture manifest's vocabulary
     ("clean", {"type": "object", "description": "a generic field"}, set()),
     ("as a key", {"properties": {"semantic": {}}}, {"semantic"}),
@@ -3410,6 +3821,28 @@ PINS = [
     Pin("P0ab", "a session log that edits .github/ or harness/ through Bash, or ends on master opening nothing, fails",
         p0ab_session_logs, (Mutant("shell_edit_admitted", _edits("P0ab_shell_edit_admitted")),
                             Mutant("silent_master_stop_admitted", _edits("P0ab_silent_master_stop_admitted")))),
+    Pin("P0ac", "a wish is drafted as a brief amendment unless the draft says in one line why it cannot wait",
+        p0ac_draft_form, (Mutant("instruction_without_because_admitted",
+                                 _edits("P0ac_instruction_without_because_admitted")),
+                          Mutant("both_forms_admitted", _edits("P0ac_both_forms_admitted")))),
+    Pin("P0ad", "the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate",
+        p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
+                              Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),
+                              Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted")))),
+    Pin("P0ae", "Guy's pick is resolved by the labels he applies; silence counts only after a declared exposure, else void",
+        p0ae_exposure_and_labels, (Mutant("exposure_inferred", _edits("P0ae_exposure_inferred")),
+                                   Mutant("void_scored", _edits("P0ae_void_scored")),
+                                   Mutant("void_not_counted", _edits("P0ae_void_not_counted")),
+                                   Mutant("later_label_ignored", _edits("P0ae_later_label_ignored")),
+                                   Mutant("label_by_anyone", _edits("P0ae_label_by_anyone")))),
+    Pin("P0af", "the chooser elects by Fixed Share with the derived alpha; fixed-order is an entrant and the default choice",
+        p0af_fixed_share, (Mutant("alpha_zero", _edits("P0af_alpha_zero")),
+                           Mutant("fixed_order_dropped", _edits("P0af_fixed_order_dropped")),
+                           Mutant("fixed_order_not_required", _edits("P0af_fixed_order_not_required")),
+                           Mutant("silence_is_an_act", _edits("P0af_silence_is_an_act")))),
+    Pin("P0ag", "the switchback's regimes equal the schedule recomputed from the committed seed, which precedes the first choice",
+        p0ag_switchback, (Mutant("regime_after_seed", _edits("P0ag_regime_after_seed")),
+                          Mutant("seed_after_act_admitted", _edits("P0ag_seed_after_act_admitted")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

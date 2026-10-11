@@ -1,0 +1,6 @@
+# P0ac's mutant (instruction #111 Part A item 4): a draft with neither a brief amendment nor an `Instruction because:`
+# line is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = '''(not because and not amendments, "no_form",'''
+new = '''(False, "no_form",'''

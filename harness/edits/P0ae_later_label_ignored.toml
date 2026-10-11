@@ -1,0 +1,5 @@
+# P0ae's mutant (instruction #111 Part B item 5): gfrmin's `later` label is not an overturn of a not_overturned act.
+[[edit]]
+path = "harness/ledger.py"
+old = '''e.get("event") in ("reopened", "unlabeled") or answer(e) == LATER'''
+new = '''e.get("event") in ("reopened", "unlabeled")'''

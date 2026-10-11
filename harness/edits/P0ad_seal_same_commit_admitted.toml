@@ -1,0 +1,6 @@
+# P0ad's mutant (instruction #111 Part B item 9a): a forecast row added in the same commit as the line that acts on it is
+# admitted as sealed.
+[[edit]]
+path = "harness/chooser.py"
+old = '''if row_commit is None or act_commit is None or row_commit == act_commit:'''
+new = '''if row_commit is None or act_commit is None:'''

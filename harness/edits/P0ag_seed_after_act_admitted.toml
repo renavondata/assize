@@ -1,0 +1,5 @@
+# P0ag's mutant (instruction #111 Part C): a seed committed after the first choice is admitted.
+[[edit]]
+path = "harness/chooser.py"
+old = '''        if not sealed_before(repo, first[0] if first else None, history[0][0]):'''
+new = '''        if False:'''

@@ -1,0 +1,6 @@
+# P0af's mutant (instruction #111 Part B item 9c): alpha is 0 -- Hedge, which never lets an entrant come back -- not the
+# value derived from the switching-regret bound.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    return min(1.0, max(1, switches) / max(1, rounds - 1))'''
+new = '''    return 0.0'''

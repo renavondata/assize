@@ -1,0 +1,6 @@
+# P0ac's mutant (instruction #111 Part A item 4): a draft carrying both an `Instruction because:` line and a brief
+# amendment is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = '''(bool(because) and bool(amendments), "both_forms",'''
+new = '''(False, "both_forms",'''

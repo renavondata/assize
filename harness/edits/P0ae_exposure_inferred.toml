@@ -1,0 +1,7 @@
+# P0ae's mutant (instruction #111 Part B item 9b): exposure is inferred -- silence counts once the time has passed,
+# whether or not gfrmin applied `seen`.
+[[edit]]
+path = "harness/ledger.py"
+old = '''    return any(_actor(e) == GUY and answer(e) == SEEN and _at_or_after(_when(e), since)
+               and not _at_or_after(_when(e), until) for e in events)'''
+new = '''    return True'''
