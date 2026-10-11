@@ -199,6 +199,9 @@ PROPOSER_EXEMPTIONS: Mapping[str, str] = {
     # P0m clean on instr-49-vizier (stacked on PR #48): the same blank line, in the review commit of PR #48; pushed,
     # and the head of a pull request awaiting Guy, so it is exempted rather than reworded.
     "e37357ed2d398cc3c1e16d65576d688e57c040c2": "reviewer claude-sonnet-5-5 a5caecbb-729c-4885-b5bf-40f1f55e76cc",
+    # P0m clean on instr-70-price-declared (pins CI run 38144888825, make pins at 39eb9f2): the same blank line, in
+    # the review commit of PR #114 round 2; pushed, and the branch is append-only, so it is exempted, not reworded.
+    "29dabe2b11a5eccddeab81aa7a72a0d29981b6f3": "reviewer claude-opus-5-5 c6c95e34-4360-4104-9f50-a576bd35102e",
 }
 
 
