@@ -1,17 +1,19 @@
-# STATUS — L2 — 2026-10-12 — 0205d30 — PR #116
-VERDICT: SESSION DONE: review 3f57a8c F1 answered; STATUS cites the green pins run in P0l's form, with its record
+# STATUS — L2 — 2026-10-12 — 13141ef — PR #117
+VERDICT: SESSION DONE: instruction #111 Parts A, B (less the CLAUDE.md sentence) and C built; pins CI run 38182372179 on 13141ef (success, attempt 1; record reports/L2/ci/38182372179.json)
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 45/45; mutants 116/116 KILLED; twins 116/116; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38165273607 on 0205d30 (success, run attempt 2; record reports/L2/ci/38165273607.json)
-changed: reports/L2/STATUS.md, reports/L2/ci/38165273607.json (code unchanged since 0205d30: `git diff --stat 0205d30 HEAD` touches only reports/)
-did: F1 (review 3f57a8c, BLOCK): rewrote the citation bare (`pins CI run <id> on <sha7>`) and committed the run's API record, as the review prescribed; no code changed
-did: #110 Parts A, C, D as in the previous STATUS; F2–F5 are obligations on L3, carried below
-did: no tool call was denied this session; local `make pins` not run (exceeds the 10-minute cloud cap); CI is the witness
-decided (not asked): header names 0205d30, the last sha whose code differs from the head and whose pins run is green; commits since touch only reports/ — p(stands on review)=0.75
-decided (not asked): no new forecast rows on this branch, because rows first present after the first pins run are late under Amendment 4 rule 2 (P0r) — p=0.8
-decided (not asked): harness/proposer.toml left at the prior session's id; changing it would change code after the cited green run — p=0.6
-forecasts: made 0 this session; resolved on this PR 1 (f07f35bccec6 pins_green p=0.2 → false, log-loss 0.223 vs base rate 0.693 over 1); open: 873f3c73ef34 review_accept, 926c865723d7 host_verdict
-price: guy-items 1; guy-latency median 0.0h max 0.0h; sessions 6; runner-min 215
-obligations added: L3: P0x's PRICE_DECLARED rejects a trailing remark on a Price line; drafts should be checked against it before signing
-obligations added: L3: review 3f57a8c F2 (pre-push reads stdin refs), F3 (sessions.py run on real logs), F4 (red pins on a PR routes to its branch, not Guy), F5 (post-merge blocked→build witness)
+pins: clean 50/50; mutants 132/132 KILLED; twins 132/132; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
+price: guy-items 1; guy-latency median 0.4h max 0.4h; sessions 0; runner-min 0
+changed: harness/chooser.py, harness/ledger.py, harness/claims.py, harness/pins.py, harness/entrants.toml, 15 mutants under harness/edits/, harness/README.md, .claude/commands/{build,vizier}.md, docs/briefs/brief-2-nethack.md, reports/
+did: #110 closed (delivered by PR #116); took #111 (oldest signed instruction no open PR holds; #112, #113 follow)
+did: P0ac draft form; P0ad sealed forecast and `chose:` line; P0ae labels, `seen` exposure, void counted; P0af Fixed Share, alpha = s/(T-1), fixed-order default; P0ag switchback schedule; brief amendment appended
+did: first pins run (38180562904) failed, P0s/outcome_inverted STALE because my resolver edit moved its anchor; fixed in 13141ef (green above). Disclosure: one edit to harness/pins.py was made by an inline `python3 -` script in Bash, against #110 Part D; the result is the same text, no tool call was denied
+decided (not asked): P0ac not P0x, since P0x is the price rule — p(stands on review)=0.9
+decided (not asked): Part C says "three regimes" and lists two; built two (fixed-order, chooser) — p=0.6
+decided (not asked): seed = merge commit sha, committed by the first Builder after merge to reports/switchback-seed.txt; chooser exits 2 until then — p=0.65
+decided (not asked): `guy_picks` p may be 0 or 1 (fixed-order is certain); `exposure: "seen"` arg opts a not_overturned forecast into the new regime so old ones keep their meaning — p=0.7
+decided (not asked): no host_verdict forecast added; 926c865723d7 is still open for L2 — p=0.8
+forecasts: made 2 this session (64bd978641da pins_green, 25642ab35f27 review_accept, both by branch); resolved 0 so far; the first pins run was red, so the first will resolve false
+obligations added: L3: CLAUDE.md A1.5 choice sentence (Part A item 3, Part B item 10) needs a reviewer-account `constitution` PR; PR #117 closes #76/#81/#82 as #111 directs though that sentence is open
+obligations added: L3: probes (Part B item 6, k = 2) belong to the boundary brief; a `chose:` line is not yet required of every STATUS
 NEEDS YOU (at most 1): none
-next: reviewer round on PR #116 head; then #113 (Batch W2) unless a PR holds it
+next: reviewer round on PR #117; the first Builder after merge commits reports/switchback-seed.txt; then #112 (Batch S) unless a PR holds it
