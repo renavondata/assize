@@ -1,0 +1,3 @@
+# pins runs read through the Actions API, 2026-10-11T15:24:46Z
+8638fe29d5d73bec974beb7f7c1f88595fa3b1cb completed success 38149902463 https://github.com/renavondata/assize/actions/runs/38149902463
+1cfd9a14cb1bf024ffc085228dfa41c19775af1b completed success 38148339961 https://github.com/renavondata/assize/actions/runs/38148339961
