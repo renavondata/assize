@@ -1,0 +1,18 @@
+Probe: what `python -m harness.chooser choose` files at PR #117 head 473a72d22a92 (reviewer c778d1a6, 2026-10-12).
+Scratch copy: `git archive HEAD` into /tmp/rev117probe.z8DV, fresh `git init`, one commit of the tree, one commit adding
+reports/switchback-seed.txt = "seed-probe" (so the chooser runs instead of exiting 2). Copy removed afterwards.
+
+$ uv run --frozen python -m harness.chooser choose '#112' '#113' --until 2026-10-20T00:00:00Z --ts 2026-10-12T00:00:00Z --session probe \
+    | (print each JSON row's type and args.entrant; other lines verbatim)
+ROW type=guy_picks entrant=fixed-order
+ROW type=guy_picks entrant=mixture
+chose: #112 over #112, #113 — entrants fixed-order=1.000 — forecast f360f980a38196bfe3d77bfc98844e8da6f82c1db8be71e606f087ff3b74c379 — regime fixed-order
+exit 0
+
+Rows of type not_overturned: 0. Rows of type merged: 0.
+
+$ grep -n 'not_overturned\|merged {pr}\|probe' .claude/commands/build.md
+(no match: the Builder's procedure does not file them either)
+
+$ grep -rn 'probe' .claude/commands/vizier.md harness/*.py   (excluding pins.py)
+(no match: no procedure or code draws Part B item 6's probes)
