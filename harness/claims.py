@@ -508,10 +508,12 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
 
 # Instruction #70: a change to how work is done names the quantity of `python -m harness.ledger price` it moves, in what
 # direction and by what bound, before the run; one that cannot says `Price: none (recording-only)` and changes no
-# workflow. Every `instruction` issue numbered from PRICE_FIRST_ISSUE and signed after PRICE_FROM carries exactly one
-# such line.
+# workflow. Every `instruction` issue signed after PRICE_FROM, except those enumerated in PRICE_EXEMPT, carries
+# exactly one such line.
 PRICE_FROM = "2026-10-11T08:30:25Z"  # a pre-stated constant: the time instruction #70's branch was committed
-PRICE_FIRST_ISSUE = 113  # issues filed before this one (batches #110-#112 carry a `Price:` line per part) could not comply
+# Issues already signed after PRICE_FROM that cannot comply: #108 (no line) and batches #110-#112 (a line per part,
+# which "exactly one" refuses). Enumerated, not bounded by number: an unsigned draft (#67) is not reached.
+PRICE_EXEMPT = frozenset({108, 110, 111, 112})
 PRICE_QUANTITIES = ("guy-items", "guy-latency", "sessions", "runner-min", "wish-latency")
 PRICE_NONE = "none (recording-only)"
 PRICE_LINE = re.compile(r"^Price: (.*?)\s*$", re.M)
@@ -520,11 +522,11 @@ WORKFLOWS = ".github/workflows/"
 
 
 def price_findings(n: int, body: str, labeled_at: str | None, commits: Sequence[Commit] = ()) -> list[Finding]:
-    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`): from PRICE_FIRST_ISSUE, signed after PRICE_FROM, exactly one `Price:`
+    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`): signed after PRICE_FROM and not in PRICE_EXEMPT, exactly one `Price:`
     line, of the form `<quantity>; down|up; <bound>` or `none (recording-only)`; and no commit citing the issue under
     the second form touches a workflow."""
     where = f"issue #{n}"
-    if n < PRICE_FIRST_ISSUE or labeled_at is None or not _after(labeled_at, PRICE_FROM):
+    if n in PRICE_EXEMPT or labeled_at is None or not _after(labeled_at, PRICE_FROM):
         return []
     lines = PRICE_LINE.findall(body)
     if len(lines) != 1:

@@ -1377,13 +1377,14 @@ PRICE_ISSUES = (  # (issue, body, signed at, commits, finding codes wanted)
     (PRICE_N + 9, "Price: sessions; sideways; 3", PRICE_AFTER, (), {"price_form"}),
     (PRICE_N + 10, "Price: sessions; down", PRICE_AFTER, (), {"price_form"}),
     (PRICE_N + 11, "Signed before the rule, no price.", PRICE_BEFORE, (), set()),
-    (claims.PRICE_FIRST_ISSUE - 1, "Signed after, filed before the rule, no price.", PRICE_AFTER, (), set()),
+    (sorted(claims.PRICE_EXEMPT)[0], "Signed after, enumerated as exempt, no price.", PRICE_AFTER, (), set()),
+    (67, "Unenumerated old draft signed after the merge, no price.", PRICE_AFTER, (), {"price_line"}),
     (PRICE_N + 12, "Never signed, no price.", None, (), set()),
 )
 
 
 def p0x_price_declared() -> bool:
-    """Every `instruction` issue numbered from claims.PRICE_FIRST_ISSUE and signed after claims.PRICE_FROM carries exactly one `Price:` line, `<quantity>; down|up;
+    """Every `instruction` issue signed after claims.PRICE_FROM, but those enumerated in claims.PRICE_EXEMPT, carries exactly one `Price:` line, `<quantity>; down|up;
     <bound>` with a quantity of `python -m harness.ledger price`, or `none (recording-only)`, and a commit citing an
     issue of the second kind touches no workflow (instruction #70); the real issues are read in CI, none skipped."""
     expect, ok = _expecter()
@@ -3129,7 +3130,8 @@ PINS = [
         p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),)),
     Pin("P0x", "an instruction signed after instruction #70 declares the price quantity it moves, or that it only records",
         p0x_price_declared, (Mutant("price_line_dropped", _edits("P0x_price_line_dropped")),
-                             Mutant("none_on_workflow_admitted", _edits("P0x_none_on_workflow_admitted")))),
+                             Mutant("none_on_workflow_admitted", _edits("P0x_none_on_workflow_admitted")),
+                             Mutant("exemption_by_number", _edits("P0x_exemption_by_number")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
