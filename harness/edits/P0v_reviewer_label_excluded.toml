@@ -1,0 +1,9 @@
+# P0v's mutant (instruction #65): the old condition restored -- every event the reviewer account sends is excluded, a
+# `needs-review` it applies included.
+[[edit]]
+path = ".github/workflows/review.yml"
+old = """      (github.event.sender.login != 'assize-reviewer' ||
+        (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && (
+"""
+new = """      github.event.sender.login != 'assize-reviewer' && (
+"""
