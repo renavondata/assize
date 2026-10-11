@@ -163,7 +163,7 @@ def ledger_rows(repo: Path, head: str = "HEAD") -> list[dict]:
 
 # ------------------------------------------------------------------ rule 3: outcomes by code (instruction #54)
 
-# An observer answers a query about the world: ("pins_runs", pr), ("run_attempt", run id), ("pr", pr),
+# An observer answers a query about the world: ("pins_runs", pr), ("run_attempt", run id), ("pr", pr), ("prs",),
 # ("review_files", pr), ("report",), ("timeline", item), ("audit", sha), ("price", layer). The real one reads the
 # GitHub API and the working tree; P0s's reads fixture answers. A query it cannot answer raises Unreadable.
 Observe = Callable[..., object]
@@ -182,9 +182,35 @@ def _at_or_after(a: str | None, b: str) -> bool:
     return a is not None and _t(a) >= _t(b)
 
 
-def _pins_green(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+def _pr_of(args: Mapping, f: Mapping, observe: Observe, now: str) -> tuple[int | None, Outcome | None]:
+    """The pull request a forecast binds to: `pr`, or else the first opened whose head ref is `branch` and which was
+    not closed before the forecast (instruction #66). With no such pull request once `resolves_by` has passed, the
+    outcome is false: no pull request is an outcome, not a drop."""
+    if "pr" in args:
+        return int(args["pr"]), None
+    branch = str(args["branch"])
+
+    def live(p: Mapping) -> bool:
+        return p.get("head_ref") == branch and (p.get("closed_at") is None or _at_or_after(p["closed_at"], f["ts"]))
+
+    prs = sorted(filter(live, observe("prs")), key=lambda p: (_t(p["created_at"]), int(p["number"])))
+    if prs:
+        return int(prs[0]["number"]), None
+    return None, ((False, f"no pull request from {branch} by {f['resolves_by']}")
+                  if _at_or_after(now, str(f["resolves_by"])) else None)
+
+
+def _bound(rule: Callable[[int, Mapping, Observe, str], Outcome | None]) -> Callable[..., Outcome | None]:
+    """A rule on a pull request, read from a forecast whose args name it by `pr` or by `branch`."""
+    def on(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+        pr, settled = _pr_of(args, f, observe, now)
+        return settled if pr is None else rule(pr, f, observe, now)
+    return on
+
+
+def _pins_green(pr: int, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """The first `pins` run on the pull request created at or after the forecast concluded success at attempt 1."""
-    runs = [r for r in observe("pins_runs", int(args["pr"])) if _at_or_after(r.get("created_at"), f["ts"])]
+    runs = [r for r in observe("pins_runs", pr) if _at_or_after(r.get("created_at"), f["ts"])]
     if not runs:
         return None
     first = min(runs, key=lambda r: (_t(r["created_at"]), int(r["id"])))
@@ -198,10 +224,10 @@ def _pins_green(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcom
 REVIEW_VERDICT = re.compile(r"^VERDICT: (ACCEPT WITH OBLIGATIONS|ACCEPT|BLOCK)\s*$", re.M)
 
 
-def _review_accept(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+def _review_accept(pr: int, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """The first review file the pull request's commits add at or after the forecast says `VERDICT: ACCEPT` or
     `ACCEPT WITH OBLIGATIONS` and carries no `severity: BLOCK`."""
-    files = [x for x in observe("review_files", int(args["pr"])) if _at_or_after(x.get("date"), f["ts"])]
+    files = [x for x in observe("review_files", pr) if _at_or_after(x.get("date"), f["ts"])]
     if not files:
         return None
     first = files[0]
@@ -210,11 +236,11 @@ def _review_accept(args: Mapping, f: Mapping, observe: Observe, now: str) -> Out
     return accept, f"{first['path']} at {str(first['sha'])[:12]}: {verdict.group(1) if verdict else 'no VERDICT'}"
 
 
-def _merged(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
-    pr = observe("pr", int(args["pr"]))
-    if pr.get("merged"):
-        return True, f"PR #{args['pr']} merged at {pr.get('merged_at')}"
-    return (False, f"PR #{args['pr']} closed unmerged at {pr.get('closed_at')}") if pr.get("state") == "closed" else None
+def _merged(pr: int, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+    got = observe("pr", pr)
+    if got.get("merged"):
+        return True, f"PR #{pr} merged at {got.get('merged_at')}"
+    return (False, f"PR #{pr} closed unmerged at {got.get('closed_at')}") if got.get("state") == "closed" else None
 
 
 def _layer_line(report: str, layer: int) -> str | None:
@@ -318,7 +344,7 @@ def _price(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | N
 
 FREE = "free"
 OUTCOMES: Mapping[str, Callable[..., Outcome | None] | None] = {
-    "pins_green": _pins_green, "review_accept": _review_accept, "merged": _merged, "host_verdict": _host_verdict,
+    "pins_green": _bound(_pins_green), "review_accept": _bound(_review_accept), "merged": _bound(_merged), "host_verdict": _host_verdict,
     "guy_answers": _guy_answers, "not_overturned": _not_overturned, "finding_count": _finding_count,
     "price": _price,
     FREE: None,  # never resolved by the mechanism; the Reviewer resolves it by hand, with its witness
@@ -409,6 +435,9 @@ def github_observer(repo: Path, price_of: Callable[[int], Mapping | None]) -> Ob
         if kind == "pr":
             return json.loads(_gh(repo, f"repos/{{owner}}/{{repo}}/pulls/{key[0]}", "--jq",
                                   "{state, merged, merged_at, closed_at}"))
+        if kind == "prs":
+            return _gh_lines(repo, "repos/{owner}/{repo}/pulls?state=all&per_page=100",
+                             ".[] | {number, head_ref: .head.ref, created_at, closed_at}")
         if kind == "review_files":
             return review_files(int(key[0]))
         if kind == "report":
