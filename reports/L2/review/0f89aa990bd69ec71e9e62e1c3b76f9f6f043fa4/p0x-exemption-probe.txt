@@ -1,0 +1,9 @@
+$ gh issue view 67 --json body -q .body > b67.txt; uv run --frozen python -c "...claims.price_findings(67, body, \"2999-01-01T00:00:00Z\", ())..." (scratch worktree of 0f89aa9)
+issue #67 signed 2999 (after merge), body Price lines: []
+findings #67: []
+findings same body as #113: ['price_line']
+
+$ gh issue view 67 --json state,labels
+OPEN draft Draft: Parallel builders on independent items, DAG scheduling
+$ instruction-label events on #67:
+0
