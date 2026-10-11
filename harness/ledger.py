@@ -472,8 +472,8 @@ def resolve(rows: Sequence[dict], observe: Observe, now: str, session: str) -> t
         if got is None:
             return None, None
         o, witness, *extra = got
-        return {"id": f["id"], "ts": now, "proposer": proposer, "outcome": o, "witness": witness,
-                **(extra[0] if extra else {})}, None
+        return {"id": f["id"], "ts": now, "proposer": proposer, **(extra[0] if extra else {}),
+                "outcome": o, "witness": witness}, None
 
     done = [one(f) for f in open_forecasts(rows)]
     return [r for r, _ in done if r is not None], [e for _, e in done if e is not None]
