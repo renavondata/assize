@@ -1,0 +1,12 @@
+3f57a8c completed failure 38168430017 attempt 1 https://github.com/renavondata/assize/actions/runs/38168430017
+0205d30 completed success 38165273607 attempt 2 https://github.com/renavondata/assize/actions/runs/38165273607
+0e0d327 completed failure 38163162591 attempt 1 https://github.com/renavondata/assize/actions/runs/38163162591
+
+pins	make pins	﻿2026-10-11T19:32:20.2775575Z ##[group]Run make pins PINS_OUT=out/pins
+^[[36;1mmake pins PINS_OUT=out/pins^[[0m
+CLEAN FAILED: P0l (observed fail)
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.295s + 0.294s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+clean: 44/45 passed, 1/45 failed
+mutants: 115/116 killed, 0/116 survived, 0/116 inconclusive, 0/116 stale, 1/116 non-causal, 0 leaked (clean and mutant)
+PINS FAILED

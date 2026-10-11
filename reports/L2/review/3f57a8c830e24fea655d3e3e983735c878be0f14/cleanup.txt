@@ -1,0 +1,8 @@
+$ ls -d /tmp/assize-review-116.* /tmp/assize-scratch-* /tmp/assize-p0*
+ls: cannot access '/tmp/assize-review-116.*': No such file or directory
+ls: cannot access '/tmp/assize-scratch-*': No such file or directory
+ls: cannot access '/tmp/assize-p0*': No such file or directory
+$ pgrep -af 'harness run|make pins|podman run|docker run'
+879426 /usr/bin/bash -c source /home/g/.claude/shell-snapshots/snapshot-bash-1791747129475-c6gbn1.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'D=reports/L2/review/3f57a8c830e24fea655d3e3e983735c878be0f14; rm -rf /tmp/assize-review-116.s7P4 /tmp/assize-scratch-* 2>/dev/null; { echo "\$ ls -d /tmp/assize-review-116.* /tmp/assize-scratch-* /tmp/assize-p0*"; ls -d /tmp/assize-review-116.* /tmp/assize-scratch-* /tmp/assize-p0* 2>&1; echo "\$ pgrep -af '"'"'harness run|make pins|podman run|docker run'"'"'"; pgrep -af '"'"'harness run|make pins|podman run|docker run'"'"' || echo "no harness process"; echo "\$ git worktree list"; git worktree list; } > $D/cleanup.txt 2>&1; cat $D/cleanup.txt' < /dev/null && pwd -P >| /tmp/claude-e3e5-cwd
+$ git worktree list
+/home/g/actions-runner/_work/assize/assize 3f57a8c [instr-110-queue-trailers]
