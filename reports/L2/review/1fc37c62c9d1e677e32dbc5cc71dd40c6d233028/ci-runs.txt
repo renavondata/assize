@@ -1,0 +1,11 @@
+# pins CI on 1fc37c6, read through the Actions API
+completed failure 38143046322 https://github.com/renavondata/assize/actions/runs/38143046322
+﻿2026-10-11T13:24:42.7709475Z ##[group]Run make pins PINS_OUT=out/pins
+2026-10-11T13:24:42.7710235Z ^[[36;1mmake pins PINS_OUT=out/pins^[[0m
+2026-10-11T13:31:34.9132107Z [clean ] P0l: observed fail -> FAILED (0.335s) out/pins/runs/P0l/clean/transcript.log
+2026-10-11T13:31:34.9133182Z CLEAN FAILED: P0l (observed fail)
+2026-10-11T13:31:34.9178639Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.36s + 0.41s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-11T13:50:44.1022859Z clean: 40/41 passed, 1/41 failed
+2026-10-11T13:50:44.1023752Z mutants: 108/109 killed, 0/109 survived, 0/109 inconclusive, 0/109 stale, 1/109 non-causal, 0 leaked (clean and mutant)
+2026-10-11T13:50:44.1024686Z twins: 108/109 passed
+2026-10-11T13:50:44.1025644Z PINS FAILED

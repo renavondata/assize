@@ -1,0 +1,33 @@
+# Probe of P0x at 1fc37c6 against instruction #70 item 4 as signed (gfrmin edit 2026-10-11T11:56:07Z). Scratch copy /tmp/assize-probe-114-sQZw/repo; a GitHub-style --no-ff merge of the PR head into origin/master (91352cc) is simulated with committer time 2026-10-12T09:00:00Z.
+# script:
+#   import subprocess, sys
+#   from pathlib import Path
+#   from harness import claims
+#   repo = Path(sys.argv[1])
+#   def git(*a): return subprocess.run(["git", "-C", str(repo), *a], check=True, capture_output=True, text=True).stdout.strip()
+#   master = git("rev-parse", "origin/master")
+#   print("1. price_from(origin/master) before the merge:", claims.price_from(repo, master))
+#   # simulate GitHub merge of PR head into master
+#   git("checkout", "-q", "-b", "probe-master", master)
+#   subprocess.run(["git", "-C", str(repo), "merge", "-q", "--no-ff", "-m", "Merge pull request #114", "instr-70-price-declared"], check=True, capture_output=True,
+#                  env={**__import__("os").environ, "GIT_COMMITTER_DATE": "2026-10-12T09:00:00+00:00", "GIT_AUTHOR_NAME": "p", "GIT_AUTHOR_EMAIL": "p@p", "GIT_COMMITTER_NAME": "p", "GIT_COMMITTER_EMAIL": "p@p"})
+#   m = git("rev-parse", "HEAD")
+#   print("2. price_from(simulated merge, committer 2026-10-12T09:00Z):", claims.price_from(repo, m))
+#   print("   branch code commit time:", git("log", "-1", "--format=%cI", "eb67973"))
+#   S = "2026-10-12T09:00:00+00:00"
+#   cases = [
+#    ("old #67 signed after merge, unpriced", 67, "Do x.", "2026-10-12T10:00:00Z"),
+#    ("new #900 signed before merge, unpriced", 900, "Do x.", "2026-10-12T08:00:00Z"),
+#    ("issue signed 12:00Z today (prior probe d)", 120, "Do x.", "2026-10-11T12:00:00Z"),
+#    ("two-Part batch, one line each", 121, "B\n## Part 1\nPrice: sessions; down; 2\n## Part 2\nPrice: guy-items; down; 1\n", "2026-10-12T10:00:00Z"),
+#    ("two-Part batch, one line total (prior probe c)", 122, "B\n## Part 1\nx\n## Part 2\nPrice: sessions; down; 2\n", "2026-10-12T10:00:00Z"),
+#    ("single, priced", 123, "x\nPrice: runner-min; down; 30\n", "2026-10-12T10:00:00Z"),
+#    ("single, priced with trailing note", 124, "x\nPrice: sessions; down; 2 (the #48 class)\n", "2026-10-12T10:00:00Z"),
+#    ("Price: none on workflow commit", 125, "x\nPrice: none (recording-only)\n", "2026-10-12T10:00:00Z"),
+#   ]
+#   wf = claims.Commit("c"*40, ("guy",), (".github/workflows/review.yml",), instructions=(125,))
+#   for name, n, body, at in cases:
+#       print(f"3. {name}: {[str(f) for f in claims.price_findings(n, body, at, S, (wf,))]}")
+#   print("4. pre-merge (since=None), unpriced issue:", claims.price_findings(126, "x", "2026-10-12T10:00:00Z", None))
+# output:
+1. price_from(origin/master) before the merge: None
