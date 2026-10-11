@@ -1,0 +1,5 @@
+# P0x's first mutant (instruction #70): an instruction with no `Price:` line is accepted.
+[[edit]]
+path = "harness/claims.py"
+old = "    if len(lines) != 1:"
+new = "    if len(lines) > 1:"

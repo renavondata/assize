@@ -1360,6 +1360,47 @@ def _github_condition(condition: str, context_: dict[str, str]) -> bool:
     return bool(eval(py.replace("&&", " and ").replace("||", " or "), {"__builtins__": {}}, {"ctx": context_}))
 
 
+PRICE_DECL_FROM = claims.PRICE_FROM
+PRICE_BEFORE, PRICE_AFTER = "2000-01-01T00:00:00Z", "2999-01-01T00:00:00Z"
+PRICE_WORKFLOW_COMMIT = claims.Commit("a" * 40, ("guy",), (".github/workflows/build.yml",), instructions=(5,))
+PRICE_DOC_COMMIT = claims.Commit("b" * 40, ("guy",), ("harness/ledger.py",), instructions=(6,))
+PRICE_ISSUES = (  # (issue, body, signed at, commits, finding codes wanted)
+    (1, "Do it.\nPrice: guy-latency; down; 2.5\nNothing else.", PRICE_AFTER, (), set()),
+    (2, "Do it.\nPrice: none (recording-only)", PRICE_AFTER, (), set()),
+    (3, "Do it, no price.", PRICE_AFTER, (), {"price_line"}),
+    (4, "Price: sessions; down; 1\nPrice: none (recording-only)", PRICE_AFTER, (), {"price_line"}),
+    (5, "Price: none (recording-only)", PRICE_AFTER, (PRICE_WORKFLOW_COMMIT,), {"price_none_on_workflow"}),
+    (6, "Price: none (recording-only)", PRICE_AFTER, (PRICE_DOC_COMMIT, PRICE_WORKFLOW_COMMIT), set()),
+    (7, "Price: sessions; down; 1", PRICE_AFTER, (PRICE_WORKFLOW_COMMIT,), set()),
+    (8, "Price: happiness; up; 3", PRICE_AFTER, (), {"price_form"}),
+    (9, "Price: sessions; sideways; 3", PRICE_AFTER, (), {"price_form"}),
+    (10, "Price: sessions; down", PRICE_AFTER, (), {"price_form"}),
+    (11, "Signed before the rule, no price.", PRICE_BEFORE, (), set()),
+    (12, "Never signed, no price.", None, (), set()),
+)
+
+
+def p0x_price_declared() -> bool:
+    """Every `instruction` issue signed after claims.PRICE_FROM carries exactly one `Price:` line, `<quantity>; down|up;
+    <bound>` with a quantity of `python -m harness.ledger price`, or `none (recording-only)`, and a commit citing an
+    issue of the second kind touches no workflow (instruction #70); the real issues are read in CI, none skipped."""
+    expect, ok = _expecter()
+    for n, body, at, commits, want in PRICE_ISSUES:
+        got = {f.code for f in claims.price_findings(n, body, at, commits)}
+        expect(got == want, f"issue #{n}: findings {sorted(got)}, want {sorted(want)}")
+    try:
+        real = claims.load_priced(_real_root())
+    except (OSError, subprocess.SubprocessError) as e:
+        real, _ = {}, expect(False, f"real issues not read ({e})")
+    root = _real_root()
+    base = _branch_base(root)
+    commits = claims.branch_commits(root, base) if base else []
+    found = [f for n, (body, at) in sorted(real.items()) for f in claims.price_findings(n, body, at, commits)]
+    print(f"    real: {len(real)} instruction issues updated since {claims.PRICE_FROM}: {sorted(real)}")
+    expect(not found, f"real instruction issues: findings {[str(f) for f in found]}")
+    return ok()
+
+
 def p0v_review_trigger() -> bool:
     """The review job starts on a `needs-review` label applied by the reviewer account (an audit-findings pull request,
     the Vizier sending a changed head back), on one applied by the builder, and not on an `awaits-guy` label a review
@@ -3084,6 +3125,9 @@ PINS = [
                        Mutant("draw_push_forced", _edits("P0u_draw_push_forced")))),
     Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
         p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),)),
+    Pin("P0x", "an instruction signed after instruction #70 declares the price quantity it moves, or that it only records",
+        p0x_price_declared, (Mutant("price_line_dropped", _edits("P0x_price_line_dropped")),
+                             Mutant("none_on_workflow_admitted", _edits("P0x_none_on_workflow_admitted")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

@@ -506,6 +506,52 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
     return {n: i for n, i in read_.items() if i is not None}
 
 
+# Instruction #70: a change to how work is done names the quantity of `python -m harness.ledger price` it moves, in what
+# direction and by what bound, before the run; one that cannot says `Price: none (recording-only)` and changes no
+# workflow. Every `instruction` issue signed after PRICE_FROM carries exactly one such line.
+PRICE_FROM = "2026-10-11T08:30:25Z"  # a pre-stated constant: the time instruction #70's branch was committed
+PRICE_QUANTITIES = ("guy-items", "guy-latency", "sessions", "runner-min", "wish-latency")
+PRICE_NONE = "none (recording-only)"
+PRICE_LINE = re.compile(r"^Price: (.*?)\s*$", re.M)
+PRICE_DECLARED = re.compile(r"(\S+); (down|up); -?\d+(?:\.\d+)?")
+WORKFLOWS = ".github/workflows/"
+
+
+def price_findings(n: int, body: str, labeled_at: str | None, commits: Sequence[Commit] = ()) -> list[Finding]:
+    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`): after PRICE_FROM, exactly one `Price:`
+    line, of the form `<quantity>; down|up; <bound>` or `none (recording-only)`; and no commit citing the issue under
+    the second form touches a workflow."""
+    where = f"issue #{n}"
+    if labeled_at is None or not _after(labeled_at, PRICE_FROM):
+        return []
+    lines = PRICE_LINE.findall(body)
+    if len(lines) != 1:
+        return [Finding(where, "price_line", f"{len(lines)} `Price:` lines, want exactly one")]
+    declared = PRICE_DECLARED.fullmatch(lines[0])
+    if lines[0] != PRICE_NONE and not (declared and declared.group(1) in PRICE_QUANTITIES):
+        return [Finding(where, "price_form", f"`Price: {lines[0]}` is neither `<quantity>; down|up; <bound>` with a "
+                                             f"quantity of {PRICE_QUANTITIES} nor `{PRICE_NONE}`")]
+    touching = [c.sha[:12] for c in commits if n in c.instructions and any(p.startswith(WORKFLOWS) for p in c.paths)]
+    return ([Finding(where, "price_none_on_workflow", f"`Price: {PRICE_NONE}` but commits {touching} touch {WORKFLOWS}")]
+            if lines[0] == PRICE_NONE and touching else [])
+
+
+def load_priced(repo: Path) -> dict[int, tuple[str, str | None]]:
+    """Every `instruction` issue, open or closed, updated since PRICE_FROM (signing updates it): number -> (body, when
+    gfrmin's standing label was applied). Raises if the issues or a timeline cannot be read: unread authorises nothing."""
+    def gh(path: str, *args: str) -> str:
+        return subprocess.run(["gh", "api", path, *args], cwd=repo, check=True, capture_output=True, text=True,
+                              timeout=120).stdout
+
+    listed = [json.loads(line) for line in gh(
+        "repos/{owner}/{repo}/issues?state=all&labels=instruction&per_page=100", "--paginate", "--jq",
+        ".[] | {n: .number, body, updated: .updated_at}").splitlines() if line.strip()]
+    return {e["n"]: (e["body"] or "", instruction_labeled_at(
+        [json.loads(line) for line in gh(f"repos/{{owner}}/{{repo}}/issues/{e['n']}/timeline?per_page=100",
+                                         "--paginate", "--jq", ".[]").splitlines() if line.strip()]))
+            for e in listed if _after(e["updated"], PRICE_FROM)}
+
+
 def _edits_said(i: Issue) -> str:
     if i.edits is None:
         return "body edits not read"
