@@ -1,0 +1,1 @@
+{"conclusion":"failure","created_at":"2026-10-11T14:20:33Z","event":"pull_request","head_branch":"instr-70-price-declared","head_sha":"39eb9f2c6cbeec39e29ee0ab82e0eb02afa73dea","html_url":"https://github.com/renavondata/assize/actions/runs/38146782078","id":38146782078,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
