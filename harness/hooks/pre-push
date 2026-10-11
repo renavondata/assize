@@ -1,0 +1,14 @@
+#!/bin/sh
+# Instruction #110 Part C: refuse a push that carries a commit whose `Proposer:` or `Instruction:` trailers git does not
+# parse (`python -m harness.claims trailers`). Installed by `git config core.hooksPath harness/hooks` in build.yml and
+# review.yml. It reads the branch's unpushed commits: from its upstream, or from origin/master for a branch not yet
+# pushed. A refused push is answered by amending the session's own unpushed commit, never by an exemption entry.
+here=$(cd "$(dirname "$0")/../.." && pwd) || exit 1
+base=$(git rev-parse -q --verify '@{u}' 2>/dev/null || git rev-parse -q --verify origin/master) || {
+  echo "pre-push: refused: neither an upstream nor origin/master to read the unpushed commits from" >&2
+  exit 1
+}
+PYTHONPATH="$here" python3 -B -m harness.claims trailers "$base..HEAD" --repo . || {
+  echo "pre-push: refused: amend your own unpushed commit so that git parses its trailers (instruction #110)" >&2
+  exit 1
+}

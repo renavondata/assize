@@ -1,0 +1,8 @@
+# P0y's mutant (instruction #110 Part C): the pre-push hook runs the check but ignores its exit status, so every push
+# is accepted.
+[[edit]]
+path = "harness/hooks/pre-push"
+old = """PYTHONPATH="$here" python3 -B -m harness.claims trailers "$base..HEAD" --repo . || {
+"""
+new = """PYTHONPATH="$here" python3 -B -m harness.claims trailers "$base..HEAD" --repo . || true || {
+"""

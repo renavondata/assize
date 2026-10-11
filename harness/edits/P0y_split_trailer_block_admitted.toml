@@ -1,0 +1,8 @@
+# P0y's mutant (instruction #110 Part C): the check reads the raw message instead of git's parse, so a `Proposer:` line
+# a blank line splits from the trailer block is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = """        parsed = {"Proposer": parties(proposers), "Instruction": parties(cited)}
+"""
+new = """        parsed = {k: [line for line in message.splitlines() if line.startswith(f"{k}:")] for k in TRAILER_KEYS}
+"""

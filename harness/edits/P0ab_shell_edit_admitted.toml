@@ -1,0 +1,7 @@
+# P0ab's mutant (instruction #110 Part D): a guarded file changed through a Bash call is admitted.
+[[edit]]
+path = "harness/sessions.py"
+old = """    return shell_edits(cs) + silent_master_stop(cs)
+"""
+new = """    return silent_master_stop(cs)
+"""

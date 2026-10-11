@@ -1,0 +1,8 @@
+# P0aa's mutant (instruction #110 Part A item 2): the selector ignores which items open pull requests hold, so a master
+# Builder retakes an item a pull request already holds.
+[[edit]]
+path = "harness/claims.py"
+old = """    held = [(c, holder(c, prs)) for c in candidates]
+"""
+new = """    held = [(c, None) for c in candidates]
+"""
