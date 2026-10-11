@@ -1,17 +1,17 @@
-# STATUS — L2 — 2026-10-12 — 0205d30 — PR #116
-VERDICT: SESSION DONE: review 3f57a8c F1 answered; STATUS cites the green pins run in P0l's form, with its record
+# STATUS — L2 — 2026-10-12 — 49d1d6a — PR #119
+VERDICT: SESSION DONE: instruction #68 done (wish-to-merge latency in the price)
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 45/45; mutants 116/116 KILLED; twins 116/116; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38165273607 on 0205d30 (success, run attempt 2; record reports/L2/ci/38165273607.json)
-changed: reports/L2/STATUS.md, reports/L2/ci/38165273607.json (code unchanged since 0205d30: `git diff --stat 0205d30 HEAD` touches only reports/)
-did: F1 (review 3f57a8c, BLOCK): rewrote the citation bare (`pins CI run <id> on <sha7>`) and committed the run's API record, as the review prescribed; no code changed
-did: #110 Parts A, C, D as in the previous STATUS; F2–F5 are obligations on L3, carried below
-did: no tool call was denied this session; local `make pins` not run (exceeds the 10-minute cloud cap); CI is the witness
-decided (not asked): header names 0205d30, the last sha whose code differs from the head and whose pins run is green; commits since touch only reports/ — p(stands on review)=0.75
-decided (not asked): no new forecast rows on this branch, because rows first present after the first pins run are late under Amendment 4 rule 2 (P0r) — p=0.8
-decided (not asked): harness/proposer.toml left at the prior session's id; changing it would change code after the cited green run — p=0.6
-forecasts: made 0 this session; resolved on this PR 1 (f07f35bccec6 pins_green p=0.2 → false, log-loss 0.223 vs base rate 0.693 over 1); open: 873f3c73ef34 review_accept, 926c865723d7 host_verdict
-price: guy-items 1; guy-latency median 0.0h max 0.0h; sessions 6; runner-min 215
-obligations added: L3: P0x's PRICE_DECLARED rejects a trailing remark on a Price line; drafts should be checked against it before signing
-obligations added: L3: review 3f57a8c F2 (pre-push reads stdin refs), F3 (sessions.py run on real logs), F4 (red pins on a PR routes to its branch, not Guy), F5 (post-merge blocked→build witness)
+pins: clean 45/45; mutants 117/117 KILLED; twins 117/117; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38184360362 on 49d1d6a (success, run attempt 1; record reports/L2/ci/38184360362.json)
+changed: harness/ledger.py, harness/pins.py, harness/edits/P0t_wish_from_instruction.toml, harness/README.md, harness/proposer.toml, reports/L2/forecasts.jsonl, reports/L2/STATUS.md, reports/L2/ci/38184360362.json
+did: #68 items 1–3: `ledger.wish_latency` (per wish filed in the window, hours from the wish's own created_at to the earliest merge of a PR citing an instruction whose body cites it; unmerged wishes counted open); price line gains `wish-latency median <h>h max <h>h open <n>`; P0t mutant `wish_from_instruction` KILLED in CI
+did: code ported from closed PR #106 (6ca2547, reviewed ACCEPT WITH OBLIGATIONS at 5821d1a; closed for a trailer split in its review commit); README/proposer.toml/forecasts conflicts resolved to master plus this change
+did: `claims next` skipped nothing (#68 first); #111 is held by PR #117; #110 already closed after PR #116 merged
+did: no tool call was denied; local `make pins` not run (CI is the witness); P0t and its new mutant run locally: clean passes, mutant fails (latency 1.0h vs 5.0h)
+decided (not asked): CLAUDE.md not edited for item 2; the price line is defined by `Price.status_line`, as PR #106's accepted review read it — p(stands on review)=0.75
+decided (not asked): wish-latency prints 0.0h when no wish is merged, with the open count beside it (review 5821d1a F2 carried as an L3 obligation, not fixed, since #68 says nothing else) — p=0.7
+forecasts: made 3 (4f9f273bc96b pins_green p=0.7, 88881be69289 review_accept p=0.7, 4245f53c7871 host_verdict FIT p=0.35); resolved 0 this session; builder cumulative log-loss 52.43 over 123 resolved (`ledger proposer builder`); per-type base rate not recomputed this session
+price: guy-items 1; guy-latency median 0.4h max 0.4h; sessions 0; runner-min 0; wish-latency median 0.0h max 0.0h open 0 (`ledger price --since 2940bc7`)
+obligations added: L3: review 5821d1a F2 (wish-latency 0.0h indistinguishable from a real zero when none merged), F4 (nothing asserts STATUS carries the line the command prints)
+obligations added: L3: STATUS forecasts line should carry the per-type base-rate log-loss; a ledger subcommand should print it
 NEEDS YOU (at most 1): none
-next: reviewer round on PR #116 head; then #113 (Batch W2) unless a PR holds it
+next: reviewer round on PR #119; then #102 unless a PR holds it
