@@ -1,0 +1,5 @@
+# P0x's second mutant (instruction #70): `Price: none (recording-only)` is accepted on a diff touching a workflow.
+[[edit]]
+path = "harness/claims.py"
+old = "any(p.startswith(WORKFLOWS) for p in c.paths)]"
+new = "any(p.startswith(WORKFLOWS) and False for p in c.paths)]"
