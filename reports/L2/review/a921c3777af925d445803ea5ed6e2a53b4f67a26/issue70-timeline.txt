@@ -1,0 +1,14 @@
+edit 2026-10-11T11:56:07Z gfrmin
+edit 2026-10-10T05:37:05Z gfrmin
+edit 2026-10-10T05:06:21Z assize-reviewer
+labeled assize-reviewer draft 2026-10-10T05:06:22Z
+cross-referenced assize-reviewer  2026-10-10T05:06:25Z
+labeled gfrmin instruction 2026-10-10T05:39:33Z
+unlabeled gfrmin instruction 2026-10-11T08:26:57Z
+labeled gfrmin instruction 2026-10-11T08:27:06Z
+cross-referenced assize-builder  2026-10-11T08:31:05Z
+cross-referenced gfrmin  2026-10-11T09:21:54Z
+cross-referenced assize-builder  2026-10-11T11:50:11Z
+commit a921c37 2026-10-11T20:18:17+08:00 STATUS at 7970612 citing pins CI run 38137016221
+commit 7970612 2026-10-11T19:49:58+08:00 Forecasts for the pull request of branch instr-70-price-declared (instruction #70)
+commit 4e31a24 2026-10-11T19:49:49+08:00 Instruction #70: drafts state the price quantity they move (pin P0x), from master
