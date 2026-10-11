@@ -1,0 +1,1 @@
+{"conclusion": "success", "created_at": "2026-10-11T11:50:12Z", "event": "pull_request", "head_branch": "instr-70-price-declared", "head_sha": "79706127445224dfb407f5dc0b2e38f37afb7033", "html_url": "https://github.com/renavondata/assize/actions/runs/38137016221", "id": 38137016221, "name": "pins", "path": ".github/workflows/pins.yml", "run_attempt": 1, "status": "completed"}
