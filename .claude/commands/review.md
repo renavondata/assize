@@ -33,4 +33,8 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
    - BLOCK: do not approve; `gh pr edit <n> --remove-label needs-review --add-label blocked`. The Builder is sent to the branch by that label.
 6. Never merge. Never write "Required" or "Do not merge"; you recommend, Guy disposes.
 
+## Files, pushes and denials (instruction #110)
+- Change files with the Edit and Write tools, never by shell redirection, heredocs or inline scripts; shell is for commands that are not edits. A tool call the harness denies is quoted (tool, reason) in the review file or in the session's stop report.
+- Every push passes `harness/hooks/pre-push` (`python -m harness.claims trailers @{u}..HEAD`, installed by the workflow): a refused push is answered by amending your own unpushed commit, never by an exemption entry in `claims.PROPOSER_EXEMPTIONS`. A session that cannot make its commit parse stops and reports.
+
 Stop and report if the PR head does not reproduce `make pins`, if the brief or its amendments are missing, or if a pre-stated criterion cannot be evaluated from the witnesses in the PR. A stopped review with a clear file is a success.

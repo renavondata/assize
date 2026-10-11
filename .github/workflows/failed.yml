@@ -1,7 +1,7 @@
 name: failed
 on:
   workflow_run:
-    workflows: [build, review]
+    workflows: [build, review, pins]
     types: [completed]
 permissions:
   issues: write
@@ -21,6 +21,8 @@ jobs:
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           URL: ${{ github.event.workflow_run.html_url }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          PR: ${{ github.event.workflow_run.pull_requests[0].number }}
         run: |
           set -euo pipefail
           if [ "$CONCLUSION" = cancelled ]; then
@@ -30,8 +32,16 @@ jobs:
             [ "$started" -eq 0 ] && exit 0
           fi
           title="$WF run $RUN_ID $CONCLUSION on $BRANCH"
+          body=$(printf 'The %s session died: %s.\n\n%s\n' "$WF" "$CONCLUSION" "$URL")
+          # Instruction #110 Part C: a red pins run on a pull request routes to an issue naming the pull request and
+          # quoting the failing pin's `CLEAN FAILED:` line from the run log.
+          if [ "$WF" = pins ]; then
+            title="pins run $RUN_ID $CONCLUSION on PR #${PR:-none} @ $SHA"
+            failed=$(gh run view "$RUN_ID" -R "$GITHUB_REPOSITORY" --log-failed | grep -o 'CLEAN FAILED: .*' || true)
+            body=$(printf 'pins concluded %s on PR #%s at %s.\n\n```\n%s\n```\n\n%s\n' "$CONCLUSION" "${PR:-none}" \
+              "$SHA" "${failed:-no CLEAN FAILED: line in the run log}" "$URL")
+          fi
           existing=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" --json number,title \
             | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
           [ -n "$existing" ] && exit 0
-          gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee gfrmin \
-            --body "$(printf 'The %s session died: %s.\n\n%s\n' "$WF" "$CONCLUSION" "$URL")"
+          gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee gfrmin --body "$body"

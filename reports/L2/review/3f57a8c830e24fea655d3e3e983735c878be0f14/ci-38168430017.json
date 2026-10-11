@@ -1,0 +1,1 @@
+{"conclusion":"failure","created_at":"2026-10-11T19:32:07Z","event":"pull_request","head_branch":"instr-110-queue-trailers","head_sha":"3f57a8c830e24fea655d3e3e983735c878be0f14","html_url":"https://github.com/renavondata/assize/actions/runs/38168430017","id":38168430017,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}

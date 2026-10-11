@@ -9,12 +9,14 @@ on:
   workflow_dispatch:
     inputs:
       pr: { description: "PR number to build on; empty builds master", required: false, type: string }
-concurrency:
-  group: build
-  cancel-in-progress: false
 jobs:
   build:
     if: (github.event_name != 'pull_request' && github.event_name != 'issues') || (github.event_name == 'pull_request' && github.event.label.name == 'blocked') || (github.event_name == 'issues' && github.event.label.name == 'instruction')
+    # Instruction #110 Part A: one queue per branch. Only a job that passes `if:` enters its group, so a skipped
+    # `issues: labeled` event never replaces a pending run, and a pull request's Builder never waits behind master's.
+    concurrency:
+      group: build-${{ github.event.pull_request.number || inputs.pr || 'master' }}
+      cancel-in-progress: false
     runs-on: [self-hosted, agent]
     timeout-minutes: 150
     env:
@@ -28,6 +30,9 @@ jobs:
       - run: gh auth setup-git
       - if: github.event_name == 'pull_request' || inputs.pr != ''
         run: gh pr checkout ${{ github.event.pull_request.number || inputs.pr }}
+      # Instruction #110 Part C: a push of a commit whose trailers git does not parse is refused. The path is relative,
+      # so the hook is the checked-out branch's own, the code under test.
+      - run: git config core.hooksPath harness/hooks
       # Instruction #54 item 7: the model is elected by EXP3 over harness/entrants.toml, never named here (instruction
       # #64). The draw is read from and committed onto origin's ledger/draws branch, so the next election reads it.
       - run: |

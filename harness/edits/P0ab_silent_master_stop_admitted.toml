@@ -1,0 +1,7 @@
+# P0ab's mutant (instruction #110 Part D): a session that ends on master with no pull request and no issue is admitted.
+[[edit]]
+path = "harness/sessions.py"
+old = """    return shell_edits(cs) + silent_master_stop(cs)
+"""
+new = """    return shell_edits(cs)
+"""

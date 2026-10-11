@@ -1,15 +1,17 @@
-# STATUS — L2 — 2026-10-11 — 1cfd9a1 — PR #114
-VERDICT: SESSION DONE (review 1fc37c6 F1 worked: this STATUS cites pins CI run 38148339961 on 1cfd9a1: success)
+# STATUS — L2 — 2026-10-12 — 0205d30 — PR #116
+VERDICT: SESSION DONE: review 3f57a8c F1 answered; STATUS cites the green pins run in P0l's form, with its record
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 41/41; mutants 109/109 KILLED; twins 109/109; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38148339961 on 1cfd9a1: success; local make pins on 1cfd9a1 agrees
-changed: harness/claims.py (PROPOSER_EXEMPTIONS), harness/proposer.toml, reports/L2/STATUS.md, reports/L2/ci/
-did: F1: interim STATUS 39eb9f2 cited the failed run 38144888825 on 29dabe2 (STOPPED); its run 38146782078 then showed P0m red too
-did: P0m red cause: reviewer commit 29dabe2 has a blank line between Proposer and Co-Authored-By, so git parses no Proposer trailer; exempted by full sha with its one party, as e37357e was (1cfd9a1)
-did: F2 (obligation): PR body regenerated to describe the diff as it stands
-decided (not asked): exempt 29dabe2 rather than rewrite the pushed branch; the entry turns inert once merged and is then removed like bb7b387's — p(stands on review)=0.75
-decided (not asked): no new forecast rows; this branch's first pins run is past, so rows now would be late under P0r — p=0.7
-forecasts: made 0 (see decided); resolved 0 by this session; cumulative log-loss not recomputed this session
-price: guy-items 1; guy-latency median 0.2h max 0.2h; sessions 22; runner-min 1087
-obligations added: L3: review commits must keep Proposer and Co-Authored-By in one trailer block; a blank line between them reddens P0m on the reviewed branch
+pins: clean 45/45; mutants 116/116 KILLED; twins 116/116; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38165273607 on 0205d30 (success, run attempt 2; record reports/L2/ci/38165273607.json)
+changed: reports/L2/STATUS.md, reports/L2/ci/38165273607.json (code unchanged since 0205d30: `git diff --stat 0205d30 HEAD` touches only reports/)
+did: F1 (review 3f57a8c, BLOCK): rewrote the citation bare (`pins CI run <id> on <sha7>`) and committed the run's API record, as the review prescribed; no code changed
+did: #110 Parts A, C, D as in the previous STATUS; F2–F5 are obligations on L3, carried below
+did: no tool call was denied this session; local `make pins` not run (exceeds the 10-minute cloud cap); CI is the witness
+decided (not asked): header names 0205d30, the last sha whose code differs from the head and whose pins run is green; commits since touch only reports/ — p(stands on review)=0.75
+decided (not asked): no new forecast rows on this branch, because rows first present after the first pins run are late under Amendment 4 rule 2 (P0r) — p=0.8
+decided (not asked): harness/proposer.toml left at the prior session's id; changing it would change code after the cited green run — p=0.6
+forecasts: made 0 this session; resolved on this PR 1 (f07f35bccec6 pins_green p=0.2 → false, log-loss 0.223 vs base rate 0.693 over 1); open: 873f3c73ef34 review_accept, 926c865723d7 host_verdict
+price: guy-items 1; guy-latency median 0.0h max 0.0h; sessions 6; runner-min 215
+obligations added: L3: P0x's PRICE_DECLARED rejects a trailing remark on a Price line; drafts should be checked against it before signing
+obligations added: L3: review 3f57a8c F2 (pre-push reads stdin refs), F3 (sessions.py run on real logs), F4 (red pins on a PR routes to its branch, not Guy), F5 (post-merge blocked→build witness)
 NEEDS YOU (at most 1): none
-next: the next signed instruction (#110), after #114 merges; close #70 then
+next: reviewer round on PR #116 head; then #113 (Batch W2) unless a PR holds it

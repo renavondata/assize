@@ -1,0 +1,8 @@
+# P0z's mutant (instruction #110 Part C): failed.yml watches build and review but not pins, so a red pins run on a pull
+# request routes nowhere (the PR #106 class).
+[[edit]]
+path = ".github/workflows/failed.yml"
+old = """    workflows: [build, review, pins]
+"""
+new = """    workflows: [build, review]
+"""

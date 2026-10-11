@@ -1475,6 +1475,221 @@ def p0v_review_trigger() -> bool:
     return ok()
 
 
+PARSED, SPLIT = "Proposer: guy\nCo-Authored-By: f <f@f>\n", "Proposer: guy\n\nCo-Authored-By: f <f@f>\n"
+TRAILERS_FIXTURE = (  # (what, message after the body, findings wanted) -- instruction #110 Part C
+    ("Proposer and Co-Authored-By in one trailer block", PARSED, set()),
+    ("Instruction and both Proposer lines in one block", "Instruction: #1\nProposer: guy\nProposer: builder m s\n",
+     set()),
+    ("a blank line between Proposer and Co-Authored-By (the #48/#106 class)", SPLIT,
+     {"no_proposer", "outside_trailer_block"}),
+    ("an Instruction line in the body, the Proposer trailer parsed", "Instruction: #1\n\nProposer: guy\n",
+     {"outside_trailer_block"}),
+    ("no Proposer line at all", "Co-Authored-By: f <f@f>\n", {"no_proposer"}),
+)
+
+
+def _commit_as(git, repo: Path, n: int, message: str, amend: bool = False, path: str = "f") -> str:
+    (repo / path).write_text(f"{n}\n")
+    git("add", "-A")
+    git("commit", "-q", *(["--amend"] if amend else []), "-m", f"case {n}\n\nbody\n\n{message}")
+    return git("rev-parse", "HEAD")
+
+
+def p0y_trailers_parse() -> bool:
+    """`python -m harness.claims trailers <base>..HEAD` refuses a non-merge commit with no `Proposer:` trailer as git
+    parses it, or with a `Proposer:` or `Instruction:` line outside its trailer block; `harness/hooks/pre-push`,
+    installed by `core.hooksPath`, refuses the push of such a commit and accepts a parseable one; the real branch's
+    commits parse (instruction #110 Part C)."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0y-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    base = _commit_as(git, repo, 0, PARSED)
+    for n, (what, message, want) in enumerate(TRAILERS_FIXTURE, 1):
+        sha = _commit_as(git, repo, n, message)
+        got = {f.code for f in claims.trailer_findings(repo, f"{sha}~1..{sha}")}
+        expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
+    git("checkout", "-q", "-b", "side", base)
+    _commit_as(git, repo, 90, PARSED, path="g")
+    git("checkout", "-q", "master")
+    git("merge", "-q", "--no-ff", "-m", "Merge side", "side")
+    expect(not claims.trailer_findings(repo, "HEAD~1..HEAD") and claims.trailer_findings(repo, f"{base}..HEAD"),
+           "a merge needs no trailer; the range's own commits are still read")
+    out = subprocess.run([sys.executable, "-B", "-m", "harness.claims", "trailers", f"{base}..HEAD", "--repo",
+                          str(repo)], cwd=ROOT, capture_output=True, text=True)
+    expect(out.returncode == 1, f"the command exits non-zero on findings ({out.returncode}: {out.stderr.strip()[-200:]})")
+
+    # The hook, from this tree, refuses a push of an unparseable commit, on a new branch and on one with an upstream.
+    git("init", "-q", "--bare", str(work / "remote.git"))
+    git("remote", "add", "origin", str(work / "remote.git"))
+    git("push", "-q", "origin", "master")
+    git("config", "core.hooksPath", str(ROOT / "harness" / "hooks"))
+
+    def push(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(["git", "-C", str(repo), "push", "-q", *args], capture_output=True, text=True,
+                              env=os.environ | claims.GIT_ENV | FIXTURE_GIT)
+
+    git("checkout", "-q", "-b", "work")
+    _commit_as(git, repo, 100, SPLIT)
+    refused_new = push("-u", "origin", "work")
+    _commit_as(git, repo, 100, PARSED, amend=True)
+    accepted_new = push("-u", "origin", "work")
+    _commit_as(git, repo, 101, SPLIT)
+    refused_up = push()
+    _commit_as(git, repo, 101, PARSED, amend=True)
+    accepted_up = push()
+    said = [(p.returncode, p.stderr.strip()[-160:]) for p in (refused_new, accepted_new, refused_up, accepted_up)]
+    print(f"    pushes: {said}")
+    expect(refused_new.returncode != 0 and refused_up.returncode != 0,
+           "the hook refuses a push of a commit whose Proposer line a blank line splits from the trailer block")
+    expect(accepted_new.returncode == 0 and accepted_up.returncode == 0
+           and git("rev-parse", "origin/work") == git("rev-parse", "HEAD"),
+           "the hook accepts the push once the session's own commit is amended to parse")
+    shutil.rmtree(work, ignore_errors=True)
+
+    root = _real_root()
+    base_real = _branch_base(root)
+    found = claims.trailer_findings(root, f"{base_real}..HEAD") if base_real else []
+    expect(base_real is not None and not found,
+           f"real branch {base_real and base_real[:12]}..HEAD: every commit parses ({[str(f) for f in found]})")
+    return ok()
+
+
+FAILED_EVENTS = (  # (what, workflow, conclusion, selects the report job) -- instruction #110 Part C
+    ("a pins run concluded failure", "pins", "failure", True),
+    ("a build run concluded failure", "build", "failure", True),
+    ("a review run timed out", "review", "timed_out", True),
+    ("a pins run concluded success", "pins", "success", False),
+    ("a measure run concluded failure", "measure", "failure", False),
+)
+
+
+def p0z_red_pins_routes() -> bool:
+    """`failed.yml`'s trigger, evaluated on a synthetic `workflow_run` completed event, selects its report job for a
+    failed `pins` run as for a failed build or review, and not for a success or an unwatched workflow; the issue for a
+    pins run names its pull request and quotes the `CLEAN FAILED:` line (instruction #110 Part C)."""
+    expect, ok = _expecter()
+    text = (ROOT / ".github" / "workflows" / "failed.yml").read_text()
+    watched = re.search(r"^  workflow_run:\n    workflows: \[([^\]]*)\]\n    types: \[([^\]]*)\]", text, re.M)
+    condition = re.search(r"^  report:\n    if: (.*)$", text, re.M)
+    expect(watched is not None and condition is not None, "the workflow_run trigger and the report job's `if:` are found")
+    workflows = [w.strip() for w in watched.group(1).split(",")] if watched else []
+    types = [t.strip() for t in watched.group(2).split(",")] if watched else []
+    for what, wf, conclusion, want in FAILED_EVENTS:
+        got = (wf in workflows and "completed" in types and condition is not None
+               and _github_condition(condition.group(1), {"github.event.workflow_run.conclusion": conclusion}))
+        expect(got is want, f"{what}: {'selects' if got else 'does not select'} the report job (must "
+                            f"{'select' if want else 'not select'})")
+    expect('title="pins run $RUN_ID $CONCLUSION on PR #' in text and "CLEAN FAILED: " in text,
+           "a pins issue's title names the pull request and its body quotes the CLEAN FAILED: line")
+    return ok()
+
+
+HELD_PRS = (claims.OpenPR(201, (110,), ()),
+            claims.OpenPR(202, (), ("# STATUS — L2 — 2026-10-12 — abc1234 — PR #202 — brief-2 A7 item 3",)))
+HELD_FIXTURE = (  # (what, candidates in order, chosen, skipped) -- instruction #110 Part A item 2
+    ("an instruction an open PR cites is skipped for the next", ("#110", "#111"), "#111", (("#110", 201),)),
+    ("a brief item an open PR's STATUS header names is skipped", ("brief-2 A7 item 3", "#112"), "#112",
+     (("brief-2 A7 item 3", 202),)),
+    ("an item no PR holds is taken", ("#113", "#110"), "#113", ()),
+    ("every candidate held: none", ("#110",), None, (("#110", 201),)),
+)
+
+
+def p0aa_held_item_skipped() -> bool:
+    """On master, an item an open pull request holds (an instruction its commits cite by `Instruction:`, a brief item
+    its own STATUS header names) is not a candidate: the selector takes the next and names the skipped item and its
+    pull request; a pull request is read from its branch against master (instruction #110 Part A item 2)."""
+    expect, ok = _expecter()
+    for what, candidates, want, skipped in HELD_FIXTURE:
+        got = claims.next_item(candidates, HELD_PRS)
+        expect(got == (want, skipped), f"{what}: took {got[0]!r}, skipped {got[1]}; want {want!r}, {skipped}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0aa-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    _append(repo, "reports/L2/STATUS.md", "# STATUS — L2 — 2026-10-01 — 1111111 — PR #1\n")
+    _commit_as(git, repo, 0, "Instruction: #7\nProposer: guy\n")
+    git("checkout", "-q", "-b", "held")
+    _commit_as(git, repo, 1, "Instruction: #110\nProposer: guy\n")
+    (repo / "reports/L2/STATUS.md").write_text(HELD_PRS[1].headers[0] + "\n")
+    _commit_as(git, repo, 2, "Instruction: #110\nProposer: guy\n")
+    git("checkout", "-q", "-b", "untouched", "master")
+    _commit_as(git, repo, 3, "Proposer: guy\n")
+    git("init", "-q", "--bare", str(work / "remote.git"))
+    git("remote", "add", "origin", str(work / "remote.git"))
+    git("push", "-q", "origin", "master", "held", "untouched")
+    git("fetch", "-q", "origin")
+    prs = [claims.open_pr(repo, 201, "held"), claims.open_pr(repo, 203, "untouched")]
+    expect(prs == [claims.OpenPR(201, (110, 110), HELD_PRS[1].headers), claims.OpenPR(203, (), ())],
+           f"a pull request is read from its own commits and its own STATUS, not master's: {prs}")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _call(n: int, tool: str, error: bool = False, **input_: str) -> list[dict]:
+    """A tool call and its result, as `claude --output-format stream-json` logs them."""
+    return [{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": f"t{n}", "name": tool,
+                                                           "input": input_}]}},
+            {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": f"t{n}",
+                                                      "is_error": error, "content": "ok"}]}}]
+
+
+def _log(*calls_: tuple) -> list[dict]:
+    return [{"type": "system", "subtype": "init"}] + [e for n, (tool, error, input_) in enumerate(calls_)
+                                                      for e in _call(n, tool, error, **input_)]
+
+
+BRANCHED = ("Bash", False, {"command": "git checkout -b instr-1-x"})
+OPENED_PR = ("Bash", False, {"command": "gh pr create --title t --body b"})
+SESSION_FIXTURE = (  # (what, calls, findings wanted) -- instruction #110 Part D
+    ("Edit on .github/, then a pull request", (BRANCHED, ("Edit", False, {"file_path": ".github/workflows/build.yml"}),
+                                               OPENED_PR), set()),
+    ("an inline python heredoc rewriting build.yml (build run 38152587119)",
+     (BRANCHED, ("Bash", False, {"command": "python3 - <<'EOF'\nimport pathlib\np = pathlib.Path("
+                                            "'.github/workflows/build.yml')\np.write_text('x')\nEOF"}), OPENED_PR),
+     {"shell_edit"}),
+    ("sed -i on harness/claims.py", (BRANCHED, ("Bash", False, {"command": "sed -i 's/a/b/' harness/claims.py"}),
+                                     OPENED_PR), {"shell_edit"}),
+    ("a redirection into harness/proposer.toml",
+     (BRANCHED, ("Bash", False, {"command": "printf 'kind = 1' > harness/proposer.toml"}), OPENED_PR), {"shell_edit"}),
+    ("reading harness/ and writing elsewhere is not an edit",
+     (BRANCHED, ("Bash", False, {"command": "grep -n x harness/pins.py > /tmp/out; cat .github/workflows/build.yml"}),
+      OPENED_PR), set()),
+    ("ends on master with no pull request and no issue", (("Bash", False, {"command": "git status"}),),
+     {"silent_master_stop"}),
+    ("ends on master after filing an issue", (("Bash", False, {"command": "gh issue create --title t --assignee g"}),),
+     set()),
+    ("ends on master; the issue was denied", (("Bash", True, {"command": "gh issue create --title t"}),),
+     {"silent_master_stop"}),
+    ("returns to master after opening a pull request", (BRANCHED, OPENED_PR, ("Bash", False,
+                                                                             {"command": "git checkout -q master"})),
+     set()),
+    ("branches, then returns to master, and opens nothing", (BRANCHED, ("Bash", False, {
+        "command": "git checkout master && git branch -D instr-1-x"})), {"silent_master_stop"}),
+    ("a pull-request session that opens nothing", (("Bash", False, {"command": "gh pr checkout 63"}),), set()),
+)
+
+
+def p0ab_session_logs() -> bool:
+    """A session log in which a file under `.github/` or `harness/` changes through a Bash call fails, as does one
+    ending on master with no pull request and no issue; one that uses Edit and Write, or opens either, passes
+    (instruction #110 Part D)."""
+    from harness import sessions
+
+    expect, ok = _expecter()
+    for what, calls_, want in SESSION_FIXTURE:
+        got = {f.code for f in sessions.session_findings(_log(*calls_))}
+        expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
+    text = "\n".join(json.dumps(e) for e in _log(*SESSION_FIXTURE[1][1])) + "\nstderr noise\n"
+    expect({f.code for f in sessions.session_findings(sessions.parse(text))} == {"shell_edit"},
+           "the log is read from stream-json text, other lines skipped")
+    return ok()
+
+
 PURITY_FIXTURE = (  # (label, schema, tokens wanted) against a fixture manifest's vocabulary
     ("clean", {"type": "object", "description": "a generic field"}, set()),
     ("as a key", {"properties": {"semantic": {}}}, {"semantic"}),
@@ -3177,13 +3392,24 @@ PINS = [
                        Mutant("hedge_election", _edits("P0u_hedge_election")),
                        Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
                        Mutant("draw_not_published", _edits("P0u_draw_not_published")),
-                       Mutant("draw_push_forced", _edits("P0u_draw_push_forced")))),
+                       Mutant("draw_push_forced", _edits("P0u_draw_push_forced")),
+                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head")))),
     Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
         p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),)),
     Pin("P0x", "an instruction signed after instruction #70 merged declares the price quantity it moves, or that it only records",
         p0x_price_declared, (Mutant("price_line_dropped", _edits("P0x_price_line_dropped")),
                              Mutant("none_on_workflow_admitted", _edits("P0x_none_on_workflow_admitted")),
                              Mutant("scoped_by_number", _edits("P0x_scoped_by_number")))),
+    Pin("P0y", "a commit whose Proposer or Instruction trailers git does not parse is refused, and its push with it",
+        p0y_trailers_parse, (Mutant("split_trailer_block_admitted", _edits("P0y_split_trailer_block_admitted")),
+                             Mutant("hook_unconditioned", _edits("P0y_hook_unconditioned")))),
+    Pin("P0z", "a failed pins run routes to an issue naming its pull request, as a failed build or review does",
+        p0z_red_pins_routes, (Mutant("pins_failure_unrouted", _edits("P0z_pins_failure_unrouted")),)),
+    Pin("P0aa", "a master Builder skips an item an open pull request holds and takes the next",
+        p0aa_held_item_skipped, (Mutant("held_item_retaken", _edits("P0aa_held_item_retaken")),)),
+    Pin("P0ab", "a session log that edits .github/ or harness/ through Bash, or ends on master opening nothing, fails",
+        p0ab_session_logs, (Mutant("shell_edit_admitted", _edits("P0ab_shell_edit_admitted")),
+                            Mutant("silent_master_stop_admitted", _edits("P0ab_silent_master_stop_admitted")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

@@ -1,0 +1,18 @@
+$ probe: pre-push hook of 3f57a8c reads @{u}..HEAD, not the refs pushed
+== git push origin bad, HEAD=master (bad's tip is a split-trailer commit):
+trailers 5f7799eddc657aa066b6c15e888e804c9d2a7f18..HEAD: 0 findings
+To ../remote.git
+ * [new branch]      bad -> bad
+exit 0
+== trailers on what was pushed:
+commit 7bb215181502: no_proposer: git parses no `Proposer:` trailer
+commit 7bb215181502: outside_trailer_block: 1 `Proposer:` lines, 0 parsed by git as trailers
+trailers master..bad: 2 findings
+exit 1
+== git push origin bad:bad2, HEAD=bad:
+commit 7bb215181502: no_proposer: git parses no `Proposer:` trailer
+commit 7bb215181502: outside_trailer_block: 1 `Proposer:` lines, 0 parsed by git as trailers
+trailers 5f7799eddc657aa066b6c15e888e804c9d2a7f18..HEAD: 2 findings
+pre-push: refused: amend your own unpushed commit so that git parses its trailers (instruction #110)
+error: failed to push some refs to '../remote.git'
+exit 1

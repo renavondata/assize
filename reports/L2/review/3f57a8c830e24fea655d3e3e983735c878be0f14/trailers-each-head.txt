@@ -1,0 +1,9 @@
+$ python -m harness.claims trailers $(git merge-base origin/master 0e0d327)..0e0d327
+trailers 64f5793cad0929262f71c522d3580dea0499801e..0e0d327: 0 findings
+exit 0
+$ python -m harness.claims trailers $(git merge-base origin/master 0205d30)..0205d30
+trailers 64f5793cad0929262f71c522d3580dea0499801e..0205d30: 0 findings
+exit 0
+$ python -m harness.claims trailers $(git merge-base origin/master 3f57a8c830e24fea655d3e3e983735c878be0f14)..3f57a8c830e24fea655d3e3e983735c878be0f14
+trailers 64f5793cad0929262f71c522d3580dea0499801e..3f57a8c830e24fea655d3e3e983735c878be0f14: 0 findings
+exit 0

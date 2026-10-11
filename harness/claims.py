@@ -8,6 +8,7 @@ import argparse
 import fnmatch
 import functools
 import hashlib
+import itertools
 import json
 import os
 import re
@@ -199,9 +200,8 @@ PROPOSER_EXEMPTIONS: Mapping[str, str] = {
     # P0m clean on instr-49-vizier (stacked on PR #48): the same blank line, in the review commit of PR #48; pushed,
     # and the head of a pull request awaiting Guy, so it is exempted rather than reworded.
     "e37357ed2d398cc3c1e16d65576d688e57c040c2": "reviewer claude-sonnet-5-5 a5caecbb-729c-4885-b5bf-40f1f55e76cc",
-    # P0m clean on instr-70-price-declared (pins CI run 38144888825, make pins at 39eb9f2): the same blank line, in
-    # the review commit of PR #114 round 2; pushed, and the branch is append-only, so it is exempted, not reworded.
-    "29dabe2b11a5eccddeab81aa7a72a0d29981b6f3": "reviewer claude-opus-5-5 c6c95e34-4360-4104-9f50-a576bd35102e",
+    # Instruction #110 Part C item 4: 29dabe2 (PR #114 round 2) was inert once #114 merged and is removed. No entry is
+    # added: a pushed commit must parse (`python -m harness.claims trailers`, the pre-push hook in harness/hooks/).
 }
 
 
@@ -392,6 +392,81 @@ def inert_exemptions(repo: Path, base: str,
 
     return [Finding(f"exemption {sha[:12]}", "inert_exemption", f"reachable from {base[:12]}; P0m never reads it")
             for sha in exemptions if reachable(sha)]
+
+
+# Instruction #110 Part C: sessions cannot push what the court cannot read. A non-merge commit must carry a `Proposer:`
+# trailer as git parses it, and no `Proposer:` or `Instruction:` line outside its trailer block (a blank line before
+# `Co-Authored-By:` splits the block, and git then parses neither). `harness/hooks/pre-push` runs this on every push.
+TRAILER_KEYS = ("Proposer", "Instruction")
+
+
+def trailer_findings(repo: Path, revisions: str) -> list[Finding]:
+    """Findings on every non-merge commit in `revisions` (e.g. `<base>..HEAD`) whose trailers git does not parse."""
+    fmt = ("%H%x1f%P%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f"
+           "%(trailers:key=Instruction,valueonly,separator=%x1e)%x1f%B%x1d")
+    records = [r.strip("\n") for r in _git(repo, "log", "--reverse", f"--format={fmt}", revisions).split("\x1d")
+               if r.strip()]
+
+    def findings(record: str) -> list[Finding]:
+        sha, parents, proposers, cited, message = record.split("\x1f", 4)
+        if len(parents.split()) > 1:
+            return []
+        where = f"commit {sha[:12]}"
+        parsed = {"Proposer": parties(proposers), "Instruction": parties(cited)}
+        written = {k: [line for line in message.splitlines() if line.startswith(f"{k}:")] for k in TRAILER_KEYS}
+        unparsed = [Finding(where, "no_proposer", "git parses no `Proposer:` trailer")] if not parsed["Proposer"] else []
+        outside = [Finding(where, "outside_trailer_block", f"{len(written[k])} `{k}:` lines, {len(parsed[k])} parsed "
+                                                           f"by git as trailers")
+                   for k in TRAILER_KEYS if len(written[k]) > len(parsed[k])]
+        return unparsed + outside
+
+    return [f for r in records for f in findings(r)]
+
+
+# Instruction #110 Part A item 2: on master, an item an open pull request already holds is not a candidate. A pull
+# request holds the instructions its commits cite by `Instruction: #<n>` trailers, and any brief item its own STATUS
+# header names; the Builder takes the next candidate and names the skipped item and its pull request in STATUS `did:`.
+@dataclass(frozen=True)
+class OpenPR:
+    number: int
+    instructions: tuple[int, ...]
+    headers: tuple[str, ...]  # the `# STATUS` header lines of the STATUS files the pull request itself changes
+
+
+def holder(item: str, prs: Sequence[OpenPR]) -> int | None:
+    """The open pull request holding `item` (`#<n>` for an instruction, else a brief item's name), or None."""
+    m = INSTRUCTION.match(item)
+    return next((p.number for p in prs if (int(m.group(1)) in p.instructions if m else
+                                           any(item in h for h in p.headers))), None)
+
+
+def next_item(candidates: Sequence[str], prs: Sequence[OpenPR]) -> tuple[str | None, tuple[tuple[str, int], ...]]:
+    """The first of `candidates`, in order, that no open pull request holds, and the held ones skipped before it."""
+    held = [(c, holder(c, prs)) for c in candidates]
+    skipped = tuple((c, n) for c, n in itertools.takewhile(lambda x: x[1] is not None, held))
+    return (held[len(skipped)][0] if len(skipped) < len(held) else None), skipped
+
+
+def open_pr(repo: Path, n: int, ref: str) -> OpenPR:
+    """Pull request `n` as its branch `origin/<ref>` shows it against `origin/master`: the instructions its commits
+    cite, and the STATUS headers of the STATUS files it changes."""
+    cited = _git(repo, "log", "--format=%(trailers:key=Instruction,valueonly,separator=%x1e)%x1d",
+                 f"origin/master..origin/{ref}")
+    statuses = _git(repo, "diff", "--name-only", f"origin/master...origin/{ref}", "--",
+                    ":(glob)reports/L*/STATUS.md").split()
+    headers = tuple(line for p in statuses for line in _git(repo, "show", f"origin/{ref}:{p}").splitlines()
+                    if STATUS_HEADER.match(line))
+    return OpenPR(n, tuple(i for r in cited.split("\x1d") for i in instructions(r.strip())), headers)
+
+
+def load_open_prs(repo: Path) -> list[OpenPR]:
+    """Every open pull request, listed through `gh`, its branch read from `repo`'s `origin` (fetched first). Raises if
+    any cannot be read: an unread pull request could hold the item."""
+    # The fetch keeps the user's configuration, which holds the credential helper (`gh auth setup-git`).
+    subprocess.run(["git", "-C", str(repo), "fetch", "-q", "origin"], check=True, capture_output=True, timeout=120)
+    listed = json.loads(subprocess.run(["gh", "pr", "list", "--state", "open", "--json", "number,headRefName"],
+                                       cwd=repo, check=True, capture_output=True, text=True, timeout=60).stdout)
+    return [open_pr(repo, int(p["number"]), str(p["headRefName"])) for p in listed]
 
 
 # ------------------------------------------------------ the ground, rules 1 and 2 (instruction #54 items 1 and 2)
@@ -587,13 +662,32 @@ def _edits_said(i: Issue) -> str:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """`python -m harness.claims signed <n>...`: whether each issue carries Guy's authority (Amendment 3). The Builder
-    acts only on an issue printed `signed`."""
+    acts only on an issue printed `signed`. `trailers <revisions>`: exits non-zero if a commit's trailers do not parse
+    (instruction #110 Part C). `next <item>...`: the first item no open pull request holds (Part A item 2)."""
     ap = argparse.ArgumentParser(prog="python -m harness.claims")
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("signed", help="whether each issue is an instruction Guy signed")
     s.add_argument("numbers", type=int, nargs="*")
     s.add_argument("--repo", type=Path, default=Path("."))
+    t = sub.add_parser("trailers", help="refuse commits whose Proposer or Instruction trailers git does not parse")
+    t.add_argument("revisions")
+    t.add_argument("--repo", type=Path, default=Path("."))
+    x = sub.add_parser("next", help="the first candidate item, in order, that no open pull request holds")
+    x.add_argument("items", nargs="+", help="`#<n>` for an instruction, else a brief item's name")
+    x.add_argument("--repo", type=Path, default=Path("."))
     a = ap.parse_args(argv)
+    if a.cmd == "trailers":
+        found = trailer_findings(a.repo, a.revisions)
+        for f in found:
+            print(f, file=sys.stderr)
+        print(f"trailers {a.revisions}: {len(found)} findings", file=sys.stderr)
+        return 1 if found else 0
+    if a.cmd == "next":
+        chosen, skipped = next_item(a.items, load_open_prs(a.repo))
+        for item, n in skipped:
+            print(f"skipped: {item} held by PR #{n}")
+        print(f"next: {chosen or 'none'}")
+        return 0
     issues = load_issues(a.repo, a.numbers)
     for n in a.numbers:
         i = issues.get(n)

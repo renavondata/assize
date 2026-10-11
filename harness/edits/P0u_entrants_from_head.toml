@@ -1,0 +1,8 @@
+# P0u's mutant (instruction #110 Part A item 3): `elect` reads harness/entrants.toml from `--head` instead of the
+# checkout.
+[[edit]]
+path = "harness/ledger.py"
+old = """        models, bound = entrants_of((a.repo / ENTRANTS).read_text(), a.procedure)
+"""
+new = """        models, bound = entrants_of(_net(a.repo, "show", f"{a.head}:{ENTRANTS}"), a.procedure)
+"""
