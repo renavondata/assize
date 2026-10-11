@@ -2,4 +2,4 @@
 [[edit]]
 path = "harness/claims.py"
 old = "    if len(lines) != 1:"
-new = "    if len(lines) > 1:"
+new = "    if not lines:\n        return []\n    if len(lines) != 1:"

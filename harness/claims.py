@@ -508,8 +508,10 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
 
 # Instruction #70: a change to how work is done names the quantity of `python -m harness.ledger price` it moves, in what
 # direction and by what bound, before the run; one that cannot says `Price: none (recording-only)` and changes no
-# workflow. Every `instruction` issue signed after PRICE_FROM carries exactly one such line.
+# workflow. Every `instruction` issue numbered from PRICE_FIRST_ISSUE and signed after PRICE_FROM carries exactly one
+# such line.
 PRICE_FROM = "2026-10-11T08:30:25Z"  # a pre-stated constant: the time instruction #70's branch was committed
+PRICE_FIRST_ISSUE = 110  # drafts filed before this pull request (#109) could not have complied, signed or not
 PRICE_QUANTITIES = ("guy-items", "guy-latency", "sessions", "runner-min", "wish-latency")
 PRICE_NONE = "none (recording-only)"
 PRICE_LINE = re.compile(r"^Price: (.*?)\s*$", re.M)
@@ -518,11 +520,11 @@ WORKFLOWS = ".github/workflows/"
 
 
 def price_findings(n: int, body: str, labeled_at: str | None, commits: Sequence[Commit] = ()) -> list[Finding]:
-    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`): after PRICE_FROM, exactly one `Price:`
+    """Findings on instruction issue `n` (body `body`, signed at `labeled_at`): from PRICE_FIRST_ISSUE, signed after PRICE_FROM, exactly one `Price:`
     line, of the form `<quantity>; down|up; <bound>` or `none (recording-only)`; and no commit citing the issue under
     the second form touches a workflow."""
     where = f"issue #{n}"
-    if labeled_at is None or not _after(labeled_at, PRICE_FROM):
+    if n < PRICE_FIRST_ISSUE or labeled_at is None or not _after(labeled_at, PRICE_FROM):
         return []
     lines = PRICE_LINE.findall(body)
     if len(lines) != 1:

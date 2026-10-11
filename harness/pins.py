@@ -1362,26 +1362,28 @@ def _github_condition(condition: str, context_: dict[str, str]) -> bool:
 
 PRICE_DECL_FROM = claims.PRICE_FROM
 PRICE_BEFORE, PRICE_AFTER = "2000-01-01T00:00:00Z", "2999-01-01T00:00:00Z"
-PRICE_WORKFLOW_COMMIT = claims.Commit("a" * 40, ("guy",), (".github/workflows/build.yml",), instructions=(5,))
-PRICE_DOC_COMMIT = claims.Commit("b" * 40, ("guy",), ("harness/ledger.py",), instructions=(6,))
+PRICE_N = 200
+PRICE_WORKFLOW_COMMIT = claims.Commit("a" * 40, ("guy",), (".github/workflows/build.yml",), instructions=(PRICE_N + 5,))
+PRICE_DOC_COMMIT = claims.Commit("b" * 40, ("guy",), ("harness/ledger.py",), instructions=(PRICE_N + 6,))
 PRICE_ISSUES = (  # (issue, body, signed at, commits, finding codes wanted)
-    (1, "Do it.\nPrice: guy-latency; down; 2.5\nNothing else.", PRICE_AFTER, (), set()),
-    (2, "Do it.\nPrice: none (recording-only)", PRICE_AFTER, (), set()),
-    (3, "Do it, no price.", PRICE_AFTER, (), {"price_line"}),
-    (4, "Price: sessions; down; 1\nPrice: none (recording-only)", PRICE_AFTER, (), {"price_line"}),
-    (5, "Price: none (recording-only)", PRICE_AFTER, (PRICE_WORKFLOW_COMMIT,), {"price_none_on_workflow"}),
-    (6, "Price: none (recording-only)", PRICE_AFTER, (PRICE_DOC_COMMIT, PRICE_WORKFLOW_COMMIT), set()),
-    (7, "Price: sessions; down; 1", PRICE_AFTER, (PRICE_WORKFLOW_COMMIT,), set()),
-    (8, "Price: happiness; up; 3", PRICE_AFTER, (), {"price_form"}),
-    (9, "Price: sessions; sideways; 3", PRICE_AFTER, (), {"price_form"}),
-    (10, "Price: sessions; down", PRICE_AFTER, (), {"price_form"}),
-    (11, "Signed before the rule, no price.", PRICE_BEFORE, (), set()),
-    (12, "Never signed, no price.", None, (), set()),
+    (PRICE_N + 1, "Do it.\nPrice: guy-latency; down; 2.5\nNothing else.", PRICE_AFTER, (), set()),
+    (PRICE_N + 2, "Do it.\nPrice: none (recording-only)", PRICE_AFTER, (), set()),
+    (PRICE_N + 3, "Do it, no price.", PRICE_AFTER, (), {"price_line"}),
+    (PRICE_N + 4, "Price: sessions; down; 1\nPrice: none (recording-only)", PRICE_AFTER, (), {"price_line"}),
+    (PRICE_N + 5, "Price: none (recording-only)", PRICE_AFTER, (PRICE_WORKFLOW_COMMIT,), {"price_none_on_workflow"}),
+    (PRICE_N + 6, "Price: none (recording-only)", PRICE_AFTER, (PRICE_DOC_COMMIT, PRICE_WORKFLOW_COMMIT), set()),
+    (PRICE_N + 7, "Price: sessions; down; 1", PRICE_AFTER, (PRICE_WORKFLOW_COMMIT,), set()),
+    (PRICE_N + 8, "Price: happiness; up; 3", PRICE_AFTER, (), {"price_form"}),
+    (PRICE_N + 9, "Price: sessions; sideways; 3", PRICE_AFTER, (), {"price_form"}),
+    (PRICE_N + 10, "Price: sessions; down", PRICE_AFTER, (), {"price_form"}),
+    (PRICE_N + 11, "Signed before the rule, no price.", PRICE_BEFORE, (), set()),
+    (claims.PRICE_FIRST_ISSUE - 1, "Signed after, filed before the rule, no price.", PRICE_AFTER, (), set()),
+    (PRICE_N + 12, "Never signed, no price.", None, (), set()),
 )
 
 
 def p0x_price_declared() -> bool:
-    """Every `instruction` issue signed after claims.PRICE_FROM carries exactly one `Price:` line, `<quantity>; down|up;
+    """Every `instruction` issue numbered from claims.PRICE_FIRST_ISSUE and signed after claims.PRICE_FROM carries exactly one `Price:` line, `<quantity>; down|up;
     <bound>` with a quantity of `python -m harness.ledger price`, or `none (recording-only)`, and a commit citing an
     issue of the second kind touches no workflow (instruction #70); the real issues are read in CI, none skipped."""
     expect, ok = _expecter()
