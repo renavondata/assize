@@ -57,8 +57,9 @@ def _forecast_findings(where: str, r: dict) -> list[Finding]:
         return missing
     wrong_id = ([Finding(where, "bad_id", f"id {r['id']!r} is not sha256(claim + ts)[:12]")]
                 if r["id"] != forecast_id(str(r["claim"]), str(r["ts"])) else [])
-    bad_p = ([Finding(where, "bad_p", f"p {r['p']!r} not in (0, 1)")]
-             if not (isinstance(r["p"], (int, float)) and 0 < r["p"] < 1) else [])
+    closed = r.get("type") == "guy_picks"  # a deterministic entrant's pick has mass 0 or 1 (instruction #111)
+    bad_p = ([Finding(where, "bad_p", f"p {r['p']!r} not in {'[0, 1]' if closed else '(0, 1)'}")]
+             if not (isinstance(r["p"], (int, float)) and (0 <= r["p"] <= 1 if closed else 0 < r["p"] < 1)) else [])
     return wrong_id + bad_p + _proposer_findings(where, r["proposer"])
 
 
@@ -600,11 +601,12 @@ PRICE_DECLARED = re.compile(r"(\S+); (down|up); -?\d+(?:\.\d+)?")
 WORKFLOWS = ".github/workflows/"
 
 
-def price_from(repo: Path, base: str) -> str | None:
-    """The committer time of the first commit on `base`'s first-parent line that adds PRICE_MARK to PRICE_PATH (a merge
-    is read against its first parent), or None if there is none: the merge of instruction #70's rule, read from git."""
+def price_from(repo: Path, base: str, mark: str = PRICE_MARK, path: str = PRICE_PATH) -> str | None:
+    """The committer time of the first commit on `base`'s first-parent line that adds `mark` to `path` (a merge is read
+    against its first parent), or None if there is none: the merge of instruction #70's rule (by default), or of any
+    rule that dates itself the same way, read from git."""
     out = _git(repo, "log", "--first-parent", "--diff-merges=first-parent", "--reverse", "--format=%cI",
-               f"-S{PRICE_MARK}", base, "--", PRICE_PATH).split()
+               f"-S{mark}", base, "--", path).split()
     return out[0] if out else None
 
 
@@ -650,6 +652,52 @@ def load_priced(repo: Path, since: str) -> dict[int, tuple[str, str | None]]:
         [json.loads(line) for line in gh(f"repos/{{owner}}/{{repo}}/issues/{e['n']}/timeline?per_page=100",
                                          "--paginate", "--jq", ".[]").splitlines() if line.strip()]))
             for e in listed if _after(e["updated"], since)}
+
+
+# Instruction #111 Part A: a wish becomes a brief amendment unless the draft says, in one `Instruction because:` line, why
+# the wish cannot wait its turn in the brief. A `draft` issue opened after the rule merged (dated as `price_from` dates
+# the price rule: `draft_from`) opens `Wish: #<n>` and carries exactly one of the two forms.
+DRAFT_MARK = "def draft_findings("
+DRAFT_WISH = re.compile(r"Wish: #(\d+)")
+DRAFT_BECAUSE = re.compile(r"^Instruction because: \S.*$", re.M)
+DRAFT_AMENDMENT = re.compile(r"^Brief amendment to `docs/briefs/brief-\d+-[\w-]+\.md`, titled `Wish #(\d+)`:\s*$", re.M)
+
+
+def draft_from(repo: Path, base: str) -> str | None:
+    """When the draft rule merged onto `base`'s first-parent line, read from git; None before it has."""
+    return price_from(repo, base, DRAFT_MARK, PRICE_PATH)
+
+
+def draft_findings(n: int, body: str, opened_at: str | None, since: str | None) -> list[Finding]:
+    """Findings on `draft` issue `n` if the rule merged at `since` and the draft was opened after it: the first line is
+    `Wish: #<n>`, and exactly one of an `Instruction because: <sentence>` line and a `Brief amendment to
+    docs/briefs/brief-<l>-<name>.md, titled Wish #<n>:` line that names the same wish."""
+    where = f"draft #{n}"
+    if since is None or opened_at is None or not _after(opened_at, since):
+        return []
+    lines = body.splitlines()
+    wish = DRAFT_WISH.fullmatch(lines[0].strip()) if lines else None
+    because, amendments = DRAFT_BECAUSE.findall(body), DRAFT_AMENDMENT.findall(body)
+    rules = (
+        (wish is None, "no_wish", "the first line is not `Wish: #<n>`"),
+        (not because and not amendments, "no_form",
+         "neither an `Instruction because:` line nor a brief amendment titled `Wish #<n>`"),
+        (bool(because) and bool(amendments), "both_forms", "carries an `Instruction because:` line and a brief amendment"),
+        (len(because) > 1 or len(amendments) > 1, "repeated_form", "carries a form more than once"),
+        (wish is not None and any(a != wish.group(1) for a in amendments), "wrong_wish",
+         "the amendment is titled for another wish than the first line names"),
+    )
+    return [Finding(where, code, detail) for broken, code, detail in rules if broken]
+
+
+def load_drafts(repo: Path, since: str) -> dict[int, tuple[str, str]]:
+    """Every `draft` issue, open or closed, opened since `since`: number -> (body, opened). Raises if they cannot be
+    read: an unread draft authorises nothing."""
+    out = subprocess.run(["gh", "api", "repos/{owner}/{repo}/issues?state=all&labels=draft&per_page=100", "--paginate",
+                          "--jq", ".[] | {n: .number, body, opened: .created_at}"], cwd=repo, check=True,
+                         capture_output=True, text=True, timeout=120).stdout
+    return {e["n"]: (e["body"] or "", e["opened"]) for e in map(json.loads, filter(str.strip, out.splitlines()))
+            if _after(e["opened"], since)}
 
 
 def _edits_said(i: Issue) -> str:

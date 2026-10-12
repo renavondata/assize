@@ -1,0 +1,1 @@
+{"conclusion":"failure","created_at":"2026-10-12T03:45:41Z","event":"pull_request","head_branch":"instr-111-chooser","head_sha":"94ec3969cf9fce9bf09f1a1026e2bc0d4f4e2602","html_url":"https://github.com/renavondata/assize/actions/runs/38201025319","id":38201025319,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}

@@ -1,0 +1,6 @@
+# P0ah's mutant (instruction #111 Part B item 3): the `not_overturned` item is always the pull request, never the
+# instruction's own issue, where gfrmin's `seen` and `later` labels fall.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    return int(m.group(1)) if m else pr'''
+new = '''    return pr'''

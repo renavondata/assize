@@ -1,0 +1,6 @@
+# P0ae's mutant (instruction #111 Part B item 2): a void resolution is scored as an outcome.
+[[edit]]
+path = "harness/ledger.py"
+old = '''("id" in r or "resolves" in r)
+            and not r.get("void")}'''
+new = '''("id" in r or "resolves" in r)}'''

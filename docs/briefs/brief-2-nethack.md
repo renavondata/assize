@@ -231,3 +231,16 @@ These are L2 items. Each becomes a pin with a seeded mutant unless marked otherw
 4. No list of the trusted base. Criterion: 7. "Monotone trusted base: the set of things outside every loop is listed and has not grown since the last audit". At CLAUDE.md:146. Pin: committed list compared with the live set of secrets, runner labels, tokens, workflows and CODEOWNERS paths. Mutant: `unlisted_secret_added`.
 5. judge/scoring.invalid never checks 0<=p_i<=1; negative loss and a judge crash are reachable. Criterion: 2. "The law names scores and competitions, never competitors". At judge/scoring.py:44. Pin: fixture replies [1.5,-0.5] and [-0.5,1.5] end the episode invalid_reply with no negative loss and no exception. Mutant: `range_check_removed`.
 6. P20's schema half has no mutant. Criterion: 1. "Every check kills a mutant". At harness/pins.py:2106. Pin: P20 mutant on the schema. Mutant: `schema_price_optional`.
+
+## Wish #80 — Amendment: the chooser is validated by switchback (appended; instruction #111 Part C)
+
+### Pre-stated criterion
+A switchback across three regimes: (i) fixed order; or (ii) the chooser of Draft "The next item is the forecast of Guy's pick, acted on and overturnable". The schedule is fixed by a seeded hash of the ledger head at this amendment's merge, alternating per choice and committed before the first scored choice. All four outcomes are reported per regime, with denominators: guy-items per merged item; overturn rate stratified by exposure (`seen` vs unexposed, void counted); wish-to-merge latency; and the log-likelihood ratio of the mixture against `fixed-order` on resolved `guy_picks`, with its evidence bound stated from the α of the chooser's draft.
+
+### Constants, pre-stated here
+k (probes per boundary brief) = 2. Switchback length = the remainder of the layer.
+
+### Pin
+The switchback schedule recomputed from the committed seed equals the regimes recorded in STATUS `chose:` lines. Mutant: the regime chosen after the seed is seen. KILLED.
+
+A regime with no resolved outcome is reported as such and never dropped. Nothing is tuned after scores are seen.

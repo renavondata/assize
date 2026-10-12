@@ -7,6 +7,13 @@ review = ["claude-opus-5-5", "claude-sonnet-5-5"]
 audit = ["claude-opus-5-5", "claude-sonnet-5-5"]
 vizier = ["claude-opus-5-5", "claude-sonnet-5-5"]
 
+# Instruction #111 Part B item 7: the entrants that forecast Guy's pick among the open candidates (`python -m
+# harness.chooser`). `fixed-order` (A1.5's order) is always one; `priorities-literal` reads the most recent open
+# `priorities` issue by gfrmin as an ordering and abstains when there is none. A new entrant enters by pull request, with
+# a pin that shows it can lose. An LLM entrant files its `guy_picks` row through a session as its proposer, never by a
+# call from repository code. Not a procedure: `ledger elect` does not draw from it.
+sovereign = ["fixed-order", "priorities-literal"]
+
 # B, the bound on a round's loss: a round's mean log-loss is clipped to [0, B] and each clip is counted and reported.
 # B = 5 holds every forecast p >= 0.0068 (log-loss ln(1/p)) unclipped.
 [bound]

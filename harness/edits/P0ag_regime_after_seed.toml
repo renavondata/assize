@@ -1,0 +1,6 @@
+# P0ag's mutant (instruction #111 Part C): the regime of the first choice does not come from the committed seed (it is
+# chosen after the seed is seen).
+[[edit]]
+path = "harness/chooser.py"
+old = '''    first = int(hashlib.sha256(seed.encode()).hexdigest(), 16) % 2'''
+new = '''    first = 1'''

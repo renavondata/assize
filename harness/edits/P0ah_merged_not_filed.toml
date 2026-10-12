@@ -1,0 +1,6 @@
+# P0ah's mutant (instruction #111 Part B item 3, review of 473a72d F1): the chooser files no `merged {pr}` forecast for
+# the item it acts on, only the `not_overturned` one.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    for row in [*made.values(), *acted]:'''
+new = '''    for row in [*made.values(), *acted[:1]]:'''

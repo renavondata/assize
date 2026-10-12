@@ -1,0 +1,6 @@
+# P0ah's mutant (instruction #111 Part B items 2 and 3): the chooser's `not_overturned` carries no `exposure`, so silence
+# keeps the choice whether or not gfrmin declared he saw it.
+[[edit]]
+path = "harness/chooser.py"
+old = '''{"item": item_number(chose, pr), "until": until, "exposure": "seen",'''
+new = '''{"item": item_number(chose, pr), "until": until,'''

@@ -1,0 +1,5 @@
+# P0ae's mutant (instruction #111 Part B item 5): a `next` or `later` label resolves Guy's pick whoever applied it.
+[[edit]]
+path = "harness/ledger.py"
+old = '''if _actor(e) == GUY and (a := answer(e)) in (NEXT, LATER)'''
+new = '''if (a := answer(e)) in (NEXT, LATER)'''

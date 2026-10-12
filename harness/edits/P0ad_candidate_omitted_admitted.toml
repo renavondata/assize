@@ -1,0 +1,6 @@
+# P0ad's mutant (instruction #111 Part B item 9e): a `chose:` line that omits a candidate its forecast declares is
+# admitted.
+[[edit]]
+path = "harness/chooser.py"
+old = '''        if over != row["args"]["candidates"]:'''
+new = '''        if False:'''

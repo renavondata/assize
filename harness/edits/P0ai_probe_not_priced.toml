@@ -1,0 +1,5 @@
+# P0ai's mutant (instruction #111 Part B item 6): a probe is not counted as a guy-item in the price.
+[[edit]]
+path = "harness/ledger.py"
+old = '''ROUTES = ("awaits-guy", "assigned", "needs-you", PROBE)'''
+new = '''ROUTES = ("awaits-guy", "assigned", "needs-you")'''

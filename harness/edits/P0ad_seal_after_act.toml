@@ -1,0 +1,6 @@
+# P0ad's mutant (instruction #111 Part B item 9a): a forecast row first present in a descendant of the commit where the
+# chooser's act appears (sealed after the act) is admitted.
+[[edit]]
+path = "harness/chooser.py"
+old = '''capture_output=True).returncode == 0'''
+new = '''capture_output=True).returncode in (0, 1)'''

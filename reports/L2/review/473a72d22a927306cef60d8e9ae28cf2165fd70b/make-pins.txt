@@ -1,0 +1,36 @@
+Reviewer c778d1a6 reproduction of `make pins` at PR #117 head 473a72d22a927306cef60d8e9ae28cf2165fd70b, 2026-10-12.
+Scratch copy /tmp/rev117.Qfep (git archive HEAD + .git), removed afterwards. Full log 196 lines; excerpt: header,
+the five new pins (P0ac-P0ag) clean and mutant lines, and the summary, verbatim.
+
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 50 pins, 132 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0ac: observed pass -> ok (0.401s) out/pins/runs/P0ac/clean/transcript.log
+[clean ] P0ad: observed pass -> ok (1.067s) out/pins/runs/P0ad/clean/transcript.log
+[clean ] P0ae: observed pass -> ok (0.39s) out/pins/runs/P0ae/clean/transcript.log
+[clean ] P0af: observed pass -> ok (0.391s) out/pins/runs/P0af/clean/transcript.log
+[clean ] P0ag: observed pass -> ok (0.896s) out/pins/runs/P0ag/clean/transcript.log
+[mutant] P0ac/instruction_without_because_admitted: mutant fail, twin pass -> KILLED (0.398s + 0.402s)
+[mutant] P0ac/both_forms_admitted: mutant fail, twin pass -> KILLED (0.413s + 0.398s)
+[mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (1.05s + 0.999s)
+[mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (1.058s + 1.049s)
+[mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (1.002s + 1.135s)
+[mutant] P0ae/exposure_inferred: mutant fail, twin pass -> KILLED (0.65s + 0.594s)
+[mutant] P0ae/void_scored: mutant fail, twin pass -> KILLED (0.58s + 0.58s)
+[mutant] P0ae/void_not_counted: mutant fail, twin pass -> KILLED (0.575s + 0.599s)
+[mutant] P0ae/later_label_ignored: mutant fail, twin pass -> KILLED (0.597s + 0.598s)
+[mutant] P0ae/label_by_anyone: mutant fail, twin pass -> KILLED (0.596s + 0.592s)
+[mutant] P0af/alpha_zero: mutant fail, twin pass -> KILLED (0.578s + 0.61s)
+[mutant] P0af/fixed_order_dropped: mutant fail, twin pass -> KILLED (0.659s + 0.514s)
+[mutant] P0af/fixed_order_not_required: mutant fail, twin pass -> KILLED (0.4s + 0.43s)
+[mutant] P0af/silence_is_an_act: mutant fail, twin pass -> KILLED (0.49s + 0.491s)
+[mutant] P0ag/regime_after_seed: mutant fail, twin pass -> KILLED (1.293s + 1.184s)
+[mutant] P0ag/seed_after_act_admitted: mutant fail, twin pass -> KILLED (0.951s + 0.95s)
+clean: 50/50 passed, 0/50 failed
+mutants: 132/132 killed, 0/132 survived, 0/132 inconclusive, 0/132 stale, 0/132 non-causal, 0 leaked (clean and mutant)
+twins: 132/132 passed
+report: out/pins/pins.jsonl
+PINS PASSED
+exit 0
+
+Equals the Builder's STATUS line (clean 50/50; mutants 132/132 KILLED; twins 132/132; leaked 0; stale 0;
+inconclusive 0; non-causal 0; exit 0). No flake.

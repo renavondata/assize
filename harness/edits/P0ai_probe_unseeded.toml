@@ -1,0 +1,6 @@
+# P0ai's mutant (instruction #111 Part B item 6): the probes are the first k of the pool in ledger order, not a draw by
+# the seeded hash of the ledger head.
+[[edit]]
+path = "harness/ledger.py"
+old = '''    return sorted(pool, key=lambda f: hashlib.sha256(f"{seed}:{f['id']}".encode()).hexdigest())[:k]'''
+new = '''    return list(pool)[:k]'''

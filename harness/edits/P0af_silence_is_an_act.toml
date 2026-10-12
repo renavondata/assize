@@ -1,0 +1,6 @@
+# P0af's mutant (instruction #111 Part B items 2 and 4): a round Guy resolved by silence counts as a sovereign act, so the
+# mixture replaces fixed-order without his having applied a label.
+[[edit]]
+path = "harness/chooser.py"
+old = '''acts = [r for r in rounds if r.act and r.ts > last]'''
+new = '''acts = [r for r in rounds if r.ts > last]'''

@@ -1,0 +1,7 @@
+# P0ae's mutant (instruction #111 Part B item 2): the record's denominator does not count the void resolutions.
+[[edit]]
+path = "harness/ledger.py"
+old = '''    void = voided(rows)
+    scored = outcomes(rows).keys()'''
+new = '''    void = set()
+    scored = outcomes(rows).keys()'''
