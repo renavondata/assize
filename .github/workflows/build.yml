@@ -42,6 +42,11 @@ jobs:
           model=$(uv run --frozen python -m harness.ledger elect build --seed ${{ github.run_id }} --head origin/master --publish origin)
           echo "elected: $model"
           claude --model "$model" -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
+      # Instruction #112 Part A item 5: this step fails when the session ended with usage_limit_reached; the price counts
+      # sessions lost to the limit by this step's name (harness.ledger.LIMIT_STEP), read through the Actions API.
+      - if: always()
+        name: usage limit
+        run: uv run --frozen python -m harness.sessions limit build.log
       - if: always()
         uses: actions/upload-artifact@v5
         with:

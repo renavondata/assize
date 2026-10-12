@@ -1,0 +1,7 @@
+# P0ak's mutant (instruction #112 Part A item 3): runs over their own bound are not counted in the price.
+[[edit]]
+path = "harness/ledger.py"
+old = """    return sum(1 for f in made if resolved.get(f["id"]) is False), len(made)
+"""
+new = """    return 0, len(made)
+"""

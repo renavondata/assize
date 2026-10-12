@@ -17,8 +17,21 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 
 ## Guards
 - If the account above is not `assize-reviewer`, stop and report: wrong credentials; do nothing else.
+- If `$ARGUMENTS` begins with `draft`, this is a draft check: the PR context above does not apply; follow "Draft-check mode" below and nothing else.
 - If your own session id equals `session` in the Builder-of-record line, stop and report: you are this PR's Builder. If it is `unknown`, say so in the review file and continue.
 - If no PR resolved, stop and report.
+
+## Declaration and stop (instruction #112 Parts A and D)
+- The first act of every session, before any other, is one comment on the item it has taken (the PR under review, or the draft) reading `review run <run id> started <ISO time> on #<n>: expected <m> minutes; model <your model id>`, with `<run id>` `$GITHUB_RUN_ID` (`local` outside Actions) and the time from `date -u +%Y-%m-%dT%H:%M:%SZ`. Nothing else is done before this comment exists. At the session's end, edit that comment (`gh api -X PATCH repos/renavondata/assize/issues/comments/<id> -f body=...`) to add `; tokens <n>`, from `uv run --frozen python -m harness.sessions tokens review.log` (`unknown` when there is no log).
+- The declaration is a forecast: `type` `session_minutes`, `args` `{"run": <run id>, "bound": <m>}`, claim `review run <run id> ends within <m> minutes of its start`, proposer kind `reviewer`. Post it as a comment on the item whose whole body is `vizier-ledger: <the row as one line of JSON>`, right after the declaration; the Auditor transcribes it.
+- A session that stops before writing its review file (or, in draft-check mode, its `Draft check:` comment) posts its stop report as a comment on the item it holds, beginning `review run <run id> stopped <ISO time>:`, before it ends. A session ending with neither is an unrouted exit (`harness.sessions.declared_findings`). The declaration and the stop comment are the two comments a session makes about itself.
+
+## Draft-check mode: `/review draft <issue number>` (instruction #112 Part C)
+1. Read the draft (`gh issue view <n> --json title,body,labels,comments`) and the `vizier-ledger:` row that recorded it (on the draft, or on the wish its first line cites). Your session id must differ from that row's `session`; if it does not, stop and report: you wrote this draft.
+2. Read CLAUDE.md and every open issue labelled `instruction`. Check the draft for: conflict with the law or an open instruction; retroactivity (does it change the rules for a pull request already open); held items (an item an open PR already holds); degenerate criteria (a pin that cannot fail, a criterion with no seeded mutant, a threshold with no stated source).
+3. First record your forecast as a comment on the draft whose whole body is `vizier-ledger: <the row as one line of JSON>`: a row in the shape of A1.6 with proposer kind `reviewer`, `class` `draft-check`, `mode` `recommend`, `type` `guy_answers`, `args` `{"item": <the draft>, "answer": <"labeled:instruction" for sign, "signed-after-edit" for edit, "closed" for decline>}`.
+4. Then post one comment `Draft check: sign | edit | decline — p=<p> that Guy agrees — <reason>`; for edit, the exact replacement text in full; for decline, the reason.
+5. Then remove the label: `gh api -X DELETE repos/renavondata/assize/issues/<n>/labels/needs-draft-check`. Never edit the draft, sign it, close it, or push anything.
 
 ## Procedure
 1. `gh pr checkout` the PR. Reproduce `make pins` on a scratch copy; probes run on scratch copies only; transcripts go under `reports/L<n>/review/<reviewed head sha>/`. Leave no process and no copy behind, and show that you didn't. Read the head's `pins` run through the Actions API, never `gh pr checks`:

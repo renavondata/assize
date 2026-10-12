@@ -1,0 +1,7 @@
+# P0am's mutant (instruction #112 Part C item 4): the needs-draft-check clause removed from the review job's `if:`.
+[[edit]]
+path = ".github/workflows/review.yml"
+old = """      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'needs-draft-check') || (
+"""
+new = """      (
+"""

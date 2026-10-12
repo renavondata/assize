@@ -1,0 +1,7 @@
+# P0ak's mutant (instruction #112 Part A item 4): a session log without the declaration comment is admitted.
+[[edit]]
+path = "harness/sessions.py"
+old = """    return ([] if first is not None and DECLARATION.search(_command(first)) else
+"""
+new = """    return ([] if True else
+"""

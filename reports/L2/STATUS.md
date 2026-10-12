@@ -1,19 +1,20 @@
-# STATUS — L2 — 2026-10-12 — c3a1997 — PR #127
-VERDICT: SESSION DONE: instruction #108 done (pins declare the paths they witness; a pins run skips pins unchanged since the last green head)
+# STATUS — L2 — 2026-10-12 — 47e6b26 — PR #131
+VERDICT: STOPPED: instruction #112 built; CI pins on 47e6b26 red from outside the diff (#136, signed with no `Price:` line, fails P0x's real-tree check on every branch)
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 47/47; mutants 122/122 KILLED; twins 122/122; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0; skipped 0 since d8afa09 (run 38205487270) — pins CI run 38208656897 on c3a1997 (success, run attempt 1; record reports/L2/ci/38208656897.json). Full run because harness/ changed
-changed: harness/pin.py, harness/runner.py, harness/__main__.py, harness/nested.py, harness/pins.py, harness/registries.py, harness/fixtures/{witness,toy,broken,daemon,escapee,noncausal,no_mutants}.py, harness/edits/P0w_*.toml, harness/README.md, harness/proposer.toml, Makefile, .github/workflows/pins.yml, reports/L2/forecasts.jsonl, reports/L2/STATUS.md, reports/L2/ci/38208656897.json
-did: #108 items 1–2: `Pin.witnesses` (validate refuses empty, `no_witnesses`); all 47 pins declare theirs, with P0k/l/m/q/r/x/y as `("**",)`; `run --since <sha> --since-run <id>` runs only matched pins (all of them on harness/, Makefile, pyproject.toml, uv.lock); skipped pins are rows with verdict `skipped` and never count as ok
-did: #108 items 3–5: `harness base` + pins.yml step (comment states the rule); `make pins` bare runs all. In CI the base step chose run 38205487270 on d8afa09. P0w cases (i)–(iv); `witness_ignored`, `harness_change_skips`, `skip_counted_ok`, `non_ancestor_base` KILLED locally and in CI
-did: `claims next` skipped #102 (held by PR #123, since merged) and took #108. Merged origin/master (#123) after the PR opened DIRTY: forecasts keep both sides, master's first; P0aj given witness `.github/workflows/build.yml`
-did: simulated on the real registry: a reports-only diff runs 7/47 pins (the `**` set). Local P0r first read `GITHUB_HEAD_REF` leaked from this session's trigger event (PR #123 branch); with it unset it passes. No tool call was denied
-decided (not asked): `--since-run` and `--repo` added beside `--since`: item 2 requires recording the run id, and P0w's synthetic git fixture needs a repository other than the tree — p(stands on review)=0.75
-decided (not asked): judge-side pins share one witness set (judge/, worlds/, incumbents/, pilot/, scripts/) rather than per-file sets; this over-runs rather than under-runs. P0b witnesses every code-file suffix it scans — p=0.75
-decided (not asked): renames are split (`--no-renames`) so a path moved out of a witness still counts; skipped pins are one row per pin with role `skipped`, listing their mutants — p=0.8
-decided (not asked): `base` prints nothing (so everything runs) when the API or an artifact cannot be read, and states why on stderr — p=0.8
-forecasts: made 3 (a1f7c97bd66b pins_green p=0.6, 6521a8aca863 review_accept p=0.6, 1124746f7c93 host_verdict FIT p=0.35); resolved 0 this session; builder cumulative log-loss 53.43 over 126 resolved (`ledger proposer builder`)
-price: guy-items 6; guy-latency median 1.3h max 2.1h; sessions 9; runner-min 484; wish-latency median 0.0h max 0.0h open 1 (`ledger price --since 487cde7`)
-obligations added: L3: the escape rate in #108's price remark (pins red on a master full run after a green skip-run on the same PR) has no ledger subcommand yet
-obligations added: L3: `harness base` lists every successful pins run (paginated) on each PR; nothing bounds it as the run count grows
-NEEDS YOU (at most 1): approve and merge PR #127 (touches entrenched .github/)
-next: reviewer round on PR #127; then #111 unless a PR holds it
+pins: clean 58/58; mutants 158/158 KILLED; twins 158/158; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on 47e6b26 (reports/L2/builder/47e6b26/make-pins.txt). pins CI run 38231985110 on 47e6b26: attempt 1 cancelled at the 30-minute cap on the last mutant (P11/golden_hash_altered); attempt 2 failure: clean 58/58, killed 155/158, non-causal 3 (P0x twins, issue #136) (record reports/L2/ci/38231985110.json). No successful CI run is cited, so P0l is red on this head too
+changed: harness/{sessions,ledger,pins}.py, harness/edits/P0a{k,l,m,n}_*.toml (12), harness/proposer.toml, .claude/commands/{build,review,audit,vizier}.md, .github/workflows/{build,review}.yml, reports/L2/{forecasts.jsonl,STATUS.md,ci/38231985110.json,builder/47e6b26/make-pins.txt}
+did: closed #111 (PR #117 merged). `claims next '#112' '#113' '#126'` -> #112, the oldest signed; nothing skipped; no awaits-guy PR open
+did: A: declaration as each procedure's first act (model; tokens added at the end, `harness.sessions tokens`); `session_minutes {run, bound}` resolved from the Actions run, cancelled void; price `sessions-over-bound k/n; sessions-lost-to-limit n` (`usage limit` step in build.yml and review.yml); P0ak
+did: B: `guy_answers` on a draft -> signed-as-drafted | signed-after-edit | declined (`outcome_detail`), `ledger proposer` counts them; P0al. C: vizier labels drafts `needs-draft-check`; `/review draft <n>`; review.yml starts it; P0am. D: no forecast rows on a PR branch; stop comment; P0an
+did: re-ran the timed-out CI run once (builder token, Actions write); commented once on #136 with the P0x finding. No tool call was denied
+decided (not asked): Part B names pin "P0w", taken by #108; the pins are P0ak (A), P0al (B), P0am (C), P0an (D) — p(stands on review)=0.85
+decided (not asked): declaration may follow the read-only commands that name the item (claims next, chooser) but nothing that writes; for a brief item it goes on the PR in master STATUS's header — p=0.6
+decided (not asked): a draft forecast on a wish binds to the draft citing it whose title the claim quotes; `closed` (decline) and `signed-after-edit` (edit) are the draft-check answers besides `labeled:instruction` — p=0.6
+decided (not asked): sessions lost to the limit are counted from a failing `usage limit` step read through the Actions jobs API (the step reads the log's last `result` event); a PR-branch Builder posts its `session_minutes` as a `vizier-ledger:` comment, which audit.md now transcribes from assize-builder too — p=0.55
+decided (not asked): extra mutants beyond the named ones (cancelled_scored, over_bound_uncounted, limit_uncounted, detail_uncounted), so that each new check kills one — p=0.7
+forecasts: made 3 (e0576f57cde2 pins_green p=0.55, a07803496173 review_accept p=0.45, 255a1a653e62 host_verdict FIT p=0.35); resolved 0 this session; builder cumulative log-loss 55.60 vs base rate 57.66 over 131 resolved (`ledger proposer builder`)
+price: guy-items 10; guy-latency median 0.9h max 2.1h; sessions 18; runner-min 882; wish-latency median 0.0h max 0.0h open 1; sessions-over-bound 0/0; sessions-lost-to-limit 0 (`ledger price --since 487cde7`)
+obligations added: L3: a full pins run is at the 30-minute cap of pins.yml (29.5 min on #117, timed out here); #136 addresses it
+obligations added: L3: P0x's real-tree check makes every branch red when an instruction is signed without a Price line; nothing checks the draft before the signature
+NEEDS YOU (at most 1): add a `Price:` line to #136 (only gfrmin can edit a signed instruction's body); then re-run pins on PR #131, which then needs your approval and merge (entrenched .claude/, .github/)
+next: re-run pins on PR #131 once #136 carries a Price line; then #113

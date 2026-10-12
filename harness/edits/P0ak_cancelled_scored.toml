@@ -1,0 +1,7 @@
+# P0ak's mutant (instruction #112 Part A item 2): a cancelled run is scored as an overrun, not void.
+[[edit]]
+path = "harness/ledger.py"
+old = """        return False, f"run {args['run']}: cancelled", {"void": CANCELLED}
+"""
+new = """        return False, f"run {args['run']}: cancelled"
+"""
