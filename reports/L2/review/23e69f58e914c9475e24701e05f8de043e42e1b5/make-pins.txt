@@ -1,0 +1,45 @@
+Reviewer 5723b3fb reproduction of `make pins` at PR #117 head 23e69f58e914c9475e24701e05f8de043e42e1b5, 2026-10-12, agent runner.
+Scratch copy /tmp/rv117.Digq (git archive 23e69f5 + .git), removed afterwards (see cleanup below). The first attempt ran into
+the session's 600 s background-tool limit at P1 and was killed (make: Error 143). That was a tool limit, not a pin verdict. It was rerun from a clean out/.
+Full log 203 lines. The excerpt below is verbatim: header, every non-ok line, the lines of the two pins added since 473a72d (P0ah, P0ai), and the summary.
+
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 52 pins, 140 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0l: observed fail -> FAILED (0.323s) out/pins/runs/P0l/clean/transcript.log
+CLEAN FAILED: P0l (observed fail)
+[clean ] P0ah: observed pass -> ok (0.321s) out/pins/runs/P0ah/clean/transcript.log
+[clean ] P0ai: observed pass -> ok (0.323s) out/pins/runs/P0ai/clean/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.337s + 0.333s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+[mutant] P0ah/kept_not_filed: mutant fail, twin pass -> KILLED (0.344s + 0.344s) out/pins/runs/P0ah/kept_not_filed/mutant/transcript.log
+[mutant] P0ah/merged_not_filed: mutant fail, twin pass -> KILLED (0.338s + 0.337s) out/pins/runs/P0ah/merged_not_filed/mutant/transcript.log
+[mutant] P0ah/kept_without_exposure: mutant fail, twin pass -> KILLED (0.336s + 0.337s) out/pins/runs/P0ah/kept_without_exposure/mutant/transcript.log
+[mutant] P0ah/item_always_pr: mutant fail, twin pass -> KILLED (0.336s + 0.337s) out/pins/runs/P0ah/item_always_pr/mutant/transcript.log
+[mutant] P0ai/probe_from_unkept: mutant fail, twin pass -> KILLED (0.339s + 0.337s) out/pins/runs/P0ai/probe_from_unkept/mutant/transcript.log
+[mutant] P0ai/probe_unseeded: mutant fail, twin pass -> KILLED (0.334s + 0.336s) out/pins/runs/P0ai/probe_unseeded/mutant/transcript.log
+[mutant] P0ai/probe_needs_exposure: mutant fail, twin pass -> KILLED (0.337s + 0.333s) out/pins/runs/P0ai/probe_needs_exposure/mutant/transcript.log
+[mutant] P0ai/probe_not_priced: mutant fail, twin pass -> KILLED (0.337s + 0.335s) out/pins/runs/P0ai/probe_not_priced/mutant/transcript.log
+clean: 51/52 passed, 1/52 failed
+mutants: 139/140 killed, 0/140 survived, 0/140 inconclusive, 0/140 stale, 1/140 non-causal, 0 leaked (clean and mutant)
+twins: 139/140 passed
+PINS FAILED
+exit 2
+
+P0l clean transcript (out/pins/runs/P0l/clean/transcript.log), the failing line and its neighbours, verbatim:
+  [ok] real STATUS files from L1: ['reports/L1/STATUS.md', 'reports/L2/STATUS.md']; 62 committed run records
+  [ok] reports/L1/STATUS.md: cites [('37840644452', '25f36e6')]; findings []
+  [FAIL] reports/L2/STATUS.md: cites []; findings ['reports/L2/STATUS.md: uncited: no `pins CI run <id> on <sha>` citation']
+  [ok] REPORT.md: 1 verdict lines from L1; findings []
+result:    FAIL
+
+pins CI on the same head, read through the Actions API:
+{"conclusion":"failure","event":"pull_request","head_branch":"instr-111-chooser","head_sha":"23e69f58e914c9475e24701e05f8de043e42e1b5","html_url":"https://github.com/renavondata/assize/actions/runs/38189096252","id":38189096252,"name":"pins","run_attempt":1,"run_started_at":"2026-10-12T00:43:21Z","status":"completed","updated_at":"2026-10-12T01:10:57Z"}
+Its failed log: "CLEAN FAILED: P0l (observed fail)"; "clean: 51/52 passed, 1/52 failed"; "mutants: 139/140 killed, ... 1/140 non-causal".
+The reproduction equals CI, so there is no flake.
+
+STATUS citations (`grep "pins CI run"`): at 3f925b4, line 2 cites `pins CI run 38182372179 on 13141ef`. At 23e69f5 (head) there are 0 matches.
+Builder's witness reports/L2/builder/3f925b4/make-pins.txt was made at 3f925b4, where the old STATUS still carried a citation. It does not describe the head.
+
+Probes on the scratch copy (read-only):
+`ledger probe --brief docs/briefs/brief-2-nethack.md ...` -> "# 0 probes of k = 2 drawn from 0 exposed-and-silent acts, seed 65d7559...", exit 0 (k read from brief 2 line 241).
+`chooser choose '#112' 'brief item' ... --pr 999 --p-kept 0.5 --p-merged 0.5` -> "no committed switchback seed (reports/switchback-seed.txt): the chooser has not begun; take A1.5's order".
