@@ -76,3 +76,4 @@
 {"procedure": "build", "ts": "2026-10-12T20:29:34Z", "run": 38304543433, "gamma": 0.14570978970796267, "probabilities": {"claude-opus-5-5": 0.4837094514432996, "claude-sonnet-5-5": 0.5162905485567004}, "drawn": "claude-opus-5-5"}
 {"procedure": "review", "ts": "2026-10-12T21:11:12Z", "run": 38309004034, "gamma": 0.17286164742210489, "probabilities": {"claude-opus-5-5": 0.5, "claude-sonnet-5-5": 0.5}, "drawn": "claude-sonnet-5-5"}
 {"procedure": "build", "ts": "2026-10-12T22:11:09Z", "run": 38315158580, "gamma": 0.14382958461728693, "probabilities": {"claude-opus-5-5": 0.4806385207631689, "claude-sonnet-5-5": 0.5193614792368312}, "drawn": "claude-sonnet-5-5"}
+{"procedure": "vizier", "ts": "2026-10-12T22:12:20Z", "run": 38315270025, "gamma": 0.24912014818866798, "probabilities": {"claude-opus-5-5": 0.5, "claude-sonnet-5-5": 0.5}, "drawn": "claude-sonnet-5-5"}
