@@ -139,8 +139,8 @@ def undeclared(cs: Sequence[Call]) -> list[Finding]:
                                                       f"({(_command(first) or (first.tool if first else 'none'))[:80]!r})")])
 
 
-LEDGER_FILE = re.compile(r"(?:^|/)reports/L\d+/forecasts\.jsonl$")
-LEDGER_APPEND = re.compile(r">>?\s*['\"]?\S*reports/L\d+/forecasts\.jsonl")
+LEDGER_FILE = re.compile(r"(?:^|/)reports/L\d+/forecasts(?:\.jsonl|/[^/]+\.jsonl)$")
+LEDGER_APPEND = re.compile(r">>?\s*['\"]?\S*reports/L\d+/forecasts(?:\.jsonl|/\S+\.jsonl)")
 
 
 def adds_forecast(c: Call) -> bool:
@@ -165,7 +165,7 @@ def pr_branch_forecasts(cs: Sequence[Call], start: str = "master") -> list[Findi
             for c, b, made in zip(cs, before, created) if adds_forecast(c) and b != "master" and b not in made]
 
 
-ROUTED_FILE = re.compile(r"(?:^|/)reports/L\d+/(?:STATUS|review-[^/]+|audit-[^/]+)\.md$")
+ROUTED_FILE = re.compile(r"(?:^|/)reports/L\d+/(?:STATUS|status/[^/]+|review-[^/]+|audit-[^/]+)\.md$")
 
 
 def silent_stop(cs: Sequence[Call]) -> list[Finding]:

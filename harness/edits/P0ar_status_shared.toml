@@ -1,0 +1,6 @@
+# P0ar's mutant (instruction #135 item 4): a session's STATUS written to the shared path, so two pull requests rewrite
+# the same lines and conflict.
+[[edit]]
+path = "harness/claims.py"
+old = """"status": f"reports/L{layer}/status/{branch}.md","""
+new = """"status": f"reports/L{layer}/STATUS.md","""
