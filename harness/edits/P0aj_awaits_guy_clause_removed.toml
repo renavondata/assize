@@ -1,0 +1,6 @@
+# P0aj's mutant (instruction #102 item 3): the `awaits-guy` clause removed from the build job's condition, so a pull
+# request awaiting Guy starts no master Builder and the queue pauses.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """ || (github.event_name == 'pull_request' && github.event.label.name == 'awaits-guy')"""
+new = ""

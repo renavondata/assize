@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-12T03:47:45Z","event":"pull_request","head_branch":"instr-102-awaits-guy-master","head_sha":"8179517a73709854d3e96b6bdbe71b43108d5cca","html_url":"https://github.com/renavondata/assize/actions/runs/38201163562","id":38201163562,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}
