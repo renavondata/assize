@@ -1,0 +1,15 @@
+pin:       P0r
+protects:  a forecast row a pull request adds after the head of its first pins run is late
+role:      clean
+tree:      /tmp/assize-scratch-uOQv/wt
+invoked:   /tmp/assize-scratch-uOQv/wt
+scratch:   /tmp/assize-scratch-7scklxzs
+  [ok] fixture: the branch adds one forecast row ({'reports/L2/forecasts.jsonl': ['{"id": "b12abb1e7f52", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "builder", "model": "m", "session": "s"}, "sha_before": "0000000000000000000000000000000000000000", "claim": "late", "p": 0.5, "resolves_by": "r"}']})
+  [ok] fixture: the first pull_request pins run is run 1 ({'id': 1, 'head_sha': '659408404a603a0971b2f1532f129bad366f813a', 'created_at': '2026-01-01T00:00:00Z', 'event': 'pull_request', 'path': '.github/workflows/pins.yml'})
+  [ok] fixture: a forecast first present in the second commit, after the first run's head, is late (['reports/L2/forecasts.jsonl: late_forecast: row \'{"id": "b12abb1e7f52", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "build\'... is not in the tree at 659408404a60, the head of the first pins run'])
+  [ok] fixture: the same forecast present at the first run's head is not late ([])
+  [ok] real branch: base resolved (f1e88e13780a0d5ca07c9961431bbbf6381871d6)
+    real branch adds 5 forecast rows in ['reports/L2/forecasts.jsonl']
+  [ok] real branch: name resolved ('instr-132-pins-cap'; GITHUB_HEAD_REF in CI, else the checked-out branch)
+  [FAIL] real branch instr-132-pins-cap: first pins run 38250796790 on ef2c322044d7 of 5; findings ['reports/L2/forecasts.jsonl: late_forecast: row \'{"id": "fc5e810248d8", "ts": "2026-10-12T13:40:00Z", "proposer": {"kind": "build\'... is not in the tree at ef2c322044d7, the head of the first pins run']
+result:    FAIL
