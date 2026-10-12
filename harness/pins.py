@@ -1368,12 +1368,66 @@ def _review_condition(text: str) -> str | None:
     return " ".join(x.strip() for x in m.group(1).splitlines()) if m else None
 
 
-def _github_condition(condition: str, context_: dict[str, str]) -> bool:
-    """Evaluates the subset of the Actions expression language the review condition uses (`==`, `!=`, `&&`, `||`,
-    `contains(fromJSON('[..]'), x)`, and `github.*` names, null when the event does not carry one)."""
-    py = re.sub(r"contains\(fromJSON\('(\[[^']*\])'\),\s*([^()]*?)\)", r"(\2 in \1)", condition)
-    py = re.sub(r"github(?:\.\w+)+", lambda m: f"ctx.get({m.group(0)!r})", py)
-    return bool(eval(py.replace("&&", " and ").replace("||", " or "), {"__builtins__": {}}, {"ctx": context_}))
+def _github_value(expression: str, context_: dict[str, object]) -> object:
+    """Evaluates the subset of the Actions expression language the workflow conditions use (`==`, `!=`, `&&`, `||`,
+    which yield an operand as Actions' do, `contains(fromJSON('[..]'), x)`, and `github.*` and `inputs.*` names, null
+    when the event does not carry one)."""
+    py = re.sub(r"contains\(fromJSON\('(\[[^']*\])'\),\s*([^()]*?)\)", r"(\2 in \1)", expression)
+    py = re.sub(r"(?:github|inputs)(?:\.\w+)+", lambda m: f"ctx.get({m.group(0)!r})", py)
+    return eval(py.replace("&&", " and ").replace("||", " or "), {"__builtins__": {}}, {"ctx": context_})
+
+
+def _github_condition(condition: str, context_: dict[str, object]) -> bool:
+    return bool(_github_value(condition, context_))
+
+
+BUILD_EVENTS = (  # (what, label, must start, on the PR branch) -- instruction #102
+    ("an awaits-guy label on a pull request", "awaits-guy", True, False),
+    ("a blocked label on a pull request", "blocked", True, True),
+    ("a needs-review label on a pull request", "needs-review", False, None),
+)
+BUILD_EVENT_PR = 7
+
+
+def _build_expressions(text: str) -> tuple[str | None, str | None, str | None]:
+    """The build job's `if:`, its concurrency group's expression, and the `if:` of the step that checks out a pull
+    request, from `.github/workflows/build.yml`."""
+    job = re.search(r"^  build:\n    if: (.*)$", text, re.M)
+    group = re.search(r"^      group: build-\$\{\{ (.*) \}\}$", text, re.M)
+    checkout = re.search(r"^      - if: (.*)\n        run: gh pr checkout ", text, re.M)
+    return tuple(m.group(1) if m else None for m in (job, group, checkout))
+
+
+def p0aj_awaits_guy_builds_master() -> bool:
+    """An `awaits-guy` label on a pull request starts a Builder on master, in master's queue, checking out no pull
+    request; a `blocked` label builds on the pull request, in its queue, as before; a `needs-review` label starts no
+    Builder (instruction #102). The workflow states this, and that the `blocked` path is unchanged."""
+    expect, ok = _expecter()
+    text = (ROOT / ".github" / "workflows" / "build.yml").read_text()
+    job, group, checkout = _build_expressions(text)
+    expect(None not in (job, group, checkout), "the build job's `if:`, its concurrency group and the PR checkout step's "
+                                              f"`if:` are found ({job is not None}, {group is not None}, "
+                                              f"{checkout is not None})")
+    if None in (job, group, checkout):
+        return ok()
+    for what, label, start, on_pr in BUILD_EVENTS:
+        # `inputs.pr` is '' outside a dispatch: Actions compares a missing input equal to ''.
+        ctx = {"github.event_name": "pull_request", "github.event.action": "labeled", "github.event.label.name": label,
+               "github.event.pull_request.number": BUILD_EVENT_PR, "inputs.pr": ""}
+        started = _github_condition(job, ctx)
+        expect(started is start, f"{what}: {'starts' if started else 'does not start'} a Builder (must "
+                                 f"{'start' if start else 'not start'})")
+        if not start:
+            continue
+        pr_branch, queue = _github_condition(checkout, ctx), _github_value(group, ctx)
+        want_queue = BUILD_EVENT_PR if on_pr else "master"
+        expect(pr_branch is on_pr and queue == want_queue,
+               f"{what}: builds on {'the PR branch' if pr_branch else 'master'} in queue build-{queue} (must build on "
+               f"{'the PR branch' if on_pr else 'master'} in queue build-{want_queue})")
+    head = text.split("concurrency:")[0]
+    expect("awaits-guy" in head and "master" in head and "`blocked` path is unchanged" in head,
+           "the workflow states that awaits-guy starts a master Builder and that the `blocked` path is unchanged")
+    return ok()
 
 
 PRICE_BEFORE, PRICE_MERGED, PRICE_AFTER = "2000-01-01T00:00:00Z", "2026-10-11T00:00:00Z", "2999-01-01T00:00:00Z"
@@ -4054,6 +4108,8 @@ PINS = [
                       Mutant("probe_unseeded", _edits("P0ai_probe_unseeded")),
                       Mutant("probe_needs_exposure", _edits("P0ai_probe_needs_exposure")),
                       Mutant("probe_not_priced", _edits("P0ai_probe_not_priced")))),
+    Pin("P0aj", "an awaits-guy label starts a Builder on master; blocked still builds on the PR; needs-review starts none",
+        p0aj_awaits_guy_builds_master, (Mutant("awaits_guy_clause_removed", _edits("P0aj_awaits_guy_clause_removed")),)),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
