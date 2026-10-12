@@ -1,0 +1,10 @@
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T16:24:37.0766838Z   clean: true
+pins	make pins	2026-10-12T16:32:08.0229934Z [clean ] P0l: observed fail -> FAILED (0.385s) out/pins/runs/P0l/clean/transcript.log
+pins	make pins	2026-10-12T16:32:08.0233058Z CLEAN FAILED: P0l (observed fail)
+pins	make pins	2026-10-12T16:32:08.0297004Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	make pins	2026-10-12T16:32:08.0320598Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.417s + 0.417s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	make pins	2026-10-12T16:32:08.0321878Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+pins	make pins	2026-10-12T16:54:55.4514417Z clean: 57/58 passed, 1/58 failed
+pins	make pins	2026-10-12T16:54:55.4515576Z mutants: 157/158 killed, 0/158 survived, 0/158 inconclusive, 0/158 stale, 1/158 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-12T16:54:55.4516503Z twins: 157/158 passed
+pins	make pins	2026-10-12T16:54:55.4518135Z PINS FAILED
