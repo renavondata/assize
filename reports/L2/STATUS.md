@@ -1,7 +1,7 @@
-# STATUS — L2 — 2026-10-12 — 6401015 — PR #117
-VERDICT: SESSION DONE: review 23e69f5 F1 worked (STATUS now cites a pins run); head 6401015 (merge of origin/master) ran pins red on P0l alone, as review F0 predicted; green run cited below is 65d7559's, the last green on this branch
+# STATUS — L2 — 2026-10-12 — 65d7559 — PR #117
+VERDICT: SESSION DONE (interim): review 23e69f5 F1 worked in two steps — P0l binds the header sha to the cited run, so this STATUS names 65d7559, the last green pins run on the branch; the next commit cites the run on the head that carries it
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 51/52; mutants 140/141 KILLED, 1 non-causal (P0l/sha_comparison_skipped, whose twin fails because the clean P0l fails); twins 140/141; leaked 0; stale 0; inconclusive 0; exit 2 — at 6401015, local witness reports/L2/builder/6401015/make-pins.txt, CI run 38199143234 on 6401015 (failure, only P0l; record reports/L2/ci/38199143234.json); P0l cures with this STATUS's citation: pins CI run 38185521602 on 65d7559 (success, run attempt 1; record reports/L2/ci/38185521602.json)
+pins: clean 50/50; mutants 132/132 KILLED; twins 132/132; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38185521602 on 65d7559 (success, run attempt 1; record reports/L2/ci/38185521602.json). Heads since: 6401015 red on P0l alone (51/52, 140/141, 1 non-causal; CI run 38199143234, record reports/L2/ci/38199143234.json, local reports/L2/builder/6401015/make-pins.txt); 94ec396 red on P0l alone (CI run 38201025319)
 price: guy-items 1; guy-latency median 0.4h max 0.4h; sessions 1; runner-min 1
 changed: reports/L2/STATUS.md, reports/L2/ci/, reports/L2/builder/6401015/, harness/proposer.toml, reports/L2/forecasts.jsonl (merge only)
 did: PR was DIRTY: merged origin/master (6401015); forecasts.jsonl keeps every line of both sides, proposer.toml names this session, STATUS kept this branch's and regenerated here; no code change since 3f925b4
