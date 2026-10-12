@@ -13,7 +13,7 @@ import time
 
 from harness import context, proc
 from harness.fixtures.toy import OFF_BY_ONE
-from harness.pin import ROOT, Pin
+from harness.pin import ALWAYS, ROOT, Pin
 
 FAST = ROOT / "harness" / "fixtures" / "fast.toml"
 MARKER = "assize-escapee"
@@ -30,4 +30,4 @@ def check_escapee() -> bool:
 
 
 PINS = [Pin("fixture/escapee", "its grandchild escapes both kill paths (seeded defect)",
-            check_escapee, (OFF_BY_ONE,))]
+            check_escapee, (OFF_BY_ONE,), ALWAYS)]

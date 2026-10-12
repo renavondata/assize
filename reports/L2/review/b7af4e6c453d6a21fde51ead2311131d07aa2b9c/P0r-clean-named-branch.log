@@ -1,0 +1,15 @@
+pin:       P0r
+protects:  a forecast row a pull request adds after the head of its first pins run is late
+role:      clean
+tree:      /tmp/review127
+invoked:   /tmp/review127
+scratch:   /tmp/r127-sc
+  [ok] fixture: the branch adds one forecast row ({'reports/L2/forecasts.jsonl': ['{"id": "b12abb1e7f52", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "builder", "model": "m", "session": "s"}, "sha_before": "0000000000000000000000000000000000000000", "claim": "late", "p": 0.5, "resolves_by": "r"}']})
+  [ok] fixture: the first pull_request pins run is run 1 ({'id': 1, 'head_sha': '26300c1e4fd1757e02d9dd49761eefceeef6855a', 'created_at': '2026-01-01T00:00:00Z', 'event': 'pull_request', 'path': '.github/workflows/pins.yml'})
+  [ok] fixture: a forecast first present in the second commit, after the first run's head, is late (['reports/L2/forecasts.jsonl: late_forecast: row \'{"id": "b12abb1e7f52", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "build\'... is not in the tree at 26300c1e4fd1, the head of the first pins run'])
+  [ok] fixture: the same forecast present at the first run's head is not late ([])
+  [ok] real branch: base resolved (506510c9bb80c69076c9c42fd3b2283848c712db)
+    real branch adds 3 forecast rows in ['reports/L2/forecasts.jsonl']
+  [ok] real branch: name resolved ('instr-108-pin-witnesses'; GITHUB_HEAD_REF in CI, else the checked-out branch)
+  [ok] real branch instr-108-pin-witnesses: first pins run 38208656897 on c3a1997f93e5 of 2; findings []
+result:    PASS

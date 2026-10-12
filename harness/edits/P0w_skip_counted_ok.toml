@@ -1,0 +1,8 @@
+# P0w's mutant (instruction #108 item 5): a skipped pin enters the clean numerator.
+[[edit]]
+path = "harness/runner.py"
+old = """            counts["skipped"] += 1
+"""
+new = """            counts["skipped"] += 1
+            counts["clean_ok"] += 1
+"""

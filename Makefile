@@ -1,5 +1,8 @@
 # assize make targets. `pins` runs in the cloud and on the host; `measure` is host-only.
 PINS_OUT ?= out/pins
+# Empty by default, so `make pins` runs every pin. The `pins` workflow passes `--since <sha> --since-run <id>` from
+# `python -m harness base` to run only the pins witnessing a path changed since that green head (instruction #108).
+PINS_SINCE ?=
 HOST_OUT ?= out/host
 PY := uv run --frozen python
 # The pilot's judge-private storage and ledgers on the measurement host persist across runs outside the checkout, so
@@ -18,7 +21,7 @@ pins:
 	@# here, outside the harness, whose sweep would otherwise count it as leaked by the first check to use Podman.
 	@# `podman unshare true` is a no-op when the process already exists (P2; witness reports/L1/p2/ci-leak.txt).
 	@if command -v podman >/dev/null 2>&1; then podman unshare true || true; fi
-	$(PY) -m harness run --registry harness --phase all --out $(PINS_OUT)
+	$(PY) -m harness run --registry harness --phase all --out $(PINS_OUT) $(PINS_SINCE)
 
 smoke:
 	@# At most 10 episodes, in fresh throwaway judge storage; the report says it is not evidence (brief 1 A1 item 3).

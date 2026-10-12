@@ -14,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -22,7 +23,7 @@ import tempfile
 import time
 import tomllib
 import traceback
-from collections.abc import Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -211,13 +212,149 @@ TALLY = {"KILLED": "killed", "SURVIVED": "survived", "INCONCLUSIVE": "inconclusi
          "STALE": "stale", "NON-CAUSAL": "non_causal", "LEAKED": "leaked"}
 
 
+# ------------------------------------------------------- since a green head
+
+# A change to any of these runs every pin: the harness (each pin's own code and its `edits/` file) and the environment
+# every check runs in (instruction #108 item 2).
+FORCE_ALL = ("harness/**", "Makefile", "pyproject.toml", "uv.lock")
+_GLOB_TOKEN = re.compile(r"\*\*/|\*\*|\*|\?|[^*?]+")
+_GLOB_REGEX = {"**/": "(?:.*/)?", "**": ".*", "*": "[^/]*", "?": "[^/]"}
+
+
+def matches(path: str, glob: str) -> bool:
+    """`**` matches any run of path segments (`**/` also none), `*` and `?` match within one segment."""
+    regex = "".join(_GLOB_REGEX.get(t, re.escape(t)) for t in _GLOB_TOKEN.findall(glob))
+    return re.fullmatch(regex, path) is not None
+
+
+def _git(repo: Path, *args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True,
+                          env=os.environ | {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1"})
+
+
+def changed_paths(repo: Path, since: str) -> tuple[str, ...]:
+    """`git diff --name-only <since>...HEAD`, renames split into their two paths so a path moved away still counts."""
+    out = _git(repo, "diff", "--no-renames", "--name-only", f"{since}...HEAD")
+    if out.returncode != 0:
+        raise RuntimeError(f"changed paths since {since} not read: {out.stderr.strip()}")
+    return tuple(out.stdout.split())
+
+
+def select(pins: Sequence[Pin], changed: Sequence[str]) -> tuple[list[Pin], list[Pin]]:
+    """(the pins that run, the pins skipped): a pin runs if a changed path matches one of its witnesses, and every pin
+    runs if a changed path matches FORCE_ALL."""
+    force = any(matches(path, g) for path in changed for g in FORCE_ALL)
+
+    def runs(pin: Pin) -> bool:
+        return force or any(matches(path, w) for path in changed for w in pin.witnesses)
+
+    return [p for p in pins if runs(p)], [p for p in pins if not runs(p)]
+
+
+def full_report(rows: Sequence[Mapping]) -> bool:
+    """A pins report usable as a base: one accepted registry row of phase `all`, every registry pin's clean run ok,
+    every registry mutant KILLED, nothing skipped, and a summary exiting 0."""
+    registry = [r for r in rows if r.get("kind") == "registry"]
+    summary = [r for r in rows if r.get("kind") == "summary"]
+    runs = [r for r in rows if r.get("kind") == "run"]
+    if len(registry) != 1 or len(summary) != 1:
+        return False
+    reg, summ = registry[0], summary[0]
+    ok = {r.get("pin") for r in runs if r.get("role") == "clean" and r.get("verdict") == "ok"}
+    killed = {r.get("mutant") for r in runs if r.get("role") == "mutant" and r.get("verdict") == "KILLED"}
+    return (reg.get("status") == "accepted" and reg.get("phase") == "all"
+            and set(reg.get("pins", ())) <= ok and set(reg.get("mutants", ())) <= killed
+            and not any(r.get("verdict") == "skipped" for r in runs)
+            and not summ.get("skipped") and summ.get("exit_code") == 0)
+
+
+def is_ancestor(repo: Path, sha: str) -> bool:
+    return _git(repo, "merge-base", "--is-ancestor", sha, "HEAD").returncode == 0
+
+
+def choose_base(repo: Path, runs: Iterable[Mapping], report: Callable[[int], Sequence[Mapping] | None]
+                ) -> tuple[tuple[str, int] | None, list[str]]:
+    """The newest successful pins run (`runs` newest first) whose head is an ancestor of HEAD and whose report is a
+    full one (`full_report`); `report(run id)` reads it, None if it cannot. Returns (head sha, run id) or None, and
+    why each newer run was refused."""
+    refused: list[str] = []
+    for r in runs:
+        rows = None
+        if r.get("conclusion") != "success":
+            refused.append(f"run {r.get('id')}: concluded {r.get('conclusion')}")
+        elif not is_ancestor(repo, str(r.get("head_sha"))):
+            refused.append(f"run {r.get('id')}: head {str(r.get('head_sha'))[:7]} is not an ancestor of HEAD")
+        elif (rows := report(int(r["id"]))) is None:
+            refused.append(f"run {r.get('id')}: report not read")
+        elif not full_report(rows):
+            refused.append(f"run {r.get('id')}: report skipped a pin or is not every pin ok and every mutant KILLED")
+        else:
+            return (str(r["head_sha"]), int(r["id"])), refused
+    return None, refused
+
+
+def boundary(repo: Path, master: str) -> bool:
+    """The branch records a layer verdict (adds a `- L<n>` line to the root REPORT.md) or opens a brief (adds a file
+    under docs/briefs/): CLAUDE.md A1.3's layer boundary."""
+    report = _git(repo, "diff", "--no-renames", "-U0", f"{master}...HEAD", "--", "REPORT.md")
+    briefs = _git(repo, "diff", "--no-renames", "--name-only", "--diff-filter=A", f"{master}...HEAD", "--",
+                  "docs/briefs/")
+    if report.returncode != 0 or briefs.returncode != 0:
+        raise RuntimeError(f"diff against {master} not read: {report.stderr.strip()} {briefs.stderr.strip()}")
+    return bool(re.search(r"^\+- L\d", report.stdout, re.M)) or bool(briefs.stdout.strip())
+
+
+def _gh_runs(repo: Path) -> Iterator[dict]:
+    out = subprocess.run(["gh", "api", "--paginate", "repos/{owner}/{repo}/actions/workflows/pins.yml/runs?"
+                          "status=success&per_page=100", "--jq", ".workflow_runs[] | {id, head_sha, conclusion}"],
+                         cwd=repo, capture_output=True, text=True, timeout=300)
+    if out.returncode != 0:
+        raise RuntimeError(f"pins runs not listed: {out.stderr.strip()}")
+    return (json.loads(line) for line in out.stdout.splitlines() if line.strip())
+
+
+def _gh_report(repo: Path, run_id: int) -> list[dict] | None:
+    with tempfile.TemporaryDirectory(prefix="assize-base-") as d:
+        got = subprocess.run(["gh", "run", "download", str(run_id), "-n", "pins-report", "-D", d], cwd=repo,
+                             capture_output=True, text=True, timeout=300)
+        path = Path(d) / "pins.jsonl"
+        if got.returncode != 0 or not path.is_file():
+            return None
+        return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def base(repo: Path, master: str) -> int:
+    """Print `--since <sha> --since-run <id>` for the base `choose_base` finds through the GitHub API, or nothing, so
+    every pin runs: on a layer boundary, with no usable base, or when the API cannot be read. Each reason goes to
+    stderr (instruction #108 item 3)."""
+    try:
+        if boundary(repo, master):
+            print("base: none: the branch records a layer verdict or opens a brief; every pin runs", file=sys.stderr)
+            return 0
+        chosen, refused = choose_base(repo, _gh_runs(repo), lambda run_id: _gh_report(repo, run_id))
+    except (RuntimeError, OSError, subprocess.SubprocessError, ValueError) as e:
+        print(f"base: none: {e}; every pin runs", file=sys.stderr)
+        return 0
+    for line in refused:
+        print(f"base: refused {line}", file=sys.stderr)
+    if chosen is None:
+        print("base: none: no successful full pins run on an ancestor of HEAD; every pin runs", file=sys.stderr)
+        return 0
+    print(f"base: run {chosen[1]} on {chosen[0]}", file=sys.stderr)
+    print(f"--since {chosen[0]} --since-run {chosen[1]}")
+    return 0
+
+
 def _proposer() -> dict:
     with (ROOT / "harness" / "proposer.toml").open("rb") as f:
         data = tomllib.load(f)
     return {k: data[k] for k in ("kind", "model", "session")}
 
 
-def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_root: Path | None = None) -> int:
+def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_root: Path | None = None,
+        since: str | None = None, since_run: int | None = None, repo: Path = ROOT) -> int:
+    """With `since`, run only the pins `select` picks from the paths changed in `repo` since that sha, and record each
+    other pin as skipped, citing `since` and its pins run `since_run`; without it, every pin."""
     proc.set_subreaper()
     cfg = config_mod.load(config_path)
     out.mkdir(parents=True, exist_ok=True)
@@ -246,18 +383,31 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
             emit({"kind": "summary", "registry": registry, "exit_code": EXIT_REFUSED})
             print(f"REGISTRY REFUSED: {registry}: {e}")
             return EXIT_REFUSED
+        changed = None if since is None else changed_paths(repo, since)
+        ran, skipped = (pins, []) if changed is None else select(pins, changed)
         emit(head | {"status": "accepted", "pins": [p.name for p in pins],
-                     "mutants": [p.label(m) for p in pins for m in p.mutants]})
+                     "mutants": [p.label(m) for p in pins for m in p.mutants],
+                     "since": since, "since_run": since_run, "changed": changed,
+                     "skipped": [p.name for p in skipped]})
         print(f"registry {registry}: {len(pins)} pins, "
               f"{sum(len(p.mutants) for p in pins)} mutants; phase={phase}; "
               f"child_timeout_s={cfg.child_timeout_s} ({os.path.relpath(cfg.path, ROOT)})")
 
         counts = dict(clean_total=0, clean_ok=0, clean_failed=0,
                       mutants_total=0, killed=0, survived=0, inconclusive=0, stale=0, non_causal=0, leaked=0,
-                      twins_total=0, twins_ok=0, twins_failed=0)
+                      twins_total=0, twins_ok=0, twins_failed=0, skipped=0, skipped_mutants=0)
+
+        # A skipped pin is recorded, never counted as ok and never dropped (instruction #108 item 2).
+        for pin in skipped:
+            emit({"kind": "run", "registry": registry, "pin": pin.name, "mutant": None, "role": "skipped",
+                  "verdict": "skipped", "since": since, "since_run": since_run, "witnesses": list(pin.witnesses),
+                  "mutants": [pin.label(m) for m in pin.mutants]})
+            print(f"[skip  ] {pin.name}: no changed path matches {list(pin.witnesses)} since {since} (run {since_run})")
+            counts["skipped"] += 1
+            counts["skipped_mutants"] += len(pin.mutants)
 
         if phase in ("all", "clean"):
-            for pin in pins:
+            for pin in ran:
                 row = _run_clean(registry, pin, out, cfg, scratch_root)
                 emit(row)
                 print(f"[clean ] {pin.name}: observed {row['observed']} -> {row['verdict']} "
@@ -269,7 +419,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
                     print(f"CLEAN FAILED: {pin.name} (observed {row['observed']})")
 
         if phase in ("all", "mutants"):
-            for pin, mutant in [(p, m) for p in pins for m in p.mutants]:
+            for pin, mutant in [(p, m) for p in ran for m in p.mutants]:
                 mrow, trow = _run_mutant(registry, pin, mutant, out, cfg, scratch_root)
                 emit(mrow)
                 emit(trow)
@@ -286,7 +436,8 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
 
         bad = sum(counts[k] for k in ("clean_failed", "survived", "inconclusive", "stale", "non_causal", "leaked"))
         code = 0 if bad == 0 else 1
-        emit({"kind": "summary", "registry": registry, "phase": phase, **counts, "exit_code": code})
+        emit({"kind": "summary", "registry": registry, "phase": phase, **counts, "since": since,
+              "since_run": since_run, "exit_code": code})
     n = counts["mutants_total"]
     print(f"clean: {counts['clean_ok']}/{counts['clean_total']} passed, "
           f"{counts['clean_failed']}/{counts['clean_total']} failed")
@@ -294,6 +445,8 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
           f"{counts['inconclusive']}/{n} inconclusive, {counts['stale']}/{n} stale, "
           f"{counts['non_causal']}/{n} non-causal, {counts['leaked']} leaked (clean and mutant)")
     print(f"twins: {counts['twins_ok']}/{counts['twins_total']} passed")
+    print(f"skipped: {counts['skipped']}/{len(pins)} pins, {counts['skipped_mutants']} mutants"
+          + ("" if since is None else f" since {since[:7]} (run {since_run})"))
     print(f"report: {os.path.relpath(rows_path, Path.cwd())}")
     print("PINS PASSED" if code == 0 else "PINS FAILED")
     return code
