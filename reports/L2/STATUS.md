@@ -1,20 +1,22 @@
-# STATUS — L2 — 2026-10-12 — 47e6b26 — PR #131
-VERDICT: STOPPED: instruction #112 built; CI pins on 47e6b26 red from outside the diff (#136, signed with no `Price:` line, fails P0x's real-tree check on every branch)
+# STATUS — L2 — 2026-10-12 — d240538 — PR #153
+VERDICT: SESSION DONE
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 58/58; mutants 158/158 KILLED; twins 158/158; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on 47e6b26 (reports/L2/builder/47e6b26/make-pins.txt). pins CI run 38231985110 on 47e6b26: attempt 1 cancelled at the 30-minute cap on the last mutant (P11/golden_hash_altered); attempt 2 failure: clean 58/58, killed 155/158, non-causal 3 (P0x twins, issue #136) (record reports/L2/ci/38231985110.json). No successful CI run is cited, so P0l is red on this head too
-changed: harness/{sessions,ledger,pins}.py, harness/edits/P0a{k,l,m,n}_*.toml (12), harness/proposer.toml, .claude/commands/{build,review,audit,vizier}.md, .github/workflows/{build,review}.yml, reports/L2/{forecasts.jsonl,STATUS.md,ci/38231985110.json,builder/47e6b26/make-pins.txt}
-did: closed #111 (PR #117 merged). `claims next '#112' '#113' '#126'` -> #112, the oldest signed; nothing skipped; no awaits-guy PR open
-did: A: declaration as each procedure's first act (model; tokens added at the end, `harness.sessions tokens`); `session_minutes {run, bound}` resolved from the Actions run, cancelled void; price `sessions-over-bound k/n; sessions-lost-to-limit n` (`usage limit` step in build.yml and review.yml); P0ak
-did: B: `guy_answers` on a draft -> signed-as-drafted | signed-after-edit | declined (`outcome_detail`), `ledger proposer` counts them; P0al. C: vizier labels drafts `needs-draft-check`; `/review draft <n>`; review.yml starts it; P0am. D: no forecast rows on a PR branch; stop comment; P0an
-did: re-ran the timed-out CI run once (builder token, Actions write); commented once on #136 with the P0x finding. No tool call was denied
-decided (not asked): Part B names pin "P0w", taken by #108; the pins are P0ak (A), P0al (B), P0am (C), P0an (D) — p(stands on review)=0.85
-decided (not asked): declaration may follow the read-only commands that name the item (claims next, chooser) but nothing that writes; for a brief item it goes on the PR in master STATUS's header — p=0.6
-decided (not asked): a draft forecast on a wish binds to the draft citing it whose title the claim quotes; `closed` (decline) and `signed-after-edit` (edit) are the draft-check answers besides `labeled:instruction` — p=0.6
-decided (not asked): sessions lost to the limit are counted from a failing `usage limit` step read through the Actions jobs API (the step reads the log's last `result` event); a PR-branch Builder posts its `session_minutes` as a `vizier-ledger:` comment, which audit.md now transcribes from assize-builder too — p=0.55
-decided (not asked): extra mutants beyond the named ones (cancelled_scored, over_bound_uncounted, limit_uncounted, detail_uncounted), so that each new check kills one — p=0.7
-forecasts: made 3 (e0576f57cde2 pins_green p=0.55, a07803496173 review_accept p=0.45, 255a1a653e62 host_verdict FIT p=0.35); resolved 0 this session; builder cumulative log-loss 55.60 vs base rate 57.66 over 131 resolved (`ledger proposer builder`)
-price: guy-items 10; guy-latency median 0.9h max 2.1h; sessions 18; runner-min 882; wish-latency median 0.0h max 0.0h open 1; sessions-over-bound 0/0; sessions-lost-to-limit 0 (`ledger price --since 487cde7`)
-obligations added: L3: a full pins run is at the 30-minute cap of pins.yml (29.5 min on #117, timed out here); #136 addresses it
-obligations added: L3: P0x's real-tree check makes every branch red when an instruction is signed without a Price line; nothing checks the draft before the signature
-NEEDS YOU (at most 1): add a `Price:` line to #136 (only gfrmin can edit a signed instruction's body); then re-run pins on PR #131, which then needs your approval and merge (entrenched .claude/, .github/)
-next: re-run pins on PR #131 once #136 carries a Price line; then #113
+pins: clean 59/59; mutants 161/161 KILLED; twins 161/161; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on d240538 (reports/L2/builder/d240538/make-pins.txt); pins CI run 38264987174 on d240538 (success, run attempt 1; record reports/L2/ci/38264987174.json)
+changed: harness/{route.py,pins.py,README.md,proposer.toml}, harness/edits/P0aq_*.toml (3), .github/workflows/failed.yml, reports/L2/{forecasts.jsonl,STATUS.md,builder/{d240538,26b69df}/make-pins.txt,ci/38264987174.json}
+did: round 2 (session 3f9d09fb): review-65cb5fa F1 (P0l uncited) answered as recommended: cites pins CI run 38264987174 on d240538 and commits its record; no code changed. Local `make pins` on 26b69df: clean 59/59, 161/161 KILLED, P0l ok (reports/L2/builder/26b69df/make-pins.txt). PR branch: no forecast row appended; the session_minutes declaration went as a `vizier-ledger:` comment on #153. No tool call was denied
+did: closed #112 (PR #131 merged). `claims next '#113' '#126' ...` -> #126; skipped #113 (held by PR #143); #132 is held by PR #146. No awaits-guy PR open
+did: #126 items 1-2: failed.yml labels `blocked` (ASSIZE_BUILDER_TOKEN, removing a standing label first so `labeled` fires) on a red pins run on a PR, and on a push to master on every CONFLICTING PR, under 3 `labeled blocked` rounds; else the issue to gfrmin
+did: items 3-4: `harness.route.decide` (stdlib, run by `python3 -m harness.route` from a sparse master checkout); P0aq on the four named cases, mutants label_branch_removed, round_cap_removed, conflict_as_clean; README paragraph
+did: forecast rows first named PR #151, taken by failed.yml issues during the first `make pins`; the unopened branch (no PR, no pins run) was rewritten with rows for #153 and pins re-run; PR opened before the re-run to hold the number. #136 first read `refused` under an exhausted API rate limit, `signed` after the reset. No tool call was denied
+decided (not asked): pin numbered P0aq, past master's P0an and open PR #143's P0ao–P0ap — p(stands on review)=0.85
+decided (not asked): the conflict job polls `mergeable` up to 6×10s while UNKNOWN; an UNKNOWN that stays is treated as not conflicting (nothing) — p=0.7
+decided (not asked): a red pins run includes cancelled and timed_out with started steps (the report job's existing set); the round count is every `labeled blocked` event on the timeline, by any account — p=0.7
+decided (not asked): round 2 leaves harness/proposer.toml at the d240538 builder: it records who built the harness state, which this round does not change, and the STATUS commit touches only reports/ — p=0.75
+decided (not asked): PR opened before STATUS (forecasts already in its first head) so that its number matches the forecasts — p=0.7
+forecasts: made 4 (23082ebd78ef pins_green p=0.5, f66ad3d86167 review_accept p=0.6, 01319774de08 host_verdict FIT p=0.35, 4d92c126b091 session_minutes 60 p=0.4); resolved 0 this session; builder cumulative log-loss 56.39 vs base rate 51.90 (in-sample per-type frequency) over 132 resolved
+price: guy-items 25; guy-latency median 1.1h max 2.7h; sessions 37; runner-min 1831; wish-latency median 0.0h max 0.0h open 3; sessions-over-bound 0/1; sessions-lost-to-limit 0 (`ledger price --since 487cde7`)
+obligations added: L3: a `pull_request` `labeled` event on a DIRTY pull request may start no run even with the builder token (#117's override comment); witness it, and if so route conflicts by `workflow_dispatch` of build.yml with `pr`
+obligations added: L3: `harness.claims signed` reports a rate-limited read as `refused`; distinguish an API failure from an unreadable edit history
+obligations added: L3: build.md step 2's PR number is read before a ~25-minute `make pins`, while failed.yml files issues; the number races
+NEEDS YOU (at most 1): approve and merge PR #153 (touches entrenched .github/workflows/failed.yml)
+next: #135 (oldest signed instruction no open PR holds after #126)

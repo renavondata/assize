@@ -1922,6 +1922,30 @@ def p0an_session_routed() -> bool:
     return ok()
 
 
+ROUTE_FIXTURE = (  # (what, event, prior `labeled blocked` rounds, mergeable, decision) -- instruction #126 item 3
+    ("red pins, 0 rounds", "pins_red", 0, "UNKNOWN", "label"),
+    ("red pins, 3 rounds", "pins_red", 3, "UNKNOWN", "issue"),
+    ("conflicting pull request, 1 round", "pushed", 1, "CONFLICTING", "label"),
+    ("clean pull request", "pushed", 0, "MERGEABLE", "nothing"),
+)
+
+
+def p0aq_red_returns_to_builder() -> bool:
+    """A red pins run on a pull request, or a pull request in conflict after a push to master, is labelled `blocked`
+    (its Builder restarts) while fewer than three `blocked` rounds stand, then files the issue to Guy; a clean pull
+    request gets nothing (`harness.route.decide`, which `failed.yml` calls; instruction #126)."""
+    from harness import route
+
+    expect, ok = _expecter()
+    for what, event, rounds, mergeable, want in ROUTE_FIXTURE:
+        got = route.decide(event, rounds, mergeable)
+        expect(got == want, f"{what}: {got}, want {want}")
+    text = (ROOT / ".github" / "workflows" / "failed.yml").read_text()
+    expect("python3 -m harness.route pins_red" in text and "python3 -m harness.route pushed" in text,
+           "failed.yml decides both cases by harness.route")
+    return ok()
+
+
 DRAFT_FORECAST_TS = "2026-01-10T00:00:00Z"
 DRAFT_EVENT = {  # draft -> its timeline (the events the resolver reads)
     21: [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"}, "created_at": AFTER_TS}],
@@ -4532,7 +4556,12 @@ PINS = [
         p0an_session_routed, (Mutant("pr_branch_forecast_admitted", _edits("P0an_pr_branch_forecast_admitted")),
                               Mutant("silent_stop_admitted", _edits("P0an_silent_stop_admitted"))),
         HARNESS + (".claude/commands/**",)),
-    Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+    Pin("P0aq", "a red pins run or a conflicted pull request is labelled blocked for three rounds, then filed to Guy",
+        p0aq_red_returns_to_builder, (Mutant("label_branch_removed", _edits("P0aq_label_branch_removed")),
+                                      Mutant("round_cap_removed", _edits("P0aq_round_cap_removed")),
+                                      Mutant("conflict_as_clean", _edits("P0aq_conflict_as_clean"))),
+        HARNESS + (".github/workflows/failed.yml",)),
+    Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
                            Mutant("domain_check_skipped", _edits("P1_domain_check_skipped")),
