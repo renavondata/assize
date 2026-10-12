@@ -1,20 +1,15 @@
-# STATUS — L2 — 2026-10-12 — 47e6b26 — PR #131
-VERDICT: STOPPED: instruction #112 built; CI pins on 47e6b26 red from outside the diff (#136, signed with no `Price:` line, fails P0x's real-tree check on every branch)
+# STATUS — L2 — 2026-10-12 — cb9b1c6 — PR #156
+VERDICT: SESSION DONE: instruction #132 built on a fresh branch (60-minute cap); pins CI run 38277028583 on cb9b1c6 was in progress at push, so no pins verdict is claimed here
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 58/58; mutants 158/158 KILLED; twins 158/158; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on 47e6b26 (reports/L2/builder/47e6b26/make-pins.txt). pins CI run 38231985110 on 47e6b26: attempt 1 cancelled at the 30-minute cap on the last mutant (P11/golden_hash_altered); attempt 2 failure: clean 58/58, killed 155/158, non-causal 3 (P0x twins, issue #136) (record reports/L2/ci/38231985110.json). No successful CI run is cited, so P0l is red on this head too
-changed: harness/{sessions,ledger,pins}.py, harness/edits/P0a{k,l,m,n}_*.toml (12), harness/proposer.toml, .claude/commands/{build,review,audit,vizier}.md, .github/workflows/{build,review}.yml, reports/L2/{forecasts.jsonl,STATUS.md,ci/38231985110.json,builder/47e6b26/make-pins.txt}
-did: closed #111 (PR #117 merged). `claims next '#112' '#113' '#126'` -> #112, the oldest signed; nothing skipped; no awaits-guy PR open
-did: A: declaration as each procedure's first act (model; tokens added at the end, `harness.sessions tokens`); `session_minutes {run, bound}` resolved from the Actions run, cancelled void; price `sessions-over-bound k/n; sessions-lost-to-limit n` (`usage limit` step in build.yml and review.yml); P0ak
-did: B: `guy_answers` on a draft -> signed-as-drafted | signed-after-edit | declined (`outcome_detail`), `ledger proposer` counts them; P0al. C: vizier labels drafts `needs-draft-check`; `/review draft <n>`; review.yml starts it; P0am. D: no forecast rows on a PR branch; stop comment; P0an
-did: re-ran the timed-out CI run once (builder token, Actions write); commented once on #136 with the P0x finding. No tool call was denied
-decided (not asked): Part B names pin "P0w", taken by #108; the pins are P0ak (A), P0al (B), P0am (C), P0an (D) — p(stands on review)=0.85
-decided (not asked): declaration may follow the read-only commands that name the item (claims next, chooser) but nothing that writes; for a brief item it goes on the PR in master STATUS's header — p=0.6
-decided (not asked): a draft forecast on a wish binds to the draft citing it whose title the claim quotes; `closed` (decline) and `signed-after-edit` (edit) are the draft-check answers besides `labeled:instruction` — p=0.6
-decided (not asked): sessions lost to the limit are counted from a failing `usage limit` step read through the Actions jobs API (the step reads the log's last `result` event); a PR-branch Builder posts its `session_minutes` as a `vizier-ledger:` comment, which audit.md now transcribes from assize-builder too — p=0.55
-decided (not asked): extra mutants beyond the named ones (cancelled_scored, over_bound_uncounted, limit_uncounted, detail_uncounted), so that each new check kills one — p=0.7
-forecasts: made 3 (e0576f57cde2 pins_green p=0.55, a07803496173 review_accept p=0.45, 255a1a653e62 host_verdict FIT p=0.35); resolved 0 this session; builder cumulative log-loss 55.60 vs base rate 57.66 over 131 resolved (`ledger proposer builder`)
-price: guy-items 10; guy-latency median 0.9h max 2.1h; sessions 18; runner-min 882; wish-latency median 0.0h max 0.0h open 1; sessions-over-bound 0/0; sessions-lost-to-limit 0 (`ledger price --since 487cde7`)
-obligations added: L3: a full pins run is at the 30-minute cap of pins.yml (29.5 min on #117, timed out here); #136 addresses it
-obligations added: L3: P0x's real-tree check makes every branch red when an instruction is signed without a Price line; nothing checks the draft before the signature
-NEEDS YOU (at most 1): add a `Price:` line to #136 (only gfrmin can edit a signed instruction's body); then re-run pins on PR #131, which then needs your approval and merge (entrenched .claude/, .github/)
-next: re-run pins on PR #131 once #136 carries a Price line; then #113
+pins: local `make pins` on cb9b1c6 hit this session's 590 s cloud limit (make exit 143) before finishing; 24 mutants KILLED in the partial transcript, no failure line; clean/twin/total counts not available; leaked, stale, inconclusive, non-causal not read; exit unknown (/tmp/pins-156.txt, not committed). CI run 38277028583 is the witness and is unread.
+changed: .github/workflows/pins.yml (30 -> 60, #132), harness/proposer.toml, reports/L2/forecasts.jsonl, reports/L2/STATUS.md
+did: PR #146 (same instruction) was blocked by review round 2 on F1: its forecast row fc5e810248d8 is late (P0r) and cannot be removed (P0q); the PR is also DIRTY, so no pins run starts on it
+did: skipped #132 as held by PR #146 (claims next), and took it anyway on a new branch from master because #146 cannot reach green; rows d42d73d01bdf and db209a71de20 were committed before the branch's first push
+did: the diff is the one-line cap change and the records builds require; nothing else
+decided (not asked): supersede #146 with PR #156 rather than resolve #146's conflict, since the late row stays late either way — p(stands on review)=0.8
+decided (not asked): STATUS cites no pins run as a verdict because the only run was unfinished; the Reviewer or a later Builder reads run 38277028583 — p(stands on review)=0.6
+forecasts: made 2 (d42d73d01bdf, db209a71de20); resolved 0 this session; builder cumulative loss 56.39 over 132 resolved (`ledger proposer builder`)
+price: guy-items 15; guy-latency median 1.4h max 2.7h; sessions 23; runner-min 1065
+obligations added: L3: a full `make pins` exceeds the 10-minute cloud limit, so a cloud Builder can never witness it locally; the rule should name CI as the witness
+NEEDS YOU (at most 1): none (PR #146 is superseded; closing it is the Vizier's or Guy's, not this session's)
+next: read pins run 38277028583 on PR #156 and, if red, work only that finding
