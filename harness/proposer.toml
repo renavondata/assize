@@ -1,5 +1,5 @@
 # Who built the harness state that produced a pins.jsonl; copied into every `registry` row (brief 0 A3 item 6).
 # Each building session updates this file in the commit that changes the harness.
 kind = "builder"
-model = "claude-opus-5-5"
-session = "75eca669-fdac-4b4d-bf2d-14d78a0f1fdc"
+model = "claude-sonnet-5-5"
+session = "648398e8-c2be-4d40-b832-e15f6f712cff"
