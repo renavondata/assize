@@ -1,0 +1,8 @@
+# P0aq's mutant (instruction #126 item 3): the label branch removed, so every red pins run and every conflict files the
+# issue to Guy, as before #126.
+[[edit]]
+path = "harness/route.py"
+old = """    return "label" if rounds < ROUNDS else "issue"
+"""
+new = """    return "issue"
+"""
