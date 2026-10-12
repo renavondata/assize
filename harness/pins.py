@@ -1491,6 +1491,35 @@ def p0v_review_trigger() -> bool:
     return ok()
 
 
+BUILD_EVENTS = (  # (what, label, must start a build, must build on the pull request) -- instruction #102
+    ("an awaits-guy label on a pull request", "awaits-guy", True, False),
+    ("a blocked label on a pull request", "blocked", True, True),
+    ("a needs-review label on a pull request", "needs-review", False, False),
+)
+
+
+def p0ac_awaits_guy_builds_master() -> bool:
+    """A pull request labelled `awaits-guy` starts a Builder on master, one labelled `blocked` a Builder on the pull
+    request, one labelled `needs-review` none (instruction #102 item 3)."""
+    expect, ok = _expecter()
+    text = (ROOT / ".github" / "workflows" / "build.yml").read_text()
+    m = re.search(r"^  build:\n    (?:#.*\n    )*if: >-\n((?:      .*\n)+)", text, re.M)
+    c = re.search(r"^      - if: (.*)\n        run: gh pr checkout", text, re.M)
+    expect(m is not None and c is not None, "the build job's `if:` and its checkout step's `if:` are found")
+    if m is None or c is None:
+        return ok()
+    condition, checkout = " ".join(x.strip() for x in m.group(1).splitlines()), c.group(1)
+    for what, label, starts, on_pr in BUILD_EVENTS:
+        ctx = {"github.event.sender.login": "assize-builder", "github.event_name": "pull_request",
+               "github.event.action": "labeled", "github.event.label.name": label, "github.event.inputs.pr": ""}
+        got, branch = _github_condition(condition, ctx), _github_condition(checkout, ctx)
+        expect(got is starts, f"{what}: {'starts' if got else 'does not start'} a build (must "
+                              f"{'start' if starts else 'not start'})")
+        expect(not starts or branch is on_pr, f"{what}: builds on {'the pull request' if branch else 'master'} "
+                                              f"(must build on {'the pull request' if on_pr else 'master'})")
+    return ok()
+
+
 PARSED, SPLIT = "Proposer: guy\nCo-Authored-By: f <f@f>\n", "Proposer: guy\n\nCo-Authored-By: f <f@f>\n"
 TRAILERS_FIXTURE = (  # (what, message after the body, findings wanted) -- instruction #110 Part C
     ("Proposer and Co-Authored-By in one trailer block", PARSED, set()),
@@ -3427,6 +3456,9 @@ PINS = [
     Pin("P0ab", "a session log that edits .github/ or harness/ through Bash, or ends on master opening nothing, fails",
         p0ab_session_logs, (Mutant("shell_edit_admitted", _edits("P0ab_shell_edit_admitted")),
                             Mutant("silent_master_stop_admitted", _edits("P0ab_silent_master_stop_admitted")))),
+    Pin("P0ac", "a pull request labelled awaits-guy starts a Builder on master, blocked one on the pull request",
+        p0ac_awaits_guy_builds_master, (Mutant("awaits_guy_clause_removed", _edits("P0ac_awaits_guy_clause_removed")),
+                                        Mutant("awaits_guy_builds_on_pr", _edits("P0ac_awaits_guy_builds_on_pr")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

@@ -1,0 +1,6 @@
+# P0ac's second mutant (instruction #102): the checkout step takes every pull request label, so an `awaits-guy` build runs
+# on the pull request's branch instead of master.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """(github.event_name == 'pull_request' && github.event.label.name == 'blocked') || github.event.inputs.pr != ''"""
+new = """github.event_name == 'pull_request' || github.event.inputs.pr != ''"""

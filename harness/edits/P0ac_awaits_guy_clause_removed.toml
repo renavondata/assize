@@ -1,0 +1,5 @@
+# P0ac's mutant (instruction #102): the `awaits-guy` clause removed from the build job's `if:`, so the label starts nothing.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """contains(fromJSON('["blocked","awaits-guy"]'), github.event.label.name)"""
+new = """github.event.label.name == 'blocked'"""
