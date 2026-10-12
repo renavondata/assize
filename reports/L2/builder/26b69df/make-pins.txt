@@ -1,0 +1,12 @@
+# Excerpt of `make pins PINS_OUT=/tmp/pins-26b69df` on 26b69df (round 2 of PR #153; reports-only change over d240538).
+# Lines 1-2, the P0l clean and mutant lines, and the summary, verbatim; every other line read `-> ok` or `-> KILLED`.
+uv run --frozen python -m harness run --registry harness --phase all --out /tmp/pins-26b69df
+registry harness: 59 pins, 161 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0l: observed pass -> ok (0.472s) ../../../../../../../tmp/pins-26b69df/runs/P0l/clean/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.481s + 0.532s) ../../../../../../../tmp/pins-26b69df/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+clean: 59/59 passed, 0/59 failed
+mutants: 161/161 killed, 0/161 survived, 0/161 inconclusive, 0/161 stale, 0/161 non-causal, 0 leaked (clean and mutant)
+twins: 161/161 passed
+skipped: 0/59 pins, 0 mutants
+report: ../../../../../../../tmp/pins-26b69df/pins.jsonl
+PINS PASSED
