@@ -1,0 +1,17 @@
+copy of /tmp/rv123.zYQf/w
+  at /tmp/assize-scratch-52qq4c9z/assize-copy-kemgj3rj/repo
+twin: no edits applied
+pin:       P0aj
+protects:  an awaits-guy label starts a Builder on master; blocked still builds on the PR; needs-review starts none
+role:      twin
+tree:      /tmp/assize-scratch-52qq4c9z/assize-copy-kemgj3rj/repo
+invoked:   /tmp/rv123.zYQf/w
+scratch:   /tmp/assize-scratch-52qq4c9z
+  [ok] the build job's `if:`, its concurrency group and the PR checkout step's `if:` are found (True, True, True)
+  [ok] an awaits-guy label on a pull request: starts a Builder (must start)
+  [ok] an awaits-guy label on a pull request: builds on master in queue build-master (must build on master in queue build-master)
+  [ok] a blocked label on a pull request: starts a Builder (must start)
+  [ok] a blocked label on a pull request: builds on the PR branch in queue build-7 (must build on the PR branch in queue build-7)
+  [ok] a needs-review label on a pull request: does not start a Builder (must not start)
+  [ok] the workflow states that awaits-guy starts a master Builder and that the `blocked` path is unchanged
+result:    PASS
