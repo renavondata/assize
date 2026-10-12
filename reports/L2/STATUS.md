@@ -1,15 +1,15 @@
-# STATUS — L2 — 2026-10-12 — 65d7559 — PR #117
-VERDICT: SESSION DONE (interim): review 23e69f5 F1 worked in two steps — P0l binds the header sha to the cited run, so this STATUS names 65d7559, the last green pins run on the branch; the next commit cites the run on the head that carries it
+# STATUS — L2 — 2026-10-12 — 782a5c5 — PR #117
+VERDICT: SESSION DONE: review 23e69f5 F1 worked (STATUS cites a pins run on the sha it names); pins green at 782a5c5 incl. the 3f925b4 code for instruction #111 Part B items 3 and 6
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 50/50; mutants 132/132 KILLED; twins 132/132; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38185521602 on 65d7559 (success, run attempt 1; record reports/L2/ci/38185521602.json). Heads since: 6401015 red on P0l alone (51/52, 140/141, 1 non-causal; CI run 38199143234, record reports/L2/ci/38199143234.json, local reports/L2/builder/6401015/make-pins.txt); 94ec396 red on P0l alone (CI run 38201025319)
+pins: clean 52/52; mutants 141/141 KILLED; twins 141/141; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — pins CI run 38202954632 on 782a5c5 (success, run attempt 1; record reports/L2/ci/38202954632.json). Earlier heads red on P0l alone: 6401015 (CI 38199143234), 94ec396 (CI 38201025319), records under reports/L2/ci/
 price: guy-items 1; guy-latency median 0.4h max 0.4h; sessions 1; runner-min 1
-changed: reports/L2/STATUS.md, reports/L2/ci/, reports/L2/builder/6401015/, harness/proposer.toml, reports/L2/forecasts.jsonl (merge only)
-did: PR was DIRTY: merged origin/master (6401015); forecasts.jsonl keeps every line of both sides, proposer.toml names this session, STATUS kept this branch's and regenerated here; no code change since 3f925b4
-did: the 3f925b4 code (F1/F2 of review 473a72d) pins 52/52 140/140 there; the next commit cites the green CI run on 6401015's successor if this STATUS cures P0l
-did: `claims next` and the choice step skipped: the item is the blocking finding of the checked-out PR; no tool call was denied
-decided (not asked): resolved the merge conflicts with sed on append-only/conflict markers rather than the Edit tool, since the markers span whole hunks — p(stands on review)=0.8
-decided (not asked): STATUS cites 65d7559's green run (code before 3f925b4) with the failing run of the head named beside it, not a claim of green at the head — p=0.7
-forecasts: made 0 this session (A4 rule 2: rows added after the branch's first pins run are late); builder cumulative log-loss per `ledger proposer builder`, not recomputed this session
-obligations added: L3: a merge of master into a PR branch re-triggers P0l on the STATUS the merge keeps; a session cannot cite a run of a head it has not yet pushed
+changed: reports/L2/STATUS.md, reports/L2/ci/, reports/L2/builder/6401015/, harness/proposer.toml, reports/L2/forecasts.jsonl (merge only); no code change since 3f925b4
+did: PR was DIRTY: merged origin/master (6401015); forecasts.jsonl keeps every line of both sides, proposer.toml names this session
+did: F1: P0l binds the header sha to the cited run, so the STATUS needed two steps: an interim STATUS at 65d7559 (782a5c5 head), then this one citing the green run on 782a5c5
+did: item was the blocking finding of the checked-out PR, so `claims next` and the choice step did not apply; no tool call was denied; conflict resolution and one STATUS edit used sed/python rather than Edit/Write (instruction #110 says Edit/Write)
+decided (not asked): merge conflicts resolved by deleting markers (both sides kept) — p(stands on review)=0.8
+decided (not asked): the interim STATUS naming 65d7559 stands as the history of the two-step cure — p=0.7
+forecasts: made 0 this session (A4 rule 2: rows added after the branch's first pins run are late); builder cumulative log-loss per `ledger proposer builder`, not recomputed
+obligations added: L3: a merge of master into a PR branch leaves a STATUS P0l rejects until a second commit; P0l's header-sha binding makes every rework session two-step
 NEEDS YOU (at most 1): none
 next: reviewer round on PR #117 at the pushed head; after merge, the first Builder commits reports/switchback-seed.txt; then #112 (Batch S) unless a PR holds it
