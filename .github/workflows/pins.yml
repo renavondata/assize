@@ -24,10 +24,24 @@ jobs:
         run: pipx install uv==0.8.17
       - name: Sync environment
         run: uv sync --frozen
+      # Instruction #108 item 3: the base is the newest successful `pins` run whose head is an ancestor of HEAD and
+      # whose `pins-report` artifact records every pin ok and nothing skipped, so a run that itself skipped pins is never
+      # a base and a skip always cites a full run. With no such run, or on a pull request that records a layer verdict
+      # or opens a brief (CLAUDE.md A1.3), or when the API cannot be read, the step prints nothing and every pin runs.
+      # Then only the pins witnessing a path changed since the base run, and every pin on a change under harness/ or to
+      # Makefile, pyproject.toml or uv.lock; the rest are recorded skipped. `make pins` with no arguments, as the
+      # Reviewer and the measurement host run it, always runs everything.
+      - name: Choose the base
+        id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.base_ref }}
+        run: echo "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"
       - name: make pins
         env:
           GH_TOKEN: ${{ github.token }}
-        run: make pins PINS_OUT=out/pins
+          PINS_SINCE: ${{ steps.base.outputs.since }}
+        run: make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
       - name: Upload pins report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

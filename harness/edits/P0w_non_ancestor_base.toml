@@ -1,0 +1,7 @@
+# P0w's mutant (instruction #108 item 5): a base off HEAD's ancestry is accepted.
+[[edit]]
+path = "harness/runner.py"
+old = """        elif not is_ancestor(repo, str(r.get("head_sha"))):
+"""
+new = """        elif False:
+"""

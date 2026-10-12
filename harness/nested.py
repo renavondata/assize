@@ -58,12 +58,12 @@ class Nested:
 
 
 def run_nested(label: str, registry: str, phase: str, *,
-               edits: str | None = None, config: Path | None = None) -> Nested:
+               edits: str | None = None, config: Path | None = None, extra: tuple[str, ...] = ()) -> Nested:
     base = context.run_dir or Path(tempfile.mkdtemp(prefix="assize-nested-"))
     out = base / "nested" / label
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
-    cmd = proc.python("-m", "harness", "run", "--registry", registry, "--phase", phase, "--out", str(out))
+    cmd = proc.python("-m", "harness", "run", "--registry", registry, "--phase", phase, "--out", str(out), *extra)
     if config is not None:
         cmd += ["--config", str(config)]
     if context.scratch is not None:

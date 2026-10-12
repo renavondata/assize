@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from harness.pin import Mutant, Pin
+from harness.pin import ALWAYS, Mutant, Pin
 
 
 def add(a: int, b: int) -> int:
@@ -28,4 +28,4 @@ LEAKS_AND_HANGS = Mutant("leaks_and_hangs", _edits("toy_leaks_and_hangs"))
 
 
 def toy_pin(*mutant_set: Mutant) -> Pin:
-    return Pin("fixture/toy", "toy addition is correct", check_toy, tuple(mutant_set))
+    return Pin("fixture/toy", "toy addition is correct", check_toy, tuple(mutant_set), ALWAYS)

@@ -16,10 +16,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-from harness import claims, config, context, edits, proc, scan, tree
-from harness.fixtures import daemon, escapee, leaky
+from harness import claims, config, context, edits, proc, runner, scan, tree
+from harness.fixtures import daemon, escapee, leaky, witness
 from harness.nested import run_nested
-from harness.pin import ROOT, Mutant, Pin
+from harness.pin import ALWAYS, ROOT, Mutant, Pin, RegistryError, validate
 
 
 def _all(*runs) -> bool:
@@ -1706,6 +1706,104 @@ def p0ab_session_logs() -> bool:
     return ok()
 
 
+WITNESS_PINS = frozenset({"fixture/a", "fixture/all", "fixture/docs"})
+WITNESS_CASES = (  # (what, branch of the fixture repository, the pins that run) -- instruction #108 item 5
+    ("(i) a change to reports/L2/STATUS.md alone", "status", {"fixture/all"}),
+    ("(ii) a change under src/a/", "src_a", {"fixture/a", "fixture/all"}),
+    ("(iii) a change under harness/", "harness", WITNESS_PINS),
+)
+WITNESS_SINCE_RUN = 7
+
+
+def _witness_repo(repo: Path) -> tuple[str, str]:
+    """A fixture repository: a base commit; one branch per WITNESS_CASES case changing its path; `side`, a commit off
+    the base that no case branch descends from; `verdict` adding a REPORT.md verdict line and `brief` a brief.
+    Returns the base and the side commit."""
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    for path in ("src/a/x.py", "docs/d.md", "reports/L2/STATUS.md", "harness/h.py", "REPORT.md"):
+        _append(repo, path, "0\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    for branch, path in (("status", "reports/L2/STATUS.md"), ("src_a", "src/a/x.py"), ("harness", "harness/h.py"),
+                         ("side", "docs/d.md"), ("verdict", "REPORT.md"), ("brief", "docs/briefs/brief-3-x.md")):
+        git("checkout", "-q", "-b", branch, base)
+        _append(repo, path, "- L2 — FIT\n" if branch == "verdict" else "1\n")
+        git("add", "-A")
+        git("commit", "-q", "-m", branch)
+    return base, git("rev-parse", "side")
+
+
+def p0w_witnessed_paths() -> bool:
+    """`python -m harness run --since <sha>` runs a pin, clean and every mutant, only if a path changed since that sha
+    matches one of its witnesses, and every pin if a changed path is under harness/; it records every other pin as
+    skipped, citing the sha and its pins run, and never counts a skip as ok. `runner.choose_base` takes the newest
+    successful run whose head is an ancestor of HEAD and whose report skipped nothing; `runner.boundary` reads a layer
+    verdict or a new brief, on which every pin runs (instruction #108)."""
+    expect, ok = _expecter()
+    try:
+        validate([dataclasses.replace(witness.PINS[0], witnesses=())])
+        expect(False, "a pin witnessing nothing is refused")
+    except RegistryError as e:
+        expect(e.code == "no_witnesses", f"a pin witnessing nothing is refused ({e.code})")
+    globs = (("src/a/b/c.py", "src/a/**", True), ("src/ab.py", "src/a/**", False), ("Makefile", "**/Makefile", True),
+             ("reports/L2/STATUS.md", "**", True), ("docs/d.md", "docs/*", True), ("docs/x/d.md", "docs/*", False))
+    for path, glob, want in globs:
+        expect(runner.matches(path, glob) is want, f"{path} {'matches' if want else 'does not match'} {glob}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0w-", dir=context.scratch))
+    repo = work / "repo"
+    base, side = _witness_repo(repo)
+    git = _git_fixture(repo)
+    fast = ROOT / "harness" / "fixtures" / "fast.toml"
+    since = ("--since", base, "--since-run", str(WITNESS_SINCE_RUN), "--repo", str(repo))
+    git("checkout", "-q", "status")
+    full = run_nested("witness-full", "fixture.witness", "all", config=fast)
+    expect(full.exit_code == 0 and {r["pin"] for r in full.runs("clean")} == WITNESS_PINS
+           and full.summary.get("skipped") == 0 and not full.runs("skipped"),
+           f"without --since every pin runs ({full.summary})")
+    reports = {}
+    for what, branch, want in WITNESS_CASES:
+        git("checkout", "-q", branch)
+        n = run_nested(f"witness-{branch}", "fixture.witness", "all", config=fast, extra=since)
+        reports[branch] = n.rows
+        skipped = n.runs("skipped")
+        s = n.summary
+        expect(n.exit_code == 0 and {r["pin"] for r in n.runs("clean")} == want
+               and {r["pin"] for r in n.runs("mutant")} == want == {r["pin"] for r in n.runs("twin")},
+               f"{what}: ran {sorted(r['pin'] for r in n.runs('clean'))}, clean and every mutant; want {sorted(want)}")
+        expect({r["pin"] for r in skipped} == WITNESS_PINS - want == set(n.registry.get("skipped", ()))
+               and all(r.get("verdict") == "skipped" and r.get("since") == base
+                       and r.get("since_run") == WITNESS_SINCE_RUN for r in skipped),
+               f"{what}: skipped {sorted(r['pin'] for r in skipped)}, each citing {base[:7]} and run "
+               f"{WITNESS_SINCE_RUN}; want {sorted(WITNESS_PINS - want)}")
+        expect(s.get("clean_ok") == s.get("clean_total") == len(want) == s.get("killed") == s.get("mutants_total")
+               and s.get("skipped") == s.get("skipped_mutants") == len(WITNESS_PINS - want)
+               and s.get("since") == base and s.get("since_run") == WITNESS_SINCE_RUN,
+               f"{what}: clean {s.get('clean_ok')}/{s.get('clean_total')}, mutants {s.get('killed')}/"
+               f"{s.get('mutants_total')}, skipped {s.get('skipped')} pins {s.get('skipped_mutants')} mutants; want "
+               f"{len(want)}/{len(want)}, {len(want)}/{len(want)}, {len(WITNESS_PINS - want)}")
+    expect(runner.full_report(full.rows) and not runner.full_report(reports["status"]),
+           "a full report is a base; one that skipped a pin is not")
+    git("checkout", "-q", "status")
+    runs = ({"id": 3, "head_sha": side, "conclusion": "success"}, {"id": 2, "head_sha": base, "conclusion": "success"},
+            {"id": 1, "head_sha": base, "conclusion": "success"})
+    by_id = {3: full.rows, 2: reports["status"], 1: full.rows}
+    got, refused = runner.choose_base(repo, runs, by_id.get)
+    expect(got == (base, 1), f"(iv) the base passes over a run off HEAD's ancestry and one whose report skipped a pin: "
+                             f"chose {got}, refused {refused}; want ({base[:7]}, run 1)")
+    got, refused = runner.choose_base(repo, runs[:2], by_id.get)
+    expect(got is None, f"(iv) with no usable base, none is chosen and every pin runs: chose {got}, refused {refused}")
+    for branch, want in (("status", False), ("verdict", True), ("brief", True)):
+        git("checkout", "-q", branch)
+        got = runner.boundary(repo, "master")
+        expect(got is want, f"branch {branch}: {'a' if got else 'no'} layer boundary (a REPORT.md verdict line or a "
+                            f"new brief is one)")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 PURITY_FIXTURE = (  # (label, schema, tokens wanted) against a fixture manifest's vocabulary
     ("clean", {"type": "object", "description": "a generic field"}, set()),
     ("as a key", {"properties": {"semantic": {}}}, {"semantic"}),
@@ -3342,39 +3440,49 @@ def p18_pilot() -> bool:
     return ok()
 
 
+# Witnesses (instruction #108 item 1): the paths each pin's check or mutants read. A change under harness/, or to
+# Makefile, pyproject.toml or uv.lock, runs every pin whatever it witnesses (runner.FORCE_ALL); a pin that reads the
+# real branch, the ledgers or the GitHub API witnesses ALWAYS.
+HARNESS = ("harness/**",)
+# The judge side: every pin playing or reading the judge, a World, an incumbent, the pilot or the host scripts.
+JUDGE_SIDE = ("judge/**", "worlds/**", "incumbents/**", "pilot/**", "scripts/**")
+# P0b scans every code file of the tree (scan.code_files).
+CODE_FILES = ("**/*.py", "**/*.sh", "**/*.yml", "**/*.yaml", "**/Makefile", "**/Dockerfile", "**/Containerfile")
+
 PINS = [
     Pin("P0", "surviving mutants are reported and fail the suite",
-        p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),)),
+        p0_survivors_reported, (Mutant("survivors_ignored", _edits("P0_survivors_ignored")),), HARNESS),
     Pin("P0b", "no code reads a mutant or test variable from the environment",
         p0b_no_switches, (Mutant("env_switch", _edits("P0b_env_switch")),
-                         Mutant("judge_imports_mutants", _edits("P0b_judge_imports_mutants")))),
+                         Mutant("judge_imports_mutants", _edits("P0b_judge_imports_mutants"))), CODE_FILES),
     Pin("P0c", "a failing clean check is recorded and fails the suite",
-        p0c_clean_failure, (Mutant("clean_failures_ignored", _edits("P0c_clean_failures_ignored")),)),
+        p0c_clean_failure, (Mutant("clean_failures_ignored", _edits("P0c_clean_failures_ignored")),), HARNESS),
     Pin("P0d", "errors and timeouts are INCONCLUSIVE, counted in the denominator, and fail the suite",
-        p0d_inconclusive, (Mutant("inconclusive_dropped", _edits("P0d_inconclusive_dropped")),)),
+        p0d_inconclusive, (Mutant("inconclusive_dropped", _edits("P0d_inconclusive_dropped")),), HARNESS),
     Pin("P0e", "a registry with a mutant-less pin, a duplicated name or a malformed edit is refused",
-        p0e_registry_validation, (Mutant("validation_off", _edits("P0e_validation_off")),)),
+        p0e_registry_validation, (Mutant("validation_off", _edits("P0e_validation_off")),), HARNESS),
     Pin("P0f", "a mutant whose twin fails is NON-CAUSAL and fails the suite",
-        p0f_non_causal, (Mutant("twin_ignored", _edits("P0f_twin_ignored")),)),
+        p0f_non_causal, (Mutant("twin_ignored", _edits("P0f_twin_ignored")),), HARNESS),
     Pin("P0g", "an anchor that does not occur exactly once is STALE and fails the suite",
-        p0g_stale, (Mutant("stale_ignored", _edits("P0g_stale_ignored")),)),
+        p0g_stale, (Mutant("stale_ignored", _edits("P0g_stale_ignored")),), HARNESS),
     Pin("P0h", P0H_SCOPE,
         p0h_timeouts_leave_nothing, (Mutant("death_signal_reverted", _edits("P0h_death_signal_reverted")),
                                      Mutant("scratch_kept", _edits("P0h_scratch_kept")),
                                      Mutant("leaked_not_counted", _edits("P0h_leaked_not_counted")),
                                      Mutant("subreaper_not_set", _edits("P0h_subreaper_not_set")),
-                                     Mutant("sweep_skipped", _edits("P0h_sweep_skipped")))),
+                                     Mutant("sweep_skipped", _edits("P0h_sweep_skipped"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
-                                 Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset")))),
+                                 Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
-        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),)),
+        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),),
+        ("scripts/**",)),
     Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
         "forecast's session, is rejected",
         p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),
-                              Mutant("self_resolution_admitted", _edits("P0k_self_resolution_admitted")))),
+                              Mutant("self_resolution_admitted", _edits("P0k_self_resolution_admitted"))), ALWAYS),
     Pin("P0l", "a verdict citing a pins run on another sha, or one not concluded success, is rejected",
-        p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),)),
+        p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),), ALWAYS),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
         "every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
@@ -3386,83 +3494,91 @@ PINS = [
                                 Mutant("instruction_label_unchecked", _edits("P0m_instruction_label_unchecked")),
                                 Mutant("instruction_labeler_unchecked", _edits("P0m_instruction_labeler_unchecked")),
                                 Mutant("body_edit_unchecked", _edits("P0m_body_edit_unchecked")),
-                                Mutant("inert_exemption_admitted", _edits("P0m_inert_exemption_admitted")))),
+                                Mutant("inert_exemption_admitted", _edits("P0m_inert_exemption_admitted"))), ALWAYS),
     Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
-        p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),)),
+        p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),), HARNESS),
     Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",
-        p0o_proposer_record, (Mutant("overturned_scored_success", _edits("P0o_overturned_scored_success")),)),
+        p0o_proposer_record, (Mutant("overturned_scored_success", _edits("P0o_overturned_scored_success")),), HARNESS),
     Pin("P0q", "a commit removing a line of a ledger, review, audit or REPORT.md is rejected; a merge of appends is not",
         p0q_append_only, (Mutant("ledger_rewrite_admitted", _edits("P0q_ledger_rewrite_admitted")),
-                          Mutant("draws_not_append_only", _edits("P0q_draws_not_append_only")))),
+                          Mutant("draws_not_append_only", _edits("P0q_draws_not_append_only"))), ALWAYS),
     Pin("P0r", "a forecast row a pull request adds after the head of its first pins run is late",
-        p0r_claims_precede_scoring, (Mutant("late_forecast_admitted", _edits("P0r_late_forecast_admitted")),)),
+        p0r_claims_precede_scoring, (Mutant("late_forecast_admitted", _edits("P0r_late_forecast_admitted")),), ALWAYS),
     Pin("P0s", "typed forecasts are resolved by code from what the API shows; free ones never by the mechanism",
         p0s_outcomes_by_code, (Mutant("outcome_inverted", _edits("P0s_outcome_inverted")),
                                Mutant("free_resolved_by_mechanism", _edits("P0s_free_resolved_by_mechanism")),
-                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr")))),
+                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr"))), HARNESS),
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")),
-                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction")))),
+                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction"))), HARNESS),
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),
                        Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
                        Mutant("draw_not_published", _edits("P0u_draw_not_published")),
                        Mutant("draw_push_forced", _edits("P0u_draw_push_forced")),
-                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head")))),
+                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head"))), HARNESS),
     Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
-        p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),)),
+        p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),),
+        (".github/workflows/review.yml",)),
+    Pin("P0w", "a pins run since a green head runs every pin witnessing a changed path, and records the rest skipped",
+        p0w_witnessed_paths, (Mutant("witness_ignored", _edits("P0w_witness_ignored")),
+                              Mutant("harness_change_skips", _edits("P0w_harness_change_skips")),
+                              Mutant("skip_counted_ok", _edits("P0w_skip_counted_ok")),
+                              Mutant("non_ancestor_base", _edits("P0w_non_ancestor_base"))), HARNESS),
     Pin("P0x", "an instruction signed after instruction #70 merged declares the price quantity it moves, or that it only records",
         p0x_price_declared, (Mutant("price_line_dropped", _edits("P0x_price_line_dropped")),
                              Mutant("none_on_workflow_admitted", _edits("P0x_none_on_workflow_admitted")),
-                             Mutant("scoped_by_number", _edits("P0x_scoped_by_number")))),
+                             Mutant("scoped_by_number", _edits("P0x_scoped_by_number"))), ALWAYS),
     Pin("P0y", "a commit whose Proposer or Instruction trailers git does not parse is refused, and its push with it",
         p0y_trailers_parse, (Mutant("split_trailer_block_admitted", _edits("P0y_split_trailer_block_admitted")),
-                             Mutant("hook_unconditioned", _edits("P0y_hook_unconditioned")))),
+                             Mutant("hook_unconditioned", _edits("P0y_hook_unconditioned"))), ALWAYS),
     Pin("P0z", "a failed pins run routes to an issue naming its pull request, as a failed build or review does",
-        p0z_red_pins_routes, (Mutant("pins_failure_unrouted", _edits("P0z_pins_failure_unrouted")),)),
+        p0z_red_pins_routes, (Mutant("pins_failure_unrouted", _edits("P0z_pins_failure_unrouted")),),
+        (".github/workflows/failed.yml",)),
     Pin("P0aa", "a master Builder skips an item an open pull request holds and takes the next",
-        p0aa_held_item_skipped, (Mutant("held_item_retaken", _edits("P0aa_held_item_retaken")),)),
+        p0aa_held_item_skipped, (Mutant("held_item_retaken", _edits("P0aa_held_item_retaken")),), HARNESS),
     Pin("P0ab", "a session log that edits .github/ or harness/ through Bash, or ends on master opening nothing, fails",
         p0ab_session_logs, (Mutant("shell_edit_admitted", _edits("P0ab_shell_edit_admitted")),
-                            Mutant("silent_master_stop_admitted", _edits("P0ab_silent_master_stop_admitted")))),
+                            Mutant("silent_master_stop_admitted", _edits("P0ab_silent_master_stop_admitted"))),
+        HARNESS),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
                            Mutant("domain_check_skipped", _edits("P1_domain_check_skipped")),
-                           Mutant("training_undomained", _edits("P1_training_undomained")))),
+                           Mutant("training_undomained", _edits("P1_training_undomained"))), JUDGE_SIDE),
     Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
         p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
                   Mutant("rootfs_writable", _edits("P2_rootfs_writable")),
-                  Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped")))),
+                  Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped"))), JUDGE_SIDE),
     Pin("P3", "every requested episode is recorded with its termination code, failures included",
-        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),)),
+        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),), JUDGE_SIDE),
     Pin("P4", "an episode's CPU and peak memory are measured from its container's cgroup, never self-reported",
         p4_measured_compute, (Mutant("self_reported", _edits("P4_self_reported")),
                               Mutant("client_rusage", _edits("P4_client_rusage")),
                               Mutant("not_differenced", _edits("P4_not_differenced")),
-                              Mutant("peak_from_current", _edits("P4_peak_from_current")))),
+                              Mutant("peak_from_current", _edits("P4_peak_from_current"))), JUDGE_SIDE),
     Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
-        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),)),
+        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),), JUDGE_SIDE),
     Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",
         p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
-                               Mutant("seen_not_reset", _edits("P14_seen_not_reset")))),
+                               Mutant("seen_not_reset", _edits("P14_seen_not_reset"))), JUDGE_SIDE),
     Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
         p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),
                             Mutant("one_arm", _edits("P15_one_arm")),
-                            Mutant("budget_one_arm", _edits("P15_budget_one_arm")))),
+                            Mutant("budget_one_arm", _edits("P15_budget_one_arm"))), JUDGE_SIDE),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
-                           Mutant("sum_unchecked", _edits("P7_sum_unchecked")))),
+                           Mutant("sum_unchecked", _edits("P7_sum_unchecked"))), JUDGE_SIDE),
     Pin("P13", "every scored step, +inf included, enters each support value's reliability row; entropy is never imputed",
         p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
                           Mutant("realised_row_only", _edits("P13_realised_row_only")),
-                          Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed")))),
+                          Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed"))), JUDGE_SIDE),
     Pin("P9", "a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's "
               "verification",
         p9_ledger_tamper, (Mutant("record_dropped", _edits("P9_record_dropped")),
@@ -3471,17 +3587,17 @@ PINS = [
                            Mutant("opened_for_rewrite", _edits("P9_opened_for_rewrite")),
                            Mutant("genesis_empty", _edits("P9_genesis_empty")),
                            Mutant("signature_unchecked", _edits("P9_signature_unchecked")),
-                           Mutant("independent_heads", _edits("P9_independent_heads")))),
+                           Mutant("independent_heads", _edits("P9_independent_heads"))), JUDGE_SIDE),
     Pin("P16", "a candidate's proposer comes from the judge-issued credential that registered it, or it is refused",
         p16_proposer_from_credential, (Mutant("unattributed_admitted", _edits("P16_unattributed_admitted")),
                                        Mutant("any_credential", _edits("P16_any_credential")),
-                                       Mutant("registration_taken_over", _edits("P16_registration_taken_over")))),
+                                       Mutant("registration_taken_over", _edits("P16_registration_taken_over"))), JUDGE_SIDE),
     Pin("P17", "evaluate() stamps every record with its registered proposer, issues no seed unregistered, is idempotent",
         p17_evaluate, (Mutant("fixed_proposer", _edits("P17_fixed_proposer")),
                        Mutant("seeds_before_proposer", _edits("P17_seeds_before_proposer")),
                        Mutant("idempotency_dropped", _edits("P17_idempotency_dropped")),
                        Mutant("conflict_unchecked", _edits("P17_conflict_unchecked")),
-                       Mutant("hash_partial", _edits("P17_hash_partial")))),
+                       Mutant("hash_partial", _edits("P17_hash_partial"))), JUDGE_SIDE),
     Pin("P18", "the pilot records every episode, stops at the cap, and reports the records' proposer and throughput",
         p18_pilot, (Mutant("cap_ignored", _edits("P18_cap_ignored")),
                     Mutant("failures_dropped", _edits("P18_failures_dropped")),
@@ -3489,23 +3605,23 @@ PINS = [
                     Mutant("proposer_from_config", _edits("P18_proposer_from_config")),
                     Mutant("mixed_proposers_admitted", _edits("P18_mixed_proposers_admitted")),
                     Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
-                    Mutant("short_request_admitted", _edits("P18_short_request_admitted")))),
+                    Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
-                            Mutant("unmeasured_free", _edits("P12_unmeasured_free")))),
+                            Mutant("unmeasured_free", _edits("P12_unmeasured_free"))), JUDGE_SIDE),
     Pin("P19", "a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding",
-        p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),)),
+        p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),), JUDGE_SIDE),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
-        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),)),
+        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
-        p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),)),
+        p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
-        p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),)),
+        p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),), JUDGE_SIDE),
     Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",
         p11_crafter_determinism, (Mutant("set_order_restored", _edits("P11_set_order_restored")),
                                   Mutant("seed_ignored", _edits("P11_seed_ignored")),
                                   Mutant("hash_constant", _edits("P11_hash_constant")),
                                   Mutant("field_dropped", _edits("P11_field_dropped")),
                                   Mutant("chunks_replaced_after_worldgen", _edits("P11_chunks_replaced_after_worldgen")),
-                                  Mutant("golden_hash_altered", _edits("P11_golden_hash_altered")))),
+                                  Mutant("golden_hash_altered", _edits("P11_golden_hash_altered"))), JUDGE_SIDE),
 ]
