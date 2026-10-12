@@ -1,0 +1,44 @@
+Review of PR #159 at add06eeb827eeeae881bf000cab680568a720a4e — probes (reviewer session 16f23d9d-6521-4c00-ba4d-dfba9cb17b45, run 38285431674)
+
+== Probe 1: old paths still named in .claude/commands at head (instruction #135 item 5)
+$ for f in .claude/commands/*.md; do echo "== $f"; grep -n -o -E '[^ ]{0,40}(forecasts\.jsonl|STATUS\.md|proposer\.toml)[^ ]{0,20}' $f; done
+== .claude/commands/audit.md
+16:reports/L*/forecasts.jsonl                 (read, alongside forecasts/*.jsonl: correct)
+42:`reports/L<n>/STATUS.md`                   (WRITE target, unchanged)
+== .claude/commands/build.md
+33:STATUS.md                                  (conflict rule: "STATUS.md keeps the newer-dated", unchanged)
+34:`harness/proposer.toml`                    (named as frozen: correct)
+38:(`reports/L<n>/STATUS.md`                  (named as frozen: correct)
+== .claude/commands/review.md
+13:harness/proposer.toml                      (read, alongside proposer.d: correct)
+== .claude/commands/vizier.md
+
+audit.md line 42 (step 6), verbatim excerpt:
+  Record the run as `reports/L<n>/ci/<id>.json` (...), write `reports/L<n>/STATUS.md` in the shape of A1.8 naming that sha
+  and citing `pins CI run <id> on <sha7>`, commit both in a commit touching only `reports/`, push, ...
+master's audit.md names the same path at the same step; the diff leaves it.
+
+== Probe 2: the resolver at head (review procedure step 3)
+$ uv run --frozen python -m harness.ledger resolve --session 38285431674
+# reports/L0/forecasts/38285431674.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/38285431674.jsonl: 1 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/38285431674.jsonl: 33 open, 26 typed; resolved 2, unreadable 4
+resolved 6e76f111ea21 False — pins run 38281856437 attempt 1 on 238e5f988a1e: cancelled
+resolved a10f624fedbf True — run 38280954794: 40.4 minutes, bound 90
+UNREAD 01e02469234d: review_accept {'pr': 58}: (HTTP 404)
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: (HTTP 404)
+UNREAD 02d749e28bef: pins_green {'pr': 103}: (HTTP 404)
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: (HTTP 404)
+$ git status --short
+?? reports/L0/forecasts/
+?? reports/L1/forecasts/
+?? reports/L2/forecasts/38285431674.jsonl
+$ wc -l reports/L*/forecasts/38285431674.jsonl
+reports/L0/forecasts/38285431674.jsonl 0
+reports/L1/forecasts/38285431674.jsonl 0
+reports/L2/forecasts/38285431674.jsonl 2
+The two empty files (created by `path.open("a")` in `_resolve_cli` for every layer whether or not it resolves anything)
+were deleted before commit; only the L2 file, carrying the two resolutions, is committed.
+
+== Cleanup
+Scratch clone /tmp/rev159.CC6t removed after the run; see the session's final check in the review file.
