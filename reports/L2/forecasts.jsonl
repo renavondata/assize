@@ -125,3 +125,4 @@
 {"id": "a07803496173", "ts": "2026-10-12T15:32:53Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38267426912"}, "outcome": true, "witness": "reports/L2/review-63a9441672d4134b5602e033da45484effebdbab.md at 60abda0292bc: ACCEPT WITH OBLIGATIONS"}
 {"id": "23082ebd78ef", "ts": "2026-10-12T15:32:53Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38267426912"}, "outcome": true, "witness": "pins run 38264987174 attempt 1 on d2405385ac72: success"}
 {"id": "4d92c126b091", "ts": "2026-10-12T15:32:53Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38267426912"}, "outcome": true, "witness": "run 38261619117: 48.0 minutes, bound 60"}
+{"id": "f66ad3d86167", "ts": "2026-10-12T16:47:28Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "local"}, "outcome": false, "witness": "reports/L2/review-65cb5fad2389e1803604484be33acb6b79fd020c.md at 89483a80f398: BLOCK"}
