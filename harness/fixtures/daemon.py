@@ -12,7 +12,7 @@ import time
 
 from harness import config, context, proc
 from harness.fixtures.toy import OFF_BY_ONE
-from harness.pin import Pin
+from harness.pin import ALWAYS, Pin
 
 MARKER = "assize-daemon"
 PID_FILE = "daemon.pid"
@@ -44,4 +44,4 @@ def check_daemon() -> bool:
 
 
 PINS = [Pin("fixture/daemon", "returns True after double-forking a daemon (seeded defect)",
-            check_daemon, (OFF_BY_ONE,))]
+            check_daemon, (OFF_BY_ONE,), ALWAYS)]

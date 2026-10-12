@@ -1,0 +1,8 @@
+# P0w's mutant (instruction #108 item 5): a pin's witnesses are ignored, so a pin a changed path matches is skipped
+# unless it witnesses every path.
+[[edit]]
+path = "harness/runner.py"
+old = """        return force or any(matches(path, w) for path in changed for w in pin.witnesses)
+"""
+new = """        return force or "**" in pin.witnesses
+"""

@@ -1,0 +1,315 @@
+pins	Set up job	﻿2026-10-12T06:05:53.7546915Z Current runner version: '2.337.0'
+pins	Set up job	2026-10-12T06:05:53.7586047Z ##[group]Runner Image Provisioner
+pins	Set up job	2026-10-12T06:05:53.7587632Z Hosted Compute Agent
+pins	Set up job	2026-10-12T06:05:53.7588716Z Version: 20261002.596
+pins	Set up job	2026-10-12T06:05:53.7589832Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+pins	Set up job	2026-10-12T06:05:53.7591244Z Build Date: 2026-10-02T22:28:27Z
+pins	Set up job	2026-10-12T06:05:53.7592890Z Worker ID: {8337907b-077a-4ccd-a047-f2f9c0d182e4}
+pins	Set up job	2026-10-12T06:05:53.7594179Z Region: westus2
+pins	Set up job	2026-10-12T06:05:53.7595322Z Cloud: Azure
+pins	Set up job	2026-10-12T06:05:53.7596312Z ##[endgroup]
+pins	Set up job	2026-10-12T06:05:53.7599421Z ##[group]Operating System
+pins	Set up job	2026-10-12T06:05:53.7600553Z Ubuntu
+pins	Set up job	2026-10-12T06:05:53.7601413Z 24.04.5
+pins	Set up job	2026-10-12T06:05:53.7602826Z LTS
+pins	Set up job	2026-10-12T06:05:53.7603700Z ##[endgroup]
+pins	Set up job	2026-10-12T06:05:53.7604703Z ##[group]Runner Image
+pins	Set up job	2026-10-12T06:05:53.7605803Z Image: ubuntu-24.04
+pins	Set up job	2026-10-12T06:05:53.7606721Z Version: 20261004.327.1
+pins	Set up job	2026-10-12T06:05:53.7608620Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+pins	Set up job	2026-10-12T06:05:53.7611649Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+pins	Set up job	2026-10-12T06:05:53.7613730Z ##[endgroup]
+pins	Set up job	2026-10-12T06:05:53.7616219Z ##[group]GITHUB_TOKEN Permissions
+pins	Set up job	2026-10-12T06:05:53.7619078Z Actions: read
+pins	Set up job	2026-10-12T06:05:53.7620140Z Contents: read
+pins	Set up job	2026-10-12T06:05:53.7621294Z Issues: read
+pins	Set up job	2026-10-12T06:05:53.7622741Z Metadata: read
+pins	Set up job	2026-10-12T06:05:53.7623871Z PullRequests: read
+pins	Set up job	2026-10-12T06:05:53.7624917Z ##[endgroup]
+pins	Set up job	2026-10-12T06:05:53.7628110Z Secret source: Actions
+pins	Set up job	2026-10-12T06:05:53.7629877Z Cache mode: write
+pins	Set up job	2026-10-12T06:05:53.7631233Z Prepare workflow directory
+pins	Set up job	2026-10-12T06:05:53.8328292Z Prepare all required actions
+pins	Set up job	2026-10-12T06:05:53.8410598Z Getting action download info
+pins	Set up job	2026-10-12T06:05:54.2564685Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+pins	Set up job	2026-10-12T06:05:54.3498108Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+pins	Set up job	2026-10-12T06:05:54.5709599Z Complete job name: pins
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-12T06:05:54.6493663Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6494762Z with:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6495230Z   persist-credentials: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6495756Z   fetch-depth: 0
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6496230Z   repository: renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6500007Z   token: ***
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6500441Z   ssh-strict: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6500888Z   ssh-user: git
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6501312Z   clean: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6501942Z   sparse-checkout-cone-mode: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6502492Z   fetch-tags: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6502942Z   show-progress: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6503392Z   lfs: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6503811Z   submodules: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6504266Z   set-safe-directory: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.6505008Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.7790835Z Syncing repository: renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.7793929Z ##[group]Getting Git version info
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.7795062Z Working directory is '/home/runner/work/assize/assize'
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.7796738Z [command]/usr/bin/git version
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.7877933Z git version 2.55.0
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9047322Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9056593Z Temporarily overriding HOME='/home/runner/work/_temp/5eeb8fdf-4454-40c2-b7ef-66357c5ed094' before making global git config changes
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9059250Z Adding repository directory to the temporary git global config as a safe directory
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9061587Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9066509Z Deleting the contents of '/home/runner/work/assize/assize'
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9069091Z ##[group]Initializing the repository
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9073026Z [command]/usr/bin/git init /home/runner/work/assize/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9075521Z hint: Using 'master' as the name for the initial branch. This default branch name
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9078090Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9080492Z hint: to use in all of your new repositories, which will suppress this warning,
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9082629Z hint: call:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9083902Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9085050Z hint: 	git config --global init.defaultBranch <name>
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9086596Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9089244Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9091032Z hint: 'development'. The just-created branch can be renamed via this command:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9093091Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9094030Z hint: 	git branch -m <name>
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9095328Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9096573Z hint: Disable this message with "git config set advice.defaultBranchName false"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9098700Z Initialized empty Git repository in /home/runner/work/assize/assize/.git/
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9102808Z [command]/usr/bin/git remote add origin https://github.com/renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9107268Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9109008Z ##[group]Disabling automatic garbage collection
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9110670Z [command]/usr/bin/git config --local gc.auto 0
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9115182Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9117192Z ##[group]Setting up auth
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9118682Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9124537Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9446143Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9453276Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9764413Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9787148Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9789343Z ##[group]Fetching the repository
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:54.9800221Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +a901fd1b3076750a56ba288b54dd8325b4370cf3:refs/remotes/pull/127/merge
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6403013Z From https://github.com/renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6405528Z  * [new branch]      add-constitution-and-briefs              -> origin/add-constitution-and-briefs
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6429732Z  * [new branch]      audit-8aae43c8c792                       -> origin/audit-8aae43c8c792
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6433930Z  * [new branch]      constitution-6                           -> origin/constitution-6
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6436592Z  * [new branch]      instr-102-awaits-guy-builds-master       -> origin/instr-102-awaits-guy-builds-master
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6441028Z  * [new branch]      instr-108-pin-witnesses                  -> origin/instr-108-pin-witnesses
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6448307Z  * [new branch]      instr-111-chooser                        -> origin/instr-111-chooser
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6506433Z  * [new branch]      instr-39-brief2-amendments               -> origin/instr-39-brief2-amendments
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6509507Z  * [new branch]      instr-46-auditor-role                    -> origin/instr-46-auditor-role
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6522652Z  * [new branch]      instr-49-vizier                          -> origin/instr-49-vizier
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6541265Z  * [new branch]      instr-64-elect-by-exp3                   -> origin/instr-64-elect-by-exp3
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6563875Z  * [new branch]      instr-64-exp3-election                   -> origin/instr-64-exp3-election
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6591744Z  * [new branch]      instr-65-review-sender                   -> origin/instr-65-review-sender
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6613552Z  * [new branch]      instr-68-wish-latency-price              -> origin/instr-68-wish-latency-price
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6633319Z  * [new branch]      instr-70-price-line                      -> origin/instr-70-price-line
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6636250Z  * [new branch]      l1-s2-crafter-binding-wip                -> origin/l1-s2-crafter-binding-wip
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6653388Z  * [new branch]      l2a-o3-replay-verified                   -> origin/l2a-o3-replay-verified
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6673359Z  * [new branch]      l2a-replay-verified                      -> origin/l2a-replay-verified
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6693304Z  * [new branch]      ledger/draws                             -> origin/ledger/draws
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6713188Z  * [new branch]      master                                   -> origin/master
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6725790Z  * [new ref]         a901fd1b3076750a56ba288b54dd8325b4370cf3 -> pull/127/merge
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6730710Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6733107Z ##[group]Determining the checkout info
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6735361Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6736758Z [command]/usr/bin/git sparse-checkout disable
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6741092Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6746025Z ##[group]Checking out the ref
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.6747971Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/127/merge
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8353143Z Note: switching to 'refs/remotes/pull/127/merge'.
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8355052Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8358273Z You are in 'detached HEAD' state. You can look around, make experimental
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8361202Z changes and commit them, and you can discard any commits you make in this
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8363768Z state without impacting any branches by switching back to a branch.
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8365265Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8366134Z If you want to create a new branch to retain commits you create, you may
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8368314Z do so (now or later) by using -c with the switch command. Example:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8369646Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8370117Z   git switch -c <new-branch-name>
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8371361Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8372128Z Or undo this operation with:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8373075Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8373505Z   git switch -
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8374081Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8375166Z Turn off this advice by setting config variable advice.detachedHead to false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8377069Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8379056Z HEAD is now at a901fd1 Merge b7af4e6c453d6a21fde51ead2311131d07aa2b9c into 506510c9bb80c69076c9c42fd3b2283848c712db
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8384654Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8387296Z [command]/usr/bin/git log -1 --format=%H
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8388781Z a901fd1b3076750a56ba288b54dd8325b4370cf3
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8393658Z ##[group]Removing auth
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8395981Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8406016Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8660451Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8694495Z http.https://github.com/.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8703456Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.8747082Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:05:55.9003420Z ##[endgroup]
+pins	Install uv	﻿2026-10-12T06:05:55.9245932Z ##[group]Run pipx install uv==0.8.17
+pins	Install uv	2026-10-12T06:05:55.9246942Z ^[[36;1mpipx install uv==0.8.17^[[0m
+pins	Install uv	2026-10-12T06:05:55.9567075Z shell: /usr/bin/bash -e {0}
+pins	Install uv	2026-10-12T06:05:55.9567926Z ##[endgroup]
+pins	Install uv	2026-10-12T06:05:56.5536269Z creating virtual environment...
+pins	Install uv	2026-10-12T06:05:56.7954773Z installing uv from spec 'uv==0.8.17'...
+pins	Install uv	2026-10-12T06:05:59.2798330Z done! ✨ 🌟 ✨
+pins	Install uv	2026-10-12T06:05:59.2813023Z   installed package uv 0.8.17, installed using Python 3.12.3
+pins	Install uv	2026-10-12T06:05:59.2814200Z   These apps are now available
+pins	Install uv	2026-10-12T06:05:59.2818494Z     - uv
+pins	Install uv	2026-10-12T06:05:59.2819416Z     - uvx
+pins	Sync environment	﻿2026-10-12T06:05:59.3161738Z ##[group]Run uv sync --frozen
+pins	Sync environment	2026-10-12T06:05:59.3162558Z ^[[36;1muv sync --frozen^[[0m
+pins	Sync environment	2026-10-12T06:05:59.3228037Z shell: /usr/bin/bash -e {0}
+pins	Sync environment	2026-10-12T06:05:59.3228338Z ##[endgroup]
+pins	Sync environment	2026-10-12T06:05:59.6669320Z Downloading cpython-3.11.13-linux-x86_64-gnu (download) (27.7MiB)
+pins	Sync environment	2026-10-12T06:06:00.7442270Z  Downloading cpython-3.11.13-linux-x86_64-gnu (download)
+pins	Sync environment	2026-10-12T06:06:00.8712642Z Using CPython 3.11.13
+pins	Sync environment	2026-10-12T06:06:00.8722784Z Creating virtual environment at: .venv
+pins	Sync environment	2026-10-12T06:06:00.9073548Z Downloading numpy (16.1MiB)
+pins	Sync environment	2026-10-12T06:06:00.9078476Z Downloading pillow (6.6MiB)
+pins	Sync environment	2026-10-12T06:06:00.9652163Z    Building crafter==1.8.3
+pins	Sync environment	2026-10-12T06:06:01.0947040Z  Downloading pillow
+pins	Sync environment	2026-10-12T06:06:01.3975485Z  Downloading numpy
+pins	Sync environment	2026-10-12T06:06:02.0928779Z       Built crafter==1.8.3
+pins	Sync environment	2026-10-12T06:06:02.0976340Z Prepared 12 packages in 1.22s
+pins	Sync environment	2026-10-12T06:06:02.1312725Z Installed 12 packages in 32ms
+pins	Sync environment	2026-10-12T06:06:02.1313668Z  + attrs==26.1.0
+pins	Sync environment	2026-10-12T06:06:02.1332565Z  + crafter==1.8.3
+pins	Sync environment	2026-10-12T06:06:02.1335819Z  + imageio==2.38.0
+pins	Sync environment	2026-10-12T06:06:02.1350823Z  + jsonschema==4.26.0
+pins	Sync environment	2026-10-12T06:06:02.1362710Z  + jsonschema-specifications==2025.9.1
+pins	Sync environment	2026-10-12T06:06:02.1363470Z  + numpy==2.4.6
+pins	Sync environment	2026-10-12T06:06:02.1364331Z  + opensimplex==0.4.5.1
+pins	Sync environment	2026-10-12T06:06:02.1365158Z  + pillow==12.3.0
+pins	Sync environment	2026-10-12T06:06:02.1382692Z  + referencing==0.37.0
+pins	Sync environment	2026-10-12T06:06:02.1402620Z  + rpds-py==2026.9.1
+pins	Sync environment	2026-10-12T06:06:02.1407978Z  + ruamel-yaml==0.19.1
+pins	Sync environment	2026-10-12T06:06:02.1432833Z  + typing-extensions==4.16.0
+pins	Choose the base	﻿2026-10-12T06:06:02.1492453Z ##[group]Run echo "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"
+pins	Choose the base	2026-10-12T06:06:02.1493361Z ^[[36;1mecho "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"^[[0m
+pins	Choose the base	2026-10-12T06:06:02.1556915Z shell: /usr/bin/bash -e {0}
+pins	Choose the base	2026-10-12T06:06:02.1557199Z env:
+pins	Choose the base	2026-10-12T06:06:02.1559958Z   GH_TOKEN: ***
+pins	Choose the base	2026-10-12T06:06:02.1560201Z   BASE_REF: master
+pins	Choose the base	2026-10-12T06:06:02.1560443Z ##[endgroup]
+pins	Choose the base	2026-10-12T06:06:10.3983373Z base: run 38208656897 on c3a1997f93e5de17406d949db52c9973ca5024d5
+pins	make pins	﻿2026-10-12T06:06:10.4150727Z ##[group]Run make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+pins	make pins	2026-10-12T06:06:10.4151240Z ^[[36;1mmake pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"^[[0m
+pins	make pins	2026-10-12T06:06:10.4214565Z shell: /usr/bin/bash -e {0}
+pins	make pins	2026-10-12T06:06:10.4214828Z env:
+pins	make pins	2026-10-12T06:06:10.4217398Z   GH_TOKEN: ***
+pins	make pins	2026-10-12T06:06:10.4217787Z   PINS_SINCE: --since c3a1997f93e5de17406d949db52c9973ca5024d5 --since-run 38208656897
+pins	make pins	2026-10-12T06:06:10.4218231Z ##[endgroup]
+pins	make pins	2026-10-12T06:06:11.6705325Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since c3a1997f93e5de17406d949db52c9973ca5024d5 --since-run 38208656897
+pins	make pins	2026-10-12T06:06:36.5710355Z registry harness: 47 pins, 122 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+pins	make pins	2026-10-12T06:06:36.5712292Z [skip  ] P0: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5714204Z [skip  ] P0b: no changed path matches ['**/*.py', '**/*.sh', '**/*.yml', '**/*.yaml', '**/Makefile', '**/Dockerfile', '**/Containerfile'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5716185Z [skip  ] P0c: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5717739Z [skip  ] P0d: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5719241Z [skip  ] P0e: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5721543Z [skip  ] P0f: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5723395Z [skip  ] P0g: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5725007Z [skip  ] P0h: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5726562Z [skip  ] P0i: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5728065Z [skip  ] P0j: no changed path matches ['scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5729592Z [skip  ] P0n: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5731111Z [skip  ] P0o: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5732945Z [skip  ] P0s: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5734507Z [skip  ] P0t: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5736045Z [skip  ] P0u: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5737705Z [skip  ] P0v: no changed path matches ['.github/workflows/review.yml'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5739379Z [skip  ] P0w: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5741049Z [skip  ] P0z: no changed path matches ['.github/workflows/failed.yml'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5743118Z [skip  ] P0aa: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5744666Z [skip  ] P0ab: no changed path matches ['harness/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5746354Z [skip  ] P0aj: no changed path matches ['.github/workflows/build.yml'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5748334Z [skip  ] P1: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5750721Z [skip  ] P2: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5753023Z [skip  ] P3: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5755120Z [skip  ] P4: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5757200Z [skip  ] P5: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5759258Z [skip  ] P14: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5761395Z [skip  ] P15: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5763727Z [skip  ] P7: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5766102Z [skip  ] P13: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5768140Z [skip  ] P9: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5770234Z [skip  ] P16: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5772668Z [skip  ] P17: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5774748Z [skip  ] P18: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5776797Z [skip  ] P12: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5778889Z [skip  ] P19: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5780969Z [skip  ] P20: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5783292Z [skip  ] P10: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5785367Z [skip  ] P6: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5787446Z [skip  ] P11: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since c3a1997f93e5de17406d949db52c9973ca5024d5 (run 38208656897)
+pins	make pins	2026-10-12T06:06:36.5789083Z [clean ] P0k: observed pass -> ok (0.386s) out/pins/runs/P0k/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5790222Z [clean ] P0l: observed pass -> ok (0.335s) out/pins/runs/P0l/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5791345Z [clean ] P0m: observed pass -> ok (0.737s) out/pins/runs/P0m/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5792742Z [clean ] P0q: observed pass -> ok (0.485s) out/pins/runs/P0q/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5794127Z [clean ] P0r: observed pass -> ok (0.886s) out/pins/runs/P0r/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5795244Z [clean ] P0x: observed pass -> ok (5.198s) out/pins/runs/P0x/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5796488Z [clean ] P0y: observed pass -> ok (1.638s) out/pins/runs/P0y/clean/transcript.log
+pins	make pins	2026-10-12T06:06:36.5798062Z [mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.363s + 0.361s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5800105Z [mutant] P0k/self_resolution_admitted: mutant fail, twin pass -> KILLED (0.413s + 0.412s) out/pins/runs/P0k/self_resolution_admitted/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5802472Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.412s + 0.413s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5804815Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.766s + 0.814s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5806918Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.819s + 0.764s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5808853Z [mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.821s + 0.767s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5810870Z [mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.817s + 0.767s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5813401Z [mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.815s + 0.817s) out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5815477Z [mutant] P0m/instruction_author_unchecked: mutant fail, twin pass -> KILLED (0.767s + 0.815s) out/pins/runs/P0m/instruction_author_unchecked/mutant/transcript.log
+pins	make pins	2026-10-12T06:06:36.5817647Z [mutant] P0m/instruction_label_unchecked: mutant fail, twin pass -> KILLED (0.767s + 0.815s) out/pins/runs/P0m/instruction_label_unchecked/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9398670Z [mutant] P0m/instruction_labeler_unchecked: mutant fail, twin pass -> KILLED (0.815s + 0.765s) out/pins/runs/P0m/instruction_labeler_unchecked/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9400676Z [mutant] P0m/body_edit_unchecked: mutant fail, twin pass -> KILLED (0.77s + 0.765s) out/pins/runs/P0m/body_edit_unchecked/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9402802Z [mutant] P0m/inert_exemption_admitted: mutant fail, twin pass -> KILLED (0.764s + 0.764s) out/pins/runs/P0m/inert_exemption_admitted/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9404719Z [mutant] P0q/ledger_rewrite_admitted: mutant fail, twin pass -> KILLED (0.466s + 0.512s) out/pins/runs/P0q/ledger_rewrite_admitted/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9406440Z [mutant] P0q/draws_not_append_only: mutant fail, twin pass -> KILLED (0.512s + 0.533s) out/pins/runs/P0q/draws_not_append_only/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9408149Z [mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (1.018s + 0.814s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9409813Z [mutant] P0x/price_line_dropped: mutant fail, twin pass -> KILLED (5.226s + 4.927s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9411504Z [mutant] P0x/none_on_workflow_admitted: mutant fail, twin pass -> KILLED (5.179s + 6.081s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9413335Z [mutant] P0x/scoped_by_number: mutant fail, twin pass -> KILLED (6.238s + 6.129s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9414933Z [mutant] P0y/split_trailer_block_admitted: mutant fail, twin pass -> KILLED (1.665s + 1.665s) out/pins/runs/P0y/split_trailer_block_admitted/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9416540Z [mutant] P0y/hook_unconditioned: mutant fail, twin pass -> KILLED (1.664s + 1.664s) out/pins/runs/P0y/hook_unconditioned/mutant/transcript.log
+pins	make pins	2026-10-12T06:07:23.9417904Z clean: 7/7 passed, 0/7 failed
+pins	make pins	2026-10-12T06:07:23.9418695Z mutants: 21/21 killed, 0/21 survived, 0/21 inconclusive, 0/21 stale, 0/21 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-12T06:07:23.9419563Z twins: 21/21 passed
+pins	make pins	2026-10-12T06:07:23.9420099Z skipped: 40/47 pins, 101 mutants since c3a1997 (run 38208656897)
+pins	make pins	2026-10-12T06:07:23.9420724Z report: out/pins/pins.jsonl
+pins	make pins	2026-10-12T06:07:23.9421206Z PINS PASSED
+pins	Upload pins report	﻿2026-10-12T06:07:23.9651151Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+pins	Upload pins report	2026-10-12T06:07:23.9651636Z with:
+pins	Upload pins report	2026-10-12T06:07:23.9652164Z   name: pins-report
+pins	Upload pins report	2026-10-12T06:07:23.9652477Z   path: out/pins
+pins	Upload pins report	2026-10-12T06:07:23.9652700Z   if-no-files-found: error
+pins	Upload pins report	2026-10-12T06:07:23.9652942Z   compression-level: 6
+pins	Upload pins report	2026-10-12T06:07:23.9653162Z   overwrite: false
+pins	Upload pins report	2026-10-12T06:07:23.9653499Z   include-hidden-files: false
+pins	Upload pins report	2026-10-12T06:07:23.9653762Z ##[endgroup]
+pins	Upload pins report	2026-10-12T06:07:24.1483498Z (node:8007) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+pins	Upload pins report	2026-10-12T06:07:24.1485132Z (Use `node --trace-deprecation ...` to show where the warning was created)
+pins	Upload pins report	2026-10-12T06:07:24.2298731Z With the provided path, there will be 50 files uploaded
+pins	Upload pins report	2026-10-12T06:07:24.2300032Z Artifact name is valid!
+pins	Upload pins report	2026-10-12T06:07:24.2300875Z Root directory input is valid!
+pins	Upload pins report	2026-10-12T06:07:24.6047289Z Beginning upload of artifact content to blob storage
+pins	Upload pins report	2026-10-12T06:07:24.6975792Z (node:8007) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+pins	Upload pins report	2026-10-12T06:07:25.1167905Z Uploaded bytes 64123
+pins	Upload pins report	2026-10-12T06:07:25.1966791Z Finished uploading artifact content to blob storage!
+pins	Upload pins report	2026-10-12T06:07:25.1968289Z SHA256 digest of uploaded artifact zip is 86ed56bd19ac7bef3eb953db23087d57bc336847080553c45da95f223b0d932d
+pins	Upload pins report	2026-10-12T06:07:25.1969816Z Finalizing artifact upload
+pins	Upload pins report	2026-10-12T06:07:25.4506497Z Artifact pins-report.zip successfully finalized. Artifact ID 11729405838
+pins	Upload pins report	2026-10-12T06:07:25.4508173Z Artifact pins-report has been successfully uploaded! Final size is 64123 bytes. Artifact ID is 11729405838
+pins	Upload pins report	2026-10-12T06:07:25.4515919Z Artifact download URL: https://github.com/renavondata/assize/actions/runs/38210893335/artifacts/11729405838
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-12T06:07:25.4750825Z Post job cleanup.
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5726726Z [command]/usr/bin/git version
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5798722Z git version 2.55.0
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5852814Z Temporarily overriding HOME='/home/runner/work/_temp/92b91f13-03b3-48f2-b156-211247eb6204' before making global git config changes
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5856261Z Adding repository directory to the temporary git global config as a safe directory
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5860381Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5954920Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.5983884Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.6373837Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-12T06:07:25.6493874Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	Complete job	﻿2026-10-12T06:07:25.7278110Z Cleaning up orphan processes
+pins	Complete job	2026-10-12T06:07:25.7568125Z Terminate orphan process: pid (2221) (catatonit)
+pins	Complete job	2026-10-12T06:07:25.7604522Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

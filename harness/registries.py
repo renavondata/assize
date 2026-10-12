@@ -20,6 +20,7 @@ REGISTRIES = {
     "fixture.dup_pin": "harness.fixtures.dup_pin",
     "fixture.dup_mutant": "harness.fixtures.dup_mutant",
     "fixture.malformed_edit": "harness.fixtures.malformed_edit",
+    "fixture.witness": "harness.fixtures.witness",
 }
 
 
