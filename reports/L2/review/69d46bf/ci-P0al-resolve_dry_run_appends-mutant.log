@@ -1,0 +1,57 @@
+copy of /home/runner/work/assize/assize
+  at /tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo
+applied 1 edit(s) from harness/edits/P0al_resolve_dry_run_appends.toml
+pin:       P0al
+protects:  under a network-less sandbox, --dry-run records, fetches, pushes and appends nothing; without it the same calls do
+role:      mutant
+tree:      /tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-iur07shd
+Traceback (most recent call last):
+  File "/tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo/harness/pins.py", line 1598, in p0al_dry_run_writes_nothing
+    files, local_refs, remote_refs = _files_digest(repo), _refs(repo), _refs(remote)
+                                     ^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo/harness/pins.py", line 1484, in _files_digest
+    for f in sorted(p for p in root.rglob("*") if p.is_file() and ".git" not in p.relative_to(root).parts
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo/harness/pins.py", line 1484, in <genexpr>
+    for f in sorted(p for p in root.rglob("*") if p.is_file() and ".git" not in p.relative_to(root).parts
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 968, in rglob
+    for p in selector.select_from(self):
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 408, in _select_from
+    for p in successor_select(starting_point, is_dir, exists, scandir):
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 355, in _select_from
+    with scandir(parent_path) as scandir_it:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 938, in _scandir
+    return os.scandir(self)
+           ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/assize-scratch-iur07shd/tmpvv_e8qzp/repo/.git/objects/66'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo/harness/runner.py", line 60, in check
+    ok = bool(pin.check())
+              ^^^^^^^^^^^
+  File "/tmp/assize-scratch-iur07shd/assize-copy-394ynmzn/repo/harness/pins.py", line 1595, in p0al_dry_run_writes_nothing
+    with tempfile.TemporaryDirectory(dir=context.scratch) as tmp:
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/tempfile.py", line 943, in __exit__
+    self.cleanup()
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/tempfile.py", line 947, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/tempfile.py", line 929, in _rmtree
+    _shutil.rmtree(name, onerror=onerror)
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/shutil.py", line 752, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/shutil.py", line 672, in _rmtree_safe_fd
+    _rmtree_safe_fd(dirfd, fullname, onerror)
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/shutil.py", line 683, in _rmtree_safe_fd
+    onerror(os.rmdir, fullname, sys.exc_info())
+  File "/home/runner/.local/share/uv/python/cpython-3.11.13-linux-x86_64-gnu/lib/python3.11/shutil.py", line 681, in _rmtree_safe_fd
+    os.rmdir(entry.name, dir_fd=topfd)
+OSError: [Errno 39] Directory not empty: '.git'
+  [ok] a network-less sandbox starts (`unshare -rn`, else `sudo -n unshare -n`)
+  [ok] the sandbox reaches no network (exit 1: ['OSError: [Errno 101] Network is unreachable'])
+result:    ERROR (check raised)
