@@ -1,0 +1,5 @@
+# P0al's mutant (instruction #113 Part A item 2): `elect --dry-run --publish` fetches the remote's draw branch.
+[[edit]]
+path = "harness/ledger.py"
+old = """tip = (local_draw_tip if a.dry_run else draw_tip)(a.repo, a.publish) if a.publish else None"""
+new = """tip = draw_tip(a.repo, a.publish) if a.publish else None"""

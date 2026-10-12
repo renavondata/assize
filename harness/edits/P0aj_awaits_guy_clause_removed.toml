@@ -2,5 +2,5 @@
 # request awaiting Guy starts no master Builder and the queue pauses.
 [[edit]]
 path = ".github/workflows/build.yml"
-old = """ || (github.event_name == 'pull_request' && github.event.label.name == 'awaits-guy')"""
+old = """ || (github.event_name == 'pull_request_target' && github.event.label.name == 'awaits-guy')"""
 new = ""

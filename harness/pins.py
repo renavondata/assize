@@ -4,6 +4,8 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 from __future__ import annotations
 
 import dataclasses
+import hashlib
+import itertools
 import json
 import math
 import os
@@ -1355,10 +1357,10 @@ def p0u_election() -> bool:
 
 REVIEW_EVENTS = (  # (what, sender, event, action, label, must start a review) -- instruction #65
     ("a needs-review label applied by the reviewer account (an audit PR, the Vizier sending a changed head back)",
-     "assize-reviewer", "pull_request", "labeled", "needs-review", True),
-    ("an awaits-guy label applied by a review session", "assize-reviewer", "pull_request", "labeled", "awaits-guy",
+     "assize-reviewer", "pull_request_target", "labeled", "needs-review", True),
+    ("an awaits-guy label applied by a review session", "assize-reviewer", "pull_request_target", "labeled", "awaits-guy",
      False),
-    ("a needs-review label applied by the builder", "assize-builder", "pull_request", "labeled", "needs-review", True),
+    ("a needs-review label applied by the builder", "assize-builder", "pull_request_target", "labeled", "needs-review", True),
 )
 
 
@@ -1412,7 +1414,7 @@ def p0aj_awaits_guy_builds_master() -> bool:
         return ok()
     for what, label, start, on_pr in BUILD_EVENTS:
         # `inputs.pr` is '' outside a dispatch: Actions compares a missing input equal to ''.
-        ctx = {"github.event_name": "pull_request", "github.event.action": "labeled", "github.event.label.name": label,
+        ctx = {"github.event_name": "pull_request_target", "github.event.action": "labeled", "github.event.label.name": label,
                "github.event.pull_request.number": BUILD_EVENT_PR, "inputs.pr": ""}
         started = _github_condition(job, ctx)
         expect(started is start, f"{what}: {'starts' if started else 'does not start'} a Builder (must "
@@ -1427,6 +1429,431 @@ def p0aj_awaits_guy_builds_master() -> bool:
     head = text.split("concurrency:")[0]
     expect("awaits-guy" in head and "master" in head and "`blocked` path is unchanged" in head,
            "the workflow states that awaits-guy starts a master Builder and that the `blocked` path is unchanged")
+    return ok()
+
+
+# ----------------------------------------------------------------- instruction #113: the session workflows and their base
+
+WORKFLOW_DIR = ROOT / ".github" / "workflows"
+SESSION_WORKFLOWS_PINNED = ("build.yml", "review.yml")
+
+
+def _steps(text: str) -> list[str]:
+    """The steps of a workflow's job, each as its text (a comment above a step rides with the step before it)."""
+    return re.split(r"\n(?= {6}- )", text.split("\n    steps:\n", 1)[1])
+
+
+def _step_run(step: str) -> str | None:
+    """The script a step runs: the rest of its `run:` line, or the dedented block under `run: |`; None for a `uses:` step."""
+    m = re.search(r"^(?: {6}- | {8})run: (.*)$", step, re.M)
+    if m is None:
+        return None
+    if m.group(1).strip() != "|":
+        return m.group(1).strip()
+    block = itertools.takewhile(lambda x: not x.strip() or x.startswith(" " * 10), step[m.end():].lstrip("\n").splitlines())
+    return "\n".join(x[10:] for x in block)
+
+
+def _code_lines(text: str) -> list[str]:
+    return [x for x in text.splitlines() if not x.lstrip().startswith("#")]
+
+
+def _netless_prefix() -> list[str] | None:
+    """A command prefix running its argument in a fresh network namespace (a loopback only): `unshare -rn`, else the same
+    through `sudo -n` with the privileges dropped again. None if neither starts."""
+    uid, gid = os.getuid(), os.getgid()
+    for prefix in (["unshare", "-rn"], ["sudo", "-n", "unshare", "-n", "setpriv", f"--reuid={uid}", f"--regid={gid}",
+                                        "--clear-groups"]):
+        try:
+            if subprocess.run([*prefix, "true"], capture_output=True, timeout=30).returncode == 0:
+                return prefix
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+    return None
+
+
+def _in_sandbox(prefix: list[str], argv: list[str], cwd: Path, timeout: int = 300) -> subprocess.CompletedProcess:
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+    return subprocess.run([*prefix, "env", *[f"{k}={v}" for k, v in env.items()], *argv], cwd=cwd, capture_output=True,
+                          text=True, timeout=timeout)
+
+
+def _files_digest(root: Path) -> str:
+    """SHA-256 over every file under `root` outside `.git` and bytecode caches."""
+    h = hashlib.sha256()
+    for f in sorted(p for p in root.rglob("*") if p.is_file() and ".git" not in p.relative_to(root).parts
+                    and "__pycache__" not in p.parts):
+        h.update(str(f.relative_to(root)).encode() + b"\0" + f.read_bytes() + b"\0")
+    return h.hexdigest()
+
+
+def _session_tree(dest: Path) -> Path:
+    """A fixture checkout holding this tree's harness and workflows as one commit, `origin/master` at it, no remote."""
+    shutil.copytree(ROOT / "harness", dest / "harness", ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copytree(WORKFLOW_DIR, dest / ".github" / "workflows")
+    git = _git_fixture(dest)
+    git("init", "-q", "-b", "master")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    git("update-ref", "refs/remotes/origin/master", "HEAD")
+    return dest
+
+
+def _replace(path: Path, old: str, new: str) -> bool:
+    """Replace `old` by `new` in `path` everywhere; whether it occurred."""
+    text = path.read_text()
+    path.write_text(text.replace(old, new))
+    return old in text
+
+
+def _run_selfrun(tree_: Path, prefix: list[str] | None = None) -> subprocess.CompletedProcess:
+    argv = [sys.executable, "-B", "-m", "harness.selfrun"]
+    return (_in_sandbox(prefix, argv, tree_) if prefix else subprocess.run(
+        argv, cwd=tree_, capture_output=True, text=True, timeout=300, env=os.environ | claims.GIT_ENV | FIXTURE_GIT))
+
+
+def p0ak_selfrun() -> bool:
+    """`pins` runs `python -m harness.selfrun`, which runs every harness call of the head's build.yml and review.yml
+    with `--dry-run` from the head's checkout: a workflow that passes a flag the harness lacks fails it, one that changes
+    the flag together with the harness passes, and a workflow with no harness call to run fails (instruction #113 Part A)."""
+    expect, ok = _expecter()
+    pins_yml = "\n".join(_code_lines((WORKFLOW_DIR / "pins.yml").read_text()))
+    expect("run: uv run --frozen python -m harness.selfrun" in pins_yml, "pins.yml runs `python -m harness.selfrun`")
+    with tempfile.TemporaryDirectory(dir=context.scratch) as tmp:
+        clean = _session_tree(Path(tmp) / "clean")
+        done = _run_selfrun(clean)
+        expect(done.returncode == 0 and "FAIL" not in done.stdout,
+               f"the workflows and the harness as they stand agree (exit {done.returncode}):\n{done.stdout}{done.stderr[-400:]}")
+        expect(done.stdout.count("selfrun: ok") >= 2,
+               f"at least one call from each of build.yml and review.yml ran ({done.stdout.count('selfrun: ok')} ok)")
+        # A pull request that changes a flag in review.yml and not in harness.ledger.
+        apart = _session_tree(Path(tmp) / "apart")
+        expect(_replace(apart / ".github" / "workflows" / "review.yml", "--head origin/master", "--tip origin/master"),
+               "fixture: review.yml carries `--head origin/master`")
+        done = _run_selfrun(apart)
+        expect(done.returncode != 0 and "FAIL review.yml" in done.stdout,
+               f"a flag changed in review.yml and not in the harness fails (exit {done.returncode})")
+        # The same rename made in both workflows and in the harness.
+        together = _session_tree(Path(tmp) / "together")
+        for name in SESSION_WORKFLOWS_PINNED:
+            expect(_replace(together / ".github" / "workflows" / name, "--head origin/master", "--tip origin/master"),
+                   f"fixture: {name} carries `--head origin/master`")
+        expect(_replace(together / "harness" / "ledger.py", 'e.add_argument("--head", default="HEAD")',
+                        'e.add_argument("--tip", dest="head", default="HEAD")'),
+               "fixture: harness/ledger.py defines the elect flag `--head`")
+        done = _run_selfrun(together)
+        expect(done.returncode == 0 and "FAIL" not in done.stdout,
+               f"the same rename in the workflows and the harness passes (exit {done.returncode}):\n{done.stdout}")
+        # A workflow that no longer calls the harness gives the run nothing to witness.
+        hollow = _session_tree(Path(tmp) / "hollow")
+        expect(_replace(hollow / ".github" / "workflows" / "review.yml", "python -m harness.ledger", "python -m other.ledger"),
+               "fixture: review.yml calls `python -m harness.ledger`")
+        done = _run_selfrun(hollow)
+        expect(done.returncode != 0 and "no step calls harness" in done.stdout,
+               f"a workflow with no harness call fails the self-run (exit {done.returncode})")
+    return ok()
+
+
+DRY_FORECAST = {"id": "", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "builder", "model": "m", "session": "s"},
+                "sha_before": "0" * 40, "claim": "L2 host verdict is FIT", "p": 0.5, "resolves_by": "REPORT.md",
+                "type": "host_verdict", "args": {"layer": 2, "verdict": "FIT"}}
+
+
+def _dry_run_tree(dest: Path, remote: Path) -> Path:
+    """A session tree whose `origin` is a bare repository on disk (a push or a fetch needs no network), holding a
+    ledger with one forecast the working tree's REPORT.md resolves."""
+    forecast = DRY_FORECAST | {"id": claims.forecast_id(DRY_FORECAST["claim"], DRY_FORECAST["ts"])}
+    _append(dest, "reports/L2/forecasts.jsonl", json.dumps(forecast) + "\n")
+    _append(dest, "REPORT.md", "- L2 — **FIT**\n")
+    _session_tree(dest)
+    git = _git_fixture(dest)
+    subprocess.run(["git", "init", "-q", "--bare", "-b", "master", str(remote)], check=True, capture_output=True,
+                   env=os.environ | claims.GIT_ENV)
+    git("remote", "add", "origin", str(remote))
+    git("push", "-q", "origin", "master")
+    return dest
+
+
+def _refs(repo: Path) -> str:
+    return _git_fixture(repo)("for-each-ref")
+
+
+def p0al_dry_run_writes_nothing() -> bool:
+    """Under a network-less sandbox, `harness.ledger elect --dry-run` (with and without `--publish`), `resolve --dry-run`
+    and `harness.selfrun` write no file, record no draw, fetch no ref and push nothing, and compute what they would have
+    (instruction #113 Part A item 2). The same commands without `--dry-run` do write: the observation can fail."""
+    expect, ok = _expecter()
+    prefix = _netless_prefix()
+    expect(prefix is not None, "a network-less sandbox starts (`unshare -rn`, else `sudo -n unshare -n`)")
+    if prefix is None:
+        return ok()
+    probe = _in_sandbox(prefix, [sys.executable, "-c", "import socket; s = socket.socket(); s.settimeout(3); "
+                                 "s.connect(('192.0.2.1', 9))"], context.scratch)
+    expect(probe.returncode != 0 and "unreachable" in probe.stderr.lower(),
+           f"the sandbox reaches no network (exit {probe.returncode}: {probe.stderr.strip().splitlines()[-1:]})")
+    elect = [sys.executable, "-B", "-m", "harness.ledger", "elect", "build", "--seed", "7", "--head", "origin/master"]
+    with tempfile.TemporaryDirectory(dir=context.scratch) as tmp:
+        repo, remote = _dry_run_tree(Path(tmp) / "repo", Path(tmp) / "remote.git"), Path(tmp) / "remote.git"
+        ledger = repo / "reports" / "L2" / "forecasts.jsonl"
+        files, local_refs, remote_refs = _files_digest(repo), _refs(repo), _refs(remote)
+
+        def unchanged(what: str) -> None:
+            expect(_files_digest(repo) == files, f"{what}: no file of the tree changed")
+            expect(_refs(repo) == local_refs, f"{what}: no local ref changed (nothing fetched)")
+            expect(_refs(remote) == remote_refs, f"{what}: the remote's refs are as they were (nothing pushed)")
+
+        for what, extra in (("elect --dry-run --publish origin", ["--publish", "origin", "--dry-run"]),
+                            ("elect --dry-run", ["--dry-run"])):
+            done = _in_sandbox(prefix, [*elect, *extra], repo)
+            expect(done.returncode == 0 and bool(done.stdout.strip()),
+                   f"{what} prints the model it drew (exit {done.returncode}, {done.stderr.strip()[-200:]})")
+            unchanged(what)
+        done = _in_sandbox(prefix, [sys.executable, "-B", "-m", "harness.ledger", "resolve", "--dry-run"], repo)
+        expect(done.returncode == 0 and "resolved 1, unreadable 0" in done.stdout,
+               f"resolve --dry-run reports the resolution it would append (exit {done.returncode}):\n{done.stdout}")
+        unchanged("resolve --dry-run")
+        done = _run_selfrun(repo, prefix)
+        expect(done.returncode == 0, f"selfrun passes in the sandbox (exit {done.returncode}):\n{done.stdout}{done.stderr[-300:]}")
+        unchanged("selfrun")
+        # The controls: the same commands without --dry-run do write, so the checks above could have failed.
+        expect(not (repo / "reports" / "draws.jsonl").exists(), "control: no draw ledger yet")
+        _in_sandbox(prefix, [*elect, "--publish", "origin"], repo)
+        expect("refs/heads/ledger/draws" in _refs(remote), "control: elect --publish pushes the draw to the remote")
+        remote_refs = _refs(remote)
+        # A push also moves the remote-tracking ref it matches; clear it so only a fetch can bring it back.
+        _git_fixture(repo)("update-ref", "-d", "refs/remotes/origin/ledger/draws")
+        local_refs = _refs(repo)
+        done = _in_sandbox(prefix, [*elect, "--dry-run", "--publish", "origin"], repo)
+        expect(done.returncode == 0 and _refs(repo) == local_refs,
+               "with a draw on the remote, elect --dry-run --publish still fetches nothing")
+        expect(_refs(remote) == remote_refs, "with a draw on the remote, elect --dry-run --publish pushes nothing")
+        _in_sandbox(prefix, [*elect], repo)
+        expect((repo / "reports" / "draws.jsonl").is_file(), "control: elect records the draw in the working tree")
+        _in_sandbox(prefix, [sys.executable, "-B", "-m", "harness.ledger", "resolve"], repo)
+        expect(ledger.read_text().count("\n") == 2, "control: resolve appends the resolution")
+    return ok()
+
+
+def _dispatch_script(text: str) -> str | None:
+    """The script of the step `id: choose` in review.yml."""
+    step = next((s for s in _steps(text) if re.search(r"^ {6}- id: choose$", s, re.M)), None)
+    return _step_run(step) if step else None
+
+
+def _chosen(script: str, event: str, label: str, pr: str) -> str | None:
+    with tempfile.TemporaryDirectory(dir=context.scratch) as tmp:
+        out = Path(tmp) / "out"
+        out.touch()
+        done = subprocess.run(["bash", "-c", script], capture_output=True, text=True,
+                              env={"PATH": os.environ["PATH"], "EVENT": event, "LABEL": label, "PR": pr,
+                                   "GITHUB_OUTPUT": str(out)})
+        found = re.findall(r"^run=(.*)$", out.read_text(), re.M)
+        return found[-1] if done.returncode == 0 and found else None
+
+
+REVIEW_PROCEDURES = (  # (what, event, label, pr, procedures chosen, concurrency group) -- instruction #113 Part B
+    ("a dispatch with no pr", "workflow_dispatch", "", "", "audit /audit", "review-audit"),
+    ("a dispatch with pr 12", "workflow_dispatch", "", "12", "review /review 12", "review-12"),
+    ("a needs-review label on pull request 7", "pull_request_target", "needs-review", "7", "review /review 7", "review-7"),
+    ("a push to master", "push", "", "", "vizier /vizier;audit /audit", "review-push"),
+    ("a daily schedule", "schedule", "", "", "vizier /vizier", "review-schedule"),
+)
+
+
+def p0am_dispatch_audits() -> bool:
+    """A `review.yml` dispatch with `pr` empty runs the Auditor at master, in concurrency group `review-audit`; one with `pr`
+    set reviews that pull request in its own group; the other events choose what they chose (instruction #113 Part B)."""
+    expect, ok = _expecter()
+    text = (WORKFLOW_DIR / "review.yml").read_text()
+    script = _dispatch_script(text)
+    group = re.search(r"^  group: review-\$\{\{ (.*) \}\}$", text, re.M)
+    expect(script is not None and group is not None, "the `choose` step's script and the concurrency group are found")
+    expect(re.search(r"^      pr: \{[^}]*required: false", text, re.M) is not None,
+           "the dispatch input `pr` is optional")
+    if script is None or group is None:
+        return ok()
+    for what, event, label, pr, procedures, want_group in REVIEW_PROCEDURES:
+        got = _chosen(script, event, label, pr)
+        expect(got == procedures, f"{what} chooses {procedures!r} (got {got!r})")
+        ctx = {"github.event_name": event, "inputs.pr": pr if event == "workflow_dispatch" else "",
+               "github.event.pull_request.number": int(pr) if event == "pull_request_target" else None}
+        name = f"review-{_github_value(group.group(1), ctx)}"
+        expect(name == want_group, f"{what} runs in group {want_group!r} (got {name!r})")
+    return ok()
+
+
+def _trusted_fixture(repo: Path, drop: str | None = None) -> None:
+    """A checkout with one workflow, one command and a table listing exactly what they hold."""
+    wf = ("name: w\non:\n  push:\n    branches: [master]\n  workflow_dispatch:\npermissions:\n  contents: read\njobs:\n"
+          "  j:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ secrets.TOK }}\n")
+    rows = ("workflow:w.yml:push", "workflow:w.yml:workflow_dispatch", "command:c", "secret:TOK", "runner:ubuntu-latest",
+            "scope:w.yml:contents:read")
+    (repo / ".github" / "workflows").mkdir(parents=True)
+    (repo / ".claude" / "commands").mkdir(parents=True)
+    (repo / "ops").mkdir()
+    (repo / ".github" / "workflows" / "w.yml").write_text(wf)
+    (repo / ".claude" / "commands" / "c.md").write_text("c\n")
+    table = "| entry | starts | lowers | pin |\n|---|---|---|---|\n" + "".join(
+        f"| `{r}` | x | sessions | P0an |\n" for r in rows if r != drop)
+    (repo / "ops" / "trusted-base.md").write_text(table)
+
+
+def _trusted(repo: Path) -> subprocess.CompletedProcess:
+    return subprocess.run([sys.executable, "-B", "-m", "harness.claims", "trusted-base", "--repo", str(repo)],
+                          capture_output=True, text=True, cwd=ROOT, env=os.environ | claims.GIT_ENV)
+
+
+def p0an_trusted_base() -> bool:
+    """`python -m harness.claims trusted-base` accepts a checkout whose table lists every trigger, command, secret, runner
+    and token scope it holds and nothing else, and fails on an unlisted trigger, a row whose trigger is gone, or a row naming
+    neither a price quantity and a pin nor REMOVE; the real tree passes, its table lists every trigger present, and the
+    triggers named by instruction #113 are among them (Part C)."""
+    expect, ok = _expecter()
+    with tempfile.TemporaryDirectory(dir=context.scratch) as tmp:
+        base = Path(tmp)
+        (base / "clean").mkdir()
+        _trusted_fixture(base / "clean")
+        done = _trusted(base / "clean")
+        expect(done.returncode == 0, f"a table listing exactly what the checkout holds passes (exit {done.returncode}): {done.stdout}")
+        (base / "unlisted").mkdir()
+        _trusted_fixture(base / "unlisted")
+        _replace(base / "unlisted" / ".github" / "workflows" / "w.yml", "  workflow_dispatch:\n",
+                 "  workflow_dispatch:\n  issues:\n    types: [labeled]\n")
+        done = _trusted(base / "unlisted")
+        expect(done.returncode != 0 and "unlisted: workflow:w.yml:issues:labeled" in done.stdout,
+               f"a workflow gaining a trigger no row lists fails (exit {done.returncode}): {done.stdout}")
+        (base / "ghost").mkdir()
+        _trusted_fixture(base / "ghost")
+        _replace(base / "ghost" / ".github" / "workflows" / "w.yml", "  workflow_dispatch:\n", "")
+        done = _trusted(base / "ghost")
+        expect(done.returncode != 0 and "ghost_row: workflow:w.yml:workflow_dispatch" in done.stdout,
+               f"a row whose trigger was deleted fails (exit {done.returncode}): {done.stdout}")
+        (base / "unpriced").mkdir()
+        _trusted_fixture(base / "unpriced")
+        _replace(base / "unpriced" / "ops" / "trusted-base.md", "| `command:c` | x | sessions | P0an |",
+                 "| `command:c` | x | sessions | |")
+        done = _trusted(base / "unpriced")
+        expect(done.returncode != 0 and "unnamed_price_or_pin: command:c" in done.stdout,
+               f"a row with no pin that is not marked REMOVE fails (exit {done.returncode}): {done.stdout}")
+        _replace(base / "unpriced" / "ops" / "trusted-base.md", "| `command:c` | x | sessions | |",
+                 "| `command:c` | x | sessions | REMOVE |")
+        done = _trusted(base / "unpriced")
+        expect(done.returncode == 0, f"the same row marked REMOVE passes (exit {done.returncode}): {done.stdout}")
+    real = _trusted(ROOT)
+    expect(real.returncode == 0, f"the real tree passes (exit {real.returncode}): {real.stdout}")
+    table = (ROOT / claims.TRUSTED_BASE).read_text() if (ROOT / claims.TRUSTED_BASE).is_file() else ""
+    named = ("workflow:build.yml:issues:labeled", "workflow:build.yml:workflow_dispatch",
+             "workflow:review.yml:issues:labeled", "workflow:review.yml:workflow_dispatch")
+    listed = {r[0].strip("`") for r in claims.trusted_rows(table)}
+    expect(all(n in listed for n in named), f"the table lists {named}")
+    expect(claims.trusted_entries(ROOT) <= listed, "the table lists every entry present in the real tree")
+    return ok()
+
+
+def _on_pull_request(workflow: str) -> str:
+    """The triggers of `workflow` that start it for a labelled pull request."""
+    return "pull_request_target" if f"workflow:{workflow}:pull_request_target:labeled" in claims.workflow_triggers(
+        workflow, (WORKFLOW_DIR / workflow).read_text()) else "pull_request"
+
+
+# Where GitHub reads the workflow file from for each event (docs.github.com, "Events that trigger workflows"):
+# `pull_request` runs the file as it is on the pull request's merge ref, `pull_request_target` the one on the base branch.
+WORKFLOW_FILE_FROM = {"pull_request": "the pull request", "pull_request_target": "master"}
+
+
+def p0ao_label_workflows_run_masters() -> bool:
+    """build.yml and review.yml start on a label through `pull_request_target`, never `pull_request`, so a pull request that
+    changes a flag one of them passes is still built and reviewed by master's file, with the conditions and the stated reason
+    kept (instruction #113 Part D)."""
+    expect, ok = _expecter()
+    for name in SESSION_WORKFLOWS_PINNED:
+        text = (WORKFLOW_DIR / name).read_text()
+        triggers = claims.workflow_triggers(name, text)
+        expect(f"workflow:{name}:pull_request_target:labeled" in triggers and
+               not any(t.startswith(f"workflow:{name}:pull_request:") or t == f"workflow:{name}:pull_request"
+                       for t in triggers), f"{name} starts on a label through pull_request_target and not pull_request")
+        head = text.split("jobs:")[0]
+        expect("private" in head and "no forks" in head, f"{name} states that the repository is private with no forks")
+        expect("'pull_request'" not in text, f"{name}'s conditions name no `pull_request` event")
+        # A pull request changing the flag review.yml passes: which file runs the label's session?
+        master_file, pr_file = text, text.replace("--head origin/master", "--tip origin/master")
+        runs = pr_file if WORKFLOW_FILE_FROM[_on_pull_request(name)] == "the pull request" else master_file
+        expect("--head origin/master" in runs, f"{name}: a pull request changing a flag it passes is run with master's file")
+    return ok()
+
+
+GRANT = ("Bash(gh:*)", "Bash(make:*)", "Bash(podman:*)")
+HOOK_MARKER = "MARKER"
+
+
+def _hook_fixture(repo: Path) -> None:
+    """A repository whose master has a benign bootstrap hook and whose branch `pr` replaces it with one writing a marker."""
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    (repo / "scripts").mkdir()
+    (repo / ".claude").mkdir()
+    (repo / ".claude" / "settings.json").write_text(json.dumps({"hooks": {"SessionStart": [{"hooks": [
+        {"type": "command", "command": '"$CLAUDE_PROJECT_DIR"/scripts/bootstrap.sh'}]}]}}))
+    boot = repo / "scripts" / "bootstrap.sh"
+    boot.write_text("#!/usr/bin/env bash\nexit 0\n")
+    boot.chmod(0o755)
+    git("add", "-A")
+    git("commit", "-q", "-m", "master")
+    git("update-ref", "refs/remotes/origin/master", "HEAD")
+    git("checkout", "-q", "-b", "pr")
+    boot.write_text(f'#!/usr/bin/env bash\ntouch "$CLAUDE_PROJECT_DIR/{HOOK_MARKER}"\n')
+    git("commit", "-q", "-am", "pr")
+
+
+def _session_start(repo: Path) -> bool:
+    """Run the SessionStart hooks the checkout's `.claude/settings.json` declares, as `claude` would; whether the marker appeared."""
+    settings = json.loads((repo / ".claude" / "settings.json").read_text())
+    for group in settings["hooks"]["SessionStart"]:
+        for hook in group["hooks"]:
+            subprocess.run(["bash", "-c", hook["command"]], cwd=repo, capture_output=True,
+                           env=os.environ | {"CLAUDE_PROJECT_DIR": str(repo)})
+    return (repo / HOOK_MARKER).exists()
+
+
+def p0ap_session_grant_and_hooks() -> bool:
+    """Each `claude` call of build.yml and review.yml passes `--allowedTools` with exactly the gh, make and podman patterns
+    and never `--dangerously-skip-permissions`; the steps build.yml runs after the pull request is checked out and before
+    `claude` leave no marker from a pull request branch's `scripts/bootstrap.sh`, and review.yml restores `.claude` and
+    the script from origin/master before each `claude` call (instruction #113 Part E)."""
+    expect, ok = _expecter()
+    restore = "git checkout origin/master -- .claude scripts/bootstrap.sh"
+    for name in SESSION_WORKFLOWS_PINNED:
+        text = (WORKFLOW_DIR / name).read_text()
+        code = _code_lines(text)
+        claude = [x for x in code if re.search(r"\bclaude --model\b", x)]
+        expect(bool(claude), f"{name} has a `claude` call")
+        for line in claude:
+            grant = re.search(r'--allowedTools "([^"]*)"', line)
+            expect(grant is not None and set(grant.group(1).split()) == set(GRANT),
+                   f"{name}: the call lists {GRANT} in --allowedTools ({grant.group(1) if grant else None})")
+        expect(not any("--dangerously-skip-permissions" in x for x in code), f"{name} skips no permissions")
+    review = "\n".join(_code_lines((WORKFLOW_DIR / "review.yml").read_text()))
+    expect(restore in review and review.index(restore) < review.index("claude --model"),
+           "review.yml restores .claude and scripts/bootstrap.sh from origin/master before the `claude` call")
+    steps = _steps((WORKFLOW_DIR / "build.yml").read_text())
+    checkout = next((i for i, s in enumerate(steps) if (_step_run(s) or "").startswith("gh pr checkout")), None)
+    session = next((i for i, s in enumerate(steps) if "claude --model" in s), None)
+    expect(checkout is not None and session is not None and checkout < session,
+           "build.yml checks out the pull request, then starts `claude`")
+    if checkout is None or session is None:
+        return ok()
+    scripts = [r for s in steps[checkout + 1:session] if (r := _step_run(s)) is not None]
+    with tempfile.TemporaryDirectory(dir=context.scratch) as tmp:
+        bare, guarded = Path(tmp) / "bare", Path(tmp) / "guarded"
+        _hook_fixture(bare)
+        shutil.copytree(bare, guarded, symlinks=True)
+        expect(_session_start(bare), "control: without the pre-session steps the branch's bootstrap.sh runs")
+        for script in scripts:
+            done = subprocess.run(["bash", "-ec", script], cwd=guarded, capture_output=True, text=True,
+                                  env=os.environ | claims.GIT_ENV | FIXTURE_GIT)
+            expect(done.returncode == 0, f"pre-session step `{script}` runs (exit {done.returncode}: {done.stderr.strip()})")
+        expect(not _session_start(guarded), "after the pre-session steps, the branch's bootstrap.sh does not run")
     return ok()
 
 
@@ -4229,6 +4656,38 @@ PINS = [
     Pin("P0aj", "an awaits-guy label starts a Builder on master; blocked still builds on the PR; needs-review starts none",
         p0aj_awaits_guy_builds_master, (Mutant("awaits_guy_clause_removed", _edits("P0aj_awaits_guy_clause_removed")),),
         (".github/workflows/build.yml",)),
+    Pin("P0ak", "pins runs each harness call of the head's build.yml and review.yml with --dry-run; a flag the harness lacks fails it",
+        p0ak_selfrun, (Mutant("selfrun_step_skipped", _edits("P0ak_selfrun_step_skipped")),
+                       Mutant("exit_ignored", _edits("P0ak_exit_ignored")),
+                       Mutant("dry_run_not_appended", _edits("P0ak_dry_run_not_appended"))),
+        (".github/workflows/**",)),
+    Pin("P0al", "under a network-less sandbox, --dry-run records, fetches, pushes and appends nothing; without it the same calls do",
+        p0al_dry_run_writes_nothing, (Mutant("dry_run_publishes", _edits("P0al_dry_run_publishes")),
+                                      Mutant("dry_run_writes_ledger", _edits("P0al_dry_run_writes_ledger")),
+                                      Mutant("dry_run_fetches", _edits("P0al_dry_run_fetches")),
+                                      Mutant("resolve_dry_run_appends", _edits("P0al_resolve_dry_run_appends"))),
+        (".github/workflows/**",)),
+    Pin("P0am", "a review.yml dispatch with no pr runs the Auditor in group review-audit; with a pr it reviews that pull request",
+        p0am_dispatch_audits, (Mutant("dispatch_always_review", _edits("P0am_dispatch_always_review")),
+                               Mutant("dispatch_pr_required", _edits("P0am_dispatch_pr_required")),
+                               Mutant("audit_group_shared", _edits("P0am_audit_group_shared"))),
+        (".github/workflows/review.yml",)),
+    Pin("P0an", "every trigger, command, secret, runner and token scope is a row of ops/trusted-base.md, and every such row has one",
+        p0an_trusted_base, (Mutant("unlisted_trigger_admitted", _edits("P0an_unlisted_trigger_admitted")),
+                            Mutant("ghost_row_admitted", _edits("P0an_ghost_row_admitted")),
+                            Mutant("unpriced_row_admitted", _edits("P0an_unpriced_row_admitted"))),
+        (".github/workflows/**", ".claude/commands/**", "ops/**")),
+    Pin("P0ao", "build.yml and review.yml start on a label through pull_request_target, so a pull request cannot change the file that runs",
+        p0ao_label_workflows_run_masters, (Mutant("build_pull_request_restored", _edits("P0ao_build_pull_request_restored")),
+                                           Mutant("review_pull_request_restored", _edits("P0ao_review_pull_request_restored"))),
+        (".github/workflows/build.yml", ".github/workflows/review.yml")),
+    Pin("P0ap", "each claude call declares --allowedTools; a pull request branch's bootstrap.sh does not run before a session starts",
+        p0ap_session_grant_and_hooks, (Mutant("pr_hook_runs", _edits("P0ap_pr_hook_runs")),
+                                       Mutant("review_restore_dropped", _edits("P0ap_review_restore_dropped")),
+                                       Mutant("grant_undeclared", _edits("P0ap_grant_undeclared")),
+                                       Mutant("review_grant_undeclared", _edits("P0ap_review_grant_undeclared")),
+                                       Mutant("skip_permissions_admitted", _edits("P0ap_skip_permissions_admitted"))),
+        (".github/workflows/build.yml", ".github/workflows/review.yml")),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

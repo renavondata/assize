@@ -1,0 +1,10 @@
+# P0ao's mutant (instruction #113 Part D): review.yml starts on a label through `pull_request` again, so a pull request's own
+# copy of the file decides how it is reviewed.
+[[edit]]
+path = ".github/workflows/review.yml"
+old = """  pull_request_target:
+    types: [labeled]
+  push:"""
+new = """  pull_request:
+    types: [labeled]
+  push:"""

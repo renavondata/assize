@@ -1,7 +1,9 @@
 name: review
 # Instruction #54 item 8: /review, /audit and /vizier are procedures of the reviewer account, chosen from the event.
 on:
-  pull_request:
+  # Instruction #113 Part D: `pull_request_target` runs this file as it stands on master, never the pull request's copy.
+  # The repository is private and has no forks, so the fork-secret risk of `pull_request_target` does not arise.
+  pull_request_target:
     types: [labeled]
   push:
     branches: [master]
@@ -11,10 +13,11 @@ on:
   schedule:
     - cron: '0 5 * * *'        # daily
   workflow_dispatch:
+    # Instruction #113 Part B: with `pr` empty a dispatch runs the Auditor (/audit) at master, in group `review-audit`.
     inputs:
-      pr: { description: "PR number", required: true }
+      pr: { description: "PR number to review; empty runs the Auditor at master", required: false }
 concurrency:
-  group: review-${{ github.event.pull_request.number || inputs.pr || github.event.issue.number || github.event_name }}
+  group: review-${{ github.event.pull_request.number || inputs.pr || github.event.issue.number || (github.event_name == 'workflow_dispatch' && 'audit') || github.event_name }}
   cancel-in-progress: false
 # Instruction #65: a review session's own label changes never start a review. They are recognised by the label: a session
 # only removes `needs-review` and adds `blocked` or `awaits-guy` (.claude/commands/review.md), so a `needs-review` label
@@ -23,9 +26,9 @@ jobs:
   review:
     if: >-
       (github.event.sender.login != 'assize-reviewer' ||
-        (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && (
+        (github.event_name == 'pull_request_target' && github.event.label.name == 'needs-review')) && (
         github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'schedule' ||
-        (github.event_name == 'pull_request' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) ||
+        (github.event_name == 'pull_request_target' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) ||
         (github.event_name == 'issues' && github.event.action == 'labeled' && contains(fromJSON('["failed-run","wish"]'), github.event.label.name)) ||
         (github.event_name == 'issues' && github.event.action == 'assigned' && github.event.assignee.login == 'gfrmin'))
     runs-on: [self-hosted, agent]
@@ -52,7 +55,8 @@ jobs:
         run: |
           set -euo pipefail
           case "$EVENT:$LABEL" in
-            workflow_dispatch:*|pull_request:needs-review) run="review /review $PR" ;;
+            workflow_dispatch:*) if [ -n "$PR" ]; then run="review /review $PR"; else run="audit /audit"; fi ;;
+            pull_request_target:needs-review) run="review /review $PR" ;;
             push:*|issues:failed-run) run="vizier /vizier;audit /audit" ;;
             *) run="vizier /vizier" ;;
           esac
@@ -69,7 +73,9 @@ jobs:
             model=$(uv run --frozen python -m harness.ledger elect "$proc" --seed ${{ github.run_id }} --head origin/master --publish origin)
             echo "$proc: elected $model" | tee -a review.log
             git checkout -q master
-            claude --model "$model" -p "$cmd" --max-turns 250 --output-format stream-json --verbose >> review.log 2>&1
+            # Instruction #113 Part E: the session's hooks, commands and settings are master's, whatever branch is out.
+            git checkout origin/master -- .claude scripts/bootstrap.sh
+            claude --model "$model" -p "$cmd" --allowedTools "Bash(gh:*) Bash(make:*) Bash(podman:*)" --max-turns 250 --output-format stream-json --verbose >> review.log 2>&1
           done
       - if: always()
         uses: actions/upload-artifact@v5

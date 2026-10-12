@@ -1,0 +1,10 @@
+# P0ak's mutant (instruction #113 Part A item 1): the self-run step removed from pins.yml, so a workflow flag the harness
+# lacks reaches master unseen.
+[[edit]]
+path = ".github/workflows/pins.yml"
+old = """      - name: Self-run the session workflows
+        run: uv run --frozen python -m harness.selfrun
+"""
+new = """      - name: Self-run the session workflows
+        run: true
+"""

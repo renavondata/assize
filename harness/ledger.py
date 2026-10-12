@@ -805,6 +805,13 @@ def draw_tip(repo: Path, remote: str) -> str | None:
     return _net(repo, "rev-parse", f"refs/remotes/{remote}/{DRAW_BRANCH}").strip()
 
 
+def local_draw_tip(repo: Path, remote: str) -> str | None:
+    """The draw-branch tip as last fetched (instruction #113 Part A: a dry run reads, never fetches); None if not fetched."""
+    out = subprocess.run(["git", "-C", str(repo), "rev-parse", "-q", "--verify", f"refs/remotes/{remote}/{DRAW_BRANCH}"],
+                         capture_output=True, text=True).stdout.strip()
+    return out or None
+
+
 def publish_draw(repo: Path, remote: str, row: Mapping, tip: str | None) -> str:
     """Commit `row` appended to the draw ledger at `tip` onto the remote's draw branch; returns the pushed commit."""
     for _ in range(PUBLISH_ATTEMPTS):
@@ -931,6 +938,7 @@ def main(argv: list[str] | None = None) -> int:
     r = sub.add_parser("resolve", help="append a resolution for every open typed forecast whose outcome is observable")
     r.add_argument("--session", default="local", help="the resolving run's id")
     r.add_argument("--repo", type=Path, default=Path("."))
+    r.add_argument("--dry-run", action="store_true", help="compute and print the resolutions; append nothing")
     q = sub.add_parser("price", help="what reached Guy, his latency, sessions and runner-minutes since <sha>")
     q.add_argument("--since", required=True)
     q.add_argument("--until", default=None, help="ISO timestamp; now if absent")
@@ -943,6 +951,8 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--repo", type=Path, default=Path("."))
     e.add_argument("--publish", metavar="REMOTE", default=None,
                    help=f"read the draws from, and commit this draw onto, REMOTE's {DRAW_BRANCH} branch")
+    e.add_argument("--dry-run", action="store_true",
+                   help="draw and print; record nothing, fetch nothing, push nothing (instruction #113 Part A)")
     b = sub.add_parser("probe", help="draw the boundary brief's k probes from the exposed-and-silent acts; print their rows")
     b.add_argument("--brief", type=Path, required=True, help="the boundary brief, which pre-states k")
     b.add_argument("--until", required=True, help="ISO time by which a probe left alone is kept (the next audit)")
@@ -976,7 +986,7 @@ def main(argv: list[str] | None = None) -> int:
             print(c)
         return 0
     if a.cmd == "resolve":
-        return _resolve_cli(a.repo, a.session)
+        return _resolve_cli(a.repo, a.session, a.dry_run)
     if a.cmd == "price":
         got, since, end = github_price(a.repo, a.since, a.until, a.head)
         print(f"# price over [{since}, {end}) since {a.since}")
@@ -990,11 +1000,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "elect":
         models, bound = entrants_of((a.repo / ENTRANTS).read_text(), a.procedure)
-        tip = draw_tip(a.repo, a.publish) if a.publish else None
+        tip = (local_draw_tip if a.dry_run else draw_tip)(a.repo, a.publish) if a.publish else None
         draws = (draw_rows(a.repo, tip) if tip else []) if a.publish else draw_rows(a.repo, a.head)
         got = elect(ledger_rows(a.repo, a.head) + draws, a.procedure, models, bound, a.seed)
         row = draw_row(got, a.procedure, a.seed, now_utc())
-        if a.publish:
+        if a.dry_run:
+            print(f"dry run: draw of {got.model} for {a.procedure} not recorded", file=sys.stderr)
+        elif a.publish:
             print(f"draw published as {publish_draw(a.repo, a.publish, row, tip)} on {a.publish} {DRAW_BRANCH}",
                   file=sys.stderr)
         else:
@@ -1010,16 +1022,17 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def _resolve_cli(repo: Path, session: str) -> int:
-    """Resolve every ledger in the working tree, appending each resolution to its forecast's ledger."""
+def _resolve_cli(repo: Path, session: str, dry_run: bool = False) -> int:
+    """Resolve every ledger in the working tree, appending each resolution to its forecast's ledger (not on a dry run)."""
     now = now_utc()
     observe = github_observer(repo, layer_price(repo))
     failed = 0
     for path in ledger_paths(repo):
         rows = _rows(path.read_text().splitlines())
         got, unread = resolve(rows, observe, now, session)
-        with path.open("a") as f:
-            f.writelines(json.dumps(r) + "\n" for r in got)
+        if not dry_run:
+            with path.open("a") as f:
+                f.writelines(json.dumps(r) + "\n" for r in got)
         typed = [x for x in open_forecasts(rows) if forecast_type(x) != FREE]
         print(f"# {path.relative_to(repo)}: {len(open_forecasts(rows))} open, {len(typed)} typed; "
               f"resolved {len(got)}, unreadable {len(unread)}")

@@ -1,0 +1,7 @@
+# P0ap's mutant (instruction #113 Part E item 2): review.yml does not restore .claude and scripts/bootstrap.sh from master
+# before its `claude` call.
+[[edit]]
+path = ".github/workflows/review.yml"
+old = """            git checkout origin/master -- .claude scripts/bootstrap.sh
+"""
+new = """"""
