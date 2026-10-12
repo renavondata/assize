@@ -19,15 +19,19 @@ concurrency:
 # Instruction #65: a review session's own label changes never start a review. They are recognised by the label: a session
 # only removes `needs-review` and adds `blocked` or `awaits-guy` (.claude/commands/review.md), so a `needs-review` label
 # applied by assize-reviewer (an audit-findings PR, the Vizier sending a changed head back) is not its own and starts one.
+# Instruction #112 Part C: a `needs-draft-check` label on an issue starts a review session in the draft-check mode on
+# that issue (`/review draft <n>`), whoever applied it: the Vizier applies it to every draft it posts. Other conditions
+# are unchanged.
 jobs:
   review:
     if: >-
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'needs-draft-check') || (
       (github.event.sender.login != 'assize-reviewer' ||
         (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && (
         github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'schedule' ||
         (github.event_name == 'pull_request' && contains(fromJSON('["needs-review","awaits-guy"]'), github.event.label.name)) ||
         (github.event_name == 'issues' && github.event.action == 'labeled' && contains(fromJSON('["failed-run","wish"]'), github.event.label.name)) ||
-        (github.event_name == 'issues' && github.event.action == 'assigned' && github.event.assignee.login == 'gfrmin'))
+        (github.event_name == 'issues' && github.event.action == 'assigned' && github.event.assignee.login == 'gfrmin')))
     runs-on: [self-hosted, agent]
     timeout-minutes: 120
     env:
@@ -49,10 +53,12 @@ jobs:
           EVENT: ${{ github.event_name }}
           LABEL: ${{ github.event.label.name }}
           PR: ${{ github.event.pull_request.number || inputs.pr }}
+          ISSUE: ${{ github.event.issue.number }}
         run: |
           set -euo pipefail
           case "$EVENT:$LABEL" in
             workflow_dispatch:*|pull_request:needs-review) run="review /review $PR" ;;
+            issues:needs-draft-check) run="review /review draft $ISSUE" ;;
             push:*|issues:failed-run) run="vizier /vizier;audit /audit" ;;
             *) run="vizier /vizier" ;;
           esac
@@ -71,6 +77,11 @@ jobs:
             git checkout -q master
             claude --model "$model" -p "$cmd" --max-turns 250 --output-format stream-json --verbose >> review.log 2>&1
           done
+      # Instruction #112 Part A item 5: this step fails when the last session ended with usage_limit_reached; the price
+      # counts sessions lost to the limit by this step's name (harness.ledger.LIMIT_STEP), read through the Actions API.
+      - if: always()
+        name: usage limit
+        run: uv run --frozen python -m harness.sessions limit review.log
       - if: always()
         uses: actions/upload-artifact@v5
         with:

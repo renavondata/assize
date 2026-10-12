@@ -111,6 +111,7 @@ class Record:
     correct: int
     overturned: int
     loss: float
+    details: tuple[int, ...] = (0, 0, 0)  # resolved drafts per DRAFT_OUTCOMES (instruction #112 Part B item 3)
 
     @property
     def unbroken(self) -> bool:
@@ -119,13 +120,16 @@ class Record:
 
     def __str__(self) -> str:
         return (f"{self.cls} made={self.made} resolved={self.resolved} correct={self.correct}/{self.resolved} "
-                f"overturned={self.overturned} loss={self.loss:.4f} unbroken={'yes' if self.unbroken else 'no'}")
+                f"overturned={self.overturned} loss={self.loss:.4f} unbroken={'yes' if self.unbroken else 'no'} "
+                + " ".join(f"{d}={n}" for d, n in zip(DRAFT_OUTCOMES, self.details)))
 
 
 def record(rows: Sequence[dict], kind: str, since: str = "") -> list[Record]:
     """`kind`'s forecasts with `ts` at or after `since`, per class (`class`, else `unclassed`), with each class's
-    resolved and correct counts, its overturned acts and its cumulative log-loss, classes in name order."""
+    resolved and correct counts, its overturned acts, its cumulative log-loss and its resolved drafts by outcome,
+    classes in name order."""
     resolved = outcomes(rows)
+    detail = {r["id"]: r.get("outcome_detail") for r in rows if "claim" not in r and "id" in r}
     mine = [r for r in rows if "claim" in r and isinstance(r.get("p"), (int, float))
             and isinstance(r.get("proposer"), dict) and r["proposer"].get("kind") == kind
             and str(r.get("ts", "")) >= since]
@@ -135,7 +139,8 @@ def record(rows: Sequence[dict], kind: str, since: str = "") -> list[Record]:
         known = [(r, resolved[r["id"]]) for r in rs if r.get("id") in resolved]
         return Record(cls, len(rs), len(known), sum(1 for _, o in known if o),
                       sum(1 for r, o in known if r.get("mode") == "act" and not o),
-                      sum(log_loss(r["p"], o) for r, o in known))
+                      sum(log_loss(r["p"], o) for r, o in known),
+                      tuple(sum(1 for r, _ in known if detail.get(r["id"]) == d) for d in DRAFT_OUTCOMES))
 
     return [tally(c) for c in sorted({str(r.get("class", "unclassed")) for r in mine})]
 
@@ -289,12 +294,59 @@ def _guy_answers(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outco
     his giving it; open otherwise."""
     if args["answer"] == SILENT:
         return _silent(args["item"], list(observe("timeline", int(args["item"]))), f, str(args["until"]), now)
+    draft = _draft_of(args, f, observe) if args["answer"] in DRAFT_ANSWERS else None
+    if draft is not None:
+        return _draft_answer(draft, args, f, observe)
     events = [e for e in observe("timeline", int(args["item"])) if _at_or_after(_when(e), f["ts"])]
     given = [e for e in events if _actor(e) == GUY and answer(e) == args["answer"]]
     if given:
         return True, f"#{args['item']}: gfrmin {args['answer']} at {_when(given[0])}"
     closed = [e for e in events if e.get("event") == "closed"]
     return (False, f"#{args['item']}: closed at {_when(closed[-1])} without gfrmin {args['answer']}") if closed else None
+
+
+SIGNED_AS_DRAFTED, SIGNED_AFTER_EDIT, DECLINED = "signed-as-drafted", "signed-after-edit", "declined"
+DRAFT_OUTCOMES = (SIGNED_AS_DRAFTED, SIGNED_AFTER_EDIT, DECLINED)
+# The answer a forecast on a draft gives, and the one outcome under which it is true (instruction #112 Part B item 2;
+# Part C's draft check records `closed` for decline and, for edit, `signed-after-edit`).
+DRAFT_ANSWERS = {"labeled:instruction": SIGNED_AS_DRAFTED, "closed": DECLINED, SIGNED_AFTER_EDIT: SIGNED_AFTER_EDIT}
+DRAFT_TITLE = re.compile(r'the draft "(.+)" of wish #(\d+)')
+
+
+def _draft_of(args: Mapping, f: Mapping, observe: Observe) -> int | None:
+    """The draft a `guy_answers` forecast is on: its item, if a `draft` issue; else, if its item is a wish, the draft
+    citing it (`Wish: #<n>`) whose title the claim quotes (the Vizier's claim form, vizier.md step 1); else None."""
+    item = int(args["item"])
+    labels = observe("issue", item)["labels"]
+    if claims.DRAFT_LABEL in labels:
+        return item
+    quoted = DRAFT_TITLE.search(str(f.get("claim", "")))
+    if "wish" not in labels or quoted is None or int(quoted.group(2)) != item:
+        return None
+    return next((int(d["number"]) for d in observe("drafts", item) if d["title"] == quoted.group(1)), None)
+
+
+def draft_outcome(events: Sequence[Mapping], edits: Sequence[Mapping] | None, since: str) -> str | None:
+    """`signed-as-drafted` when gfrmin applied `instruction` at or after `since` and edited the body before none of
+    it; `signed-after-edit` when he edited the body before applying it; `declined` when the draft was closed with no
+    `instruction` applied by him; None while neither, or when the edit history cannot be read. Edits by any other
+    account are not his (instruction #112 Part B item 1)."""
+    if edits is None:
+        return None
+    after = [e for e in events if _at_or_after(_when(e), since)]
+    signed = [e for e in after if _actor(e) == GUY and answer(e) == "labeled:instruction"]
+    if signed:
+        at = _t(str(_when(signed[0])))
+        return SIGNED_AFTER_EDIT if any(e.get("editor") == GUY and _t(e["at"]) < at for e in edits) \
+            else SIGNED_AS_DRAFTED
+    return DECLINED if any(e.get("event") == "closed" for e in after) else None
+
+
+def _draft_answer(draft: int, args: Mapping, f: Mapping, observe: Observe) -> Outcome | None:
+    detail = draft_outcome(list(observe("timeline", draft)), observe("edits", draft), f["ts"])
+    if detail is None:
+        return None
+    return (detail == DRAFT_ANSWERS[args["answer"]], f"draft #{draft}: {detail}", {"outcome_detail": detail})
 
 
 SILENT = "silent-default"  # the answer of an item Guy saw and did not overturn (instruction #111 Part B)
@@ -374,6 +426,21 @@ def _price(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | N
         return None
     got = price[str(args["quantity"])]
     return got <= float(args["bound"]), f"price of L{args['layer']}: {args['quantity']} {got}"
+
+
+CANCELLED = "cancelled"
+
+
+def _session_minutes(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+    """The run ended within `bound` minutes of its start, from the Actions API run's `run_started_at` and `updated_at`
+    (instruction #112 Part A item 2). A run in progress stays open; a cancelled run is void, counted, never scored."""
+    run = observe("run", int(args["run"]))
+    if run.get("status") != "completed":
+        return None
+    if run.get("conclusion") == CANCELLED:
+        return False, f"run {args['run']}: cancelled", {"void": CANCELLED}
+    minutes = _hours(str(run["run_started_at"]), str(run["updated_at"])) * 60
+    return minutes <= float(args["bound"]), f"run {args['run']}: {minutes:.1f} minutes, bound {args['bound']}"
 
 
 ITEM = re.compile(r"#(\d+)\b")
@@ -492,7 +559,7 @@ FREE = "free"
 OUTCOMES:Mapping[str, Callable[..., Outcome | None] | None] = {
     "pins_green": _bound(_pins_green), "review_accept": _bound(_review_accept), "merged": _bound(_merged), "host_verdict": _host_verdict,
     "guy_answers": _guy_answers, "not_overturned": _not_overturned, "finding_count": _finding_count,
-    "price": _price, "guy_picks": _guy_picks,
+    "price": _price, "guy_picks": _guy_picks, "session_minutes": _session_minutes,
     FREE: None,  # never resolved by the mechanism; the Reviewer resolves it by hand, with its witness
 }
 
@@ -595,6 +662,25 @@ def github_observer(repo: Path, price_of: Callable[[int], Mapping | None]) -> Ob
             return audit(str(key[0]))
         if kind == "price":
             return price_of(int(key[0]))
+        if kind == "run":
+            return json.loads(_gh(repo, f"repos/{{owner}}/{{repo}}/actions/runs/{key[0]}", "--jq",
+                                  "{status, conclusion, run_started_at, updated_at}"))
+        if kind == "issue":
+            return json.loads(_gh(repo, f"repos/{{owner}}/{{repo}}/issues/{key[0]}", "--jq",
+                                  "{number, title, labels: [.labels[].name]}"))
+        if kind == "drafts":
+            return [d for d in _gh_lines(repo, f"repos/{{owner}}/{{repo}}/issues?state=all&labels={claims.DRAFT_LABEL}"
+                                               "&per_page=100", ".[] | {number, title, body}")
+                    if (m := WISH_CITE.match(d["body"] or "")) and int(m.group(1)) == int(key[0])]
+        if kind == "edits":  # None when the edit history cannot be read: the draft then resolves to nothing
+            try:
+                out = _gh(repo, "graphql", "--paginate", "-F", "owner={owner}", "-F", "repo={repo}", "-F",
+                          f"n={key[0]}", "-f", f"query={claims.EDITS_QUERY}", "--jq",
+                          ".data.repository.issue.userContentEdits.nodes[]")
+            except Unreadable:
+                return None
+            return [{"editor": (e.get("editor") or {}).get("login"), "at": str(e["editedAt"])}
+                    for e in map(json.loads, filter(str.strip, out.splitlines()))]
         raise Unreadable(f"no query {kind}")
 
     return observe
@@ -625,6 +711,9 @@ class Price:
     wishes: tuple[int, ...] = ()  # filed in the window
     wish_latencies_h: tuple[float, ...] = ()  # one per wish merged by the window's end, from the wish's own creation
     open_wishes: tuple[int, ...] = ()  # no instruction citing it merged yet: counted, never dropped
+    over_bound: int = 0  # session_minutes forecasts resolved false: runs that exceeded their own bound
+    bounded: int = 0  # session_minutes forecasts made in the window, open and void included
+    lost_to_limit: int = 0  # session runs whose LIMIT_STEP failed: ended with usage_limit_reached
 
     def quantities(self) -> dict[str, float]:
         lat = self.latencies_h or (0.0,)
@@ -637,7 +726,8 @@ class Price:
         w = self.wish_latencies_h or (0.0,)
         return (f"price: guy-items {len(self.items)}; guy-latency median {q['guy-latency-median']:.1f}h max "
                 f"{q['guy-latency-max']:.1f}h; sessions {self.sessions}; runner-min {q['runner-min']:.0f}; "
-                f"wish-latency median {statistics.median(w):.1f}h max {max(w):.1f}h open {len(self.open_wishes)}")
+                f"wish-latency median {statistics.median(w):.1f}h max {max(w):.1f}h open {len(self.open_wishes)}; "
+                f"sessions-over-bound {self.over_bound}/{self.bounded}; sessions-lost-to-limit {self.lost_to_limit}")
 
 
 def _hours(a: str, b: str) -> float:
@@ -665,8 +755,23 @@ def price(reached: Sequence[Mapping], actions: Mapping[int, Sequence[str]], runs
         return max(0.0, _hours(start, r["updated_at"]) * 60) if start and r.get("updated_at") else 0.0
 
     per = {w: sum(minutes(r) for r in ran if r.get("path") == w) for w in sorted({str(r.get("path")) for r in ran})}
-    return Price(tuple(items), latencies, tuple(n for n in items if answered[n] is None),
-                 sum(1 for r in ran if r.get("path") in SESSION_WORKFLOWS), per, per.get(PINS_WORKFLOW, 0.0))
+    sessions = [r for r in ran if r.get("path") in SESSION_WORKFLOWS]
+    return Price(tuple(items), latencies, tuple(n for n in items if answered[n] is None), len(sessions), per,
+                 per.get(PINS_WORKFLOW, 0.0),
+                 lost_to_limit=sum(1 for r in sessions if any(s.get("name") == LIMIT_STEP and s.get("conclusion")
+                                                              == "failure" for s in r.get("steps") or ())))
+
+
+LIMIT_STEP = "usage limit"  # the step of build.yml and review.yml that fails when the session hit the usage limit
+
+
+def over_bound(rows: Sequence[dict], since: str, until: str) -> tuple[int, int]:
+    """Of the `session_minutes` forecasts made in [since, until), those resolved false -- the run exceeded its own
+    bound -- over all of them, open and void included (instruction #112 Part A item 3)."""
+    made = [f for f in rows if "claim" in f and f.get("type") == "session_minutes"
+            and _at_or_after(f.get("ts"), since) and not _at_or_after(f.get("ts"), until)]
+    resolved = outcomes(rows)
+    return sum(1 for f in made if resolved.get(f["id"]) is False), len(made)
 
 
 def wish_latency(created: Mapping[int, str], wishes: Sequence[int], cited: Mapping[int, int],
@@ -718,7 +823,13 @@ def github_price(repo: Path, since_sha: str, until: str | None, head: str = "HEA
                                                     ".[]") if _actor(e) == GUY and _when(e)] for n in items}
     runs = _gh_lines(repo, f"repos/{{owner}}/{{repo}}/actions/runs?per_page=100&created=>={since[:10]}",
                      ".workflow_runs[] | {id, path, conclusion, created_at, run_started_at, updated_at}")
-    return replace(price(reached, actions, runs, since, end), **_wish_fields(repo, since, end)), since, end
+    # A session lost to the usage limit fails its LIMIT_STEP, so only failed session runs' steps are read.
+    runs = [r | ({"steps": _gh_lines(repo, f"repos/{{owner}}/{{repo}}/actions/runs/{r['id']}/jobs",
+                                     ".jobs[].steps[] | {name, conclusion}")}
+                 if r.get("path") in SESSION_WORKFLOWS and r.get("conclusion") == "failure" else {}) for r in runs]
+    k, n = over_bound(ledger_rows(repo, head), since, end)
+    return replace(price(reached, actions, runs, since, end), **_wish_fields(repo, since, end), over_bound=k,
+                   bounded=n), since, end
 
 
 WISH_CITE = re.compile(r"^Wish: #(\d+)", re.M)

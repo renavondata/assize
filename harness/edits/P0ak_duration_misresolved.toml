@@ -1,0 +1,5 @@
+# P0ak's mutant (instruction #112 Part A item 4): a run is resolved as within its bound whatever its duration.
+[[edit]]
+path = "harness/ledger.py"
+old = """    return minutes <= float(args["bound"]), """
+new = """    return True or minutes <= float(args["bound"]), """

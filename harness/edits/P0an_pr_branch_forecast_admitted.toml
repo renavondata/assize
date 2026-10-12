@@ -1,0 +1,5 @@
+# P0an's mutant (instruction #112 Part D item 1): a forecast row added on a pull-request branch is admitted.
+[[edit]]
+path = "harness/sessions.py"
+old = """if adds_forecast(c) and b != "master" and b not in made]"""
+new = """if False and adds_forecast(c)]"""

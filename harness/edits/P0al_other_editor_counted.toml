@@ -1,0 +1,5 @@
+# P0al's mutant (instruction #112 Part B item 4): an edit by an account other than gfrmin counts as gfrmin's.
+[[edit]]
+path = "harness/ledger.py"
+old = """e.get("editor") == GUY and _t(e["at"]) < at"""
+new = """e.get("editor") is not None and _t(e["at"]) < at"""
