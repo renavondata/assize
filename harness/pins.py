@@ -3,6 +3,7 @@ and each kill is causal: the mutant run fails and its unedited twin passes."""
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 import os
@@ -1151,6 +1152,12 @@ PRICE_RUNS = (  # (workflow, conclusion, start hour, minutes)
     (".github/workflows/review.yml", "skipped", 2, 1), (claims.PINS_WORKFLOW, "success", 3, 10),
     (".github/workflows/build.yml", "success", -10, 99))
 PRICE_UNTIL = 10
+# wishes (number, filed hour) and the instructions citing them (number, wish, hour filed, hour merged or None):
+# wish 10 filed at 1h, drafted by 20 (filed at 4h, merged at 6h) and 21 (filed at 5h, merged at 9h): 6 - 1 = 5h, the
+# earliest merge, not 6 - 4; wish 11 filed at 2h, instruction 22 merged at 12h, after the window's end: open; wish 12
+# filed at 3h with no instruction: open; wish 13 filed before the window: not counted.
+PRICE_WISHES = ((10, 1), (11, 2), (12, 3), (13, -2))
+PRICE_INSTRUCTIONS = ((20, 10, 4, 6), (21, 10, 5, 9), (22, 11, 3, 12))
 # by the definition, over [T0, T0 + 10h): items 1, 2, 3 (4 reached before the window; 3 once, at its first arrival);
 # latencies 1 -> 3 is 2h, 2 unanswered is 10 - 2 = 8h (open, never dropped), 3 -> 5 is 2h; sessions: the build and
 # the failed review (the skipped one never ran); runner-minutes 30 + 60 + 10, pins 10.
@@ -1182,8 +1189,17 @@ def p0t_price() -> bool:
                                                                                             PRICE_WANT["pins"]),
            f"runner-minutes {dict(got.runner_min)}, pins {got.pins_min}; want {PRICE_WANT['runner']}, "
            f"{PRICE_WANT['pins']}")
-    expect(got.status_line() == "price: guy-items 3; guy-latency median 2.0h max 8.0h; sessions 2; runner-min 100",
-           f"STATUS line {got.status_line()!r}")
+    wishes = {n: _h(h) for n, h in PRICE_WISHES}
+    cited = {i: w for i, w, _, _ in PRICE_INSTRUCTIONS}
+    merged = {i: _h(m) for i, _, _, m in PRICE_INSTRUCTIONS}
+    created = {i: _h(c) for i, _, c, _ in PRICE_INSTRUCTIONS}
+    ws, wl, wo = ledger.wish_latency(wishes | created, [n for n, _ in PRICE_WISHES], cited, merged, T0, _h(PRICE_UNTIL))
+    print(f"    wishes {ws}, latencies {wl}, open {wo}")
+    expect(ws == (10, 11, 12) and wo == (11, 12) and len(wl) == 1 and math.isclose(wl[0], 5.0),
+           f"wishes {ws}, latencies {wl}, open {wo}; want (10, 11, 12), (5.0,), (11, 12)")
+    line = dataclasses.replace(got, wishes=ws, wish_latencies_h=wl, open_wishes=wo).status_line()
+    expect(line == "price: guy-items 3; guy-latency median 2.0h max 8.0h; sessions 2; runner-min 100; "
+                   "wish-latency median 5.0h max 5.0h open 2", f"STATUS line {line!r}")
     return ok()
 
 
@@ -3981,7 +3997,8 @@ PINS = [
                                Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr")))),
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
-                    Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")))),
+                    Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")),
+                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction")))),
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),

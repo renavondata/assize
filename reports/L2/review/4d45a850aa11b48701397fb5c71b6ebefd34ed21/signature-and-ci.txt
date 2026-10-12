@@ -1,0 +1,25 @@
+$ gh api repos/renavondata/assize/issues/68/timeline (label events)
+labeled assize-reviewer draft 2026-10-10T04:32:47Z
+unlabeled gfrmin draft 2026-10-10T04:40:24Z
+labeled gfrmin instruction 2026-10-10T04:40:24Z
+labeled gfrmin draft 2026-10-10T04:50:37Z
+unlabeled gfrmin instruction 2026-10-10T04:50:39Z
+labeled gfrmin instruction 2026-10-10T04:50:42Z
+unlabeled gfrmin instruction 2026-10-11T11:17:24Z
+labeled gfrmin instruction 2026-10-11T23:19:42Z
+
+$ gh api graphql ... issue(number:68){userContentEdits{editedAt editor}}
+2026-10-11T19:03:07Z gfrmin
+2026-10-10T04:32:46Z assize-reviewer
+=> last body edit (gfrmin, 19:03:07Z) precedes the last `labeled instruction` by gfrmin (23:19:42Z); no edit by another account after it. Signed (CLAUDE.md Amendment 4 rule 5).
+
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=4d45a850aa11b48701397fb5c71b6ebefd34ed21&event=pull_request"
+pins completed success 38185735723
+build completed skipped 38185741303
+measure completed skipped 38185741240
+review in_progress null 38185741270 (this session)
+
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=49d1d6a...&event=pull_request"
+pins completed success 38184360362 (cited by STATUS; first pins run on the PR)
+
+Scratch: /tmp/rev119.2tQb (git clone --no-hardlinks of the PR head, branch instr-68-wish-latency); `make pins` exit 0; removed after this review.

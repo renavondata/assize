@@ -1,0 +1,12 @@
+# reports/L0/forecasts.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts.jsonl: 1 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts.jsonl: 28 open, 21 typed; resolved 1, unreadable 4
+resolved 4f9f273bc96b True — pins run 38184360362 attempt 1 on 49d1d6ad46d2: success
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404)
+)
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 02d749e28bef: pins_green {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103: gh: Not Found (HTTP 404)
+)
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103/commits?per_page=100: gh: Not Found (HTTP 404)
+)
