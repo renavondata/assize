@@ -1,0 +1,6 @@
+# P0ai's mutant (instruction #111 Part B item 6, review of 473a72d F2): probes are drawn from every exposure-regime act,
+# open, void and overturned ones included, not only the exposed-and-silent.
+[[edit]]
+path = "harness/ledger.py"
+old = '''            and kept.get(f["id"]) is True and f["id"] not in probed]'''
+new = '''            and f["id"] not in probed]'''

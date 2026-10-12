@@ -1,0 +1,6 @@
+# P0ai's mutant (instruction #111 Part B item 6): a probe is filed under the exposure regime, so a probe left alone is
+# void unless gfrmin labels it `seen`, instead of defaulting to keep.
+[[edit]]
+path = "harness/ledger.py"
+old = '''            "args": {"item": item, "until": until, "probe_of": f["id"], "seed": seed}}'''
+new = '''            "args": {"item": item, "until": until, "probe_of": f["id"], "seed": seed, "exposure": "seen"}}'''

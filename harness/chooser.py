@@ -166,6 +166,30 @@ def pick_row(entrant: str, candidates: Sequence[str], dist: Dist, chose: str, sh
             "claim": claim, "p": dist.get(chose, 0.0), "resolves_by": until, "type": "guy_picks", "args": args}
 
 
+def item_number(chose: str, pr: int) -> int:
+    """The issue an act-alone choice is overturned on: an instruction `#<n>` is its own issue; a brief item has none,
+    so it is the pull request that carries it."""
+    m = ledger.ITEM.fullmatch(chose)
+    return int(m.group(1)) if m else pr
+
+
+def act_rows(chose: str, pr: int, until: str, rid: str, ts: str, sha_before: str, proposer: Mapping, p_kept: float,
+             p_merged: float) -> list[dict]:
+    """What the chooser files for the item it acts on (instruction #111 Part B item 3): `not_overturned {item: <chose>,
+    until: <next audit>}` under the exposure regime (silence counts only after gfrmin's `seen`), and #77's `merged {pr}`
+    for the pull request that carries it. The probabilities are the acting Builder's, its proposer named."""
+    kept = f"Guy does not overturn the chooser's pick {chose} (round {rid}) before {until}"
+    merged = f"PR #{pr}, which carries the chooser's pick {chose} (round {rid}), is merged"
+
+    def row(claim: str, p: float, ftype: str, args: dict) -> dict:
+        return {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": dict(proposer), "sha_before": sha_before,
+                "claim": claim, "p": p, "resolves_by": until, "type": ftype, "args": args}
+
+    return [row(kept, p_kept, "not_overturned", {"item": item_number(chose, pr), "until": until, "exposure": "seen",
+                                                 "chose": chose, "round": rid}),
+            row(merged, p_merged, "merged", {"pr": pr, "chose": chose, "round": rid})]
+
+
 CHOSE = re.compile(r"^chose: (?P<chose>.+?) over (?P<over>.+?) — entrants (?P<entrants>.+?) — forecast "
                    r"(?P<hash>[0-9a-f]{64}) — regime (?P<regime>\S+)\s*$", re.M)
 
@@ -272,11 +296,16 @@ def rounds_of(rows: Sequence[dict], sovereign: Sequence[str]) -> list[Round]:
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m harness.chooser")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    c = sub.add_parser("choose", help="print the sovereign entrants' forecast rows, the mixture's, and the STATUS line")
+    c = sub.add_parser("choose", help="print the sovereign entrants' forecast rows, the mixture's, the act's "
+                                      "not_overturned and merged rows, and the STATUS line")
     c.add_argument("candidates", nargs="+", help="the open candidates, in A1.5's order")
     c.add_argument("--until", required=True, help="ISO time of the next audit: when silence starts to count")
     c.add_argument("--ts", required=True)
     c.add_argument("--session", required=True)
+    c.add_argument("--model", required=True, help="the acting Builder's model: the proposer of the act's forecasts")
+    c.add_argument("--pr", type=int, required=True, help="the pull request that will carry the chosen item")
+    c.add_argument("--p-kept", type=float, required=True, help="the Builder's p that Guy does not overturn the choice")
+    c.add_argument("--p-merged", type=float, required=True, help="the Builder's p that the pull request merges")
     c.add_argument("--change-point", action="append", default=[], help="ISO time of a layer boundary or signed instruction")
     c.add_argument("--ordering", type=Path, default=None, help="file with the latest `priorities` issue body")
     c.add_argument("--repo", type=Path, default=Path("."))
@@ -290,7 +319,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(x)
         print(f"{len(chose_history(a.repo, a.head))} chose lines, {len(found)} findings", file=sys.stderr)
         return 1 if found else 0
-    sovereign = tomllib.loads((a.repo / ledger.ENTRANTS).read_text())[SOVEREIGN]
+    if not (0 < a.p_kept < 1 and 0 < a.p_merged < 1):
+        print(f"--p-kept {a.p_kept} and --p-merged {a.p_merged} must lie in (0, 1)", file=sys.stderr)
+        return 2
+    sovereign =tomllib.loads((a.repo / ledger.ENTRANTS).read_text())[SOVEREIGN]
     if FIXED not in sovereign:
         print(f"{ledger.ENTRANTS}: {FIXED} is not a sovereign entrant", file=sys.stderr)
         return 2
@@ -312,7 +344,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                         {"kind": "mechanism", "model": f"chooser:{e}", "session": a.session}) for e, d in dists.items()}
     made[MIXTURE] = pick_row(MIXTURE, a.candidates, got.dist, got.chose, got.chose, a.until, rid, a.ts, sha,
                              {"kind": "mechanism", "model": f"chooser:{MIXTURE}", "session": a.session})
-    for row in made.values():
+    acted = act_rows(got.chose, a.pr, a.until, rid, a.ts, sha, {"kind": "builder", "model": a.model, "session": a.session},
+                     a.p_kept, a.p_merged)
+    for row in [*made.values(), *acted]:
         print(json.dumps(row))
     print(chose_line(got.chose, a.candidates, got.weights, made[MIXTURE]["args"]["hash"], regime))
     return 0

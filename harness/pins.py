@@ -1736,6 +1736,7 @@ PICK_PROPOSER = {"kind": "mechanism", "model": "chooser:p0", "session": "p0"}
 PICK_TS, PICK_UNTIL, PICK_WITHIN, PICK_AFTER = ("2026-01-10T00:00:00Z", "2026-01-20T00:00:00Z", "2026-01-15T00:00:00Z",
                                                 "2026-01-25T00:00:00Z")
 PICK_NOW = "2026-02-01T00:00:00Z"
+CHOOSE_ACT = ("--model", "m", "--pr", "7", "--p-kept", "0.8", "--p-merged", "0.6")  # the acting Builder's
 
 
 def _pick(entrant: str, cands: list, chose: str, shown: str | None = None, rid: str = "r", dist: dict | None = None,
@@ -1830,19 +1831,20 @@ def p0ad_chooser_sealed() -> bool:
     _commit(git)
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
-        rc = chooser.main(["choose", "#1", "#2", "#3", "--until", PICK_UNTIL, "--ts", PICK_TS, "--session", "p0ad",
-                           "--repo", str(cli)])
+        rc = chooser.main(["choose", "#1", "#2", "#3", *CHOOSE_ACT, "--until", PICK_UNTIL, "--ts", PICK_TS,
+                           "--session", "p0ad", "--repo", str(cli)])
     lines = out.getvalue().splitlines()
     printed = [json.loads(line) for line in lines[:-1]]
+    picks = [r for r in printed if r.get("type") == "guy_picks"]
     line = chooser.CHOSE.match(lines[-1]) if lines else None
-    expect(rc == 0 and line is not None and len(printed) == 2, f"choose exits 0 and prints two rows and a line ({rc}, "
-                                                              f"{len(printed)} rows)")
-    if line is None or len(printed) != 2:
+    expect(rc == 0 and line is not None and len(picks) == 2, f"choose exits 0 and prints two guy_picks rows and a line "
+                                                            f"({rc}, {len(picks)} rows)")
+    if line is None or len(picks) != 2:
         return False
-    mixture = next(r for r in printed if r["args"]["entrant"] == chooser.MIXTURE)
+    mixture = next(r for r in picks if r["args"]["entrant"] == chooser.MIXTURE)
     expect([f.code for f in claims.ledger_findings([json.dumps(r) for r in printed])] == [],
            "the printed rows pass the ledger check")
-    expect(all(r["args"]["hash"] == chooser.forecast_hash(r["args"]) for r in printed), "each row's hash is its SHA-256")
+    expect(all(r["args"]["hash"] == chooser.forecast_hash(r["args"]) for r in picks), "each row's hash is its SHA-256")
     expect(line["hash"] == mixture["args"]["hash"] and [c.strip() for c in line["over"].split(",")] == ["#1", "#2", "#3"],
            "the line cites the mixture row's hash and lists every candidate")
     expect(line["regime"] == chooser.regime_at("seed0", 0), "the line names the regime the seed assigns the first choice")
@@ -2040,7 +2042,8 @@ def p0af_fixed_share() -> bool:
     _commit(git)
     err = io.StringIO()
     with contextlib.redirect_stderr(err):
-        rc = chooser.main(["choose", "a", "--until", PICK_UNTIL, "--ts", PICK_TS, "--session", "p0af", "--repo", str(repo)])
+        rc = chooser.main(["choose", "a", *CHOOSE_ACT, "--until", PICK_UNTIL, "--ts", PICK_TS, "--session", "p0af",
+                           "--repo", str(repo)])
     expect(rc == 2 and "is not a sovereign entrant" in err.getvalue(), f"a sovereign list without {chooser.FIXED} is refused "
                                                                       f"({rc}: {err.getvalue().strip()})")
     shutil.rmtree(work, ignore_errors=True)
@@ -2097,6 +2100,187 @@ def p0ag_switchback() -> bool:
     found = chooser.seed_findings(root)
     print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
     expect(not found, f"real switchback: findings {[str(f) for f in found]}")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _observer(answers: dict):
+    from harness import ledger
+
+    def observe(kind: str, *key: object) -> object:
+        if (kind, *key) not in answers:
+            raise ledger.Unreadable(f"fixture has no answer to {(kind, *key)}")
+        return answers[(kind, *key)]
+
+    return observe
+
+
+ACT_RESOLVES = (  # (what, events on the chosen issue, the not_overturned resolution wanted)
+    ("seen, then silence", [_ev("labeled", "gfrmin", PICK_WITHIN, "seen")], {"outcome": True}),
+    ("silence, never seen", [], {"outcome": False, "void": "unexposed"}),
+    ("seen, then later", [_ev("labeled", "gfrmin", PICK_TS, "seen"), _ev("labeled", "gfrmin", PICK_WITHIN, "later")],
+     {"outcome": False}),
+)
+
+
+def p0ah_chooser_files_act() -> bool:
+    """`python -m harness.chooser choose` files, beside the `guy_picks` rows, `not_overturned {item: <chose>, until}`
+    under the exposure regime -- the item is the instruction's issue, or for a brief item the pull request that carries
+    it -- and #77's `merged {pr}`, both with the acting Builder's p and proposer; and they resolve by code: silence after
+    gfrmin's `seen` keeps the choice, silence unseen is void, `later` overturns it, the merge resolves `merged`
+    (instruction #111 Part B item 3)."""
+    import contextlib
+    import io
+
+    from harness import chooser, ledger
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ah-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir()
+    git("init", "-q", "-b", "master")
+    _append(repo, ledger.ENTRANTS, 'sovereign = ["fixed-order", "priorities-literal"]\n[bound]\nloss = 5.0\n')
+    _append(repo, chooser.SEED_PATH, "seed0\n")
+    _commit(git)
+
+    def run(cands: list, *extra: str) -> tuple[int, list[dict]]:
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+            rc = chooser.main(["choose", *cands, *CHOOSE_ACT, *extra, "--until", PICK_UNTIL, "--ts", PICK_TS,
+                               "--session", "p0ah", "--repo", str(repo)])
+        return rc, [json.loads(line) for line in out.getvalue().splitlines() if line.startswith("{")]
+
+    builder = {"kind": "builder", "model": "m", "session": "p0ah"}
+    acts: dict[str, list[dict]] = {}
+    for cands, item in ((["#41", "#42"], 41), (["write the brief", "#42"], 7)):
+        rc, rows = run(cands)
+        kept = [r for r in rows if r.get("type") == "not_overturned"]
+        merged = [r for r in rows if r.get("type") == "merged"]
+        acts[cands[0]] = kept + merged
+        want = {"item": item, "until": PICK_UNTIL, "exposure": "seen", "chose": cands[0]}
+        expect(rc == 0 and len(kept) == 1 and {k: kept[0]["args"].get(k) for k in want} == want and kept[0]["p"] == 0.8,
+               f"{cands[0]}: one not_overturned {want} at p 0.8 ({[r['args'] | {'p': r['p']} for r in kept]})")
+        expect(len(merged) == 1 and merged[0]["args"].get("pr") == 7 and merged[0]["p"] == 0.6,
+               f"{cands[0]}: one merged {{pr: 7}} at p 0.6 ({[r['args'] for r in merged]})")
+        expect(all(r["proposer"] == builder for r in kept + merged), "the act's rows are the acting Builder's")
+        found = claims.ledger_findings([json.dumps(r) for r in rows])
+        expect(not found, f"{cands[0]}: the printed rows pass the ledger check ({[str(f) for f in found]})")
+    for bad in (("--p-kept", "1"), ("--p-merged", "0")):
+        rc, rows = run(["#41"], *bad)
+        expect(rc == 2 and not rows, f"{' '.join(bad)} is refused, nothing printed (exit {rc})")
+    rows = acts["#41"]
+    if len(rows) != 2:
+        shutil.rmtree(work, ignore_errors=True)
+        return False
+    kept, merged = rows
+    for what, events, want in ACT_RESOLVES:
+        observe = _observer({("timeline", 41): events, ("pr", 7): {"merged": True, "merged_at": PICK_WITHIN}})
+        got, unread = ledger.resolve(rows, observe, PICK_NOW, "p0ah")
+        by = {r["id"]: r for r in got}
+        have = {k: by.get(kept["id"], {}).get(k) for k in want}
+        expect(have == want and not unread, f"{what}: not_overturned resolved {have}, want {want} ({unread})")
+        expect(by.get(merged["id"], {}).get("outcome") is True, f"{what}: merged resolved true on the merge")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+PROBE_BRIEF = "### Constants, pre-stated here\nk (probes per boundary brief) = 2. Switchback length = the rest.\n"
+
+
+def _act(n: int, exposure: bool = True) -> dict:
+    return _typed(f"act on #{n}", 0.8, "not_overturned", {"item": n, "until": PICK_UNTIL}
+                  | ({"exposure": "seen"} if exposure else {}))
+
+
+def _answered(f: dict, outcome: bool, void: str | None = None) -> dict:
+    return {"id": f["id"], "ts": PICK_NOW, "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "r"},
+            "outcome": outcome, **({"void": void} if void else {})}
+
+
+# The acts on #51-#54 were seen and kept; #55 was void (never seen); #56 was overturned; #57 is open; #58 was made
+# before the exposure regime; #59 was seen and kept but is already probed.
+PROBE_ACTS = {n: _act(n, exposure=n != 58) for n in range(51, 60)}
+PROBE_ROWS = ([*PROBE_ACTS.values()]
+              + [_answered(PROBE_ACTS[n], True) for n in (51, 52, 53, 54, 58, 59)]
+              + [_answered(PROBE_ACTS[55], False, "unexposed"), _answered(PROBE_ACTS[56], False)])
+PROBE_POOL = {51, 52, 53, 54}
+
+
+def p0ai_probes() -> bool:
+    """At a boundary brief, `python -m harness.ledger probe` draws k act-alone choices (k as the brief pre-states it)
+    from the exposed-and-silent set -- acts made under the exposure regime, kept, not void, not overturned, not open,
+    not probed -- ranked by the SHA-256 of `<ledger head>:<id>`; each probe is a `not_overturned` forecast that defaults
+    to keep and is resolved false by gfrmin's overturn; every probe is a guy-item of the price (instruction #111 Part B
+    item 6)."""
+    import contextlib
+    import hashlib
+    import io
+
+    from harness import ledger
+
+    expect, ok = _expecter()
+    expect(ledger.probe_k(PROBE_BRIEF) == 2, "k is read from the brief's pre-stated constant")
+    try:
+        ledger.probe_k("no constant here\n")
+        expect(False, "a brief that states no k is refused")
+    except ValueError:
+        expect(True, "a brief that states no k is refused")
+    real = (ROOT / "docs/briefs/brief-2-nethack.md").read_text()
+    expect(ledger.probe_k(real) == 2, "brief 2 pre-states k = 2")
+    vizier = {"kind": "vizier", "model": "m", "session": "p0ai"}
+    already = ledger.probe_row(PROBE_ACTS[59], "s", PICK_UNTIL, PICK_TS, "0" * 40, vizier)
+    rows = PROBE_ROWS + [already]
+    pool = ledger.exposed_and_silent(rows)
+    have = {f["args"]["item"] for f in pool}
+    expect(have == PROBE_POOL, f"exposed-and-silent: {sorted(have)}, want {sorted(PROBE_POOL)}")
+
+    def by_definition(seed: str, k: int) -> list[int]:
+        ranked = sorted(pool, key=lambda f: hashlib.sha256(f"{seed}:{f['id']}".encode()).hexdigest())
+        return [f["args"]["item"] for f in ranked[:k]]
+
+    draws = {s: [f["args"]["item"] for f in ledger.draw_probes(pool, s, 2)] for s in (f"head{i}" for i in range(8))}
+    expect(all(d == by_definition(s, 2) for s, d in draws.items()), f"each draw is the SHA-256 ranking ({draws})")
+    expect(len({tuple(d) for d in draws.values()}) > 1, "the draw depends on the ledger head")
+    expect([f["args"]["item"] for f in ledger.draw_probes(pool, "s", 9)] == by_definition("s", 9),
+           "a pool smaller than k is drawn whole")
+    probes = [ledger.probe_row(f, "head0", PICK_UNTIL, PICK_TS, "0" * 40, vizier) for f in ledger.draw_probes(pool, "head0", 2)]
+    found = claims.ledger_findings(_ledger(*rows, *probes))
+    expect(not found, f"the probe rows pass the ledger check ({[str(f) for f in found]})")
+    expect(all(p["p"] == PROBE_ACTS[p["args"]["item"]]["p"] for p in probes), "a probe's p is its act's")
+    probe = probes[0]
+    item = probe["args"]["item"]
+    for what, events, want in (
+            ("left alone", [], True),
+            ("later by gfrmin", [_ev("labeled", "gfrmin", PICK_WITHIN, "later")], False),
+            ("later by another account", [_ev("labeled", "assize-reviewer", PICK_WITHIN, "later")], True)):
+        got, unread = ledger.resolve([probe], _observer({("timeline", item): events}), PICK_NOW, "p0ai")
+        have = [(r["outcome"], r.get("void")) for r in got]
+        expect(have == [(want, None)] and not unread, f"probe {what}: resolved {have}, want {[(want, None)]}")
+    reached = ledger.probes_reached(rows + probes)
+    priced = ledger.price(reached, {}, [], PICK_TS, PICK_NOW)
+    want_items = tuple(sorted({59, *(p["args"]["item"] for p in probes)}))
+    expect(priced.items == want_items, f"probes are guy-items of the price: {priced.items}, want {want_items}")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ai-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir()
+    git("init", "-q", "-b", "master")
+    _append(repo, "brief.md", PROBE_BRIEF)
+    _append(repo, "none.md", "no constant\n")
+    _append(repo, "reports/L2/forecasts.jsonl", "".join(json.dumps(r) + "\n" for r in rows))
+    _commit(git)
+    for brief, want_rc, want_n in (("brief.md", 0, 2), ("none.md", 2, 0)):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+            rc = ledger.main(["probe", "--brief", str(repo / brief), "--until", PICK_UNTIL, "--ts", PICK_TS,
+                              "--session", "p0ai", "--model", "m", "--repo", str(repo)])
+        printed = [json.loads(line) for line in out.getvalue().splitlines() if line.startswith("{")]
+        seed = ledger.probe_seed(repo)
+        expect(rc == want_rc and len(printed) == want_n
+               and [p["args"]["item"] for p in printed] == by_definition(seed, want_n)
+               and all(p["args"]["seed"] == seed for p in printed),
+               f"probe --brief {brief}: exit {rc}, {len(printed)} rows drawn at the ledger head (want {want_rc}, {want_n})")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -3843,6 +4027,16 @@ PINS = [
     Pin("P0ag", "the switchback's regimes equal the schedule recomputed from the committed seed, which precedes the first choice",
         p0ag_switchback, (Mutant("regime_after_seed", _edits("P0ag_regime_after_seed")),
                           Mutant("seed_after_act_admitted", _edits("P0ag_seed_after_act_admitted")))),
+    Pin("P0ah", "the chooser files not_overturned under the exposure regime and merged for the item it acts on",
+        p0ah_chooser_files_act, (Mutant("kept_not_filed", _edits("P0ah_kept_not_filed")),
+                                 Mutant("merged_not_filed", _edits("P0ah_merged_not_filed")),
+                                 Mutant("kept_without_exposure", _edits("P0ah_kept_without_exposure")),
+                                 Mutant("item_always_pr", _edits("P0ah_item_always_pr")))),
+    Pin("P0ai", "a boundary brief's k probes are drawn by the ledger head from the exposed-and-silent acts, and priced",
+        p0ai_probes, (Mutant("probe_from_unkept", _edits("P0ai_probe_from_unkept")),
+                      Mutant("probe_unseeded", _edits("P0ai_probe_unseeded")),
+                      Mutant("probe_needs_exposure", _edits("P0ai_probe_needs_exposure")),
+                      Mutant("probe_not_priced", _edits("P0ai_probe_not_priced")))),
     Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

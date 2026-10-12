@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import math
 import os
@@ -35,6 +36,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
+from harness import claims
 from harness.claims import MECHANISM, PINS_WORKFLOW, _git
 
 MERGE_SUBJECT = re.compile(r"^Merge pull request #(\d+) ")
@@ -435,8 +437,59 @@ def pick_rounds(rows: Sequence[dict], sovereign: Sequence[str]) -> list:
                           g["res"].get("answer") != SILENT) for g in sorted(groups.values(), key=lambda g: g["ts"])]
 
 
+# ------------------------------------------------------------------ probes (instruction #111 Part B item 6)
+
+PROBE_K = re.compile(r"^k \(probes per boundary brief\) = (\d+)\b", re.M)
+PROBE = "probe"  # the route by which a probe reaches Guy, counted in the price
+
+
+def probe_k(brief: str) -> int:
+    """k as the boundary brief pre-states it; a brief that states none is refused, never defaulted."""
+    m = PROBE_K.search(brief)
+    if m is None:
+        raise ValueError("the brief pre-states no `k (probes per boundary brief) = <k>`")
+    return int(m.group(1))
+
+
+def exposed_and_silent(rows: Sequence[dict]) -> list[dict]:
+    """The act-alone choices Guy saw and let stand: `not_overturned` forecasts made under the exposure regime whose
+    last resolution is true and not void; neither a probe itself nor already probed."""
+    kept = outcomes(rows)
+    probed = {(f.get("args") or {}).get("probe_of") for f in rows if "claim" in f}
+    return [f for f in rows if "claim" in f and f.get("type") == "not_overturned"
+            and (f.get("args") or {}).get("exposure") == "seen" and "probe_of" not in f["args"]
+            and kept.get(f["id"]) is True and f["id"] not in probed]
+
+
+def probe_seed(repo: Path, head: str = "HEAD") -> str:
+    """The ledger head: the last commit reachable from `head` that changed a forecast ledger."""
+    return _git(repo, "log", "-1", "--format=%H", head, "--", LEDGER).strip()
+
+
+def draw_probes(pool: Sequence[dict], seed: str, k: int) -> list[dict]:
+    """k of the pool (all of it if smaller), ranked by the SHA-256 of `<seed>:<id>`: a draw anyone can recompute."""
+    return sorted(pool, key=lambda f: hashlib.sha256(f"{seed}:{f['id']}".encode()).hexdigest())[:k]
+
+
+def probe_row(f: Mapping, seed: str, until: str, ts: str, sha_before: str, proposer: Mapping) -> dict:
+    """A probe: a one-tap confirm or overturn of the act `f` on its item. It carries no `exposure`, so it defaults to
+    keep (silence until `until` resolves it true) and a reversal by gfrmin (`later`, a reopen, an unlabel, a close
+    other than by merge) resolves it false, as an overturn does. Its p is the act's own."""
+    item = f["args"]["item"]
+    claim = f"Guy keeps, on probe, the act-alone choice on #{item} of forecast {f['id']}"
+    return {"id": claims.forecast_id(claim, ts), "ts": ts, "proposer": dict(proposer), "sha_before": sha_before,
+            "claim": claim, "p": f["p"], "resolves_by": until, "type": "not_overturned",
+            "args": {"item": item, "until": until, "probe_of": f["id"], "seed": seed}}
+
+
+def probes_reached(rows: Sequence[dict]) -> list[dict]:
+    """Every probe filed, as an item that reached Guy at the probe's time (a guy-item of the price)."""
+    return [{"item": int(f["args"]["item"]), "route": PROBE, "at": f["ts"]} for f in rows
+            if "claim" in f and f.get("type") == "not_overturned" and "probe_of" in (f.get("args") or {})]
+
+
 FREE = "free"
-OUTCOMES: Mapping[str, Callable[..., Outcome | None] | None] = {
+OUTCOMES:Mapping[str, Callable[..., Outcome | None] | None] = {
     "pins_green": _bound(_pins_green), "review_accept": _bound(_review_accept), "merged": _bound(_merged), "host_verdict": _host_verdict,
     "guy_answers": _guy_answers, "not_overturned": _not_overturned, "finding_count": _finding_count,
     "price": _price, "guy_picks": _guy_picks,
@@ -557,7 +610,7 @@ def now_utc() -> str:
 
 # --------------------------------------------------------------------- rule 6: the price (instruction #54 item 6)
 
-ROUTES = ("awaits-guy", "assigned", "needs-you")
+ROUTES = ("awaits-guy", "assigned", "needs-you", PROBE)
 SESSION_WORKFLOWS = (".github/workflows/build.yml", ".github/workflows/review.yml")
 
 
@@ -640,7 +693,8 @@ def github_price(repo: Path, since_sha: str, until: str | None, head: str = "HEA
     reached = [{"item": e["item"], "route": "awaits-guy" if e["event"] == "labeled" else "assigned",
                 "at": e["created_at"]} for e in events
                if (e["event"] == "labeled" and e["label"] == "awaits-guy")
-               or (e["event"] == "assigned" and e["assignee"] == GUY)] + needs_you(repo, since_sha, head)
+               or (e["event"] == "assigned" and e["assignee"] == GUY)] + needs_you(repo, since_sha, head) \
+        + probes_reached(ledger_rows(repo, head))
     items = sorted({e["item"] for e in reached})
     actions = {n: [str(_when(e)) for e in _gh_lines(repo, f"repos/{{owner}}/{{repo}}/issues/{n}/timeline?per_page=100",
                                                     ".[]") if _actor(e) == GUY and _when(e)] for n in items}
@@ -852,7 +906,31 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--repo", type=Path, default=Path("."))
     e.add_argument("--publish", metavar="REMOTE", default=None,
                    help=f"read the draws from, and commit this draw onto, REMOTE's {DRAW_BRANCH} branch")
+    b = sub.add_parser("probe", help="draw the boundary brief's k probes from the exposed-and-silent acts; print their rows")
+    b.add_argument("--brief", type=Path, required=True, help="the boundary brief, which pre-states k")
+    b.add_argument("--until", required=True, help="ISO time by which a probe left alone is kept (the next audit)")
+    b.add_argument("--ts", required=True)
+    b.add_argument("--session", required=True)
+    b.add_argument("--model", required=True)
+    b.add_argument("--head", default="HEAD")
+    b.add_argument("--repo", type=Path, default=Path("."))
     a = ap.parse_args(argv)
+    if a.cmd == "probe":
+        try:
+            k = probe_k(a.brief.read_text())
+        except ValueError as e:
+            print(f"{a.brief}: {e}", file=sys.stderr)
+            return 2
+        rows = ledger_rows(a.repo, a.head)
+        pool, seed = exposed_and_silent(rows), probe_seed(a.repo, a.head)
+        sha = _git(a.repo, "rev-parse", a.head).strip()
+        proposer = {"kind": "vizier", "model": a.model, "session": a.session}
+        drawn = draw_probes(pool, seed, k)
+        for f in drawn:
+            print(json.dumps(probe_row(f, seed, a.until, a.ts, sha, proposer)))
+        print(f"# {len(drawn)} probes of k = {k} drawn from {len(pool)} exposed-and-silent acts, seed {seed}",
+              file=sys.stderr)
+        return 0
     if a.cmd == "proposer":
         classes = record(ledger_rows(a.repo, a.head), a.kind, a.since)
         print(f"# {a.kind}: {sum(c.made for c in classes)} forecasts in {len(classes)} classes since "
