@@ -32,7 +32,7 @@ import subprocess
 import sys
 import tomllib
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from harness.claims import MECHANISM, PINS_WORKFLOW, _git
@@ -475,6 +475,9 @@ class Price:
     sessions: int
     runner_min: Mapping[str, float]  # per workflow path
     pins_min: float
+    wishes: tuple[int, ...] = ()  # filed in the window
+    wish_latencies_h: tuple[float, ...] = ()  # one per wish merged by the window's end, from the wish's own creation
+    open_wishes: tuple[int, ...] = ()  # no instruction citing it merged yet: counted, never dropped
 
     def quantities(self) -> dict[str, float]:
         lat = self.latencies_h or (0.0,)
@@ -484,8 +487,10 @@ class Price:
 
     def status_line(self) -> str:
         q = self.quantities()
+        w = self.wish_latencies_h or (0.0,)
         return (f"price: guy-items {len(self.items)}; guy-latency median {q['guy-latency-median']:.1f}h max "
-                f"{q['guy-latency-max']:.1f}h; sessions {self.sessions}; runner-min {q['runner-min']:.0f}")
+                f"{q['guy-latency-max']:.1f}h; sessions {self.sessions}; runner-min {q['runner-min']:.0f}; "
+                f"wish-latency median {statistics.median(w):.1f}h max {max(w):.1f}h open {len(self.open_wishes)}")
 
 
 def _hours(a: str, b: str) -> float:
@@ -515,6 +520,19 @@ def price(reached: Sequence[Mapping], actions: Mapping[int, Sequence[str]], runs
     per = {w: sum(minutes(r) for r in ran if r.get("path") == w) for w in sorted({str(r.get("path")) for r in ran})}
     return Price(tuple(items), latencies, tuple(n for n in items if answered[n] is None),
                  sum(1 for r in ran if r.get("path") in SESSION_WORKFLOWS), per, per.get(PINS_WORKFLOW, 0.0))
+
+
+def wish_latency(created: Mapping[int, str], wishes: Sequence[int], cited: Mapping[int, int],
+                 merged: Mapping[int, str], since: str, until: str) -> tuple[tuple[int, ...], tuple[float, ...], tuple[int, ...]]:
+    """`created`: issue number -> `created_at`, for wishes and instructions alike; `wishes`: the wish numbers; `cited`: instruction number -> the wish its draft cites; `merged`:
+    instruction number -> merge time of the pull request that closed it. For each wish filed in [since, until), the
+    hours from its own creation to the earliest merge before `until` of an instruction citing it; a wish with none is
+    open. Returns (wishes, latencies of the merged ones, open wishes)."""
+    filed = sorted(n for n in wishes if _at_or_after(created[n], since) and not _at_or_after(created[n], until))
+    done = {n: min((merged[i] for i, w in cited.items() if w == n and i in merged and not _at_or_after(merged[i], until)),
+                   key=_t, default=None) for n in filed}
+    return (tuple(filed), tuple(_hours(created[n], done[n]) for n in filed if done[n]),
+            tuple(n for n in filed if not done[n]))
 
 
 STATUS_PR = re.compile(r"^# STATUS — L\d+ — \S+ — \S+ — PR #(\d+)", re.M)
@@ -552,7 +570,26 @@ def github_price(repo: Path, since_sha: str, until: str | None, head: str = "HEA
                                                     ".[]") if _actor(e) == GUY and _when(e)] for n in items}
     runs = _gh_lines(repo, f"repos/{{owner}}/{{repo}}/actions/runs?per_page=100&created=>={since[:10]}",
                      ".workflow_runs[] | {id, path, conclusion, created_at, run_started_at, updated_at}")
-    return price(reached, actions, runs, since, end), since, end
+    return replace(price(reached, actions, runs, since, end), **_wish_fields(repo, since, end)), since, end
+
+
+WISH_CITE = re.compile(r"^Wish: #(\d+)", re.M)
+INSTRUCTION_CITE = re.compile(r"Instruction: #(\d+)")
+
+
+def _wish_fields(repo: Path, since: str, until: str) -> dict:
+    """The wishes filed in the window, the drafts citing them (`Wish: #n`), and the merged pull requests citing an
+    instruction (`Instruction: #n` in their body), read from the API."""
+    issues = _gh_lines(repo, "repos/{owner}/{repo}/issues?state=all&per_page=100",
+                       ".[] | select(.pull_request == null) | {number, created_at, body, labels: [.labels[].name]}")
+    cited = {i["number"]: int(m.group(1)) for i in issues if "instruction" in i["labels"]
+             and (m := WISH_CITE.search(i["body"] or ""))}
+    prs = _gh_lines(repo, "repos/{owner}/{repo}/pulls?state=closed&per_page=100", ".[] | {body, merged_at}")
+    merged = {int(m.group(1)): p["merged_at"] for p in prs if p["merged_at"]
+              for m in INSTRUCTION_CITE.finditer(p["body"] or "")}
+    created = {i["number"]: i["created_at"] for i in issues}
+    got = wish_latency(created, [i["number"] for i in issues if "wish" in i["labels"]], cited, merged, since, until)
+    return {"wishes": got[0], "wish_latencies_h": got[1], "open_wishes": got[2]}
 
 
 def boundary_window(repo: Path, layer: int, head: str = "HEAD") -> tuple[str, str] | None:
@@ -776,6 +813,7 @@ def main(argv: list[str] | None = None) -> int:
         for w, m in got.runner_min.items():
             print(f"workflow {w} runner-min {m:.0f}")
         print(f"pins CI minutes {got.pins_min:.0f}")
+        print(f"wishes filed {len(got.wishes)}: merged {len(got.wish_latencies_h)}, open {len(got.open_wishes)}")
         print(got.status_line())
         return 0
     if a.cmd == "elect":
