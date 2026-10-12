@@ -244,3 +244,31 @@ k (probes per boundary brief) = 2. Switchback length = the remainder of the laye
 The switchback schedule recomputed from the committed seed equals the regimes recorded in STATUS `chose:` lines. Mutant: the regime chosen after the seed is seen. KILLED.
 
 A regime with no resolved outcome is reported as such and never dropped. Nothing is tuned after scores are seen.
+
+## Wish #134 — Amendment: a full pins run takes minutes, on our own hardware (appended; instruction #136)
+
+### Purpose
+A full `pins` run (every harness change forces one, since #108) took 29 of its 30 minutes on `ubuntu-latest` (run 38225369452). It is run serially on one hosted core. Run it in parallel on a self-hosted runner so it finishes in minutes, and so several Builders' pull requests can be checked at once.
+
+### Scope
+1. `harness/runner.py` runs pins in parallel across N worker processes, one pin per worker at a time, each in its own scratch copy as now. Results are written in registry order whatever order the workers finish in, so a run's record is byte-identical for every N. N is read from `harness/config.toml`, a constant committed before the first parallel run. Following A3 §5 it is adopted only if the parallel configuration beats the serial one on the switch rule; it is not tuned by sight.
+2. `.github/workflows/pins.yml` runs on `[self-hosted, pins]` instead of `ubuntu-latest`. It keeps the isolation of CLAUDE.md's container rules (rootless Podman, `--network=none`, read-only, no judge mounts). The runner is a fresh checkout per job and is never the `measure` host's runner, so pins never contend with a measurement.
+3. `ledger price` reports pins wall-clock per run alongside pins CI minutes.
+
+### Pre-stated criteria
+- Record identity: the full registry run with N=1 and N=8 on the same head gives byte-identical records, verdicts included.
+- Speed: on the self-hosted runner, the median wall-clock of the full run over the first ten full runs after adoption is at most one fifth of the median of the last ten full runs on `ubuntu-latest`, read from `ledger price`. Failing that, the amendment is recorded UNFIT and `pins.yml` returns to `ubuntu-latest`.
+
+### Pins (each must demonstrate it can fail)
+- P-par: the runner on the synthetic registry with N=1 and N=4 must give identical records. Mutants, each KILLED: records in completion order; two workers sharing one scratch copy; a worker's crash dropped instead of recorded `inconclusive`.
+
+### Refusal list
+- No pin is skipped, sampled or reordered in the record to gain speed; #108's witness-based skipping is the only skipping.
+- No runner shared with `measure`.
+
+### Stop-and-report boundaries
+- The self-hosted `pins` runner is not registered: stop and record it under `NEEDS YOU` (runner registration is Guy's alone).
+- A pin that passes serially and fails in parallel: stop and report it as a hidden shared state, do not serialise it quietly.
+
+### Deliverables
+Runner change, workflow change, P-par, a `ledger price` transcript for each criterion. The third part of the wish, several Builders at once, is draft #67 (wish #61) and depends on this amendment and on the split of shared files drafted beside it.
