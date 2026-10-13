@@ -1,0 +1,13 @@
+Reviewer session 257064c1-d8c2-49ba-8d40-3857c56a51bd, run 38267426912, scratch worktree of 65cb5fa (removed afterwards; `git worktree list` shows only the main checkout).
+
+CI: pins run 38267424805 on 65cb5fa: completed failure. clean 58/59, mutants 160/161 killed, 1 non-causal (P0l/sha_comparison_skipped, twin fail),
+"CLEAN FAILED: P0l (observed fail)". Every other pin, including the new P0aq and its three mutants, is ok / KILLED.
+
+Reproduction: uv run --frozen python -m harness check --registry harness --pin P0l --role clean ...
+  [ok] ... (fixture cases)
+  [ok] reports/L1/STATUS.md: cites [('37840644452', '25f36e6')]; findings []
+  [FAIL] reports/L2/STATUS.md: cites []; findings ['reports/L2/STATUS.md: uncited: no `pins CI run <id> on <sha>` citation']
+  result: FAIL
+
+Cause: STATUS header names d240538 and cites only the local `make pins`. pins run 38264987174 on d240538 exists (pull_request, completed, success),
+but STATUS does not cite it and reports/L2/ci/38264987174.json is not recorded.

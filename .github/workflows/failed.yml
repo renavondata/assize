@@ -3,6 +3,8 @@ on:
   workflow_run:
     workflows: [build, review, pins]
     types: [completed]
+  push:
+    branches: [master]
 permissions:
   issues: write
 jobs:
@@ -14,8 +16,13 @@ jobs:
       issues: write
       actions: read
     steps:
+      - uses: actions/checkout@v5
+        with: { ref: master, sparse-checkout: harness, persist-credentials: false }
       - env:
           GH_TOKEN: ${{ github.token }}
+          # Instruction #126 item 1: `blocked` is applied with the builder token, whose label events start workflows;
+          # `github.token`'s start none, so a label applied with it would restart no Builder.
+          LABEL_TOKEN: ${{ secrets.ASSIZE_BUILDER_TOKEN }}
           WF: ${{ github.event.workflow_run.name }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
@@ -31,6 +38,21 @@ jobs:
               | awk '{n += $1} END {print n + 0}')
             [ "$started" -eq 0 ] && exit 0
           fi
+          # Instruction #126 item 1: a red pins run on a pull request goes back to its Builder through the `blocked`
+          # path while the pull request's timeline holds fewer than three `labeled blocked` events; from the third
+          # round the issue assigned to gfrmin is filed as before (A1.5: three rounds hand the branch to Guy). The
+          # decision is harness.route.decide. The build, review and non-PR cases are unchanged.
+          if [ "$WF" = pins ] && [ -n "$PR" ]; then
+            rounds=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/timeline" \
+              --jq '[.[] | select(.event == "labeled" and .label.name == "blocked")] | length' \
+              | awk '{n += $1} END {print n + 0}')
+            if [ "$(python3 -m harness.route pins_red "$rounds" UNKNOWN)" = label ]; then
+              # A label already present fires no `labeled` event, so it is removed first.
+              GH_TOKEN="$LABEL_TOKEN" gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$PR/labels/blocked" >/dev/null 2>&1 || true
+              GH_TOKEN="$LABEL_TOKEN" gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --add-label blocked
+              exit 0
+            fi
+          fi
           title="$WF run $RUN_ID $CONCLUSION on $BRANCH"
           body=$(printf 'The %s session died: %s.\n\n%s\n' "$WF" "$CONCLUSION" "$URL")
           # Instruction #110 Part C: a red pins run on a pull request routes to an issue naming the pull request and
@@ -45,3 +67,49 @@ jobs:
             | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
           [ -n "$existing" ] && exit 0
           gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee gfrmin --body "$body"
+  # Instruction #126 item 2: on a push to master, every open pull request whose `mergeable` is CONFLICTING is labelled
+  # `blocked`, under the same three-round count (harness.route.decide, event `pushed`); from the third round the issue
+  # assigned to gfrmin is filed instead. `blocked` fires no run on a conflicted pull request unless the label is applied
+  # by such a token (the builder token, as above) and the Builder checks the branch out (see #117's override comment:
+  # DIRTY, so the `blocked` label fired no pull_request run), so the Builder is told to merge master first (build.md
+  # procedure step 1).
+  conflicts:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+        with: { ref: master, sparse-checkout: harness, persist-credentials: false }
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          LABEL_TOKEN: ${{ secrets.ASSIZE_BUILDER_TOKEN }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          for pr in $(gh pr list -R "$GITHUB_REPOSITORY" --state open --json number -q '.[].number'); do
+            # GitHub computes `mergeable` after the push; UNKNOWN until it has.
+            mergeable=UNKNOWN
+            for _ in 1 2 3 4 5 6; do
+              mergeable=$(gh pr view "$pr" -R "$GITHUB_REPOSITORY" --json mergeable -q .mergeable)
+              [ "$mergeable" != UNKNOWN ] && break
+              sleep 10
+            done
+            rounds=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$pr/timeline" \
+              --jq '[.[] | select(.event == "labeled" and .label.name == "blocked")] | length' \
+              | awk '{n += $1} END {print n + 0}')
+            case "$(python3 -m harness.route pushed "$rounds" "$mergeable")" in
+              label)
+                GH_TOKEN="$LABEL_TOKEN" gh api -X DELETE "repos/$GITHUB_REPOSITORY/issues/$pr/labels/blocked" >/dev/null 2>&1 || true
+                GH_TOKEN="$LABEL_TOKEN" gh pr edit "$pr" -R "$GITHUB_REPOSITORY" --add-label blocked ;;
+              issue)
+                title="PR #$pr conflicts with master after three blocked rounds"
+                existing=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title \"$title\"" \
+                  --json number,title | jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty')
+                [ -n "$existing" ] && continue
+                gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee gfrmin \
+                  --body "PR #$pr is CONFLICTING with master at $SHA and its timeline holds $rounds \`labeled blocked\` events (A1.5: three rounds hand the branch to Guy)." ;;
+            esac
+          done

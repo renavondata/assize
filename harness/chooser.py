@@ -220,10 +220,10 @@ def switchback_findings(seed: str | None, lines: Sequence[Mapping]) -> list[Find
 
 # ------------------------------------------------------------------------------------------------------- git readers
 
-def _log(repo: Path, head: str, needle: str, glob: str) -> list[str]:
-    """Commits reachable from `head`, oldest first, whose diff adds or removes `needle` under `glob`."""
+def _log(repo: Path, head: str, needle: str, globs: Sequence[str]) -> list[str]:
+    """Commits reachable from `head`, oldest first, whose diff adds or removes `needle` under `globs`."""
     return claims._git(repo, "log", "--reverse", "--topo-order", "--format=%H", f"-S{needle}", head, "--",
-                       glob).split()
+                       *globs).split()
 
 
 def sealed_before(repo: Path, row_commit: str | None, act_commit: str | None) -> bool:
@@ -239,10 +239,10 @@ def chose_history(repo: Path, head: str = "HEAD") -> list[tuple[str, dict]]:
     parsed line)."""
     seen: dict[str, tuple[str, dict]] = {}
     commits = claims._git(repo, "log", "--reverse", "--topo-order", "--format=%H", head, "--",
-                          "reports/L*/STATUS.md").split()
+                          *claims.STATUS_GLOBS).split()
     for c in commits:
         for path in claims._git(repo, "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "-m", "--first-parent", c,
-                                "--", "reports/L*/STATUS.md").split():
+                                "--", *claims.STATUS_GLOBS).split():
             for m in CHOSE.finditer(claims._git(repo, "show", f"{c}:{path}")):
                 seen.setdefault(m["hash"], (c, m.groupdict()))
     return list(seen.values())
@@ -258,7 +258,7 @@ def chose_findings(repo: Path, head: str = "HEAD") -> list[Finding]:
         where = f"chose {line['hash'][:12]} at {act_commit[:12]}"
         over = [c.strip() for c in line["over"].split(",")]
         row = rows.get(line["hash"])
-        first = _log(repo, head, line["hash"], "reports/L*/forecasts.jsonl")
+        first = _log(repo, head, line["hash"], claims.LEDGER_GLOBS)
         if row is None or not first:
             found.append(Finding(where, "no_forecast", "no `guy_picks` row carries the cited hash"))
             continue
@@ -279,7 +279,7 @@ def seed_findings(repo: Path, head: str = "HEAD") -> list[Finding]:
     seed = claims._git(repo, "show", f"{head}:{SEED_PATH}").strip() if present else None
     found = switchback_findings(seed, [line for _, line in history])
     if seed is not None and history:
-        first = _log(repo, head, seed, SEED_PATH)
+        first = _log(repo, head, seed, (SEED_PATH,))
         if not sealed_before(repo, first[0] if first else None, history[0][0]):
             found.append(Finding("seed", "late", "the seed was not committed before the first choice"))
     return found

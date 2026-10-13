@@ -1,0 +1,8 @@
+# P0aq's mutant (instruction #126 item 3): the conflict case treated as clean, so a conflicted pull request is left
+# where it stands.
+[[edit]]
+path = "harness/route.py"
+old = """    if event == "pushed" and mergeable != "CONFLICTING":
+"""
+new = """    if event == "pushed":
+"""

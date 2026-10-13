@@ -1,0 +1,7 @@
+# P0ar's mutant (instruction #135 item 4): the registry reads only the frozen proposer.toml, so every pull request's
+# proposer row is lost.
+[[edit]]
+path = "harness/registries.py"
+old = """    return [p for p in [root / "harness" / "proposer.toml", *sorted((root / "harness" / "proposer.d").glob("*.toml"))]
+            if p.is_file()]"""
+new = """    return [p for p in [root / "harness" / "proposer.toml"] if p.is_file()]"""

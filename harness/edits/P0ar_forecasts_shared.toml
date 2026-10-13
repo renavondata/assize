@@ -1,0 +1,6 @@
+# P0ar's mutant (instruction #135 item 4): a session's forecasts written to the shared file, so two pull requests append
+# at the same place and conflict.
+[[edit]]
+path = "harness/claims.py"
+old = """    return {"forecasts": f"reports/L{layer}/forecasts/{session}.jsonl","""
+new = """    return {"forecasts": f"reports/L{layer}/forecasts.jsonl","""

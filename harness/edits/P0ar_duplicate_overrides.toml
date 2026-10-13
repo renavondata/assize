@@ -1,0 +1,8 @@
+# P0ar's mutant (instruction #135 item 3): a proposer row keyed twice across files silently overrides instead of being a
+# registry error.
+[[edit]]
+path = "harness/registries.py"
+old = """    if twice:
+        raise RegistryError("proposer_keyed_twice", ", ".join(twice))"""
+new = """    if False:
+        raise RegistryError("proposer_keyed_twice", ", ".join(twice))"""
