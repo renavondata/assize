@@ -5,9 +5,12 @@ Non-interactive and idempotent per `request_id`. In order:
 1. The image's proposer is `registry.proposer_of` it: the party whose judge-issued credential registered it. An image
    never registered is refused `unregistered` before anything else, so no seed is issued to it (A4 item 2).
 2. A `request_id` the ledger already holds under a signed head returns its records as written, running nothing and
-   issuing nothing; the same `request_id` asked of another image, World or episode count is refused `request_conflict`.
+   issuing nothing, once they are checked against the signed head (signature, count, chain, last `sha256`; a mismatch
+   is refused `ledger_unverified`); the same `request_id` asked of another image, World or episode count is refused
+   `request_conflict`.
    A `request_id` whose seeds were issued but whose records were never signed (a judge that died mid-request) is
-   refused `interrupted`: its seeds are spent and never reissued, and a new `request_id` is needed.
+   refused `interrupted`: its seeds are spent and never reissued, and a new `request_id` is needed. The next request
+   of its World seals it into the ledger first, whoever asks it (`_seal`, below; reports/L1/REPORT.md obligation 4).
 3. The World must be one the judge binds, its manifest must commit a price, `n_episodes` must be a positive integer, the
    runtime usable and the image present locally; otherwise the request is refused before any seed is issued. The judge
    binds every directory of `worlds/` holding both a `manifest.json` and a `binding.py`, under the directory's name; it
@@ -19,14 +22,23 @@ Non-interactive and idempotent per `request_id`. In order:
    included, with its termination code, log-loss, calibration, measured compute and price.
 6. Each record is stamped with `schema_version`, `judge_sha256` (the hash of the judge's code and config, `judge_hash`),
    the candidate image digest, its `proposer`, the World, the runtime, the request's episode count and the episode's
-   achievement set, then chained and signed into the World's append-only ledger (`ledger.append`)."""
+   achievement set, then chained and appended to the World's append-only ledger as its episode ends, and the request's
+   head signed after the last (`ledger.append`). Steps 4 to 6 hold the World's request lock, and begin by sealing
+   every interrupted request of the World (`ledger.seal_interrupted`): the episodes it played stay in the ledger, and
+   one closing record states its seeds issued, the image and proposer they were issued to (recorded with them at
+   issue) and its episodes recorded, all signed. So a request killed and asked again
+   under another id leaves its played episodes and its spent seeds on the record, and cannot be selected away."""
 
 from __future__ import annotations
 
+import collections
+import contextlib
+import fcntl
 import hashlib
 import importlib
+import os
 import subprocess
-from collections.abc import Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 
 from judge import episodes, ledger, price, registry, runtime, seeds
@@ -63,11 +75,15 @@ def ledger_path(ledgers: Path, world: str) -> Path:
 
 
 def _recorded(led: Path, private: Path, request_id: str) -> list[dict] | None:
-    """The records of `request_id` as written, if its head was signed; None if the ledger holds no such request."""
-    if not any(h["ledger"] == led.name and h["request_id"] == request_id
-               for h in ledger._lines(private / ledger.HEADS)):
+    """The records of `request_id` as written, if its head was signed and they match it; None if the ledger holds no
+    such request; refused `ledger_unverified` if they do not match."""
+    held = ledger.request_records(led, private, request_id)
+    if held is None:
         return None
-    return [r for r in ledger._lines(led) if r.get("request_id") == request_id]
+    rows, found = held
+    if found:
+        raise Refused("ledger_unverified", f"request {request_id!r} does not match its signed head: {found}")
+    return rows
 
 
 def bound(worlds: Path = WORLDS) -> list[str]:
@@ -116,14 +132,46 @@ def _played(binding, issued: Sequence[int], m: dict, achieved: list):
         achieved.append(w.achievements)
 
 
-def stamp(records: Sequence[dict], achieved: Sequence[Sequence[str]], *, image: str, proposer: dict, world: str,
-          rt: str, judge_sha256: str) -> list[dict]:
-    """`records`, one per episode, each with what every judge record carries (brief 1 section 2, A4 item 2) and its
-    episode's achievement set (section 3)."""
-    return [{"schema_version": episodes.SCHEMA_VERSION, "judge_sha256": judge_sha256, "image": image,
-             "proposer": proposer, "world": world, "runtime": rt, "n_episodes": len(records),
-             "achievements": list(a)} | r
-            for r, a in zip(records, achieved, strict=True)]
+def stamp(records: Iterable[dict], achieved: Sequence[Sequence[str]], *, n_episodes: int, image: str, proposer: dict,
+          world: str, rt: str, judge_sha256: str) -> Iterator[dict]:
+    """`records`, one per episode, each as it is drawn, with what every judge record carries (brief 1 section 2, A4
+    item 2) and its episode's achievement set (section 3), `achieved[episode]` by then."""
+    return ({"schema_version": episodes.SCHEMA_VERSION, "judge_sha256": judge_sha256, "image": image,
+             "proposer": proposer, "world": world, "runtime": rt, "n_episodes": n_episodes,
+             "achievements": list(achieved[r["episode"]])} | r
+            for r in records)
+
+
+@contextlib.contextmanager
+def _alone(private: Path, world: str):
+    """Hold the World's request lock, in judge-private storage, for the rest of the request: one request writes the
+    World's ledger at a time, so a request found issued but unsigned while holding it was interrupted, not running.
+    The lock dies with its holder."""
+    fd = os.open(seeds.store_path(private, world).with_suffix(".lock"), os.O_WRONLY | os.O_CREAT, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        os.close(fd)
+
+
+def _seal(led: Path, private: Path, world: str) -> list[str]:
+    """Seal into the ledger every interrupted request of `world` (`ledger.seal_interrupted`), its played episodes and
+    spent seeds included; the request_ids sealed. Each closing record carries the `image` and `proposer` its seeds were
+    issued to (A1.7; brief 1 A4 item 2), so a request's spent seeds are charged to the party that asked it. A ledger
+    tail that is no interrupted request's is `ledger_unverified`."""
+    held = seeds.records(private, world)
+    issued = collections.Counter(r["request_id"] for r in held)
+    first = {r["request_id"]: r for r in reversed(held)}
+    stamp = {"schema_version": episodes.SCHEMA_VERSION, "judge_sha256": judge_hash(), "world": world}
+    closing = {rid: stamp | {"issued": n,
+                             "image": first[rid].get("image"),
+                             "proposer": first[rid].get("proposer")}
+               for rid, n in issued.items()}
+    try:
+        return ledger.seal_interrupted(led, private, closing)
+    except ValueError as e:
+        raise Refused("ledger_unverified", str(e)) from e
 
 
 def evaluate(image: str, world: str, n_episodes: int, request_id: str, *, private: Path, ledgers: Path,
@@ -134,6 +182,10 @@ def evaluate(image: str, world: str, n_episodes: int, request_id: str, *, privat
     proposer = registry.proposer_of(private, image)
     done = _recorded(led, private, request_id)
     if done is not None:
+        if done[-1].get("interrupted"):
+            raise Refused("interrupted", f"request {request_id!r} was interrupted after {done[-1]['recorded']} of "
+                                         f"{done[-1]['issued']} episodes, sealed as such; its seeds are spent, ask "
+                                         f"again under a new request_id")
         asked = {(r["image"], r["world"], r["n_episodes"]) for r in done}
         if asked != {(image, world, n_episodes)}:
             raise Refused("request_conflict", f"request {request_id!r} was {sorted(asked)}, not "
@@ -145,16 +197,21 @@ def evaluate(image: str, world: str, n_episodes: int, request_id: str, *, privat
         raise Refused("bad_episodes", f"{n_episodes!r} is not a positive episode count")
     rt = _usable(runtime_name)
     _present(rt, image)
-    try:
-        issued = seeds.issue(private, world, binding.world_seed, n_episodes, request_id)
-    except seeds.SeedError as e:
-        if e.code == "request_reused":
-            raise Refused("interrupted", f"request {request_id!r} has seeds but no signed records; its seeds are "
-                                         f"spent, ask again under a new request_id") from e
-        raise
-    achieved: list = []
-    records = episodes.run(rt, image, _played(binding, issued, m, achieved), m)
-    stamped = stamp(records, achieved, image=image, proposer=proposer, world=world, rt=rt.name,
-                    judge_sha256=judge_hash())
     led.parent.mkdir(parents=True, exist_ok=True)
-    return ledger.append(led, private, request_id, stamped)
+    with _alone(private, world):
+        if request_id in _seal(led, private, world):
+            raise Refused("interrupted", f"request {request_id!r} had seeds but no signed records; sealed as "
+                                         f"interrupted, its seeds are spent, ask again under a new request_id")
+        try:
+            issued = seeds.issue(private, world, binding.world_seed, n_episodes, request_id,
+                                 {"image": image, "proposer": proposer})
+        except seeds.SeedError as e:
+            if e.code == "request_reused":
+                raise Refused("interrupted", f"request {request_id!r} has seeds but no signed records; its seeds "
+                                             f"are spent, ask again under a new request_id") from e
+            raise
+        achieved: list = []
+        records = episodes.played(rt, image, _played(binding, issued, m, achieved), m)
+        stamped = stamp(records, achieved, n_episodes=n_episodes, image=image, proposer=proposer, world=world,
+                        rt=rt.name, judge_sha256=judge_hash())
+        return ledger.append(led, private, request_id, stamped)

@@ -1,0 +1,5 @@
+# P0t's mutant (instruction #139 item 4a): every session is attributed to the first model the draw ledger names.
+[[edit]]
+path = "harness/ledger.py"
+old = "        paired = [(m, mins / len(drawn), got[i] if i < len(got) else None) for i, m in enumerate(drawn)]"
+new = "        paired = [(str((draws or [{\"drawn\": m}])[0][\"drawn\"]), mins / len(drawn), got[i] if i < len(got) else None) for i, m in enumerate(drawn)]"

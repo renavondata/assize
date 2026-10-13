@@ -1,0 +1,6 @@
+# P23's mutant `interrupted_unsealed` (brief 2 A2, L2a obligation 4): the next request never seals an interrupted one,
+# so its played episodes and spent seeds stay unsigned, or absent, and the caller can select among its requests.
+[[edit]]
+path = "judge/evaluate.py"
+old = "        if request_id in _seal(led, private, world):\n"
+new = "        if False:\n"

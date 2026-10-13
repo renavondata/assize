@@ -1,0 +1,5 @@
+# P0t's mutant (instruction #139 item 4c): cost is summed across models into one figure, reported under each.
+[[edit]]
+path = "harness/ledger.py"
+old = "sum(r[1] for r in mine), sum(r[2] for r in mine if r[2] is not None),\n"
+new = "sum(r[1] for r in mine), sum(r[2] for r in rows if r[2] is not None),\n"

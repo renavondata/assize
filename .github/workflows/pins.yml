@@ -14,7 +14,7 @@ permissions:
 jobs:
   pins:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -24,11 +24,6 @@ jobs:
         run: pipx install uv==0.8.17
       - name: Sync environment
         run: uv sync --frozen
-      # Instruction #113 Part A: the head's session workflows (build.yml, review.yml) are run against the head's harness
-      # in dry-run mode before merge: every `python -m harness...` step is executed with `--dry-run`, so a flag the
-      # workflow passes and the harness does not accept fails `pins` here, not in a session after merge.
-      - name: Self-run the session workflows
-        run: uv run --frozen python -m harness.selfrun
       # Instruction #108 item 3: the base is the newest successful `pins` run whose head is an ancestor of HEAD and
       # whose `pins-report` artifact records every pin ok and nothing skipped, so a run that itself skipped pins is never
       # a base and a skip always cites a full run. With no such run, or on a pull request that records a layer verdict

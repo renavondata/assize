@@ -1176,6 +1176,26 @@ PRICE_INSTRUCTIONS = ((20, 10, 4, 6), (21, 10, 5, 9), (22, 11, 3, 12))
 # the failed review (the skipped one never ran); runner-minutes 30 + 60 + 10, pins 10.
 PRICE_WANT = {"items": (1, 2, 3), "latencies": (2.0, 8.0, 2.0), "open": (2,), "sessions": 2, "runner": 100.0,
               "pins": 10.0}
+# Instruction #139: run 100 (the build) drew model x and its one session emits cumulative results of $1.00 then $1.50,
+# the final one $1.50 (review b2e7f72 F1); run 101 (the review, 60 minutes) drew y for review then x for vizier, and its
+# log ends after one result of $2.00, the vizier session never reaching its own. By the definition: x has two sessions
+# over 30 + 30 minutes with one cost known ($1.50, one unknown); y has one session over 30 minutes at $2.00. The run
+# before the window (104) is in neither.
+PRICE_DRAWS = (("build", 100, "claude-x"), ("review", 101, "claude-y"), ("vizier", 101, "claude-x"))
+PRICE_LOGS = {100: ((1.0, 1.5),), 101: ((2.0,),)}  # run -> per session, the cost of each of its result events in order
+PRICE_MODELS_WANT = (("claude-x", 2, 60.0, 1.5, 1), ("claude-y", 1, 30.0, 2.0, 0))
+
+
+def _session_log(*sessions_: tuple) -> list[dict]:
+    """A stream-json log of sessions: each, under its own `session_id`, is an assistant message and a `result` event
+    carrying its cumulative cost, if any, per wake-up."""
+    events: list[dict] = []
+    for s, costs in enumerate(sessions_):
+        for cost in costs:
+            events += [{"type": "assistant", "session_id": f"s{s}", "message": {"id": "m", "content": []}},
+                       {"type": "result", "subtype": "success", "session_id": f"s{s}"}
+                       | ({} if cost is None else {"total_cost_usd": cost})]
+    return events
 
 
 def p0t_price() -> bool:
@@ -1187,9 +1207,11 @@ def p0t_price() -> bool:
     expect, ok = _expecter()
     reached = [{"item": n, "route": r, "at": _h(h)} for n, r, h in PRICE_REACHED]
     actions = {n: [_h(h) for h in hs] for n, hs in PRICE_ACTIONS.items()}
-    runs = [{"path": w, "conclusion": c, "created_at": _h(h), "run_started_at": _h(h), "updated_at": _h(h + m / 60)}
-            for w, c, h, m in PRICE_RUNS]
-    got = ledger.price(reached, actions, runs, T0, _h(PRICE_UNTIL))
+    runs = [{"id": 100 + i, "path": w, "conclusion": c, "created_at": _h(h), "run_started_at": _h(h),
+             "updated_at": _h(h + m / 60)} for i, (w, c, h, m) in enumerate(PRICE_RUNS)]
+    draws = [{"procedure": p, "run": r, "drawn": m} for p, r, m in PRICE_DRAWS]
+    costs = {r: ledger.result_costs(_session_log(*cs)) for r, cs in PRICE_LOGS.items()}
+    got = ledger.price(reached, actions, runs, T0, _h(PRICE_UNTIL), draws, costs)
     print(f"    {got}")
     print(f"    {got.status_line()}")
     expect(got.items == PRICE_WANT["items"], f"items {got.items}, want {PRICE_WANT['items']}")
@@ -1212,8 +1234,22 @@ def p0t_price() -> bool:
            f"wishes {ws}, latencies {wl}, open {wo}; want (10, 11, 12), (5.0,), (11, 12)")
     line = dataclasses.replace(got, wishes=ws, wish_latencies_h=wl, open_wishes=wo).status_line()
     expect(line == "price: guy-items 3; guy-latency median 2.0h max 8.0h; sessions 2; runner-min 100; "
+                   "models claude-x s2/60m/$1.50+?, claude-y s1/30m/$2.00; "
                    "wish-latency median 5.0h max 5.0h open 2; sessions-over-bound 0/0; sessions-lost-to-limit 0",
            f"STATUS line {line!r}")
+    # Instruction #139 item 4: each model reported separately, correct sums, a session without a result counted.
+    have = tuple((m.model, m.sessions, m.minutes, m.cost_usd, m.cost_unknown) for m in got.models)
+    expect(len(have) == len(PRICE_MODELS_WANT) and all(
+        a[:2] == b[:2] and a[4] == b[4] and math.isclose(a[2], b[2]) and math.isclose(a[3], b[3])
+        for a, b in zip(have, PRICE_MODELS_WANT)), f"per-model price {have}, want {PRICE_MODELS_WANT}")
+    expect(sum(m.sessions for m in got.models) == len(PRICE_DRAWS) and got.sessions == 2,
+           "every drawn session is under a model (three draws over two runs); the vizier session without a result is "
+           "counted, not dropped")
+    bare = ledger.model_price({7: 10.0}, [], {})
+    expect(bare == (ledger.ModelPrice(ledger.UNKNOWN_MODEL, 1, 10.0, 0.0, 1),),
+           f"a session run with no draw and no log is one unknown session with cost unknown: {bare}")
+    expect(ledger.result_costs([{"type": "result"}, {"type": "result", "total_cost_usd": 0.25}, {"type": "assistant"}])
+           == [None, 0.25], "a result event without a cost reads as unknown, not zero")
     return ok()
 
 
@@ -1304,6 +1340,16 @@ def p0u_election() -> bool:
            f"probabilities {dict(got.probabilities)}, by definition {want}")
     expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, ELECTION_BOUND, 0).model in ELECTION_ENTRANTS,
            "a procedure with no record draws among its entrants")
+    # Instruction #139 item 5: with three entrants and no recorded draw, each starts at EXP3's uniform 1/3 and a sweep of
+    # every seed draws each a third of the time, and nothing else.
+    three = ("m-a", "m-b", "m-c")
+    fresh = {m: 0 for m in three}
+    for seed in range(ledger.DRAWS):
+        fresh[ledger.elect([], "vizier", three, ELECTION_BOUND, seed).model] += 1
+    start = ledger.elect([], "vizier", three, ELECTION_BOUND, 0)
+    expect(set(start.probabilities) == set(three) and all(math.isclose(p, 1 / 3) for p in start.probabilities.values())
+           and all(abs(n - ledger.DRAWS / 3) <= 1 for n in fresh.values()),
+           f"three new entrants start uniform: {dict(start.probabilities)}, sweep {fresh}")
     work = Path(tempfile.mkdtemp(prefix="assize-p0u-", dir=context.scratch))
     repo = work / "repo"
     git = _git_fixture(repo)
@@ -2326,8 +2372,9 @@ def p0ak_session_declared() -> bool:
     expect(not unread, f"every run read ({unread})")
     k, n = ledger.over_bound(rows + got, BEFORE_TS, LATER_TS)
     expect((k, n) == (1, 4), f"sessions-over-bound {k}/{n}, want 1/4 (run 2 over; run 3 open and run 4 void counted)")
-    runs = [{"path": w, "conclusion": c, "created_at": _h(1), "run_started_at": _h(1), "updated_at": _h(2),
-             "steps": [{"name": s, "conclusion": sc} for s, sc in steps]} for w, c, steps in LIMIT_RUNS]
+    runs = [{"id": 200 + i, "path": w, "conclusion": c, "created_at": _h(1), "run_started_at": _h(1),
+             "updated_at": _h(2), "steps": [{"name": s, "conclusion": sc} for s, sc in steps]}
+            for i, (w, c, steps) in enumerate(LIMIT_RUNS)]
     priced = ledger.price([], {}, runs, T0, _h(PRICE_UNTIL))
     expect(priced.lost_to_limit == 1, f"sessions-lost-to-limit {priced.lost_to_limit}, want 1 (the build run whose "
                                       f"`{ledger.LIMIT_STEP}` step failed)")
@@ -2390,6 +2437,86 @@ def p0aq_red_returns_to_builder() -> bool:
     text = (ROOT / ".github" / "workflows" / "failed.yml").read_text()
     expect("python3 -m harness.route pins_red" in text and "python3 -m harness.route pushed" in text,
            "failed.yml decides both cases by harness.route")
+    return ok()
+
+
+def _job_blocks(text: str) -> dict[str, str]:
+    """Each job's text in a workflow file, by job id: the lines from `  <id>:` under `jobs:` to the next job, or to the
+    next top-level key or the file's end."""
+    text = "\n" + text
+    after = text.split("\njobs:\n", 1)[1] if "\njobs:\n" in text else ""
+    body = re.split(r"^\S", after, maxsplit=1, flags=re.M)[0]
+    heads = list(re.finditer(r"^  ([A-Za-z0-9_-]+):[ \t]*$", body, re.M))
+    ends = [m.start() for m in heads[1:]] + [len(body)]
+    return {m.group(1): body[m.start():end] for m, end in zip(heads, ends)}
+
+
+def _job_permissions(job: str) -> dict[str, str] | str | None:
+    """A job's `permissions:`: None if it sets none, the scalar (`read-all`, `write-all`) if one is given, else the
+    scope-to-access map, in block or flow form."""
+    m = re.search(r"^    permissions:[ \t]*(.*)$", job, re.M)
+    if m is None:
+        return None
+    inline = m.group(1).split("#")[0].strip()
+    if inline.startswith("{"):
+        pairs = (p.split(":", 1) for p in inline.strip("{} ").split(",") if ":" in p)
+        return {k.strip(): v.strip() for k, v in pairs}
+    if inline:
+        return inline
+    rest = job[m.end():].split("\n")[1:]
+    block = []
+    for line in rest:
+        if line.strip() and not line.startswith("      "):
+            break
+        block.append(line)
+    pairs = (re.match(r"^      ([A-Za-z-]+):[ \t]*([A-Za-z-]+)", line) for line in block)
+    return {p.group(1): p.group(2) for p in pairs if p}
+
+
+def _checkout_ungranted(text: str) -> list[str]:
+    """The jobs of a workflow file that set `permissions:` and use `actions/checkout` but grant no `contents` access:
+    a job-level `permissions:` replaces the default token's, so such a checkout fails with "repository not found"."""
+    def granted(perms) -> bool:
+        return (perms in ("read-all", "write-all") if isinstance(perms, str)
+                else perms.get("contents") in ("read", "write"))
+    jobs = _job_blocks(text)
+    return [name for name, job in jobs.items()
+            if re.search(r"uses:\s*actions/checkout@", job) and (perms := _job_permissions(job)) is not None
+            and not granted(perms)]
+
+
+CHECKOUT_FIXTURE = (  # (what, workflow text, ungranted jobs) -- instruction #162
+    ("a block grant without contents is flagged",
+     "jobs:\n  a:\n    permissions:\n      issues: write\n    steps:\n      - uses: actions/checkout@v5\n", ["a"]),
+    ("a block grant with contents: read passes",
+     "jobs:\n  a:\n    permissions:\n      issues: write\n      contents: read\n    steps:\n"
+     "      - uses: actions/checkout@v5\n", []),
+    ("a flow grant without contents is flagged",
+     "jobs:\n  a:\n    permissions: { issues: write }\n    steps:\n      - uses: actions/checkout@v5\n", ["a"]),
+    ("read-all passes", "jobs:\n  a:\n    permissions: read-all\n    steps:\n      - uses: actions/checkout@v5\n", []),
+    ("a job setting no permissions passes",
+     "jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v5\n", []),
+    ("a job with no checkout passes", "jobs:\n  a:\n    permissions:\n      issues: write\n    steps:\n      - run: x\n",
+     []),
+    ("only the offending job of two is flagged",
+     "jobs:\n  a:\n    permissions:\n      contents: write\n    steps:\n      - uses: actions/checkout@v5\n"
+     "  b:\n    permissions:\n      issues: write\n    steps:\n      - uses: actions/checkout@v5\n", ["b"]),
+)
+
+
+def p0aw_checkout_granted() -> bool:
+    """Every job in every workflow file that sets `permissions:` and uses `actions/checkout` grants `contents` access
+    (instruction #162: since #153 merged, both `failed.yml` jobs failed at checkout with "repository not found")."""
+    expect, ok = _expecter()
+    for what, text, want in CHECKOUT_FIXTURE:
+        got = _checkout_ungranted(text)
+        expect(got == want, f"{what}: {got}, want {want}")
+    files = sorted((ROOT / ".github" / "workflows").glob("*.yml"))
+    expect(bool(files), f"workflow files read: {len(files)}")
+    for f in files:
+        text = f.read_text()
+        bad = _checkout_ungranted(text)
+        expect(not bad, f"{f.name}: jobs {sorted(_job_blocks(text))}; checking out without contents: {bad}")
     return ok()
 
 
@@ -2756,12 +2883,23 @@ def p0ad_chooser_sealed() -> bool:
     _commit(git, "forecasts")
     (cli / "reports/L2/STATUS.md").write_text("# STATUS — L2 — 2026-10-12 — abc1234 — PR #1\n" + lines[-1] + "\n")
     _commit(git, "act")
-    found = chooser.chose_findings(cli)
-    expect(not found, f"the printed rows, committed first, then the line, pass the check ({[str(f) for f in found]})")
+    (cli / "reports/L2/STATUS.md").unlink()
+    _commit(git, "withdraw")
+
+    def findings(repo: Path) -> list[str]:
+        """The check's findings, or the git failure it raised reading history, as one finding."""
+        try:
+            return [str(f) for f in chooser.chose_findings(repo)]
+        except subprocess.CalledProcessError as e:
+            return [f"raised: {e}"]
+
+    found = findings(cli)
+    expect(not found, f"the printed rows, committed first, then the line, pass the check, a later commit deleting the "
+                      f"STATUS read as no text ({found})")
     root = _real_root()
-    found = chooser.chose_findings(root)
-    print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
-    expect(not found, f"real chose lines: findings {[str(f) for f in found]}")
+    found = findings(root)
+    print(f"    real: {'?' if found else len(chooser.chose_history(root))} chose lines in history")
+    expect(not found, f"real chose lines: findings {found}")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -3728,7 +3866,8 @@ def p3_survivorship() -> bool:
     """Every episode is recorded with its termination code, failures included: under every usable runtime, a fixture
     candidate that crashes, garbles its reply, plays an illegal action, stalls a step or overruns the episode yields
     exactly one record per requested episode, in order, each with that failure's code; a polite candidate's episodes
-    end as the World ends them. No candidate container is left listed (brief 1 section 2)."""
+    end as the World ends them. Each record is yielded by `episodes.played` once final, before the World after the next
+    is drawn (reports/L1/REPORT.md obligation 4 on L2). No candidate container is left listed (brief 1 section 2)."""
     import dataclasses
 
     from harness.fixtures import candidates
@@ -3748,9 +3887,20 @@ def p3_survivorship() -> bool:
     def case(rt, expect, say):
         before = _candidates(rt)
         for behaviour, n, tt, want in cases:
-            records = episodes.run(rt, image, _short_crafter(n), binding.manifest(),
-                                   command=candidates.command(behaviour), t=tt)
+            records: list[dict] = []
+            drawn: list[int] = []
+
+            def worlds():
+                for w in _short_crafter(n):
+                    drawn.append(len(records))
+                    yield w
+
+            records.extend(r for r in episodes.played(rt, image, worlds(), binding.manifest(),
+                                                      command=candidates.command(behaviour), t=tt))
             say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            expect(all(d >= i - 1 for i, d in enumerate(drawn)),
+                   f"{rt.name} {behaviour}: each record is yielded before the World after next is drawn, so it can "
+                   f"be written as its episode ends (records yielded at each draw: {drawn})")
             expect(len(records) == n and [r["episode"] for r in records] == list(range(n)),
                    f"{rt.name} {behaviour}: {len(records)} of {n} requested episodes recorded, in order")
             expect(all(r["termination"] == want for r in records),
@@ -4190,6 +4340,155 @@ def p20_world_price() -> bool:
         unpriced = {k: x for k, x in m.items() if k != "price"}
         expect(not v.is_valid(unpriced), f"manifest.schema.json rejects {name} without its price")
     return ok()
+
+
+def p22_replay_verified() -> bool:
+    """Replay checks a request's records against its signed head (brief 2 A2, L2a obligation 3; review 6debf231b630 F2).
+    Of two signed requests, `evaluate._recorded` returns the first's records exactly as written and an unknown request
+    as None; and refuses `ledger_unverified` when a utility is altered, a record is dropped, a record is added, the
+    head's signature is forged, or the heads file is not JSONL (review c1ef406 F4)."""
+    from judge import evaluate, ledger, registry
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p22-", dir=context.scratch))
+    try:
+        led, private = work / "ledger.jsonl", work / "private"
+        (a_id, a), (b_id, b) = P9_REQUESTS
+        held_a = ledger.append(led, private, a_id, a)
+        ledger.append(led, private, b_id, b)
+        written, heads = led.read_bytes(), (private / ledger.HEADS).read_bytes()
+        rows = [json.loads(line) for line in written.splitlines()]
+
+        def replay(name: str, want) -> None:
+            try:
+                got = evaluate._recorded(led, private, a_id)
+            except registry.Refused as e:
+                got = e.code
+            expect(got == want, f"{name}: replay gives {want if isinstance(want, str) else 'the records as written'} "
+                                f"(got {got if isinstance(got, str) else 'records'})")
+
+        def put(path: Path, out: list[dict]) -> None:
+            path.write_bytes(b"".join(ledger.canonical(r) + b"\n" for r in out))
+
+        tampers = (
+            ("a utility altered", lambda: put(led, [r | {"utility": r["utility"] + 99} if i == 0 else r
+                                                    for i, r in enumerate(rows)])),
+            ("a record dropped", lambda: put(led, [r for i, r in enumerate(rows) if i != 1])),
+            ("a record added", lambda: put(led, rows[:3] + [rows[0]] + rows[3:])),
+            ("the head's signature forged", lambda: put(private / ledger.HEADS, [
+                json.loads(h) | {"mac": "0" * 64} for h in heads.splitlines()])),
+            ("the heads file not JSONL", lambda: (private / ledger.HEADS).write_bytes(heads + b"{not json\n")),
+        )
+        replay("untouched", held_a)
+        expect(evaluate._recorded(led, private, "p22-unknown") is None, "a request never signed replays as None")
+        for name, act in tampers:
+            act()
+            replay(name, "ledger_unverified")
+            led.write_bytes(written)
+            (private / ledger.HEADS).write_bytes(heads)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+# P23's child judge (brief 2 A2, L2a obligation 4): `evaluate()` as written, over Crafter, with the runtime, the image
+# check and the episode loop faked so no container starts. The fake loop keeps `episodes.played`'s contract, each
+# record yielded once the next World is drawn, and the judge kills itself with SIGKILL on drawing episode KILL_AT's
+# World. Prints the request's records, or its refusal code.
+P23_RUN = """
+import json, os, signal, sys, types
+from pathlib import Path
+from judge import episodes, evaluate, registry
+private, ledgers, party, rid, n, kill_at, image = (Path(sys.argv[1]), Path(sys.argv[2]), json.loads(sys.argv[3]),
+                                                   sys.argv[4], int(sys.argv[5]), int(sys.argv[6]), sys.argv[7])
+try:
+    registry.proposer_of(private, image)
+except registry.Refused:
+    registry.register(private, image, registry.credential(private, party))
+
+def played(rt, image, worlds, manifest, **kw):
+    pending = []
+    for i, w in enumerate(worlds):
+        yield from pending
+        if i == kill_at:
+            os.kill(os.getpid(), signal.SIGKILL)
+        pending = [{"episode": i, "termination": "terminal", "detail": "", "steps": w.t, "utility": w.utility}]
+    yield from pending
+
+episodes.played = played
+evaluate._usable = lambda name: types.SimpleNamespace(name=name)
+evaluate._present = lambda rt, image: None
+try:
+    print(json.dumps(evaluate.evaluate(image, "crafter", n, rid, private=private, ledgers=ledgers, runtime_name="fake")))
+except registry.Refused as e:
+    print(json.dumps(e.code))
+"""
+P23_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p23-fixture-party"}
+P23_IMAGE = "sha256:" + "c" * 64
+P23_ASKED, P23_KILL_AT = 3, 2  # the killed request asks 3 episodes and dies drawing the third's World: 2 played
+
+
+def p23_interrupted_recorded() -> bool:
+    """An interrupted request's played episodes are in the ledger (brief 2 A2, L2a obligation 4; review 6debf231b630
+    F3). A child judge asked for 3 Crafter episodes is killed by SIGKILL drawing the third's World: the ledger then holds
+    the 2 episodes it played, unsigned. A second request, from another child, first seals the killed one: its 2 records
+    and one closing record stating `interrupted`, 3 seeds issued and 2 recorded, signed; it is then killed drawing its
+    own first World, so it played nothing. The next request seals that one too (1 seed issued, 0 recorded), then writes
+    its own 2 records. Every record, each closing record included, carries the image and the registering `proposer`
+    (A1.7; review 0a2c02c F2), which for the request that played nothing only its issuance can supply. The ledger
+    verifies at its last head and holds exactly these. The killed request asked again is refused `interrupted`,
+    changing nothing. No container starts: the runtime and loop are faked, keeping `episodes.played`'s contract, which
+    P3 pins on the real loop."""
+    from judge import evaluate, ledger
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p23-", dir=context.scratch))
+    try:
+        private, ledgers = work / "private", work / "ledgers"
+        led = evaluate.ledger_path(ledgers, "crafter")
+
+        def child(rid: str, n: int, kill_at: int = -1) -> tuple[int, object]:
+            r = subprocess.run(proc.python("-c", P23_RUN, str(private), str(ledgers), json.dumps(P23_PARTY), rid,
+                                           str(n), str(kill_at), P23_IMAGE),
+                               cwd=ROOT, env=proc.child_env(), capture_output=True, text=True, timeout=120)
+            return r.returncode, json.loads(r.stdout) if r.stdout.strip() else r.stderr.strip()[-500:]
+
+        def rows() -> list[tuple]:
+            return [(r["request_id"], r.get("episode"), r.get("interrupted"), r.get("issued"), r.get("recorded"),
+                     r.get("image") == P23_IMAGE and r.get("proposer") == P23_PARTY)
+                    for r in ledger._lines(led)] if led.exists() else []
+
+        code, out = child("p23-killed", P23_ASKED, P23_KILL_AT)
+        print(f"  killed child: exit {code}; ledger {rows()}")
+        expect(code == -signal.SIGKILL, f"the child judge died by SIGKILL mid-request (exit {code}: {out})")
+        played = [("p23-killed", i, None, None, None, True) for i in range(P23_KILL_AT)]
+        expect(rows() == played, f"the ledger holds the {P23_KILL_AT} episodes the killed request played ({rows()})")
+
+        code, out = child("p23-unplayed", 1, 0)
+        print(f"  unplayed child: exit {code}; ledger {rows()}")
+        sealed = played + [("p23-killed", None, True, P23_ASKED, P23_KILL_AT, True)]
+        expect(code == -signal.SIGKILL and rows() == sealed,
+               f"a second child seals the killed request, {P23_ASKED} seeds issued and {P23_KILL_AT} recorded, "
+               f"attributed, and dies by SIGKILL before playing (exit {code}; {rows()})")
+
+        code, out = child("p23-next", 2)
+        print(f"  next child: exit {code}; ledger {rows()}")
+        want = sealed + [("p23-unplayed", None, True, 1, 0, True)] + [("p23-next", i, None, None, None, True)
+                                                                      for i in range(2)]
+        expect(code == 0 and rows() == want,
+               f"the next request seals the unplayed one, 1 seed issued and 0 recorded, attributed to its image and "
+               f"proposer, before its own 2 records (exit {code}; {rows()})")
+        anchor = out[-1]["sha256"] if code == 0 and out else ""
+        found = ledger.verify(led, private, anchor)
+        expect(found == [], f"the ledger verifies at the next request's head ({found})")
+
+        was = led.read_bytes()
+        code, out = child("p23-killed", P23_ASKED)
+        expect(code == 0 and out == "interrupted" and led.read_bytes() == was,
+               f"the killed request asked again is refused interrupted, the ledger unchanged (exit {code}: {out})")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
 
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
@@ -4701,7 +5000,7 @@ def p17_evaluate() -> bool:
     The same request asked again, from a child interpreter, prints the same records and changes nothing; asked of
     another episode count it is refused `request_conflict`. A present but unregistered image is refused `unregistered`
     with the seed store and ledger unchanged, so no seed is issued to it; a request whose seeds were issued but never
-    signed is refused `interrupted`. The judge hash changes when any of judge config and code, the interface, the
+    signed is refused `interrupted`, and sealed into the ledger as such. The judge hash changes when any of judge config and code, the interface, the
     Crafter binding and manifest, or the lock file changes."""
     from judge import episodes, evaluate, ledger, registry, runtime, seeds
     from worlds.crafter import binding
@@ -4783,7 +5082,19 @@ def p17_evaluate() -> bool:
                 refused("p17-a of another episode count", "request_conflict", image, "crafter",
                         EVALUATE_EPISODES + 1, "p17-a")
                 seeds.issue(private, "crafter", binding.world_seed, 1, "p17-b")
-                refused("seeds issued, records never signed", "interrupted", image, "crafter", 1, "p17-b")
+                try:
+                    evaluate.evaluate(image, "crafter", 1, "p17-b", private=private, ledgers=ledgers,
+                                      runtime_name=rt.name)
+                    code = "evaluated"
+                except registry.Refused as e:
+                    code = e.code
+                sealed = ledger._lines(led)[len(got):]
+                expect(code == "interrupted" and [(r["request_id"], r.get("interrupted"), r.get("issued"),
+                                                   r.get("recorded")) for r in sealed] == [("p17-b", True, 1, 0)]
+                       and ledger.verify(led, private, sealed[-1]["sha256"]) == [],
+                       f"{rt.name} seeds issued, records never signed: refused interrupted ({code}), and sealed into "
+                       f"the ledger as interrupted with its 1 seed issued and 0 episodes recorded, verifying "
+                       f"({[{k: r.get(k) for k in ('request_id', 'interrupted', 'issued', 'recorded')} for r in sealed]})")
             finally:
                 subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
             strays = _removing_strays(rt, before)
@@ -4994,14 +5305,20 @@ PINS = [
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")),
-                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction"))), HARNESS),
+                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction")),
+                    Mutant("first_entrant_only", _edits("P0t_first_entrant_only")),
+                    Mutant("costless_session_dropped", _edits("P0t_costless_session_dropped")),
+                    Mutant("cost_pooled", _edits("P0t_cost_pooled")),
+                    Mutant("first_result_charged", _edits("P0t_first_result_charged")),
+                    Mutant("result_per_session", _edits("P0t_result_per_session"))), HARNESS),
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),
                        Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
                        Mutant("draw_not_published", _edits("P0u_draw_not_published")),
                        Mutant("draw_push_forced", _edits("P0u_draw_push_forced")),
-                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head"))), HARNESS),
+                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head")),
+                       Mutant("entrants_beyond_second_ignored", _edits("P0u_entrants_beyond_second_ignored"))), HARNESS),
     Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
         p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),),
         (".github/workflows/review.yml",)),
@@ -5033,7 +5350,8 @@ PINS = [
     Pin("P0ad", "the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate",
         p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
                               Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),
-                              Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted"))),
+                              Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted")),
+                              Mutant("deleted_status_read", _edits("P0ad_deleted_status_read"))),
         ALWAYS),
     Pin("P0ae", "Guy's pick is resolved by the labels he applies; silence counts only after a declared exposure, else void",
         p0ae_exposure_and_labels, (Mutant("exposure_inferred", _edits("P0ae_exposure_inferred")),
@@ -5127,6 +5445,9 @@ PINS = [
                             Mutant("status_by_date", _edits("P0ar_status_by_date")),
                             Mutant("duplicate_overrides", _edits("P0ar_duplicate_overrides"))),
         HARNESS + (".claude/commands/**", "reports/**")),
+    Pin("P0aw", "a workflow job that sets permissions and checks out the repository grants contents access",
+        p0aw_checkout_granted, (Mutant("checkout_without_contents", _edits("P0aw_checkout_without_contents")),),
+        HARNESS + (".github/workflows/**",)),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
@@ -5138,7 +5459,8 @@ PINS = [
                   Mutant("rootfs_writable", _edits("P2_rootfs_writable")),
                   Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped"))), JUDGE_SIDE),
     Pin("P3", "every requested episode is recorded with its termination code, failures included",
-        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),), JUDGE_SIDE),
+        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),
+                          Mutant("played_at_end", _edits("P3_played_at_end"))), JUDGE_SIDE),
     Pin("P4", "an episode's CPU and peak memory are measured from its container's cgroup, never self-reported",
         p4_measured_compute, (Mutant("self_reported", _edits("P4_self_reported")),
                               Mutant("client_rusage", _edits("P4_client_rusage")),
@@ -5197,6 +5519,13 @@ PINS = [
         p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),), JUDGE_SIDE),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
         p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),), JUDGE_SIDE),
+    Pin("P22", "replay returns a request's records only if they match its signed head, else refuses ledger_unverified",
+        p22_replay_verified, (Mutant("replay_unchecked", _edits("P22_replay_unchecked")),), JUDGE_SIDE),
+    Pin("P23", "an interrupted request's played episodes and spent seeds are sealed into the ledger by the next "
+               "request of its World, charged to the image and proposer they were issued to",
+        p23_interrupted_recorded, (Mutant("partial_dropped", _edits("P23_partial_dropped")),
+                                   Mutant("interrupted_unsealed", _edits("P23_interrupted_unsealed")),
+                                   Mutant("closing_unattributed", _edits("P23_closing_unattributed"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

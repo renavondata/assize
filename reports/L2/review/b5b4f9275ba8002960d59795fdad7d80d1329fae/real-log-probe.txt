@@ -1,0 +1,18 @@
+Probe: harness.ledger.result_costs / model_price at b5b4f92 (code of 9f59867) on a real session log, and on interleaved
+sessions. Reviewer run 38351599771, session aa621c8f-28d4-4685-8654-31ed1b042c20, 2026-10-13. Scratch copy
+/tmp/rev167.iwL2 (clone at b5b4f92); log downloaded to /tmp/rev167-log.gr33; both removed after the session.
+
+$ gh run download 38337502750 -R renavondata/assize
+/tmp/rev167-log.gr33/build-38337502750/build.log
+$ uv run --frozen python -I -c '<sessions.parse(build.log); result_costs; model_price({38337502750: 60.0}, [draw opus], ...)>'
+results: [('15185207-cbdc-4c0c-9c30-5077204d1b1d', 1.1789745999999997), ('15185207-cbdc-4c0c-9c30-5077204d1b1d', 1.2234559999999997), ('15185207-cbdc-4c0c-9c30-5077204d1b1d', 1.5137587999999997)]
+result_costs: [1.5137587999999997]
+(ModelPrice(model='claude-opus-5-5', sessions=1, minutes=60.0, cost_usd=1.5137587999999997, cost_unknown=0),)
+
+Interleaved synthetic: results a:$1, b:$5, a:$2, (no session_id):$9, b:True
+result_costs: [2, None, 9]
+(a: its final $2; b: its final result carries a bool, read as unknown, not $5 and not 1; the session-less result a session
+of its own.)
+
+Agrees with the Builder's probe (reports/L2/builder/9f598678c89b5c8eef32da2b550bc1e453cd4603/real-log-probe.txt):
+one session at $1.51, the final `result`, as #139 item 2 defines. Review b2e7f72 F1 is answered.

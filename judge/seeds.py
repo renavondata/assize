@@ -20,7 +20,7 @@ import json
 import os
 import secrets
 import stat
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 SEED_SPACE = 2**31 - 1  # Crafter's own default seed range, [0, 2**31 - 1)
@@ -76,10 +76,12 @@ def records(root: Path, world: str) -> list[dict]:
     return [json.loads(line) for line in p.read_text().splitlines()] if p.exists() else []
 
 
-def admit(root: Path, world: str, key: Key, seeds: Sequence[int], request_id: str) -> list[int]:
+def admit(root: Path, world: str, key: Key, seeds: Sequence[int], request_id: str,
+          issued_to: Mapping = {}) -> list[int]:
     """The issuance check. Refuses the whole request, recording nothing, if any seed is outside the seed space,
     keyed outside the evaluation domain, keyed like an earlier issued seed or another seed of this request, or if
-    `request_id` was used before; otherwise appends one record per seed and syncs. Returns the seeds."""
+    `request_id` was used before; otherwise appends one record per seed, carrying `issued_to` (the image and proposer
+    the seeds are issued to), and syncs. Returns the seeds."""
     p = store_path(root, world)
     fd = os.open(p, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
     try:
@@ -100,7 +102,8 @@ def admit(root: Path, world: str, key: Key, seeds: Sequence[int], request_id: st
             raise SeedError("reused", f"{bad} were issued before")
         if len({k for _, k in keyed}) != len(keyed):
             raise SeedError("reused", f"{list(seeds)} repeat a key within request {request_id!r}")
-        os.write(fd, b"".join(json.dumps({"request_id": request_id, "seed": s, "key": k}, sort_keys=True).encode()
+        os.write(fd, b"".join(json.dumps(dict(issued_to) | {"request_id": request_id, "seed": s, "key": k},
+                                         sort_keys=True).encode()
                               + b"\n" for s, k in keyed))
         os.fsync(fd)
         return list(seeds)
@@ -121,7 +124,8 @@ def fresh(root: Path, world: str, key: Key, n: int) -> list[int]:
     return out
 
 
-def issue(root: Path, world: str, key: Key, n: int, request_id: str) -> list[int]:
-    """`n` fresh evaluation seeds for `request_id`, admitted and recorded in judge-private storage before return."""
+def issue(root: Path, world: str, key: Key, n: int, request_id: str, issued_to: Mapping = {}) -> list[int]:
+    """`n` fresh evaluation seeds for `request_id`, admitted and recorded, with `issued_to`, in judge-private storage
+    before return."""
     seeds = fresh(root, world, key, n)
-    return admit(root, world, key, seeds, request_id)
+    return admit(root, world, key, seeds, request_id, issued_to)

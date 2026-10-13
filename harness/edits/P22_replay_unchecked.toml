@@ -1,0 +1,6 @@
+# P22's mutant `replay_unchecked` (brief 2 A2, L2a obligation 3): replay returns the ledger's lines for a signed
+# request without checking them against the signed head.
+[[edit]]
+path = "judge/evaluate.py"
+old = "    if found:\n"
+new = "    if False:\n"

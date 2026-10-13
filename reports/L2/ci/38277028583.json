@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-12T16:23:14Z","event":"pull_request","head_branch":"instr-132-pins-cap-2","head_sha":"cb9b1c68818b2748b8a2c1a0a77329a0683481e4","html_url":"https://github.com/renavondata/assize/actions/runs/38277028583","id":38277028583,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed"}

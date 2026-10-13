@@ -272,3 +272,32 @@ A full `pins` run (every harness change forces one, since #108) took 29 of its 3
 
 ### Deliverables
 Runner change, workflow change, P-par, a `ledger price` transcript for each criterion. The third part of the wish, several Builders at once, is draft #67 (wish #61) and depends on this amendment and on the split of shared files drafted beside it.
+
+## Wish #138 — Amendment: claude-fable-5-1 enters the build election (appended)
+
+### Precondition
+The pull requests closing #135 (each pull request writes its own STATUS, forecasts and proposer rows) and #136 (parallel pins on our own hardware) have both merged. Until then this item is not a candidate: `claims next` skips it and names the precondition it is waiting on.
+
+### Purpose
+Guy asked for Fable in the build election once shared-file conflicts and slow pins no longer make a Builder session expensive to lose. The Haiku and Fable entries for review, audit and vizier, and the per-model price line, are the instruction drafted beside this amendment.
+
+### Scope
+1. `harness/entrants.toml`: `build` becomes `["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1"]`. Nothing else in the file changes.
+2. `claims next` reads this amendment's precondition from the merge state of the two named pull requests, not from a guess.
+
+### Pre-stated criteria
+- After the change, `python -m harness.ledger elect build` on a synthetic ledger with no Fable draws gives Fable EXP3's uniform starting probability.
+- From the first Builder session that draws Fable, the per-model price line (the beside instruction's item 3) reports its sessions, minutes and cost.
+
+### Pins (each must demonstrate it can fail)
+- P0aa gains a case: this item, with either named pull request unmerged, is skipped and the skip names the precondition. Mutant, KILLED: the precondition ignored (the item taken while #136 is open).
+
+### Refusal list
+- No model is named in a workflow; the election draws it.
+- No weight, prior or head start for Fable: it enters as every entrant does.
+
+### Stop-and-report boundaries
+- If the per-model price line has not merged when the precondition is met, stop and report: the wish asks that the cost be readable.
+
+### Deliverables
+The entrants change, the P0aa case, and an `elect build` transcript.

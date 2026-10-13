@@ -38,7 +38,7 @@ import subprocess
 import time
 import tomllib
 import uuid
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -218,15 +218,24 @@ def _play(c: Container, world, manifest: Mapping, t: Timeouts, losses: list, pre
         return f.code, f.detail
 
 
-def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *, command: Sequence[str] = (),
-        lim: runtime.Limits | None = None, t: Timeouts | None = None) -> list[dict]:
-    """Play every World of `worlds` with the candidate `image`, one record per World, in order. A container serves
-    episodes until one fails; it is then torn down, and the next episode starts in a fresh container."""
+def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, **kw) -> list[dict]:
+    """Every record of `played`, in order."""
+    return list(played(rt, image, worlds, manifest, **kw))
+
+
+def played(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *, command: Sequence[str] = (),
+           lim: runtime.Limits | None = None, t: Timeouts | None = None) -> Iterator[dict]:
+    """Play every World of `worlds` with the candidate `image`, one record per World, in order, each yielded once it
+    is final: when the next World is drawn, or after the last container's teardown. A container serves episodes until
+    one fails; it is then torn down, and the next episode starts in a fresh container."""
     lim, t = lim or runtime.limits(), t or timeouts()
     rate, bins = price.of(manifest), calibration_bins()
     records: list[dict] = []
+    final = 0
     c: Container | None = None
     for i, world in enumerate(worlds):
+        yield from records[final:]
+        final = len(records)
         c = c or Container(rt, image, lim, command)
         losses: list[dict] = []
         predicted: list[dict] = []
@@ -247,4 +256,4 @@ def run(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping, *,
                         "compute": used, "price": charged})
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
-    return records
+    yield from records[final:]
