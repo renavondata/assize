@@ -725,20 +725,25 @@ class ModelPrice:
 
 
 def result_costs(events: Sequence[Mapping]) -> list[float | None]:
-    """The `total_cost_usd` of each session's final `result` event in a stream-json log, in log order; None for a
-    `result` event that carries none."""
-    return [r.get("total_cost_usd") if isinstance(r.get("total_cost_usd"), (int, float))
-            and not isinstance(r.get("total_cost_usd"), bool) else None
-            for r in events if r.get("type") == "result"]
+    """The `total_cost_usd` of each session's final `result` event in a stream-json log, sessions in order of their
+    first `result`; None for a final `result` that carries none. A session is the events' `session_id`: one session
+    emits a `result`, each with the cumulative cost, at every wake-up, so only its last counts (review b2e7f72 F1); a
+    `result` with no `session_id` is a session of its own."""
+    results = [r for r in events if r.get("type") == "result"]
+    key = [r.get("session_id") or ("", i) for i, r in enumerate(results)]
+    final = {k: r for k, r in zip(key, results)}
+    return [final[k].get("total_cost_usd") if isinstance(final[k].get("total_cost_usd"), (int, float))
+            and not isinstance(final[k].get("total_cost_usd"), bool) else None
+            for k in dict.fromkeys(key)]
 
 
 def model_price(minutes: Mapping[int, float], draws: Sequence[Mapping],
                 costs: Mapping[int, Sequence[float | None]]) -> tuple[ModelPrice, ...]:
     """Each session run attributed to the model(s) it drew: `minutes`: session run id -> runner-minutes; `draws`: the
     draw ledger's rows (`run`, `drawn`), in ledger order; `costs`: run id -> `result_costs` of its uploaded log (absent
-    when there is no log). A run's draws and its log's `result` events pair in order, and a run's minutes divide equally
-    among its sessions. A run with no draw is one `unknown` session; a session with no log, or no `result` beyond the
-    log's last, has its cost unknown; a `result` with no draw left is an `unknown` session with its cost. None dropped."""
+    when there is no log). A run's draws and its log's sessions pair in order, and a run's minutes divide equally
+    among its sessions. A run with no draw is one `unknown` session; a session with no log, or none beyond the log's
+    last, has its cost unknown; a log session with no draw left is an `unknown` session with its cost. None dropped."""
     rows: list[tuple[str, float, float | None]] = []
     for run, mins in sorted(minutes.items()):
         drawn = [str(d["drawn"]) for d in draws if "drawn" in d and str(d.get("run")) == str(run)] or [UNKNOWN_MODEL]

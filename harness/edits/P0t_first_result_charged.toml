@@ -1,0 +1,5 @@
+# P0t's mutant (review b2e7f72 F1, F2): a session is charged the cost of its first `result` event, not its final one.
+[[edit]]
+path = "harness/ledger.py"
+old = "    final = {k: r for k, r in zip(key, results)}"
+new = "    final = {k: r for k, r in reversed(list(zip(key, results)))}"

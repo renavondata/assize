@@ -1,0 +1,6 @@
+# P0t's mutant (review b2e7f72 F1): every `result` event is a session of its own, so a session's later wake-ups become
+# `unknown` sessions charged their cumulative cost again.
+[[edit]]
+path = "harness/ledger.py"
+old = "    key = [r.get(\"session_id\") or (\"\", i) for i, r in enumerate(results)]"
+new = "    key = [(\"\", i) for i, r in enumerate(results)]"

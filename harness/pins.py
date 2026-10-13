@@ -1174,21 +1174,25 @@ PRICE_INSTRUCTIONS = ((20, 10, 4, 6), (21, 10, 5, 9), (22, 11, 3, 12))
 # the failed review (the skipped one never ran); runner-minutes 30 + 60 + 10, pins 10.
 PRICE_WANT = {"items": (1, 2, 3), "latencies": (2.0, 8.0, 2.0), "open": (2,), "sessions": 2, "runner": 100.0,
               "pins": 10.0}
-# Instruction #139: run 100 (the build) drew model x and its log ends in a result costing $1.50; run 101 (the review, 60
-# minutes) drew y for review then x for vizier, and its log ends after one result of $2.00, the vizier session never
-# reaching its own. By the definition: x has two sessions over 30 + 30 minutes with one cost known ($1.50, one unknown);
-# y has one session over 30 minutes at $2.00. The run before the window (104) is in neither.
+# Instruction #139: run 100 (the build) drew model x and its one session emits cumulative results of $1.00 then $1.50,
+# the final one $1.50 (review b2e7f72 F1); run 101 (the review, 60 minutes) drew y for review then x for vizier, and its
+# log ends after one result of $2.00, the vizier session never reaching its own. By the definition: x has two sessions
+# over 30 + 30 minutes with one cost known ($1.50, one unknown); y has one session over 30 minutes at $2.00. The run
+# before the window (104) is in neither.
 PRICE_DRAWS = (("build", 100, "claude-x"), ("review", 101, "claude-y"), ("vizier", 101, "claude-x"))
-PRICE_LOGS = {100: ((1.5,),), 101: ((2.0,),)}  # run -> the (cost,) of each session's result event in its log
+PRICE_LOGS = {100: ((1.0, 1.5),), 101: ((2.0,),)}  # run -> per session, the cost of each of its result events in order
 PRICE_MODELS_WANT = (("claude-x", 2, 60.0, 1.5, 1), ("claude-y", 1, 30.0, 2.0, 0))
 
 
 def _session_log(*sessions_: tuple) -> list[dict]:
-    """A stream-json log of sessions: each is an assistant message and a `result` event carrying its cost, if any."""
+    """A stream-json log of sessions: each, under its own `session_id`, is an assistant message and a `result` event
+    carrying its cumulative cost, if any, per wake-up."""
     events: list[dict] = []
-    for (cost,) in sessions_:
-        events += [{"type": "assistant", "message": {"id": "m", "content": []}},
-                   {"type": "result", "subtype": "success"} | ({} if cost is None else {"total_cost_usd": cost})]
+    for s, costs in enumerate(sessions_):
+        for cost in costs:
+            events += [{"type": "assistant", "session_id": f"s{s}", "message": {"id": "m", "content": []}},
+                       {"type": "result", "subtype": "success", "session_id": f"s{s}"}
+                       | ({} if cost is None else {"total_cost_usd": cost})]
     return events
 
 
@@ -4682,7 +4686,9 @@ PINS = [
                     Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction")),
                     Mutant("first_entrant_only", _edits("P0t_first_entrant_only")),
                     Mutant("costless_session_dropped", _edits("P0t_costless_session_dropped")),
-                    Mutant("cost_pooled", _edits("P0t_cost_pooled"))), HARNESS),
+                    Mutant("cost_pooled", _edits("P0t_cost_pooled")),
+                    Mutant("first_result_charged", _edits("P0t_first_result_charged")),
+                    Mutant("result_per_session", _edits("P0t_result_per_session"))), HARNESS),
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),
