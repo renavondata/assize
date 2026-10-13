@@ -2,7 +2,10 @@ name: build
 on:
   push:
     branches: [master]
-  pull_request:
+  # Instruction #113 Part D: `pull_request_target` runs this file as it stands on master, never the pull request's copy,
+  # so a PR that changes a flag this workflow passes is built by master's workflow against master's harness. The
+  # repository is private and has no forks, so the fork-secret risk of `pull_request_target` does not arise.
+  pull_request_target:
     types: [labeled]
   issues:
     types: [labeled]
@@ -11,7 +14,7 @@ on:
       pr: { description: "PR number to build on; empty builds master", required: false, type: string }
 jobs:
   build:
-    if: (github.event_name != 'pull_request' && github.event_name != 'issues') || (github.event_name == 'pull_request' && github.event.label.name == 'blocked') || (github.event_name == 'pull_request' && github.event.label.name == 'awaits-guy') || (github.event_name == 'issues' && github.event.label.name == 'instruction')
+    if: (github.event_name != 'pull_request_target' && github.event_name != 'issues') || (github.event_name == 'pull_request_target' && github.event.label.name == 'blocked') || (github.event_name == 'pull_request_target' && github.event.label.name == 'awaits-guy') || (github.event_name == 'issues' && github.event.label.name == 'instruction')
     # Instruction #102: an `awaits-guy` label on a pull request starts a Builder on master, not on the PR branch (the PR
     # is finished from the Builder's side), so the queue does not pause while Guy's answer is pending; it queues in
     # master's group and checks out no PR. The `blocked` path is unchanged: it builds on the PR, in the PR's group.
@@ -31,8 +34,12 @@ jobs:
       - uses: actions/checkout@v5
         with: { ref: master, fetch-depth: 0, persist-credentials: false }
       - run: gh auth setup-git
-      - if: (github.event_name == 'pull_request' && github.event.label.name == 'blocked') || inputs.pr != ''
+      - if: (github.event_name == 'pull_request_target' && github.event.label.name == 'blocked') || inputs.pr != ''
         run: gh pr checkout ${{ github.event.pull_request.number || inputs.pr }}
+      # Instruction #113 Part E: hooks run whether or not the workspace is trusted, so a branch's own
+      # `scripts/bootstrap.sh` would run before `claude` starts, with the builder token in its environment. Restore
+      # the hooks, commands and settings from master after the pull request is checked out, before the session starts.
+      - run: git checkout origin/master -- .claude scripts/bootstrap.sh
       # Instruction #110 Part C: a push of a commit whose trailers git does not parse is refused. The path is relative,
       # so the hook is the checked-out branch's own, the code under test.
       - run: git config core.hooksPath harness/hooks
@@ -41,7 +48,7 @@ jobs:
       - run: |
           model=$(uv run --frozen python -m harness.ledger elect build --seed ${{ github.run_id }} --head origin/master --publish origin)
           echo "elected: $model"
-          claude --model "$model" -p "/build" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
+          claude --model "$model" -p "/build" --allowedTools "Bash(gh:*) Bash(make:*) Bash(podman:*)" --max-turns 250 --output-format stream-json --verbose > build.log 2>&1
       # Instruction #112 Part A item 5: this step fails when the session ended with usage_limit_reached; the price counts
       # sessions lost to the limit by this step's name (harness.ledger.LIMIT_STEP), read through the Actions API.
       - if: always()
