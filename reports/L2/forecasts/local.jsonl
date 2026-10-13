@@ -1,0 +1,2 @@
+{"id": "db209a71de20", "ts": "2026-10-13T01:23:58Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "local"}, "outcome": false, "witness": "reports/L2/review-dac79cf7232b9aa973b5c4610fb21aec6f461021.md at f97a02ac94d8: BLOCK"}
+{"id": "157fa18e1313", "ts": "2026-10-13T01:23:58Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "local"}, "outcome": true, "witness": "reports/L2/review-b7ee2fb86b52eb49ea1f1dfd1662a2e51d9fd776.md at 488af73daa20: ACCEPT WITH OBLIGATIONS"}
