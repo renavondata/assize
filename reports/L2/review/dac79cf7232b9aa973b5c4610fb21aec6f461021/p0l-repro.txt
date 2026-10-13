@@ -1,0 +1,3 @@
+scratch reproduction of P0l finding on a detached worktree at dac79cf7232b9aa973b5c4610fb21aec6f461021:
+reports/L2/STATUS.md: unrecorded: run 38277028583 has no committed record (reports/L2/ci/38277028583.json)
+run 38277028583 (pins on cb9b1c6): completed success; run 38277175721 (pins on dac79cf7232b9aa973b5c4610fb21aec6f461021): completed failure
