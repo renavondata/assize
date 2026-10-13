@@ -301,3 +301,10 @@ Guy asked for Fable in the build election once shared-file conflicts and slow pi
 
 ### Deliverables
 The entrants change, the P0aa case, and an `elect build` transcript.
+
+## Wish #173 (appended; instruction #174)
+
+1. When the elected model for a procedure is unavailable (a usage limit, or a refusal to start, as in review run 38374009672), the session re-runs at once with a fresh draw from `python -m harness.ledger elect <procedure> --seed <new run id>`. The unavailable model is excluded from that draw for the rest of the run. At most one re-run per run id.
+2. The unavailable round is itself a forecast of the elected model that resolves 0 (did not run), with proposer kind `mechanism`, under the same proper log score as every other typed forecast of that model. No new constant: the loss is the one the election already uses.
+3. Witnesses: a pin in `harness/pins.py` fails a mutant that drops an unavailable round unscored, and a pin fails a mutant that re-runs with the same draw. Both must be KILLED before the amendment is in force.
+4. Price quantity: re-runs per week and runner-minutes spent on unavailable rounds, reported on the STATUS price line (P0t). Expected direction: both fall to zero once the election has learned to avoid the unavailable model.
