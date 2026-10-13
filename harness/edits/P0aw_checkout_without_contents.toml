@@ -1,0 +1,9 @@
+# P0aw's mutant (instruction #162): the report job of failed.yml grants issues and actions but not contents, so its
+# actions/checkout fails with "repository not found" and no red pull request is routed (the state after #153).
+[[edit]]
+path = ".github/workflows/failed.yml"
+old = """      actions: read
+      contents: read
+"""
+new = """      actions: read
+"""
