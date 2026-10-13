@@ -1,0 +1,34 @@
+2026-10-13T05:25:09.6088585Z   clean: true
+2026-10-13T05:25:28.2341282Z ##[group]Run make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+2026-10-13T05:25:28.2341797Z make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+2026-10-13T05:25:28.2408141Z   PINS_SINCE: --since 41682c27c513ec10f0bb0e6188c2c8ebacad1d03 --since-run 38345714403
+2026-10-13T05:32:41.7323785Z [clean ] P0l: observed fail -> FAILED (0.385s) out/pins/runs/P0l/clean/transcript.log
+2026-10-13T05:32:41.7324870Z CLEAN FAILED: P0l (observed fail)
+2026-10-13T05:32:41.7394336Z [clean ] P9: observed pass -> ok (4.945s) out/pins/runs/P9/clean/transcript.log
+2026-10-13T05:32:41.7397140Z [clean ] P17: observed pass -> ok (11.797s) out/pins/runs/P17/clean/transcript.log
+2026-10-13T05:32:41.7403433Z [clean ] P22: observed pass -> ok (0.535s) out/pins/runs/P22/clean/transcript.log
+2026-10-13T05:32:41.7404656Z [clean ] P23: observed pass -> ok (8.204s) out/pins/runs/P23/clean/transcript.log
+2026-10-13T05:32:41.7414808Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.418s + 0.418s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-13T05:32:41.7451163Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.417s + 0.418s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+2026-10-13T05:32:41.7452717Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+2026-10-13T05:46:32.0558272Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.418s + 0.418s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+2026-10-13T05:46:32.0591073Z [mutant] P3/played_at_end: mutant fail, twin pass -> KILLED (37.962s + 37.85s) out/pins/runs/P3/played_at_end/mutant/transcript.log
+2026-10-13T05:57:06.2927867Z [mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (5.034s + 4.98s) out/pins/runs/P9/record_dropped/mutant/transcript.log
+2026-10-13T05:57:06.2929537Z [mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (5.029s + 4.979s) out/pins/runs/P9/utility_altered/mutant/transcript.log
+2026-10-13T05:57:06.2931166Z [mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (5.03s + 4.979s) out/pins/runs/P9/chain_update_skipped/mutant/transcript.log
+2026-10-13T05:57:06.2932831Z [mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.418s + 4.978s) out/pins/runs/P9/opened_for_rewrite/mutant/transcript.log
+2026-10-13T05:57:06.2934424Z [mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (5.03s + 5.08s) out/pins/runs/P9/genesis_empty/mutant/transcript.log
+2026-10-13T05:57:06.2936252Z [mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (4.979s + 4.979s) out/pins/runs/P9/signature_unchecked/mutant/transcript.log
+2026-10-13T05:57:06.2937965Z [mutant] P9/independent_heads: mutant fail, twin pass -> KILLED (5.029s + 4.978s) out/pins/runs/P9/independent_heads/mutant/transcript.log
+2026-10-13T05:57:06.2944839Z [mutant] P17/fixed_proposer: mutant fail, twin pass -> KILLED (12.184s + 12.378s) out/pins/runs/P17/fixed_proposer/mutant/transcript.log
+2026-10-13T05:57:06.2946650Z [mutant] P17/seeds_before_proposer: mutant fail, twin pass -> KILLED (14.195s + 12.394s) out/pins/runs/P17/seeds_before_proposer/mutant/transcript.log
+2026-10-13T05:57:06.2948313Z [mutant] P17/idempotency_dropped: mutant fail, twin pass -> KILLED (15.897s + 12.938s) out/pins/runs/P17/idempotency_dropped/mutant/transcript.log
+2026-10-13T05:57:06.2950158Z [mutant] P17/conflict_unchecked: mutant fail, twin pass -> KILLED (12.44s + 12.388s) out/pins/runs/P17/conflict_unchecked/mutant/transcript.log
+2026-10-13T05:57:06.2951668Z [mutant] P17/hash_partial: mutant fail, twin pass -> KILLED (12.73s + 12.739s) out/pins/runs/P17/hash_partial/mutant/transcript.log
+2026-10-13T05:57:06.2971295Z [mutant] P22/replay_unchecked: mutant fail, twin pass -> KILLED (0.568s + 0.568s) out/pins/runs/P22/replay_unchecked/mutant/transcript.log
+2026-10-13T05:57:06.2972749Z [mutant] P23/partial_dropped: mutant fail, twin pass -> KILLED (8.084s + 8.236s) out/pins/runs/P23/partial_dropped/mutant/transcript.log
+2026-10-13T05:57:06.2974442Z [mutant] P23/interrupted_unsealed: mutant fail, twin pass -> KILLED (8.49s + 8.288s) out/pins/runs/P23/interrupted_unsealed/mutant/transcript.log
+2026-10-13T05:57:06.2989614Z clean: 62/63 passed, 1/63 failed
+2026-10-13T05:57:06.2990535Z mutants: 170/171 killed, 0/171 survived, 0/171 inconclusive, 0/171 stale, 1/171 non-causal, 0 leaked (clean and mutant)
+2026-10-13T05:57:06.2991504Z twins: 170/171 passed
+2026-10-13T05:57:06.2993230Z PINS FAILED
