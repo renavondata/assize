@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-113-w2 (instruction #113): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "65a8ae95-0f78-49d8-99c4-a6d29f9a96dd"

@@ -408,6 +408,7 @@ def p0k_forecast_ledger() -> bool:
     proposed by the Reviewer or the resolver is rejected (brief 1 A4 item 7a, CLAUDE.md A1.6), and so is one proposed
     by its forecast's own session (rule 4 of the ground, instruction #54 item 4); every real ledger is validated."""
     expect, ok = _expecter()
+    from harness import ledger
     forecast, resolution = _ledger_fixture()
     got = claims.ledger_findings(_ledger(forecast, resolution))
     expect(not got, f"well-formed forecast and Reviewer resolution accepted ({[str(f) for f in got]})")
@@ -438,17 +439,25 @@ def p0k_forecast_ledger() -> bool:
     got = claims.ledger_findings(_ledger(forecast | {"id": "ffffffffffff"}))
     expect(("row 1", "bad_id") in _codes(got), "a forecast whose id is not sha256(claim + ts)[:12] rejected")
 
-    ledgers = sorted(_real_root().glob("reports/L*/forecasts.jsonl"))
-    expect(bool(ledgers), f"real ledgers found: {[str(p.relative_to(_real_root())) for p in ledgers]}")
-    for path in ledgers:
-        lines = path.read_text().splitlines()
+    root = _real_root()
+    layers = sorted(root.glob("reports/L*"))
+    expect(bool(layers), f"real layers found: {[str(p.relative_to(root)) for p in layers]}")
+    for layer in layers:
+        frozen = layer / "forecasts.jsonl"
+        own = sorted((layer / "forecasts").glob("*.jsonl"))
+        if not frozen.exists() and not own:
+            continue
+        # A resolution may sit in another session's file than its forecast: a layer's ledger is the frozen file's rows,
+        # then every file under forecasts/ ordered by ts then id (instruction #135).
+        later = ledger.ordered([r for p in own for r in map(json.loads, filter(str.strip, p.read_text().splitlines()))])
+        lines = (frozen.read_text().splitlines() if frozen.exists() else []) + [json.dumps(r) for r in later]
         got = claims.ledger_findings(lines)
-        allowed = L0_PRE_RULE if path.parent.name == "L0" else set()
+        allowed = L0_PRE_RULE if layer.name == "L0" else set()
         for f in got:
-            print(f"    {path.parent.name}: {f}")
+            print(f"    {layer.name}: {f}")
         expect(_codes(got) == allowed if allowed else not got,
-               f"{path.relative_to(_real_root())}: {len(lines)} rows, {len(got)} findings; "
-               f"expected exactly {sorted(allowed) or 'none'}")
+               f"{layer.relative_to(root)}: {len(lines)} rows in {1 + len(own) if frozen.exists() else len(own)} files, "
+               f"{len(got)} findings; expected exactly {sorted(allowed) or 'none'}")
     return ok()
 
 
@@ -487,7 +496,8 @@ def p0l_ci_claims() -> bool:
 
     root = _real_root()
     runs = claims.load_runs(root)
-    statuses = sorted(p for p in root.glob("reports/L*/STATUS.md") if int(p.parent.name[1:]) >= 1)
+    statuses = sorted(p for g in claims.STATUS_GLOBS for p in root.glob(g)
+                      if int(re.search(r"/L(\d+)/", f"/{p.relative_to(root)}").group(1)) >= 1)
     expect(bool(statuses), f"real STATUS files from L1: {[str(p.relative_to(root)) for p in statuses]}; "
                            f"{len(runs)} committed run records")
     for path in statuses:
@@ -1092,6 +1102,7 @@ OUTCOME_ANSWERS = {  # what the GitHub API and the tree answer, in the shapes th
     ("timeline", 7): [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"},
                        "created_at": BEFORE_TS},
                       {"event": "closed", "actor": {"login": "assize-reviewer"}, "created_at": AFTER_TS}],
+    ("issue", 7): {"number": 7, "title": "an instruction", "labels": ["instruction"]},  # not a draft (instruction #112)
     ("timeline", 8): [{"event": "merged", "actor": {"login": "gfrmin"}, "created_at": AFTER_TS},
                       {"event": "closed", "actor": {"login": "gfrmin"}, "created_at": AFTER_TS},
                       {"event": "unlabeled", "actor": {"login": "assize-reviewer"}, "created_at": AFTER_TS}],
@@ -1201,7 +1212,8 @@ def p0t_price() -> bool:
            f"wishes {ws}, latencies {wl}, open {wo}; want (10, 11, 12), (5.0,), (11, 12)")
     line = dataclasses.replace(got, wishes=ws, wish_latencies_h=wl, open_wishes=wo).status_line()
     expect(line == "price: guy-items 3; guy-latency median 2.0h max 8.0h; sessions 2; runner-min 100; "
-                   "wish-latency median 5.0h max 5.0h open 2", f"STATUS line {line!r}")
+                   "wish-latency median 5.0h max 5.0h open 2; sessions-over-bound 0/0; sessions-lost-to-limit 0",
+           f"STATUS line {line!r}")
     return ok()
 
 
@@ -1512,7 +1524,7 @@ def _run_selfrun(tree_: Path, prefix: list[str] | None = None) -> subprocess.Com
         argv, cwd=tree_, capture_output=True, text=True, timeout=300, env=os.environ | claims.GIT_ENV | FIXTURE_GIT))
 
 
-def p0ak_selfrun() -> bool:
+def p0as_selfrun() -> bool:
     """`pins` runs `python -m harness.selfrun`, which runs every harness call of the head's build.yml and review.yml
     with `--dry-run` from the head's checkout: a workflow that passes a flag the harness lacks fails it, one that changes
     the flag together with the harness passes, and a workflow with no harness call to run fails (instruction #113 Part A)."""
@@ -1578,7 +1590,7 @@ def _refs(repo: Path) -> str:
     return _git_fixture(repo)("for-each-ref")
 
 
-def p0al_dry_run_writes_nothing() -> bool:
+def p0at_dry_run_writes_nothing() -> bool:
     """Under a network-less sandbox, `harness.ledger elect --dry-run` (with and without `--publish`), `resolve --dry-run`
     and `harness.selfrun` write no file, record no draw, fetch no ref and push nothing, and compute what they would have
     (instruction #113 Part A item 2). The same commands without `--dry-run` do write: the observation can fail."""
@@ -1660,7 +1672,7 @@ REVIEW_PROCEDURES = (  # (what, event, label, pr, procedures chosen, concurrency
 )
 
 
-def p0am_dispatch_audits() -> bool:
+def p0au_dispatch_audits() -> bool:
     """A `review.yml` dispatch with `pr` empty runs the Auditor at master, in concurrency group `review-audit`; one with `pr`
     set reviews that pull request in its own group; the other events choose what they chose (instruction #113 Part B)."""
     expect, ok = _expecter()
@@ -1694,7 +1706,7 @@ def _trusted_fixture(repo: Path, drop: str | None = None) -> None:
     (repo / ".github" / "workflows" / "w.yml").write_text(wf)
     (repo / ".claude" / "commands" / "c.md").write_text("c\n")
     table = "| entry | starts | lowers | pin |\n|---|---|---|---|\n" + "".join(
-        f"| `{r}` | x | sessions | P0an |\n" for r in rows if r != drop)
+        f"| `{r}` | x | sessions | P0av |\n" for r in rows if r != drop)
     (repo / "ops" / "trusted-base.md").write_text(table)
 
 
@@ -1703,7 +1715,7 @@ def _trusted(repo: Path) -> subprocess.CompletedProcess:
                           capture_output=True, text=True, cwd=ROOT, env=os.environ | claims.GIT_ENV)
 
 
-def p0an_trusted_base() -> bool:
+def p0av_trusted_base() -> bool:
     """`python -m harness.claims trusted-base` accepts a checkout whose table lists every trigger, command, secret, runner
     and token scope it holds and nothing else, and fails on an unlisted trigger, a row whose trigger is gone, or a row naming
     neither a price quantity and a pin nor REMOVE; the real tree passes, its table lists every trigger present, and the
@@ -1730,7 +1742,7 @@ def p0an_trusted_base() -> bool:
                f"a row whose trigger was deleted fails (exit {done.returncode}): {done.stdout}")
         (base / "unpriced").mkdir()
         _trusted_fixture(base / "unpriced")
-        _replace(base / "unpriced" / "ops" / "trusted-base.md", "| `command:c` | x | sessions | P0an |",
+        _replace(base / "unpriced" / "ops" / "trusted-base.md", "| `command:c` | x | sessions | P0av |",
                  "| `command:c` | x | sessions | |")
         done = _trusted(base / "unpriced")
         expect(done.returncode != 0 and "unnamed_price_or_pin: command:c" in done.stdout,
@@ -2184,6 +2196,390 @@ def p0ab_session_logs() -> bool:
     text = "\n".join(json.dumps(e) for e in _log(*SESSION_FIXTURE[1][1])) + "\nstderr noise\n"
     expect({f.code for f in sessions.session_findings(sessions.parse(text))} == {"shell_edit"},
            "the log is read from stream-json text, other lines skipped")
+    return ok()
+
+
+DECLARE_TEXT = "build run 9 started 2026-10-12T09:00:00Z on #112: expected 60 minutes"
+DECLARE = ("Bash", False, {"command": f"gh issue comment 112 --body '{DECLARE_TEXT}; model m'"})
+STATUS_WRITTEN = ("Write", False, {"file_path": "reports/L2/STATUS.md", "content": "# STATUS\n"})
+STOP_COMMENT = ("Bash", False, {"command": "gh pr comment 63 --body 'build run 9 stopped 2026-10-12T10:00:00Z: no item'"})
+FORECAST_ROW = '{"id": "f1", "claim": "pins green", "p": 0.6}'
+RESOLUTION_ROW = '{"id": "f0", "outcome": true}'
+
+
+def _ledger_edit(row: str) -> tuple:
+    return ("Edit", False, {"file_path": "reports/L2/forecasts.jsonl", "old_string": "{}\n", "new_string": f"{{}}\n{row}\n"})
+
+
+DECLARED_FIXTURE = (  # (what, branch the workflow checked out, calls, findings wanted) -- instruction #112 Parts A, D
+    ("declares, branches, writes STATUS", "master", (DECLARE, BRANCHED, STATUS_WRITTEN), set()),
+    ("reads to name its item, then declares", "master",
+     (("Bash", False, {"command": "uv run --frozen python -m harness.claims next '#112'"}), DECLARE, BRANCHED,
+      STATUS_WRITTEN), set()),
+    ("no declaration", "master", (BRANCHED, STATUS_WRITTEN), {"undeclared_session"}),
+    ("commits before declaring", "master", (BRANCHED, ("Bash", False, {"command": "git commit -m x"}), DECLARE,
+                                            STATUS_WRITTEN), {"undeclared_session"}),
+    ("edits a file before declaring", "master", (("Edit", False, {"file_path": "harness/x.py"}), DECLARE,
+                                                 STATUS_WRITTEN), {"undeclared_session"}),
+    ("a declaration naming no model", "master",
+     (("Bash", False, {"command": f"gh issue comment 112 --body '{DECLARE_TEXT}'"}), STATUS_WRITTEN),
+     {"undeclared_session"}),
+    ("a denied declaration, then a commit", "master", (("Bash", True, DECLARE[2]), BRANCHED,
+                                                       ("Bash", False, {"command": "git commit -m x"}), STATUS_WRITTEN),
+     {"undeclared_session"}),
+    ("takes no item: the stop issue carries the declaration and the stop", "master",
+     (("Bash", False, {"command": f"gh issue create --assignee gfrmin --title t --body '{DECLARE_TEXT}; model m\n"
+                                  "build run 9 stopped 2026-10-12T09:01:00Z: nothing to do'"}),), set()),
+    ("a new branch adds forecast rows", "master", (DECLARE, BRANCHED, _ledger_edit(FORECAST_ROW), STATUS_WRITTEN),
+     set()),
+    ("a PR-branch session adds a forecast row (run 38133974898)", "instr-109-x",
+     (DECLARE, _ledger_edit(FORECAST_ROW), STATUS_WRITTEN), {"pr_branch_forecast"}),
+    ("checks out a PR, then adds a forecast row", "master",
+     (DECLARE, ("Bash", False, {"command": "gh pr checkout 63"}), _ledger_edit(FORECAST_ROW), STATUS_WRITTEN),
+     {"pr_branch_forecast"}),
+    ("a PR-branch session appends a forecast row by shell", "instr-109-x",
+     (DECLARE, ("Bash", False, {"command": f"echo '{FORECAST_ROW}' >> reports/L2/forecasts.jsonl"}), STATUS_WRITTEN),
+     {"pr_branch_forecast"}),
+    ("a PR-branch session appends a resolution", "instr-109-x", (DECLARE, _ledger_edit(RESOLUTION_ROW),
+                                                                 STATUS_WRITTEN), set()),
+    ("stops on a PR branch with a stop comment", "instr-109-x", (DECLARE, STOP_COMMENT), set()),
+    ("writes a review file", "master", (DECLARE, ("Write", False, {"file_path": "reports/L2/review-abc.md"})), set()),
+    ("stops silently (PR #109's fix session)", "instr-109-x",
+     (DECLARE, ("Bash", False, {"command": "make pins"})), {"silent_stop"}),
+    ("its stop comment was denied", "instr-109-x", (DECLARE, ("Bash", True, STOP_COMMENT[2])), {"silent_stop"}),
+)
+
+
+RUN_ANSWERS = {  # (run id) -> the Actions API run, in the shape the observer returns
+    1: {"status": "completed", "conclusion": "success", "run_started_at": AFTER_TS, "updated_at": "2026-01-11T00:30:00Z"},
+    2: {"status": "completed", "conclusion": "failure", "run_started_at": AFTER_TS, "updated_at": "2026-01-11T01:30:00Z"},
+    3: {"status": "in_progress", "conclusion": None, "run_started_at": AFTER_TS, "updated_at": AFTER_TS},
+    4: {"status": "completed", "conclusion": "cancelled", "run_started_at": AFTER_TS,
+        "updated_at": "2026-01-11T05:00:00Z"},
+}
+# (forecast, outcome wanted, void wanted): run 1 took 30 minutes against 60; run 2 took 90 against 60; run 3 is in
+# progress, open; run 4 was cancelled, void.
+MINUTES_FIXTURE = (
+    (_typed("build run 1 ends within 60 minutes of its start", 0.7, "session_minutes", {"run": 1, "bound": 60}), True,
+     False),
+    (_typed("build run 2 ends within 60 minutes of its start", 0.7, "session_minutes", {"run": 2, "bound": 60}), False,
+     False),
+    (_typed("build run 3 ends within 60 minutes of its start", 0.7, "session_minutes", {"run": 3, "bound": 60}), None,
+     False),
+    (_typed("build run 4 ends within 60 minutes of its start", 0.7, "session_minutes", {"run": 4, "bound": 600}),
+     None, True),
+)
+LIMIT_RUNS = (  # (workflow, conclusion, steps): only a session run whose LIMIT_STEP failed is lost to the limit
+    (".github/workflows/build.yml", "failure", (("usage limit", "failure"),)),
+    (".github/workflows/review.yml", "failure", (("usage limit", "success"), ("claude", "failure"))),
+    (".github/workflows/build.yml", "success", (("usage limit", "success"),)),
+    (claims.PINS_WORKFLOW, "failure", (("usage limit", "failure"),)),
+)
+USAGE_LOG = (  # the same message id repeated once per content block counts once
+    {"type": "assistant", "message": {"id": "m1", "usage": {"input_tokens": 10, "output_tokens": 5,
+                                                             "cache_read_input_tokens": 100}}},
+    {"type": "assistant", "message": {"id": "m1", "usage": {"input_tokens": 10, "output_tokens": 5,
+                                                             "cache_read_input_tokens": 100}}},
+    {"type": "assistant", "message": {"id": "m2", "usage": {"input_tokens": 1, "output_tokens": 2,
+                                                             "cache_creation_input_tokens": 3}}},
+)
+DECLARATION_FORM = "run <run id> started <ISO time> on #<n>: expected <m> minutes; model <your model id>"
+SESSION_COMMANDS = ("build", "review", "audit", "vizier")
+
+
+def p0ak_session_declared() -> bool:
+    """A session's first act is its declaration comment, naming the model; a log without it fails. The declaration's
+    `session_minutes` forecast resolves from the Actions API run: within its bound true, beyond it false, in progress
+    open, cancelled void; the price counts runs over their own bound and runs lost to the usage limit (instruction
+    #112 Part A)."""
+    from harness import ledger, sessions
+
+    expect, ok = _expecter()
+    for what, start, calls_, want in DECLARED_FIXTURE:
+        got = {f.code for f in sessions.undeclared(sessions.calls(_log(*calls_)))}
+        want_a = want & {"undeclared_session"}
+        expect(got == want_a, f"{what}: findings {sorted(got)}, want {sorted(want_a)}")
+
+    def observe(kind: str, *key: object) -> object:
+        if kind != "run" or int(key[0]) not in RUN_ANSWERS:
+            raise ledger.Unreadable(f"fixture has no answer to {(kind, *key)}")
+        return RUN_ANSWERS[int(key[0])]
+
+    rows = [f for f, _, _ in MINUTES_FIXTURE]
+    got, unread = ledger.resolve(rows, observe, OUTCOME_NOW, "p0ak")
+    by_id = {r["id"]: r for r in got}
+    for f, want, void in MINUTES_FIXTURE:
+        r = by_id.get(f["id"])
+        said = "open" if r is None else ("void" if r.get("void") else r["outcome"])
+        wanted = "void" if void else ("open" if want is None else want)
+        expect(said == wanted, f"{f['claim']!r}: resolved {said}, want {wanted}")
+    expect(not unread, f"every run read ({unread})")
+    k, n = ledger.over_bound(rows + got, BEFORE_TS, LATER_TS)
+    expect((k, n) == (1, 4), f"sessions-over-bound {k}/{n}, want 1/4 (run 2 over; run 3 open and run 4 void counted)")
+    runs = [{"path": w, "conclusion": c, "created_at": _h(1), "run_started_at": _h(1), "updated_at": _h(2),
+             "steps": [{"name": s, "conclusion": sc} for s, sc in steps]} for w, c, steps in LIMIT_RUNS]
+    priced = ledger.price([], {}, runs, T0, _h(PRICE_UNTIL))
+    expect(priced.lost_to_limit == 1, f"sessions-lost-to-limit {priced.lost_to_limit}, want 1 (the build run whose "
+                                      f"`{ledger.LIMIT_STEP}` step failed)")
+    line = dataclasses.replace(priced, over_bound=k, bounded=n).status_line()
+    expect(line.endswith("; sessions-over-bound 1/4; sessions-lost-to-limit 1"), f"STATUS price line {line!r}")
+    expect(sessions.tokens(list(USAGE_LOG)) == 121, f"tokens {sessions.tokens(list(USAGE_LOG))}, want 121")
+    expect(sessions.limit_reached([{"type": "result", "subtype": "error", "error": "usage_limit_reached"}])
+           and not sessions.limit_reached([{"type": "result", "subtype": "success", "result": "done"}]),
+           "a log whose last result carries usage_limit_reached is lost to the limit; one ending otherwise is not")
+    for w, log in (("build.yml", "build.log"), ("review.yml", "review.log")):
+        text = (ROOT / ".github" / "workflows" / w).read_text()
+        expect(re.search(rf"- if: always\(\)\n\s+name: {re.escape(ledger.LIMIT_STEP)}\n\s+run: uv run --frozen python "
+                         rf"-m harness\.sessions limit {re.escape(log)}\n", text) is not None,
+               f"{w} runs `harness.sessions limit {log}` as the always-run step `{ledger.LIMIT_STEP}`")
+    for c in SESSION_COMMANDS:
+        text = (ROOT / ".claude" / "commands" / f"{c}.md").read_text()
+        expect(f"`{c} {DECLARATION_FORM}`" in text and "session_minutes" in text and "harness.sessions tokens" in text,
+               f"{c}.md: the first act is the declaration `{c} {DECLARATION_FORM}`, a session_minutes forecast, and "
+               f"the tokens added at the end")
+    return ok()
+
+
+def p0an_session_routed() -> bool:
+    """A session on a pull-request branch adds no forecast row; a session that writes no STATUS, review or audit file
+    and posts no stop comment fails as an unrouted exit; each procedure says both (instruction #112 Part D)."""
+    from harness import sessions
+
+    expect, ok = _expecter()
+    for what, start, calls_, want in DECLARED_FIXTURE:
+        got = {f.code for f in sessions.declared_findings(_log(*calls_), start)}
+        expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
+    for c in SESSION_COMMANDS:
+        text = (ROOT / ".claude" / "commands" / f"{c}.md").read_text()
+        expect(f"`{c} run <run id> stopped <ISO time>:`" in text, f"{c}.md: a session that stops posts "
+                                                                  f"`{c} run <run id> stopped <ISO time>:`")
+    build = (ROOT / ".claude" / "commands" / "build.md").read_text()
+    expect("On a pull-request branch, append no forecast row" in build,
+           "build.md step 2: a pull-request branch takes no forecast row")
+    return ok()
+
+
+ROUTE_FIXTURE = (  # (what, event, prior `labeled blocked` rounds, mergeable, decision) -- instruction #126 item 3
+    ("red pins, 0 rounds", "pins_red", 0, "UNKNOWN", "label"),
+    ("red pins, 3 rounds", "pins_red", 3, "UNKNOWN", "issue"),
+    ("conflicting pull request, 1 round", "pushed", 1, "CONFLICTING", "label"),
+    ("clean pull request", "pushed", 0, "MERGEABLE", "nothing"),
+)
+
+
+def p0aq_red_returns_to_builder() -> bool:
+    """A red pins run on a pull request, or a pull request in conflict after a push to master, is labelled `blocked`
+    (its Builder restarts) while fewer than three `blocked` rounds stand, then files the issue to Guy; a clean pull
+    request gets nothing (`harness.route.decide`, which `failed.yml` calls; instruction #126)."""
+    from harness import route
+
+    expect, ok = _expecter()
+    for what, event, rounds, mergeable, want in ROUTE_FIXTURE:
+        got = route.decide(event, rounds, mergeable)
+        expect(got == want, f"{what}: {got}, want {want}")
+    text = (ROOT / ".github" / "workflows" / "failed.yml").read_text()
+    expect("python3 -m harness.route pins_red" in text and "python3 -m harness.route pushed" in text,
+           "failed.yml decides both cases by harness.route")
+    return ok()
+
+
+def _session_branch(git, repo: Path, base: str, branch: str, session: str, date: str) -> str:
+    """A synthetic branch off `base` doing what one Builder session does: a forecast, a STATUS and a proposer row, each
+    at the path `claims.session_files` gives. Returns the branch's name."""
+    git("checkout", "-q", "-b", branch, base)
+    files = claims.session_files(2, session, branch)
+    row = {"id": session, "ts": "2026-10-01T00:00:00Z", "claim": f"{branch} is green", "p": 0.5}
+    # The shared files are appended to or rewritten, as a session writing them does: a shared path collides.
+    for path, text in ((files["forecasts"], json.dumps(row) + "\n"),
+                       (files["status"], f"# STATUS — L2 — {date} — {branch[:7]:7} — PR #1\n"),
+                       (files["proposer"], f'kind = "builder"\nmodel = "m"\nsession = "{session}"\n')):
+        if path.endswith("STATUS.md"):
+            (repo / path).write_text(text)
+        else:
+            _append(repo, path, text)
+    git("add", "-A")
+    git("commit", "-q", "-m", branch)
+    return branch
+
+
+def _merge_in_order(git, repo: Path, base: str, name: str, order: tuple[str, ...]) -> str | None:
+    """Merge the branches into a fresh branch off `base`, in order, as pull requests: None if all merge, else the
+    branch that conflicted."""
+    git("checkout", "-q", "-b", name, base)
+    for n, branch in enumerate(order, 1):
+        try:
+            git("merge", "-q", "--no-ff", "-m", f"Merge pull request #{n} from x/{branch}", branch)
+        except subprocess.CalledProcessError:
+            git("merge", "--abort")
+            return branch
+    return None
+
+
+def p0ar_per_pr_files() -> bool:
+    """Two pull requests each doing what one Builder session does (a forecast, a STATUS, a proposer row) merge with no
+    conflict in either order; the ledger, the registry and the master STATUS view then read both pull requests' rows,
+    the STATUS view being the file of the pull request merged last (instruction #135)."""
+    from harness import ledger, registries
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ar-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir()
+    git("init", "-q", "-b", "master")
+    _append(repo, "reports/L2/forecasts.jsonl", json.dumps({"id": "old", "ts": "2026-09-01T00:00:00Z", "claim": "c"}) + "\n")
+    _append(repo, "reports/L2/STATUS.md", "# STATUS — L2 — 2026-09-01 — 0000000 — PR #0\n")
+    _append(repo, "harness/proposer.toml", 'kind = "builder"\nmodel = "m"\nsession = "frozen"\n')
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    # a's header is the later date, b's the earlier: the master view follows merge order, not the date
+    a = _session_branch(git, repo, base, "branch-a", "sess-a", "2026-10-02")
+    b = _session_branch(git, repo, base, "branch-b", "sess-b", "2026-10-01")
+    for order in ((a, b), (b, a)):
+        name = "merged-" + "-".join(order)
+        conflict = _merge_in_order(git, repo, base, name, order)
+        expect(conflict is None, f"merging {order} gives no conflict ({conflict!r} conflicted)")
+        if conflict is not None:
+            continue
+        ids = {r["id"] for r in ledger.ledger_rows(repo)}
+        expect({"old", "sess-a", "sess-b"} <= ids, f"{order}: the ledger reads the frozen row and both sessions' ({ids})")
+        sessions = set(registries.proposers(repo))
+        expect(sessions == {"frozen", "sess-a", "sess-b"}, f"{order}: the registry reads all three proposer rows ({sessions})")
+        view = ledger.status_view(repo)
+        expect(view is not None and view[0] == f"reports/L2/status/{order[-1]}.md",
+               f"{order}: the master STATUS is the file of the pull request merged last, {order[-1]} "
+               f"({view[0] if view else None})")
+    git("checkout", "-q", "-b", "twin", base)
+    _append(repo, "harness/proposer.d/other.toml", 'kind = "builder"\nmodel = "m"\nsession = "frozen"\n')
+    try:
+        registries.proposers(repo)
+        expect(False, "a proposer row keyed twice across files is a registry error")
+    except RegistryError as e:
+        expect(e.code == "proposer_keyed_twice", f"a proposer row keyed twice across files is a registry error ({e})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+DRAFT_FORECAST_TS = "2026-01-10T00:00:00Z"
+DRAFT_EVENT = {  # draft -> its timeline (the events the resolver reads)
+    21: [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"}, "created_at": AFTER_TS}],
+    22: [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"}, "created_at": LATER_TS}],
+    23: [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"}, "created_at": LATER_TS}],
+    24: [{"event": "closed", "actor": {"login": "assize-reviewer"}, "created_at": AFTER_TS}],
+    25: [{"event": "labeled", "actor": {"login": "gfrmin"}, "label": {"name": "instruction"}, "created_at": AFTER_TS}],
+    26: [{"event": "labeled", "actor": {"login": "assize-reviewer"}, "label": {"name": "needs-draft-check"},
+          "created_at": AFTER_TS}],
+}
+DRAFT_EDITS = {  # draft -> its body's edits (None: the history cannot be read); the creation is the author's
+    21: [{"editor": "assize-reviewer", "at": DRAFT_FORECAST_TS}],
+    22: [{"editor": "assize-reviewer", "at": DRAFT_FORECAST_TS}, {"editor": "gfrmin", "at": AFTER_TS}],
+    23: [{"editor": "assize-reviewer", "at": DRAFT_FORECAST_TS}, {"editor": "assize-reviewer", "at": AFTER_TS}],
+    24: [],
+    25: None,
+    26: [],
+}
+DRAFT_WISH = 30
+
+
+def _draft_forecast(claim: str, item: int, answer: str, kind: str = "vizier", cls: str = "draft") -> dict:
+    f = _typed(claim, 0.7, "guy_answers", {"item": item, "answer": answer}, ts=DRAFT_FORECAST_TS)
+    return f | {"proposer": f["proposer"] | {"kind": kind}, "class": cls, "mode": "recommend"}
+
+
+# (forecast, outcome wanted or None for open, outcome_detail wanted)
+DRAFT_RESOLUTION_FIXTURE = (
+    (_draft_forecast("sign 21, signed as drafted", 21, "labeled:instruction"), True, "signed-as-drafted"),
+    (_draft_forecast("sign 22, Guy edited first", 22, "labeled:instruction"), False, "signed-after-edit"),
+    (_draft_forecast("edit 22", 22, "signed-after-edit", "reviewer", "draft-check"), True, "signed-after-edit"),
+    (_draft_forecast("sign 23, edited by another account only", 23, "labeled:instruction"), True, "signed-as-drafted"),
+    (_draft_forecast("sign 24, closed unsigned", 24, "labeled:instruction"), False, "declined"),
+    (_draft_forecast("decline 24", 24, "closed", "reviewer", "draft-check"), True, "declined"),
+    (_draft_forecast("sign 25, edits unreadable", 25, "labeled:instruction"), None, None),
+    (_draft_forecast("sign 26, not yet answered", 26, "labeled:instruction"), None, None),
+    (_draft_forecast(f'Guy answers sign on the draft "Twenty-one" of wish #{DRAFT_WISH}', DRAFT_WISH,
+                     "labeled:instruction"), True, "signed-as-drafted"),
+)
+# the Vizier's class `draft`: 21, 23 and the wish's (21) signed as drafted; 22 after edit; 24 declined; 25, 26 open
+DRAFT_RECORD_WANT = {"draft": (3, 1, 1), "draft-check": (0, 1, 1)}
+
+
+def _draft_observe(kind: str, *key: object) -> object:
+    from harness import ledger
+
+    n = int(key[0])
+    if kind == "issue":
+        return {"number": n, "title": "x", "labels": ["wish"] if n == DRAFT_WISH else ["draft"]}
+    if kind == "timeline" and n in DRAFT_EVENT:
+        return DRAFT_EVENT[n]
+    if kind == "edits" and n in DRAFT_EDITS:
+        return DRAFT_EDITS[n]
+    if kind == "drafts" and n == DRAFT_WISH:
+        return [{"number": 22, "title": "Twenty-two", "body": f"Wish: #{DRAFT_WISH}\n"},
+                {"number": 21, "title": "Twenty-one", "body": f"Wish: #{DRAFT_WISH}\n"}]
+    raise ledger.Unreadable(f"fixture has no answer to {(kind, *key)}")
+
+
+def p0al_draft_outcomes() -> bool:
+    """A `guy_answers` forecast on a draft resolves to signed-as-drafted, signed-after-edit or declined, read from the
+    draft's timeline and edit history; `labeled:instruction` is true only on signed-as-drafted; another account's edit
+    is not gfrmin's; an unreadable edit history leaves it open; `ledger proposer` counts the three per class
+    (instruction #112 Part B)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    rows = [f for f, _, _ in DRAFT_RESOLUTION_FIXTURE]
+    got, unread = ledger.resolve(rows, _draft_observe, OUTCOME_NOW, "p0al")
+    by_id = {r["id"]: r for r in got}
+    for f, want, detail in DRAFT_RESOLUTION_FIXTURE:
+        r = by_id.get(f["id"], {})
+        expect((r.get("outcome"), r.get("outcome_detail")) == (want, detail),
+               f"{f['claim']!r}: resolved {r.get('outcome', 'open')} / {r.get('outcome_detail')}, want "
+               f"{'open' if want is None else want} / {detail}")
+    expect(not unread, f"every draft read ({unread})")
+    for kind, cls in (("vizier", "draft"), ("reviewer", "draft-check")):
+        rec = {r.cls: r for r in ledger.record(rows + got, kind)}
+        print(f"    {rec.get(cls)}")
+        expect(cls in rec and rec[cls].details == DRAFT_RECORD_WANT[cls],
+               f"{kind} {cls}: drafts {rec[cls].details if cls in rec else None} by outcome, want "
+               f"{DRAFT_RECORD_WANT[cls]}")
+        expect(cls in rec and "signed-as-drafted=" in str(rec[cls]) and "declined=" in str(rec[cls]),
+               f"{kind} {cls}: the record prints the three outcomes")
+    return ok()
+
+
+DRAFT_CHECK_EVENTS = (  # (what, sender, event, action, label, must start a review) -- instruction #112 Part C
+    ("needs-draft-check on an issue", "assize-reviewer", "issues", "labeled", "needs-draft-check", True),
+    ("draft on an issue", "assize-reviewer", "issues", "labeled", "draft", False),
+    ("needs-review on a pull request by assize-builder", "assize-builder", "pull_request", "labeled", "needs-review",
+     True),
+)
+
+
+def p0am_draft_check_trigger() -> bool:
+    """A `needs-draft-check` label on an issue starts a review session in the draft-check mode on that issue; a
+    `draft` label does not; `needs-review` on a pull request still does (instruction #112 Part C)."""
+    expect, ok = _expecter()
+    text = (ROOT / ".github" / "workflows" / "review.yml").read_text()
+    condition = _review_condition(text)
+    expect(condition is not None, "the review job's `if:` is found")
+    for what, sender, event, action, label, want in DRAFT_CHECK_EVENTS:
+        got = condition is not None and _github_condition(condition, {
+            "github.event.sender.login": sender, "github.event_name": event, "github.event.action": action,
+            "github.event.label.name": label})
+        expect(got is want, f"{what}: {'starts' if got else 'does not start'} a review (must "
+                            f"{'start' if want else 'not start'})")
+    expect('issues:needs-draft-check) run="review /review draft $ISSUE"' in text,
+           "the chosen procedure on needs-draft-check is `/review draft <issue>`")
+    expect("needs-draft-check" in text.split("jobs:")[0] and "draft-check mode" in text.split("jobs:")[0],
+           "the workflow states that needs-draft-check starts a draft check")
+    review = (ROOT / ".claude" / "commands" / "review.md").read_text()
+    vizier = (ROOT / ".claude" / "commands" / "vizier.md").read_text()
+    expect("## Draft-check mode: `/review draft <issue number>`" in review
+           and "`Draft check: sign | edit | decline — p=<p> that Guy agrees — <reason>`" in review,
+           "review.md has the draft-check mode and its comment")
+    expect("add the label `needs-draft-check`" in vizier and "until a `Draft check:` comment exists" in vizier,
+           "vizier.md labels each draft needs-draft-check and does not address Guy before the check")
     return ok()
 
 
@@ -4656,26 +5052,26 @@ PINS = [
     Pin("P0aj", "an awaits-guy label starts a Builder on master; blocked still builds on the PR; needs-review starts none",
         p0aj_awaits_guy_builds_master, (Mutant("awaits_guy_clause_removed", _edits("P0aj_awaits_guy_clause_removed")),),
         (".github/workflows/build.yml",)),
-    Pin("P0ak", "pins runs each harness call of the head's build.yml and review.yml with --dry-run; a flag the harness lacks fails it",
-        p0ak_selfrun, (Mutant("selfrun_step_skipped", _edits("P0ak_selfrun_step_skipped")),
-                       Mutant("exit_ignored", _edits("P0ak_exit_ignored")),
-                       Mutant("dry_run_not_appended", _edits("P0ak_dry_run_not_appended"))),
+    Pin("P0as", "pins runs each harness call of the head's build.yml and review.yml with --dry-run; a flag the harness lacks fails it",
+        p0as_selfrun, (Mutant("selfrun_step_skipped", _edits("P0as_selfrun_step_skipped")),
+                       Mutant("exit_ignored", _edits("P0as_exit_ignored")),
+                       Mutant("dry_run_not_appended", _edits("P0as_dry_run_not_appended"))),
         (".github/workflows/**",)),
-    Pin("P0al", "under a network-less sandbox, --dry-run records, fetches, pushes and appends nothing; without it the same calls do",
-        p0al_dry_run_writes_nothing, (Mutant("dry_run_publishes", _edits("P0al_dry_run_publishes")),
-                                      Mutant("dry_run_writes_ledger", _edits("P0al_dry_run_writes_ledger")),
-                                      Mutant("dry_run_fetches", _edits("P0al_dry_run_fetches")),
-                                      Mutant("resolve_dry_run_appends", _edits("P0al_resolve_dry_run_appends"))),
+    Pin("P0at", "under a network-less sandbox, --dry-run records, fetches, pushes and appends nothing; without it the same calls do",
+        p0at_dry_run_writes_nothing, (Mutant("dry_run_publishes", _edits("P0at_dry_run_publishes")),
+                                      Mutant("dry_run_writes_ledger", _edits("P0at_dry_run_writes_ledger")),
+                                      Mutant("dry_run_fetches", _edits("P0at_dry_run_fetches")),
+                                      Mutant("resolve_dry_run_appends", _edits("P0at_resolve_dry_run_appends"))),
         (".github/workflows/**",)),
-    Pin("P0am", "a review.yml dispatch with no pr runs the Auditor in group review-audit; with a pr it reviews that pull request",
-        p0am_dispatch_audits, (Mutant("dispatch_always_review", _edits("P0am_dispatch_always_review")),
-                               Mutant("dispatch_pr_required", _edits("P0am_dispatch_pr_required")),
-                               Mutant("audit_group_shared", _edits("P0am_audit_group_shared"))),
+    Pin("P0au", "a review.yml dispatch with no pr runs the Auditor in group review-audit; with a pr it reviews that pull request",
+        p0au_dispatch_audits, (Mutant("dispatch_always_review", _edits("P0au_dispatch_always_review")),
+                               Mutant("dispatch_pr_required", _edits("P0au_dispatch_pr_required")),
+                               Mutant("audit_group_shared", _edits("P0au_audit_group_shared"))),
         (".github/workflows/review.yml",)),
-    Pin("P0an", "every trigger, command, secret, runner and token scope is a row of ops/trusted-base.md, and every such row has one",
-        p0an_trusted_base, (Mutant("unlisted_trigger_admitted", _edits("P0an_unlisted_trigger_admitted")),
-                            Mutant("ghost_row_admitted", _edits("P0an_ghost_row_admitted")),
-                            Mutant("unpriced_row_admitted", _edits("P0an_unpriced_row_admitted"))),
+    Pin("P0av", "every trigger, command, secret, runner and token scope is a row of ops/trusted-base.md, and every such row has one",
+        p0av_trusted_base, (Mutant("unlisted_trigger_admitted", _edits("P0av_unlisted_trigger_admitted")),
+                            Mutant("ghost_row_admitted", _edits("P0av_ghost_row_admitted")),
+                            Mutant("unpriced_row_admitted", _edits("P0av_unpriced_row_admitted"))),
         (".github/workflows/**", ".claude/commands/**", "ops/**")),
     Pin("P0ao", "build.yml and review.yml start on a label through pull_request_target, so a pull request cannot change the file that runs",
         p0ao_label_workflows_run_masters, (Mutant("build_pull_request_restored", _edits("P0ao_build_pull_request_restored")),
@@ -4688,7 +5084,39 @@ PINS = [
                                        Mutant("review_grant_undeclared", _edits("P0ap_review_grant_undeclared")),
                                        Mutant("skip_permissions_admitted", _edits("P0ap_skip_permissions_admitted"))),
         (".github/workflows/build.yml", ".github/workflows/review.yml")),
-    Pin("P1", "evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+    Pin("P0ak", "a session's first act is its declaration; its duration forecast resolves from the run; the price counts overruns and limits",
+        p0ak_session_declared, (Mutant("undeclared_session_admitted", _edits("P0ak_undeclared_session_admitted")),
+                                Mutant("duration_misresolved", _edits("P0ak_duration_misresolved")),
+                                Mutant("cancelled_scored", _edits("P0ak_cancelled_scored")),
+                                Mutant("over_bound_uncounted", _edits("P0ak_over_bound_uncounted")),
+                                Mutant("limit_uncounted", _edits("P0ak_limit_uncounted"))),
+        HARNESS + (".github/workflows/build.yml", ".github/workflows/review.yml", ".claude/commands/**")),
+    Pin("P0al", "a forecast on a draft resolves as signed-as-drafted, signed-after-edit or declined, and is counted so",
+        p0al_draft_outcomes, (Mutant("after_edit_as_drafted", _edits("P0al_after_edit_as_drafted")),
+                              Mutant("other_editor_counted", _edits("P0al_other_editor_counted")),
+                              Mutant("unreadable_edits_resolved", _edits("P0al_unreadable_edits_resolved")),
+                              Mutant("detail_uncounted", _edits("P0al_detail_uncounted"))), HARNESS),
+    Pin("P0am", "a needs-draft-check label on an issue starts a draft check; a draft label does not",
+        p0am_draft_check_trigger, (Mutant("draft_check_clause_removed", _edits("P0am_draft_check_clause_removed")),),
+        (".github/workflows/review.yml", ".claude/commands/review.md", ".claude/commands/vizier.md")),
+    Pin("P0an", "a session on a pull-request branch adds no forecast row; one ending with no STATUS and no stop comment fails",
+        p0an_session_routed, (Mutant("pr_branch_forecast_admitted", _edits("P0an_pr_branch_forecast_admitted")),
+                              Mutant("silent_stop_admitted", _edits("P0an_silent_stop_admitted"))),
+        HARNESS + (".claude/commands/**",)),
+    Pin("P0aq", "a red pins run or a conflicted pull request is labelled blocked for three rounds, then filed to Guy",
+        p0aq_red_returns_to_builder, (Mutant("label_branch_removed", _edits("P0aq_label_branch_removed")),
+                                      Mutant("round_cap_removed", _edits("P0aq_round_cap_removed")),
+                                      Mutant("conflict_as_clean", _edits("P0aq_conflict_as_clean"))),
+        HARNESS + (".github/workflows/failed.yml",)),
+    Pin("P0ar", "two pull requests, each writing its own forecast, STATUS and proposer row, merge without conflict in "
+                "either order and are read together",
+        p0ar_per_pr_files, (Mutant("forecasts_shared", _edits("P0ar_forecasts_shared")),
+                            Mutant("status_shared", _edits("P0ar_status_shared")),
+                            Mutant("registry_frozen_only", _edits("P0ar_registry_frozen_only")),
+                            Mutant("status_by_date", _edits("P0ar_status_by_date")),
+                            Mutant("duplicate_overrides", _edits("P0ar_duplicate_overrides"))),
+        HARNESS + (".claude/commands/**", "reports/**")),
+    Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
                            Mutant("domain_check_skipped", _edits("P1_domain_check_skipped")),

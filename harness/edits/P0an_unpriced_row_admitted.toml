@@ -1,5 +1,0 @@
-# P0an's mutant (instruction #113 Part C item 1): a row naming neither a price quantity and a pin nor REMOVE is admitted.
-[[edit]]
-path = "harness/claims.py"
-old = """    return shape + bare + dup + unlisted + ghosts"""
-new = """    return shape + dup + unlisted + ghosts"""

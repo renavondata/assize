@@ -1,21 +1,19 @@
-# STATUS — L2 — 2026-10-12 — 78148eb — PR #143
-VERDICT: SESSION DONE: instruction #113 done (Parts A–E); pins red locally on P0x alone, from issues #136 and #140, not from this diff
-LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict, adds or opens no brief)
-pins: clean 59/60; mutants 163/166 KILLED (the 23 new ones all KILLED); twins 163/166; leaked 0; stale 0; inconclusive 0; non-causal 3 (P0x/*, its clean check fails); exit 2 — local `make pins` at 5bb4051 (this branch before it was rewritten onto PR #143's number; `git diff 5bb4051 78148eb` outside reports/ is empty), reports/L2/builder/5bb4051/make-pins.txt; CI not yet run
-changed: .github/workflows/{build,review,pins}.yml, harness/{selfrun,claims,ledger,pins,proposer}.py, harness/edits/P0{ak..ap}_*.toml, harness/edits/P0{v,aj}_*.toml, ops/trusted-base.md, reports/L2/{forecasts.jsonl,STATUS.md,builder/5bb4051}
-did: #113 A: `harness.selfrun` + `--dry-run` on `ledger elect`/`resolve` + pins.yml step; P0ak (3 mutants), P0al (4, under `unshare -rn`). B: dispatch with no `pr` runs /audit in group review-audit, `pr` optional; P0am (3). C: `ops/trusted-base.md` (40 rows) + `claims trusted-base`; P0an (3). D: `pull_request_target` in build.yml and review.yml; P0ao (2); P0v/P0aj contexts and mutant anchors renamed. E: `--allowedTools`, `git checkout origin/master -- .claude scripts/bootstrap.sh`; P0ap (5)
-did: `claims next` skipped #112 (held by PR #131) and took #113. Issue #142 (a failed-run issue) took the number I had forecast for; the unopened branch was rewritten with forecasts for #143, not forced over any review. No tool call was denied. Shell edits, which P0ab forbids: one `sed -i` renaming four `"pull_request"` event strings in harness/pins.py, one `sed -i` on ops/trusted-base.md (pin names), and one read-only `python3` heredoc naming harness/ledger.py; the rest used Edit and Write
-did: P0x clean reads the live issues, so its failure does not depend on this diff (not run on master): `real instruction issues: issue #136 and #140: price_line, 0 Price: lines, want 1` (reports/L2/builder/5bb4051/P0x-clean-transcript.log). Both were signed after the price rule merged and carry none. Only gfrmin can add the line without voiding the signature (rule 5)
-decided (not asked): "the session launcher" of Part A item 2 is the workflow's own `claude` call, outside this repository; `harness.selfrun` has no non-dry mode and P0al runs it in the sandbox — p(stands on review)=0.6
-decided (not asked): `elect --dry-run --publish` reads the last fetched `ledger/draws` ref and fetches nothing, so the self-run needs no network — p=0.8
-decided (not asked): Part C rows cover also secrets, runners and job-token scopes, checked both ways; `sovereign` rows name no pin ("reserved to Guy", not removable by a pull request) rather than REMOVE — p=0.6
-decided (not asked): `--allowedTools` is exactly the three patterns of the issue (no Edit/Write/Read); review.yml restores after its own `git checkout -q master`, since it checks out no PR before `claude` — p=0.65
-decided (not asked): the P0x red is left for gfrmin; editing #136/#140 as the builder would void their signatures — p=0.8
-forecasts: made 3 (570193519c67 pins_green p=0.1, 1fbcdeba570e review_accept p=0.3, 62b63e55c045 host_verdict FIT p=0.35); resolved 0; builder cumulative log-loss 55.60 over 131 resolved (`ledger proposer builder`)
-price: guy-items 15; guy-latency median 0.9h max 2.1h; sessions 28; runner-min 1120; wish-latency median 0.0h max 0.0h open 3 (`ledger price --since 487cde7`)
-obligations added: L3: a PR editing .claude/ or scripts/bootstrap.sh sees master's copies staged in its session's tree after Part E; build.md must say to `git checkout HEAD -- .claude scripts/bootstrap.sh` first
-obligations added: L3: files in .claude/ that a PR adds and master lacks survive the restore (e.g. a settings.local.json hook); the restore does not delete them
-obligations added: L3: P0x reads live issues, so one unpriced signed instruction turns every branch red; the Vizier's drafts (#136, #140) were filed without `Price:`
-obligations added: L3: the criterion "dispatching review.yml with no pr produces an audit-<sha>.md or a stop issue" can only be witnessed after merge
-NEEDS YOU (at most 1): approve and merge PR #143 (touches entrenched .github/); pins stays red until gfrmin adds a `Price:` line to #136 and #140
-next: reviewer round on PR #143; then the oldest unheld signed instruction (#126, #132, #135, #136, #139, #140)
+# STATUS — L2 — 2026-10-12 — 604237e — PR #160
+VERDICT: SESSION DONE
+LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; amends the current brief, adds or opens no brief of a new layer)
+pins: clean 59/59; mutants 161/161 KILLED; twins 161/161; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on 604237e (reports/L2/builder/604237e/make-pins.txt); pins CI run 38304768437 on 604237e (success, run attempt 1; record reports/L2/ci/38304768437.json)
+changed: docs/briefs/brief-2-nethack.md, harness/proposer.toml, reports/L2/{forecasts.jsonl,STATUS.md,builder/604237e/*,ci/38304768437.json}
+did: instruction #136: appended the Wish #134 amendment (parallel pins on own hardware) to brief 2, verbatim; nothing implemented, its scope becomes brief items
+did: `claims next '#113' '#132' '#135' '#136' '#139' '#140'` -> #136; skipped #113 (held by PR #143), #132 (PR #156), #135 (PR #159). #126 already closed (PR #153 merged). No item refused; switchback seed absent, so no chooser rows
+did: first local `make pins` read P0r red: the session's env carried GITHUB_HEAD_REF=instr-135-per-pr-files from the event that started it (PR #159), so P0r checked #159's branch; re-run with it unset is green; the red run is kept as make-pins-GITHUB_HEAD_REF-leaked.txt
+did: pre-push refused the first commit (Co-Authored-By outside the trailer block); amended my unpushed commit. No tool call was denied
+decided (not asked): heading carries "; instruction #136", as Wish #80's carries "; instruction #111 Part C"; the issue's `Price:` line and gfrmin's edit note are issue metadata, not transcribed — p(stands on review)=0.8
+decided (not asked): the local witness is the run with GITHUB_HEAD_REF unset; P0r is green on the real branch in CI run 38304768437 — p=0.8
+decided (not asked): harness/proposer.toml set to this session per build.md step 2, though no harness code changes — p=0.75
+decided (not asked): PR opened before `make pins` (forecasts already in its first head) so its number matches the forecasts (#160) — p=0.75
+decided (not asked): no awaits-guy conflict: PR #159 touches neither the brief nor reports/L2/{STATUS.md,forecasts.jsonl} — p=0.85
+forecasts: made 4 (8497c8c6bc30 pins_green p=0.6, 157fa18e1313 review_accept p=0.7, cd0db1de863a host_verdict FIT p=0.35, 40d37ee189e8 session_minutes 50 p=0.6); resolved 0 this session; builder cumulative log-loss 59.72 vs base rate 53.87 (in-sample per-type frequency) over 136 resolved
+price: guy-items 29; guy-latency median 1.1h max 2.7h; sessions 51; runner-min 2403; wish-latency median 11.8h max 11.8h open 2; sessions-over-bound 0/2; sessions-lost-to-limit 0 (`ledger price --since 487cde7`)
+obligations added: L3: build.yml sessions inherit the triggering event's GITHUB_HEAD_REF, so a local `make pins` runs P0r's (and any GITHUB_HEAD_REF-keyed pin's) real-branch check against another PR's branch; resolve the branch from the checkout outside `pull_request` runs
+NEEDS YOU (at most 1): none
+next: #139 (oldest signed instruction no open PR holds after #136; #140 follows it)

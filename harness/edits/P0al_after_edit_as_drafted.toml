@@ -1,0 +1,5 @@
+# P0al's mutant (instruction #112 Part B item 4): a draft signed after gfrmin edited it scores as signed-as-drafted.
+[[edit]]
+path = "harness/ledger.py"
+old = """        return SIGNED_AFTER_EDIT if any("""
+new = """        return SIGNED_AS_DRAFTED if any("""

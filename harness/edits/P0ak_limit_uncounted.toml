@@ -1,0 +1,5 @@
+# P0ak's mutant (instruction #112 Part A item 5): sessions lost to the usage limit are not counted in the price.
+[[edit]]
+path = "harness/ledger.py"
+old = """lost_to_limit=sum(1 for r in sessions if"""
+new = """lost_to_limit=0 * sum(1 for r in sessions if"""

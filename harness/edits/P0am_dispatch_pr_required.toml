@@ -1,5 +1,0 @@
-# P0am's mutant (instruction #113 Part B): the dispatch input `pr` is required again, so GitHub refuses a dispatch with none.
-[[edit]]
-path = ".github/workflows/review.yml"
-old = """empty runs the Auditor at master", required: false }"""
-new = """empty runs the Auditor at master", required: true }"""

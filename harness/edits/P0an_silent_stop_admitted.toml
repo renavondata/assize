@@ -1,0 +1,5 @@
+# P0an's mutant (instruction #112 Part D item 2): a session ending with no STATUS, review file or stop comment is admitted.
+[[edit]]
+path = "harness/sessions.py"
+old = """    return [] if routed else [Finding("""
+new = """    return [] if True else [Finding("""

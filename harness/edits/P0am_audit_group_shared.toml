@@ -1,6 +1,0 @@
-# P0am's mutant (instruction #113 Part B): a dispatch with `pr` empty shares the group `review-workflow_dispatch` instead of
-# `review-audit`.
-[[edit]]
-path = ".github/workflows/review.yml"
-old = """ || (github.event_name == 'workflow_dispatch' && 'audit')"""
-new = """"""

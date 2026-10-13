@@ -1,0 +1,8 @@
+# P0al's mutant (instruction #112 Part B item 4): an unreadable edit history is resolved as empty, not left open.
+[[edit]]
+path = "harness/ledger.py"
+old = """    if edits is None:
+        return None
+    after = """
+new = """    edits = edits or ()
+    after = """

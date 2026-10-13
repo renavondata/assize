@@ -1,0 +1,5 @@
+# P0au's mutant (instruction #113 Part B): a dispatch always reviews, so one with `pr` empty reviews pull request "".
+[[edit]]
+path = ".github/workflows/review.yml"
+old = """workflow_dispatch:*) if [ -n "$PR" ]; then run="review /review $PR"; else run="audit /audit"; fi ;;"""
+new = """workflow_dispatch:*) run="review /review $PR" ;;"""

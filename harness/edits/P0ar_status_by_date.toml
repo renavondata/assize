@@ -1,0 +1,11 @@
+# P0ar's mutant (instruction #135 item 4): the master STATUS view picks the newest header date instead of the most
+# recently merged pull request's file, so a merge cannot replace it with one dated earlier.
+[[edit]]
+path = "harness/ledger.py"
+old = """    return (paths[-1], _git(repo, "show", f"{head}:{paths[-1]}")) if paths else None
+"""
+new = """    every = sorted((_git(repo, "show", f"{head}:{p}"), p) for p in _git(repo, "ls-tree", "-r", "--name-only", head,
+                                                                         "reports/").split()
+                   if any(Path(p).match(g) for g in STATUSES))
+    return (every[-1][1], every[-1][0]) if every else None
+"""

@@ -1,7 +1,0 @@
-# P0al's mutant (instruction #113 Part A item 2): `elect --dry-run` without `--publish` records the draw in the working tree.
-[[edit]]
-path = "harness/ledger.py"
-old = """        if a.dry_run:
-            print(f"dry run: draw"""
-new = """        if a.dry_run and a.publish:
-            print(f"dry run: draw"""

@@ -1,7 +1,0 @@
-# P0ak's mutant (instruction #113 Part A item 1): the self-run exits 0 whatever its dry runs said.
-[[edit]]
-path = "harness/selfrun.py"
-old = """    print(f"selfrun: {failures} failures")
-    return 1 if failures else 0"""
-new = """    print(f"selfrun: {failures} failures")
-    return 0"""

@@ -1,0 +1,7 @@
+# P0at's mutant (instruction #113 Part A item 2): `elect --dry-run --publish` pushes the draw to the remote.
+[[edit]]
+path = "harness/ledger.py"
+old = """        if a.dry_run:
+            print(f"dry run: draw"""
+new = """        if a.dry_run and not a.publish:
+            print(f"dry run: draw"""

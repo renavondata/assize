@@ -21,7 +21,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import tomllib
 import traceback
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
@@ -346,9 +345,7 @@ def base(repo: Path, master: str) -> int:
 
 
 def _proposer() -> dict:
-    with (ROOT / "harness" / "proposer.toml").open("rb") as f:
-        data = tomllib.load(f)
-    return {k: data[k] for k in ("kind", "model", "session")}
+    return registries.proposer(ROOT)
 
 
 def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_root: Path | None = None,
