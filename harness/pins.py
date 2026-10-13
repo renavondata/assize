@@ -4052,6 +4052,32 @@ def p23_interrupted_recorded() -> bool:
     return ok()
 
 
+# P24's episode counts (brief 2 A2, L2a obligation 5): written as the judge's CLI receives them. Each of the first
+# five satisfies `str.isdigit` yet is no count `int` reads as one; the rest are not digits at all or are not positive.
+P24_BAD = ("²", "٣", "①", "0", "00", "-1", "+3", "2.5", " 3", "")
+P24_GOOD = (("1", 1), ("3", 3), ("007", 7), ("12", 12))
+
+
+def p24_episode_guard() -> bool:
+    """The judge's `evaluate` refuses an episode count that is not a positive ASCII integer with the code
+    `bad_episodes`, exit 1 and no traceback; it reads every positive ASCII integer as itself (brief 2 A2, L2a
+    obligation 5; review 6debf231b630 F4). The guard runs before any path, so the CLI is given none that exists."""
+    from judge import __main__ as cli
+
+    expect, ok = _expecter()
+    for bad in P24_BAD:
+        r = subprocess.run(proc.python("-m", "judge", "evaluate", "/nonexistent/private", "/nonexistent/ledgers", "fake",
+                                       "sha256:" + "d" * 64, "crafter", bad, "p24-request"),
+                           cwd=ROOT, env=proc.child_env(), capture_output=True, text=True, timeout=120)
+        expect(r.returncode == 1 and r.stderr.startswith("refused: bad_episodes") and "Traceback" not in r.stderr,
+               f"{bad!r} is refused bad_episodes with exit 1 and no traceback (exit {r.returncode}: "
+               f"{r.stderr.strip().splitlines()[-1:]})")
+    for text, want in P24_GOOD:
+        got = cli._episodes(text)
+        expect(got == want, f"{text!r} is read as {want} (got {got})")
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5056,6 +5082,9 @@ PINS = [
         p23_interrupted_recorded, (Mutant("partial_dropped", _edits("P23_partial_dropped")),
                                    Mutant("interrupted_unsealed", _edits("P23_interrupted_unsealed")),
                                    Mutant("closing_unattributed", _edits("P23_closing_unattributed"))), JUDGE_SIDE),
+    Pin("P24", "the judge's evaluate refuses an episode count that is not a positive ASCII integer, with the code "
+               "bad_episodes and no traceback",
+        p24_episode_guard, (Mutant("isdigit_guard", _edits("P24_isdigit_guard")),), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

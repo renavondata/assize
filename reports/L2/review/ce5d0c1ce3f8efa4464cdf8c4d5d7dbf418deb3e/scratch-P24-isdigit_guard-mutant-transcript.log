@@ -1,0 +1,24 @@
+copy of /home/g/git/worktrees/assize/rv171-ce5d0c1
+  at /tmp/assize-scratch-ajn3nfuo/assize-copy-z7e_4lph/repo
+applied 1 edit(s) from harness/edits/P24_isdigit_guard.toml
+pin:       P24
+protects:  the judge's evaluate refuses an episode count that is not a positive ASCII integer, with the code bad_episodes and no traceback
+role:      mutant
+tree:      /tmp/assize-scratch-ajn3nfuo/assize-copy-z7e_4lph/repo
+invoked:   /home/g/git/worktrees/assize/rv171-ce5d0c1
+scratch:   /tmp/assize-scratch-ajn3nfuo
+  [FAIL] '²' is refused bad_episodes with exit 1 and no traceback (exit 1: ["ValueError: invalid literal for int() with base 10: '²'"])
+  [FAIL] '٣' is refused bad_episodes with exit 1 and no traceback (exit 1: ['refused: unregistered: sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd was never registered'])
+  [FAIL] '①' is refused bad_episodes with exit 1 and no traceback (exit 1: ["ValueError: invalid literal for int() with base 10: '①'"])
+  [FAIL] '0' is refused bad_episodes with exit 1 and no traceback (exit 1: ['refused: unregistered: sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd was never registered'])
+  [FAIL] '00' is refused bad_episodes with exit 1 and no traceback (exit 1: ['refused: unregistered: sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd was never registered'])
+  [ok] '-1' is refused bad_episodes with exit 1 and no traceback (exit 1: ["refused: bad_episodes: '-1' is not a positive episode count"])
+  [ok] '+3' is refused bad_episodes with exit 1 and no traceback (exit 1: ["refused: bad_episodes: '+3' is not a positive episode count"])
+  [ok] '2.5' is refused bad_episodes with exit 1 and no traceback (exit 1: ["refused: bad_episodes: '2.5' is not a positive episode count"])
+  [ok] ' 3' is refused bad_episodes with exit 1 and no traceback (exit 1: ["refused: bad_episodes: ' 3' is not a positive episode count"])
+  [ok] '' is refused bad_episodes with exit 1 and no traceback (exit 1: ["refused: bad_episodes: '' is not a positive episode count"])
+  [ok] '1' is read as 1 (got 1)
+  [ok] '3' is read as 3 (got 3)
+  [ok] '007' is read as 7 (got 7)
+  [ok] '12' is read as 12 (got 12)
+result:    FAIL

@@ -39,10 +39,16 @@ def _register(private: str, image: str) -> int:
     return 0
 
 
-def _evaluate(private: str, ledgers: str, rt: str, image: str, world: str, n: str, request_id: str) -> int:
-    if not n.isdigit():
+def _episodes(n: str) -> int:
+    """N as a positive count written in ASCII digits; `str.isdigit` also admits `²` and Arabic-Indic digits, which
+    `int` rejects with a traceback (L2a obligation 5, review 6debf231b630 F4)."""
+    if not (n.isascii() and n.isdigit() and int(n) > 0):
         raise registry.Refused("bad_episodes", f"{n!r} is not a positive episode count")
-    for r in evaluate.evaluate(image, world, int(n), request_id, private=Path(private), ledgers=Path(ledgers),
+    return int(n)
+
+
+def _evaluate(private: str, ledgers: str, rt: str, image: str, world: str, n: str, request_id: str) -> int:
+    for r in evaluate.evaluate(image, world, _episodes(n), request_id, private=Path(private), ledgers=Path(ledgers),
                                runtime_name=rt):
         print(json.dumps(r, sort_keys=True))
     return 0

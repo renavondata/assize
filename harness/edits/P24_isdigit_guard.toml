@@ -1,0 +1,6 @@
+# P24's mutant `isdigit_guard` (brief 2 A2, L2a obligation 5; review 6debf231b630 F4): the episode-count guard is
+# `str.isdigit` alone, which admits `²` and Arabic-Indic digits (a traceback from `int`) and `0`.
+[[edit]]
+path = "judge/__main__.py"
+old = "    if not (n.isascii() and n.isdigit() and int(n) > 0):\n"
+new = "    if not n.isdigit():\n"
