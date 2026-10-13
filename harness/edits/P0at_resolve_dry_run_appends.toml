@@ -2,6 +2,6 @@
 [[edit]]
 path = "harness/ledger.py"
 old = """        if not dry_run:
-            with path.open("a") as f:"""
+            path.parent.mkdir(exist_ok=True)"""
 new = """        if True:
-            with path.open("a") as f:"""
+            path.parent.mkdir(exist_ok=True)"""

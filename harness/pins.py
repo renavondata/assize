@@ -1558,8 +1558,8 @@ def p0as_selfrun() -> bool:
                f"the same rename in the workflows and the harness passes (exit {done.returncode}):\n{done.stdout}")
         # A workflow that no longer calls the harness gives the run nothing to witness.
         hollow = _session_tree(Path(tmp) / "hollow")
-        expect(_replace(hollow / ".github" / "workflows" / "review.yml", "python -m harness.ledger", "python -m other.ledger"),
-               "fixture: review.yml calls `python -m harness.ledger`")
+        expect(_replace(hollow / ".github" / "workflows" / "review.yml", "python -m harness.", "python -m other."),
+               "fixture: review.yml calls `python -m harness...`")
         done = _run_selfrun(hollow)
         expect(done.returncode != 0 and "no step calls harness" in done.stdout,
                f"a workflow with no harness call fails the self-run (exit {done.returncode})")
@@ -1642,7 +1642,10 @@ def p0at_dry_run_writes_nothing() -> bool:
         _in_sandbox(prefix, [*elect], repo)
         expect((repo / "reports" / "draws.jsonl").is_file(), "control: elect records the draw in the working tree")
         _in_sandbox(prefix, [sys.executable, "-B", "-m", "harness.ledger", "resolve"], repo)
-        expect(ledger.read_text().count("\n") == 2, "control: resolve appends the resolution")
+        # Instruction #135: a run appends its resolutions to its own file, `forecasts/<session>.jsonl`.
+        own = [line for p in (ledger.parent / "forecasts").glob("*.jsonl") for line in p.read_text().splitlines()
+               if line.strip()]
+        expect(len(own) == 1, f"control: resolve appends the resolution to the run's own file ({len(own)} rows)")
     return ok()
 
 
@@ -2551,8 +2554,9 @@ def p0al_draft_outcomes() -> bool:
 DRAFT_CHECK_EVENTS = (  # (what, sender, event, action, label, must start a review) -- instruction #112 Part C
     ("needs-draft-check on an issue", "assize-reviewer", "issues", "labeled", "needs-draft-check", True),
     ("draft on an issue", "assize-reviewer", "issues", "labeled", "draft", False),
-    ("needs-review on a pull request by assize-builder", "assize-builder", "pull_request", "labeled", "needs-review",
-     True),
+    # Instruction #113 Part D: review.yml starts on a label through `pull_request_target`, not `pull_request`.
+    ("needs-review on a pull request by assize-builder", "assize-builder", "pull_request_target", "labeled",
+     "needs-review", True),
 )
 
 
