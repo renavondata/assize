@@ -118,6 +118,16 @@ STATUS_VERDICT = re.compile(r"^VERDICT: (.*)$", re.M)
 CITATION = re.compile(r"\bpins CI run (\d+) on ([0-9a-f]{7,40})\b")
 VERDICT_LINE = re.compile(r"^- L(\d+) — ", re.M)
 PINS_WORKFLOW = ".github/workflows/pins.yml"
+# The files a pull request writes are its own (instruction #135): a session appends to `forecasts/<session id>.jsonl` and
+# writes `status/<branch>.md`; the single files are frozen and still read.
+LEDGER_GLOBS = ("reports/L*/forecasts.jsonl", "reports/L*/forecasts/*.jsonl")
+STATUS_GLOBS = ("reports/L*/STATUS.md", "reports/L*/status/*.md")
+
+
+def session_files(layer: int, session: str, branch: str) -> dict[str, str]:
+    """The three files one Builder session writes, each a path no other session writes (instruction #135)."""
+    return {"forecasts": f"reports/L{layer}/forecasts/{session}.jsonl", "status": f"reports/L{layer}/status/{branch}.md",
+            "proposer": f"harness/proposer.d/{branch}.toml"}
 
 
 def _citation_findings(where: str, run_id: int, cited_sha: str, named_sha: str, runs: Mapping[int, dict],
@@ -454,7 +464,7 @@ def open_pr(repo: Path, n: int, ref: str) -> OpenPR:
     cited = _git(repo, "log", "--format=%(trailers:key=Instruction,valueonly,separator=%x1e)%x1d",
                  f"origin/master..origin/{ref}")
     statuses = _git(repo, "diff", "--name-only", f"origin/master...origin/{ref}", "--",
-                    ":(glob)reports/L*/STATUS.md").split()
+                    *(f":(glob){g}" for g in STATUS_GLOBS)).split()
     headers = tuple(line for p in statuses for line in _git(repo, "show", f"origin/{ref}:{p}").splitlines()
                     if STATUS_HEADER.match(line))
     return OpenPR(n, tuple(i for r in cited.split("\x1d") for i in instructions(r.strip())), headers)
@@ -472,7 +482,7 @@ def load_open_prs(repo: Path) -> list[OpenPR]:
 
 # ------------------------------------------------------ the ground, rules 1 and 2 (instruction #54 items 1 and 2)
 
-APPEND_ONLY = ("reports/L*/forecasts.jsonl", "reports/L*/review-*.md", "reports/L*/audit-*.md", "REPORT.md",
+APPEND_ONLY = (*LEDGER_GLOBS, "reports/L*/review-*.md", "reports/L*/audit-*.md", "REPORT.md",
                "reports/draws.jsonl")
 
 
@@ -517,7 +527,7 @@ def append_only(repo: Path, base: str, head: str = "HEAD") -> list[Finding]:
 def forecast_rows_added(repo: Path, base: str, head: str = "HEAD") -> dict[str, list[str]]:
     """Per ledger, the forecast rows (rows carrying `claim`) the diff base...head adds, as committed lines."""
     diff = _git(repo, "diff", "-U0", "--no-color", "--no-renames", f"{base}...{head}", "--",
-                ":(glob)reports/L*/forecasts.jsonl")
+                *(f":(glob){g}" for g in LEDGER_GLOBS))
 
     def step(acc: tuple[str | None, dict[str, list[str]]], line: str) -> tuple[str | None, dict[str, list[str]]]:
         path, added = acc

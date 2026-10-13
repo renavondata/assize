@@ -406,6 +406,7 @@ def p0k_forecast_ledger() -> bool:
     proposed by the Reviewer or the resolver is rejected (brief 1 A4 item 7a, CLAUDE.md A1.6), and so is one proposed
     by its forecast's own session (rule 4 of the ground, instruction #54 item 4); every real ledger is validated."""
     expect, ok = _expecter()
+    from harness import ledger
     forecast, resolution = _ledger_fixture()
     got = claims.ledger_findings(_ledger(forecast, resolution))
     expect(not got, f"well-formed forecast and Reviewer resolution accepted ({[str(f) for f in got]})")
@@ -436,17 +437,25 @@ def p0k_forecast_ledger() -> bool:
     got = claims.ledger_findings(_ledger(forecast | {"id": "ffffffffffff"}))
     expect(("row 1", "bad_id") in _codes(got), "a forecast whose id is not sha256(claim + ts)[:12] rejected")
 
-    ledgers = sorted(_real_root().glob("reports/L*/forecasts.jsonl"))
-    expect(bool(ledgers), f"real ledgers found: {[str(p.relative_to(_real_root())) for p in ledgers]}")
-    for path in ledgers:
-        lines = path.read_text().splitlines()
+    root = _real_root()
+    layers = sorted(root.glob("reports/L*"))
+    expect(bool(layers), f"real layers found: {[str(p.relative_to(root)) for p in layers]}")
+    for layer in layers:
+        frozen = layer / "forecasts.jsonl"
+        own = sorted((layer / "forecasts").glob("*.jsonl"))
+        if not frozen.exists() and not own:
+            continue
+        # A resolution may sit in another session's file than its forecast: a layer's ledger is the frozen file's rows,
+        # then every file under forecasts/ ordered by ts then id (instruction #135).
+        later = ledger.ordered([r for p in own for r in map(json.loads, filter(str.strip, p.read_text().splitlines()))])
+        lines = (frozen.read_text().splitlines() if frozen.exists() else []) + [json.dumps(r) for r in later]
         got = claims.ledger_findings(lines)
-        allowed = L0_PRE_RULE if path.parent.name == "L0" else set()
+        allowed = L0_PRE_RULE if layer.name == "L0" else set()
         for f in got:
-            print(f"    {path.parent.name}: {f}")
+            print(f"    {layer.name}: {f}")
         expect(_codes(got) == allowed if allowed else not got,
-               f"{path.relative_to(_real_root())}: {len(lines)} rows, {len(got)} findings; "
-               f"expected exactly {sorted(allowed) or 'none'}")
+               f"{layer.relative_to(root)}: {len(lines)} rows in {1 + len(own) if frozen.exists() else len(own)} files, "
+               f"{len(got)} findings; expected exactly {sorted(allowed) or 'none'}")
     return ok()
 
 
@@ -485,7 +494,8 @@ def p0l_ci_claims() -> bool:
 
     root = _real_root()
     runs = claims.load_runs(root)
-    statuses = sorted(p for p in root.glob("reports/L*/STATUS.md") if int(p.parent.name[1:]) >= 1)
+    statuses = sorted(p for g in claims.STATUS_GLOBS for p in root.glob(g)
+                      if int(re.search(r"/L(\d+)/", f"/{p.relative_to(root)}").group(1)) >= 1)
     expect(bool(statuses), f"real STATUS files from L1: {[str(p.relative_to(root)) for p in statuses]}; "
                            f"{len(runs)} committed run records")
     for path in statuses:
@@ -1943,6 +1953,84 @@ def p0aq_red_returns_to_builder() -> bool:
     text = (ROOT / ".github" / "workflows" / "failed.yml").read_text()
     expect("python3 -m harness.route pins_red" in text and "python3 -m harness.route pushed" in text,
            "failed.yml decides both cases by harness.route")
+    return ok()
+
+
+def _session_branch(git, repo: Path, base: str, branch: str, session: str, date: str) -> str:
+    """A synthetic branch off `base` doing what one Builder session does: a forecast, a STATUS and a proposer row, each
+    at the path `claims.session_files` gives. Returns the branch's name."""
+    git("checkout", "-q", "-b", branch, base)
+    files = claims.session_files(2, session, branch)
+    row = {"id": session, "ts": "2026-10-01T00:00:00Z", "claim": f"{branch} is green", "p": 0.5}
+    # The shared files are appended to or rewritten, as a session writing them does: a shared path collides.
+    for path, text in ((files["forecasts"], json.dumps(row) + "\n"),
+                       (files["status"], f"# STATUS — L2 — {date} — {branch[:7]:7} — PR #1\n"),
+                       (files["proposer"], f'kind = "builder"\nmodel = "m"\nsession = "{session}"\n')):
+        if path.endswith("STATUS.md"):
+            (repo / path).write_text(text)
+        else:
+            _append(repo, path, text)
+    git("add", "-A")
+    git("commit", "-q", "-m", branch)
+    return branch
+
+
+def _merge_in_order(git, repo: Path, base: str, name: str, order: tuple[str, ...]) -> str | None:
+    """Merge the branches into a fresh branch off `base`, in order, as pull requests: None if all merge, else the
+    branch that conflicted."""
+    git("checkout", "-q", "-b", name, base)
+    for n, branch in enumerate(order, 1):
+        try:
+            git("merge", "-q", "--no-ff", "-m", f"Merge pull request #{n} from x/{branch}", branch)
+        except subprocess.CalledProcessError:
+            git("merge", "--abort")
+            return branch
+    return None
+
+
+def p0ar_per_pr_files() -> bool:
+    """Two pull requests each doing what one Builder session does (a forecast, a STATUS, a proposer row) merge with no
+    conflict in either order; the ledger, the registry and the master STATUS view then read both pull requests' rows,
+    the STATUS view being the file of the pull request merged last (instruction #135)."""
+    from harness import ledger, registries
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ar-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir()
+    git("init", "-q", "-b", "master")
+    _append(repo, "reports/L2/forecasts.jsonl", json.dumps({"id": "old", "ts": "2026-09-01T00:00:00Z", "claim": "c"}) + "\n")
+    _append(repo, "reports/L2/STATUS.md", "# STATUS — L2 — 2026-09-01 — 0000000 — PR #0\n")
+    _append(repo, "harness/proposer.toml", 'kind = "builder"\nmodel = "m"\nsession = "frozen"\n')
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    # a's header is the later date, b's the earlier: the master view follows merge order, not the date
+    a = _session_branch(git, repo, base, "branch-a", "sess-a", "2026-10-02")
+    b = _session_branch(git, repo, base, "branch-b", "sess-b", "2026-10-01")
+    for order in ((a, b), (b, a)):
+        name = "merged-" + "-".join(order)
+        conflict = _merge_in_order(git, repo, base, name, order)
+        expect(conflict is None, f"merging {order} gives no conflict ({conflict!r} conflicted)")
+        if conflict is not None:
+            continue
+        ids = {r["id"] for r in ledger.ledger_rows(repo)}
+        expect({"old", "sess-a", "sess-b"} <= ids, f"{order}: the ledger reads the frozen row and both sessions' ({ids})")
+        sessions = set(registries.proposers(repo))
+        expect(sessions == {"frozen", "sess-a", "sess-b"}, f"{order}: the registry reads all three proposer rows ({sessions})")
+        view = ledger.status_view(repo)
+        expect(view is not None and view[0] == f"reports/L2/status/{order[-1]}.md",
+               f"{order}: the master STATUS is the file of the pull request merged last, {order[-1]} "
+               f"({view[0] if view else None})")
+    git("checkout", "-q", "-b", "twin", base)
+    _append(repo, "harness/proposer.d/other.toml", 'kind = "builder"\nmodel = "m"\nsession = "frozen"\n')
+    try:
+        registries.proposers(repo)
+        expect(False, "a proposer row keyed twice across files is a registry error")
+    except RegistryError as e:
+        expect(e.code == "proposer_keyed_twice", f"a proposer row keyed twice across files is a registry error ({e})")
+    shutil.rmtree(work, ignore_errors=True)
     return ok()
 
 
@@ -4561,6 +4649,14 @@ PINS = [
                                       Mutant("round_cap_removed", _edits("P0aq_round_cap_removed")),
                                       Mutant("conflict_as_clean", _edits("P0aq_conflict_as_clean"))),
         HARNESS + (".github/workflows/failed.yml",)),
+    Pin("P0ar", "two pull requests, each writing its own forecast, STATUS and proposer row, merge without conflict in "
+                "either order and are read together",
+        p0ar_per_pr_files, (Mutant("forecasts_shared", _edits("P0ar_forecasts_shared")),
+                            Mutant("status_shared", _edits("P0ar_status_shared")),
+                            Mutant("registry_frozen_only", _edits("P0ar_registry_frozen_only")),
+                            Mutant("status_by_date", _edits("P0ar_status_by_date")),
+                            Mutant("duplicate_overrides", _edits("P0ar_duplicate_overrides"))),
+        HARNESS + (".claude/commands/**", "reports/**")),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

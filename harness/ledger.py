@@ -41,6 +41,7 @@ from harness.claims import MECHANISM, PINS_WORKFLOW, _git
 
 MERGE_SUBJECT = re.compile(r"^Merge pull request #(\d+) ")
 LEDGER = "reports/*/forecasts.jsonl"
+LEDGERS = (LEDGER, "reports/*/forecasts/*.jsonl")  # the frozen single file, and one file per session (instruction #135)
 
 
 @dataclass(frozen=True)
@@ -155,7 +156,7 @@ def merged_since(repo: Path, since: str, head: str = "HEAD") -> list[Merged]:
         m = MERGE_SUBJECT.match(subject)
         if m is None:
             return None
-        diff = _git(repo, "diff", "-U0", "--no-color", parents.split()[0], sha, "--", LEDGER).splitlines()
+        diff = _git(repo, "diff", "-U0", "--no-color", parents.split()[0], sha, "--", *LEDGERS).splitlines()
         added = [line[1:] for line in diff if line.startswith("+") and not line.startswith("+++")]
         return Merged(int(m.group(1)), sha, tuple(r for r in _rows(added) if _builder_forecast(r)))
 
@@ -163,10 +164,15 @@ def merged_since(repo: Path, since: str, head: str = "HEAD") -> list[Merged]:
 
 
 def ledger_rows(repo: Path, head: str = "HEAD") -> list[dict]:
-    """Every row of every ledger at `head`, ledgers in path order."""
+    """Every row of every ledger at `head`: the frozen `forecasts.jsonl` and every file under `forecasts/`, ordered by
+    `ts` then `id` (rows are never reordered within equal keys: the sort is stable over path order)."""
     paths = sorted(p for p in _git(repo, "ls-tree", "-r", "--name-only", head, "reports/").splitlines()
-                   if Path(p).match(LEDGER))
-    return [r for p in paths for r in _rows(_git(repo, "show", f"{head}:{p}").splitlines())]
+                   if any(Path(p).match(g) for g in LEDGERS))
+    return ordered([r for p in paths for r in _rows(_git(repo, "show", f"{head}:{p}").splitlines())])
+
+
+def ordered(rows: Sequence[dict]) -> list[dict]:
+    return sorted(rows, key=lambda r: (str(r.get("ts", "")), str(r.get("id", ""))))
 
 
 # ------------------------------------------------------------------ rule 3: outcomes by code (instruction #54)
@@ -530,7 +536,7 @@ def exposed_and_silent(rows: Sequence[dict]) -> list[dict]:
 
 def probe_seed(repo: Path, head: str = "HEAD") -> str:
     """The ledger head: the last commit reachable from `head` that changed a forecast ledger."""
-    return _git(repo, "log", "-1", "--format=%H", head, "--", LEDGER).strip()
+    return _git(repo, "log", "-1", "--format=%H", head, "--", *LEDGERS).strip()
 
 
 def draw_probes(pool: Sequence[dict], seed: str, k: int) -> list[dict]:
@@ -687,7 +693,7 @@ def github_observer(repo: Path, price_of: Callable[[int], Mapping | None]) -> Ob
 
 
 def ledger_paths(repo: Path) -> list[Path]:
-    return sorted(repo.glob(LEDGER))
+    return sorted(p for g in LEDGERS for p in repo.glob(g))
 
 
 def now_utc() -> str:
@@ -787,6 +793,21 @@ def wish_latency(created: Mapping[int, str], wishes: Sequence[int], cited: Mappi
             tuple(n for n in filed if not done[n]))
 
 
+STATUSES = ("reports/*/STATUS.md", "reports/*/status/*.md")  # the frozen single file, and one file per branch
+
+
+def status_view(repo: Path, head: str = "HEAD") -> tuple[str, str] | None:
+    """The master view of STATUS (instruction #135 item 2): the (path, text at `head`) of the STATUS file the most
+    recently merged pull request wrote, by commit order on `head`'s first-parent line; None if no commit wrote one."""
+    last = _git(repo, "log", "--first-parent", "-1", "--format=%H", head, "--", *STATUSES).strip()
+    if not last:
+        return None
+    parent = _git(repo, "rev-list", "--parents", "-n", "1", last).split()[1:2]
+    paths = sorted(_git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", *(parent or ["--root"]), last, "--",
+                        *STATUSES).split())
+    return (paths[-1], _git(repo, "show", f"{head}:{paths[-1]}")) if paths else None
+
+
 STATUS_PR = re.compile(r"^# STATUS — L\d+ — \S+ — \S+ — PR #(\d+)", re.M)
 NEEDS_YOU = re.compile(r"^NEEDS YOU[^:]*:\s*(.*)$", re.M)
 
@@ -794,12 +815,12 @@ NEEDS_YOU = re.compile(r"^NEEDS YOU[^:]*:\s*(.*)$", re.M)
 def needs_you(repo: Path, since: str, head: str = "HEAD") -> list[dict]:
     """Every STATUS commit in since..head whose `NEEDS YOU` line names an item: the pull request in its header, at
     the commit's committer date."""
-    log = _git(repo, "log", "--format=%H%x1f%cI", f"{since}..{head}", "--", "reports/*/STATUS.md").splitlines()
+    log = _git(repo, "log", "--format=%H%x1f%cI", f"{since}..{head}", "--", *STATUSES).splitlines()
 
     def asked(line: str) -> list[dict]:
         sha, at = line.split("\x1f")
         paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", sha,
-                     "--", "reports/*/STATUS.md").splitlines()
+                     "--", *STATUSES).splitlines()
         texts = [_git(repo, "show", f"{sha}:{p}") for p in paths if p]
         return [{"item": int(h.group(1)), "route": "needs-you", "at": at} for t in texts
                 if (h := STATUS_PR.search(t)) and (n := NEEDS_YOU.search(t)) and n.group(1).strip().lower() != "none"]
@@ -1047,6 +1068,9 @@ def main(argv: list[str] | None = None) -> int:
     q.add_argument("--until", default=None, help="ISO timestamp; now if absent")
     q.add_argument("--head", default="HEAD")
     q.add_argument("--repo", type=Path, default=Path("."))
+    t = sub.add_parser("status", help="the master view of STATUS: the file of the most recently merged pull request")
+    t.add_argument("--head", default="HEAD")
+    t.add_argument("--repo", type=Path, default=Path("."))
     e = sub.add_parser("elect", help="draw a model for a procedure by EXP3 over its entrants")
     e.add_argument("procedure", choices=sorted(PROCEDURES))
     e.add_argument("--seed", type=int, required=True)
@@ -1088,6 +1112,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "resolve":
         return _resolve_cli(a.repo, a.session)
+    if a.cmd == "status":
+        view = status_view(a.repo, a.head)
+        if view is None:
+            print("no STATUS file has been merged", file=sys.stderr)
+            return 1
+        print(f"# {view[0]}", file=sys.stderr)
+        print(view[1], end="")
+        return 0
     if a.cmd == "price":
         got, since, end = github_price(a.repo, a.since, a.until, a.head)
         print(f"# price over [{since}, {end}) since {a.since}")
@@ -1122,13 +1154,18 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _resolve_cli(repo: Path, session: str) -> int:
-    """Resolve every ledger in the working tree, appending each resolution to its forecast's ledger."""
+    """Resolve every layer's ledger in the working tree (the union of its files), appending the resolutions to the
+    layer's own file for this run, `forecasts/<session>.jsonl`."""
     now = now_utc()
     observe = github_observer(repo, layer_price(repo))
     failed = 0
-    for path in ledger_paths(repo):
-        rows = _rows(path.read_text().splitlines())
+    layers = sorted({p.parent.parent if p.parent.name == "forecasts" else p.parent for p in ledger_paths(repo)})
+    for layer in layers:
+        path = layer / "forecasts" / f"{session}.jsonl"
+        rows = ordered([r for p in ledger_paths(repo) if layer in (p.parent, p.parent.parent)
+                        for r in _rows(p.read_text().splitlines())])
         got, unread = resolve(rows, observe, now, session)
+        path.parent.mkdir(exist_ok=True)
         with path.open("a") as f:
             f.writelines(json.dumps(r) + "\n" for r in got)
         typed = [x for x in open_forecasts(rows) if forecast_type(x) != FREE]

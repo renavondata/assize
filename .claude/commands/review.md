@@ -10,10 +10,10 @@ Read CLAUDE.md first, including every amendment. It governs this session. Role: 
 - PR: !`gh pr view $ARGUMENTS --json number,title,headRefName,headRefOid,baseRefName,isDraft,author,labels -q '"#\(.number) \(.title) — \(.headRefName)@\(.headRefOid) -> \(.baseRefName) draft=\(.isDraft) author=\(.author.login) labels=\([.labels[].name]|join(","))"' 2>&1 || true`
 - Fetched head: !`git fetch -q origin "$(gh pr view $ARGUMENTS --json headRefName -q .headRefName 2>/dev/null)" 2>&1 && git rev-parse --short FETCH_HEAD || true`
 - Files touched: !`gh pr view $ARGUMENTS --json files -q '[.files[].path] | join(", ")' 2>&1 || true`
-- Builder of record at head: !`git show FETCH_HEAD:harness/proposer.toml 2>&1 || true`
+- Builder of record at head: !`for f in $(git ls-tree -r --name-only FETCH_HEAD harness/proposer.toml harness/proposer.d); do echo "# $f"; git show "FETCH_HEAD:$f"; done 2>&1 || true`
 - Current layer at head: !`L=$(( $(git show FETCH_HEAD:REPORT.md | grep -oP '^- L\K[0-9]+' | sort -n | tail -1) + 1 )); echo "L$L" || true`
 - Brief at head: !`L=$(( $(git show FETCH_HEAD:REPORT.md | grep -oP '^- L\K[0-9]+' | sort -n | tail -1) + 1 )); git ls-tree --name-only FETCH_HEAD docs/briefs/ | grep "brief-$L-" || true`
-- Open forecasts at head: !`f=$(git ls-tree -r --name-only FETCH_HEAD | grep 'forecasts.jsonl$' | sort | tail -1); [ -n "$f" ] && git show "FETCH_HEAD:$f" | python3 -c 'import sys,json; r=[json.loads(l) for l in sys.stdin if l.strip()]; c={x["id"] for x in r if "claim" in x}; o={x["id"] for x in r if "outcome" in x}; print(len(c-o))' || echo none`
+- Open forecasts at head: !`f=$(git ls-tree -r --name-only FETCH_HEAD | grep 'reports/L[0-9]*/forecasts\(\.jsonl\|/[^/]*\.jsonl\)$' | sort); [ -n "$f" ] && for p in $f; do git show "FETCH_HEAD:$p"; done | python3 -c 'import sys,json; r=[json.loads(l) for l in sys.stdin if l.strip()]; c={x["id"] for x in r if "claim" in x}; o={x["id"] for x in r if "outcome" in x}; print(len(c-o))' || echo none`
 
 ## Guards
 - If the account above is not `assize-reviewer`, stop and report: wrong credentials; do nothing else.
