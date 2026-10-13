@@ -2400,13 +2400,21 @@ def p0ad_chooser_sealed() -> bool:
     _commit(git, "act")
     (cli / "reports/L2/STATUS.md").unlink()
     _commit(git, "withdraw")
-    found = chooser.chose_findings(cli)
+
+    def findings(repo: Path) -> list[str]:
+        """The check's findings, or the git failure it raised reading history, as one finding."""
+        try:
+            return [str(f) for f in chooser.chose_findings(repo)]
+        except subprocess.CalledProcessError as e:
+            return [f"raised: {e}"]
+
+    found = findings(cli)
     expect(not found, f"the printed rows, committed first, then the line, pass the check, a later commit deleting the "
-                      f"STATUS read as no text ({[str(f) for f in found]})")
+                      f"STATUS read as no text ({found})")
     root = _real_root()
-    found = chooser.chose_findings(root)
-    print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
-    expect(not found, f"real chose lines: findings {[str(f) for f in found]}")
+    found = findings(root)
+    print(f"    real: {'?' if found else len(chooser.chose_history(root))} chose lines in history")
+    expect(not found, f"real chose lines: findings {found}")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
