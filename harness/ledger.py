@@ -873,12 +873,12 @@ NEEDS_YOU = re.compile(r"^NEEDS YOU[^:]*:\s*(.*)$", re.M)
 
 def needs_you(repo: Path, since: str, head: str = "HEAD") -> list[dict]:
     """Every STATUS commit in since..head whose `NEEDS YOU` line names an item: the pull request in its header, at
-    the commit's committer date."""
+    the commit's committer date. A commit that deletes a STATUS asks nothing (`--diff-filter=d`)."""
     log = _git(repo, "log", "--format=%H%x1f%cI", f"{since}..{head}", "--", *STATUSES).splitlines()
 
     def asked(line: str) -> list[dict]:
         sha, at = line.split("\x1f")
-        paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", sha,
+        paths = _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", "--diff-filter=d", sha,
                      "--", *STATUSES).splitlines()
         texts = [_git(repo, "show", f"{sha}:{p}") for p in paths if p]
         return [{"item": int(h.group(1)), "route": "needs-you", "at": at} for t in texts

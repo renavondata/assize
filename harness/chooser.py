@@ -236,13 +236,13 @@ def sealed_before(repo: Path, row_commit: str | None, act_commit: str | None) ->
 
 def chose_history(repo: Path, head: str = "HEAD") -> list[tuple[str, dict]]:
     """Every distinct `chose:` line in any STATUS in history, in the order of the commit that first has it: (commit,
-    parsed line)."""
+    parsed line). A commit that deletes a STATUS has no text of it to read (`--diff-filter=d`)."""
     seen: dict[str, tuple[str, dict]] = {}
     commits = claims._git(repo, "log", "--reverse", "--topo-order", "--format=%H", head, "--",
                           *claims.STATUS_GLOBS).split()
     for c in commits:
-        for path in claims._git(repo, "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "-m", "--first-parent", c,
-                                "--", *claims.STATUS_GLOBS).split():
+        for path in claims._git(repo, "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "-m", "--first-parent",
+                                "--diff-filter=d", c, "--", *claims.STATUS_GLOBS).split():
             for m in CHOSE.finditer(claims._git(repo, "show", f"{c}:{path}")):
                 seen.setdefault(m["hash"], (c, m.groupdict()))
     return list(seen.values())
