@@ -1,0 +1,23 @@
+Probe: harness.ledger.model_price at PR #167 head b2e7f72 on one real session log.
+Reviewer run 38343173108, session b3adb64d-5522-43e8-a075-a599be4b29c4, 2026-10-13.
+
+Input: the uploaded build.log of build run 38337502750 (artifact 11788050289, the Builder session of this PR).
+ledger/draws (origin, c771e00) holds exactly one draw for that run:
+{"procedure": "build", "ts": "2026-10-13T03:14:43Z", "run": 38337502750, ..., "drawn": "claude-opus-5-5"}
+
+`result` events in the log (subtype, total_cost_usd, num_turns, session_id) — one session id, three events:
+success 1.1789745999999997 31 15185207-cbdc-4c0c-9c30-5077204d1b1d
+success 1.2234559999999997 2 15185207-cbdc-4c0c-9c30-5077204d1b1d
+success 1.5137587999999997 9 15185207-cbdc-4c0c-9c30-5077204d1b1d
+results 3
+
+$ git rev-parse --short HEAD
+b2e7f72
+$ uv run --frozen python -I -c '<model_price({38337502750: 60.0}, [that draw], {38337502750: result_costs(parse(build.log))})>'
+result events in build.log of run 38337502750: [1.1789745999999997, 1.2234559999999997, 1.5137587999999997]
+ModelPrice(model='claude-opus-5-5', sessions=1, minutes=60.0, cost_usd=1.1789745999999997, cost_unknown=0) -> claude-opus-5-5 s1/60m/$1.18
+ModelPrice(model='unknown', sessions=2, minutes=0.0, cost_usd=2.7372147999999994, cost_unknown=0) -> unknown s2/0m/$2.74
+
+By instruction #139 item 2 ("Cost is the `total_cost_usd` of the final `result` event in the session's uploaded
+stream-json log"), the answer is one session, claude-opus-5-5, $1.51. The head reports three sessions, $1.18 under
+opus (the first event, not the final) and $2.74 under `unknown` (the later cumulative totals, summed): total $3.92.

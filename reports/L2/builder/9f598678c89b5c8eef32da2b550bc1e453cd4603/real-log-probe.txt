@@ -1,0 +1,23 @@
+Probe: harness.ledger.model_price at 9f59867 on the real session log of review b2e7f72 F1.
+Builder run 38348163289, session 403f4990-65e2-4d9a-b8f2-4f765e3e1b49, 2026-10-13.
+
+Input: the uploaded build.log of build run 38337502750 (`gh run download 38337502750`), one draw for that run on
+ledger/draws: {"procedure": "build", "run": 38337502750, "drawn": "claude-opus-5-5"}.
+
+$ git rev-parse --short HEAD
+9f59867
+$ uv run --frozen python -I -c '<sessions.parse(build.log); result_costs; model_price({38337502750: 60.0}, [draw], ...)>'
+result events (subtype, total_cost_usd, session_id):
+  success 1.1789745999999997 15185207-cbdc-4c0c-9c30-5077204d1b1d
+  success 1.2234559999999997 15185207-cbdc-4c0c-9c30-5077204d1b1d
+  success 1.5137587999999997 15185207-cbdc-4c0c-9c30-5077204d1b1d
+result_costs: [1.5137587999999997]
+ModelPrice(model='claude-opus-5-5', sessions=1, minutes=60.0, cost_usd=1.5137587999999997, cost_unknown=0) -> claude-opus-5-5 s1/60m/$1.51
+
+At b2e7f72 the same input gave claude-opus-5-5 s1/60m/$1.18 and unknown s2/0m/$2.74 (review probe). Now: one session,
+the final result's $1.51, as instruction #139 item 2 defines.
+
+Window-wide, `uv run --frozen python -m harness.ledger price --since 3ea5325` on 9f59867:
+price: guy-items 4; guy-latency median 0.0h max 0.3h; sessions 16; runner-min 827; models claude-opus-5-5 s7/299m/$10.40+?, claude-sonnet-5-5 s8/119m/$2.56+?, unknown s1/6m/$?; wish-latency median 0.0h max 0.0h open 0; sessions-over-bound 2/2; sessions-lost-to-limit 0
+sessions with cost unknown 3 of 16
+(the per-model sessions sum to 16, the session runs' count; at fde1426 they summed to 23 against 12.)
