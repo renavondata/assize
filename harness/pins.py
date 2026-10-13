@@ -1545,12 +1545,20 @@ def _files_digest(root: Path) -> str:
     return h.hexdigest()
 
 
+FIXTURE_QUIET = (("gc.auto", "0"), ("maintenance.auto", "false"), ("maintenance.autoDetach", "false"),
+                 ("gc.autoDetach", "false"), ("receive.autogc", "false"))  # no background writer in a fixture's `.git`
+
+
 def _session_tree(dest: Path) -> Path:
     """A fixture checkout holding this tree's harness and workflows as one commit, `origin/master` at it, no remote."""
     shutil.copytree(ROOT / "harness", dest / "harness", ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copytree(WORKFLOW_DIR, dest / ".github" / "workflows")
     git = _git_fixture(dest)
     git("init", "-q", "-b", "master")
+    # Quiet before the first commit: a commit too starts a detached `git maintenance run --auto` (CI run 38424679926,
+    # P0at's twin: a repack removed `.git/objects/d1` while the scratch directory was being deleted).
+    for key, value in FIXTURE_QUIET:
+        git("config", key, value)
     git("add", "-A")
     git("commit", "-q", "-m", "base")
     git("update-ref", "refs/remotes/origin/master", "HEAD")
@@ -1628,11 +1636,8 @@ def _dry_run_tree(dest: Path, remote: Path) -> Path:
     subprocess.run(["git", "init", "-q", "--bare", "-b", "master", str(remote)], check=True, capture_output=True,
                    env=os.environ | claims.GIT_ENV)
     # A fetch or push starts a detached `git maintenance run --auto` (a receive, `gc --auto`) that can still be writing
-    # into `.git` when the pin removes its scratch directory (review db9577f F1); both repositories run none.
-    quiet = (("gc.auto", "0"), ("maintenance.auto", "false"), ("maintenance.autoDetach", "false"),
-             ("gc.autoDetach", "false"), ("receive.autogc", "false"))
-    for key, value in quiet:
-        git("config", key, value)
+    # into `.git` when the pin removes its scratch directory (review db9577f F1); the remote runs none either.
+    for key, value in FIXTURE_QUIET:
         _git_fixture(remote)("config", key, value)
     git("remote", "add", "origin", str(remote))
     git("push", "-q", "origin", "master")
