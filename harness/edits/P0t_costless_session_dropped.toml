@@ -1,0 +1,5 @@
+# P0t's mutant (instruction #139 item 4b): a session with no cost is dropped from its model's session count.
+[[edit]]
+path = "harness/ledger.py"
+old = "        return ModelPrice(model, len(mine), sum(r[1] for r in mine), sum(r[2] for r in mine if r[2] is not None),"
+new = "        return ModelPrice(model, len([r for r in mine if r[2] is not None]), sum(r[1] for r in mine), sum(r[2] for r in mine if r[2] is not None),"

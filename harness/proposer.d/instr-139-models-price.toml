@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-139-models-price (instruction #139): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "b7117650-006d-4434-913c-ecca91e1d488"

@@ -1174,6 +1174,22 @@ PRICE_INSTRUCTIONS = ((20, 10, 4, 6), (21, 10, 5, 9), (22, 11, 3, 12))
 # the failed review (the skipped one never ran); runner-minutes 30 + 60 + 10, pins 10.
 PRICE_WANT = {"items": (1, 2, 3), "latencies": (2.0, 8.0, 2.0), "open": (2,), "sessions": 2, "runner": 100.0,
               "pins": 10.0}
+# Instruction #139: run 100 (the build) drew model x and its log ends in a result costing $1.50; run 101 (the review, 60
+# minutes) drew y for review then x for vizier, and its log ends after one result of $2.00, the vizier session never
+# reaching its own. By the definition: x has two sessions over 30 + 30 minutes with one cost known ($1.50, one unknown);
+# y has one session over 30 minutes at $2.00. The run before the window (104) is in neither.
+PRICE_DRAWS = (("build", 100, "claude-x"), ("review", 101, "claude-y"), ("vizier", 101, "claude-x"))
+PRICE_LOGS = {100: ((1.5,),), 101: ((2.0,),)}  # run -> the (cost,) of each session's result event in its log
+PRICE_MODELS_WANT = (("claude-x", 2, 60.0, 1.5, 1), ("claude-y", 1, 30.0, 2.0, 0))
+
+
+def _session_log(*sessions_: tuple) -> list[dict]:
+    """A stream-json log of sessions: each is an assistant message and a `result` event carrying its cost, if any."""
+    events: list[dict] = []
+    for (cost,) in sessions_:
+        events += [{"type": "assistant", "message": {"id": "m", "content": []}},
+                   {"type": "result", "subtype": "success"} | ({} if cost is None else {"total_cost_usd": cost})]
+    return events
 
 
 def p0t_price() -> bool:
@@ -1185,9 +1201,11 @@ def p0t_price() -> bool:
     expect, ok = _expecter()
     reached = [{"item": n, "route": r, "at": _h(h)} for n, r, h in PRICE_REACHED]
     actions = {n: [_h(h) for h in hs] for n, hs in PRICE_ACTIONS.items()}
-    runs = [{"path": w, "conclusion": c, "created_at": _h(h), "run_started_at": _h(h), "updated_at": _h(h + m / 60)}
-            for w, c, h, m in PRICE_RUNS]
-    got = ledger.price(reached, actions, runs, T0, _h(PRICE_UNTIL))
+    runs = [{"id": 100 + i, "path": w, "conclusion": c, "created_at": _h(h), "run_started_at": _h(h),
+             "updated_at": _h(h + m / 60)} for i, (w, c, h, m) in enumerate(PRICE_RUNS)]
+    draws = [{"procedure": p, "run": r, "drawn": m} for p, r, m in PRICE_DRAWS]
+    costs = {r: ledger.result_costs(_session_log(*cs)) for r, cs in PRICE_LOGS.items()}
+    got = ledger.price(reached, actions, runs, T0, _h(PRICE_UNTIL), draws, costs)
     print(f"    {got}")
     print(f"    {got.status_line()}")
     expect(got.items == PRICE_WANT["items"], f"items {got.items}, want {PRICE_WANT['items']}")
@@ -1210,8 +1228,22 @@ def p0t_price() -> bool:
            f"wishes {ws}, latencies {wl}, open {wo}; want (10, 11, 12), (5.0,), (11, 12)")
     line = dataclasses.replace(got, wishes=ws, wish_latencies_h=wl, open_wishes=wo).status_line()
     expect(line == "price: guy-items 3; guy-latency median 2.0h max 8.0h; sessions 2; runner-min 100; "
+                   "models claude-x s2/60m/$1.50+?, claude-y s1/30m/$2.00; "
                    "wish-latency median 5.0h max 5.0h open 2; sessions-over-bound 0/0; sessions-lost-to-limit 0",
            f"STATUS line {line!r}")
+    # Instruction #139 item 4: each model reported separately, correct sums, a session without a result counted.
+    have = tuple((m.model, m.sessions, m.minutes, m.cost_usd, m.cost_unknown) for m in got.models)
+    expect(len(have) == len(PRICE_MODELS_WANT) and all(
+        a[:2] == b[:2] and a[4] == b[4] and math.isclose(a[2], b[2]) and math.isclose(a[3], b[3])
+        for a, b in zip(have, PRICE_MODELS_WANT)), f"per-model price {have}, want {PRICE_MODELS_WANT}")
+    expect(sum(m.sessions for m in got.models) == len(PRICE_DRAWS) and got.sessions == 2,
+           "every drawn session is under a model (three draws over two runs); the vizier session without a result is "
+           "counted, not dropped")
+    bare = ledger.model_price({7: 10.0}, [], {})
+    expect(bare == (ledger.ModelPrice(ledger.UNKNOWN_MODEL, 1, 10.0, 0.0, 1),),
+           f"a session run with no draw and no log is one unknown session with cost unknown: {bare}")
+    expect(ledger.result_costs([{"type": "result"}, {"type": "result", "total_cost_usd": 0.25}, {"type": "assistant"}])
+           == [None, 0.25], "a result event without a cost reads as unknown, not zero")
     return ok()
 
 
@@ -1302,6 +1334,16 @@ def p0u_election() -> bool:
            f"probabilities {dict(got.probabilities)}, by definition {want}")
     expect(ledger.elect(rows, "audit", ELECTION_ENTRANTS, ELECTION_BOUND, 0).model in ELECTION_ENTRANTS,
            "a procedure with no record draws among its entrants")
+    # Instruction #139 item 5: with three entrants and no recorded draw, each starts at EXP3's uniform 1/3 and a sweep of
+    # every seed draws each a third of the time, and nothing else.
+    three = ("m-a", "m-b", "m-c")
+    fresh = {m: 0 for m in three}
+    for seed in range(ledger.DRAWS):
+        fresh[ledger.elect([], "vizier", three, ELECTION_BOUND, seed).model] += 1
+    start = ledger.elect([], "vizier", three, ELECTION_BOUND, 0)
+    expect(set(start.probabilities) == set(three) and all(math.isclose(p, 1 / 3) for p in start.probabilities.values())
+           and all(abs(n - ledger.DRAWS / 3) <= 1 for n in fresh.values()),
+           f"three new entrants start uniform: {dict(start.probabilities)}, sweep {fresh}")
     work = Path(tempfile.mkdtemp(prefix="assize-p0u-", dir=context.scratch))
     repo = work / "repo"
     git = _git_fixture(repo)
@@ -1889,8 +1931,9 @@ def p0ak_session_declared() -> bool:
     expect(not unread, f"every run read ({unread})")
     k, n = ledger.over_bound(rows + got, BEFORE_TS, LATER_TS)
     expect((k, n) == (1, 4), f"sessions-over-bound {k}/{n}, want 1/4 (run 2 over; run 3 open and run 4 void counted)")
-    runs = [{"path": w, "conclusion": c, "created_at": _h(1), "run_started_at": _h(1), "updated_at": _h(2),
-             "steps": [{"name": s, "conclusion": sc} for s, sc in steps]} for w, c, steps in LIMIT_RUNS]
+    runs = [{"id": 200 + i, "path": w, "conclusion": c, "created_at": _h(1), "run_started_at": _h(1),
+             "updated_at": _h(2), "steps": [{"name": s, "conclusion": sc} for s, sc in steps]}
+            for i, (w, c, steps) in enumerate(LIMIT_RUNS)]
     priced = ledger.price([], {}, runs, T0, _h(PRICE_UNTIL))
     expect(priced.lost_to_limit == 1, f"sessions-lost-to-limit {priced.lost_to_limit}, want 1 (the build run whose "
                                       f"`{ledger.LIMIT_STEP}` step failed)")
@@ -4556,14 +4599,18 @@ PINS = [
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")),
-                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction"))), HARNESS),
+                    Mutant("wish_from_instruction", _edits("P0t_wish_from_instruction")),
+                    Mutant("first_entrant_only", _edits("P0t_first_entrant_only")),
+                    Mutant("costless_session_dropped", _edits("P0t_costless_session_dropped")),
+                    Mutant("cost_pooled", _edits("P0t_cost_pooled"))), HARNESS),
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),
                        Mutant("unweighted_estimate", _edits("P0u_unweighted_estimate")),
                        Mutant("draw_not_published", _edits("P0u_draw_not_published")),
                        Mutant("draw_push_forced", _edits("P0u_draw_push_forced")),
-                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head"))), HARNESS),
+                       Mutant("entrants_from_head", _edits("P0u_entrants_from_head")),
+                       Mutant("entrants_beyond_second_ignored", _edits("P0u_entrants_beyond_second_ignored"))), HARNESS),
     Pin("P0v", "a needs-review label applied by the reviewer account starts a review; a review session's awaits-guy does not",
         p0v_review_trigger, (Mutant("reviewer_label_excluded", _edits("P0v_reviewer_label_excluded")),),
         (".github/workflows/review.yml",)),

@@ -1,0 +1,5 @@
+# P0u's mutant (instruction #139 item 5): the election looks at the first two entrants only.
+[[edit]]
+path = "harness/ledger.py"
+old = "    estimate = {m: sum(min(l, bound) / d[\"probabilities\"][m] for d, l in scored if d[\"drawn\"] == m) for m in entrants}"
+new = "    estimate = {m: sum(min(l, bound) / d[\"probabilities\"][m] for d, l in scored if d[\"drawn\"] == m) for m in list(entrants)[:2]}"
