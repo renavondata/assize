@@ -1,0 +1,529 @@
+pins	Set up job	﻿2026-10-13T08:36:08.4464209Z Current runner version: '2.337.0'
+pins	Set up job	2026-10-13T08:36:08.4503345Z ##[group]Runner Image Provisioner
+pins	Set up job	2026-10-13T08:36:08.4504821Z Hosted Compute Agent
+pins	Set up job	2026-10-13T08:36:08.4505860Z Version: 20261002.596
+pins	Set up job	2026-10-13T08:36:08.4507017Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+pins	Set up job	2026-10-13T08:36:08.4508323Z Build Date: 2026-10-02T22:28:27Z
+pins	Set up job	2026-10-13T08:36:08.4509510Z Worker ID: {b3b99f11-ccb9-4ad4-b47f-8cc79382d27c}
+pins	Set up job	2026-10-13T08:36:08.4510835Z Region: eastus
+pins	Set up job	2026-10-13T08:36:08.4512049Z Cloud: Azure
+pins	Set up job	2026-10-13T08:36:08.4513123Z ##[endgroup]
+pins	Set up job	2026-10-13T08:36:08.4515977Z ##[group]Operating System
+pins	Set up job	2026-10-13T08:36:08.4517175Z Ubuntu
+pins	Set up job	2026-10-13T08:36:08.4518052Z 24.04.5
+pins	Set up job	2026-10-13T08:36:08.4518899Z LTS
+pins	Set up job	2026-10-13T08:36:08.4519910Z ##[endgroup]
+pins	Set up job	2026-10-13T08:36:08.4520931Z ##[group]Runner Image
+pins	Set up job	2026-10-13T08:36:08.4522252Z Image: ubuntu-24.04
+pins	Set up job	2026-10-13T08:36:08.4523449Z Version: 20261004.327.1
+pins	Set up job	2026-10-13T08:36:08.4525368Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+pins	Set up job	2026-10-13T08:36:08.4528507Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+pins	Set up job	2026-10-13T08:36:08.4530332Z ##[endgroup]
+pins	Set up job	2026-10-13T08:36:08.4533104Z ##[group]GITHUB_TOKEN Permissions
+pins	Set up job	2026-10-13T08:36:08.4536232Z Actions: read
+pins	Set up job	2026-10-13T08:36:08.4537380Z Contents: read
+pins	Set up job	2026-10-13T08:36:08.4538376Z Issues: read
+pins	Set up job	2026-10-13T08:36:08.4539286Z Metadata: read
+pins	Set up job	2026-10-13T08:36:08.4540238Z PullRequests: read
+pins	Set up job	2026-10-13T08:36:08.4541359Z ##[endgroup]
+pins	Set up job	2026-10-13T08:36:08.4544792Z Secret source: Actions
+pins	Set up job	2026-10-13T08:36:08.4546444Z Cache mode: write
+pins	Set up job	2026-10-13T08:36:08.4548109Z Prepare workflow directory
+pins	Set up job	2026-10-13T08:36:08.5044405Z Prepare all required actions
+pins	Set up job	2026-10-13T08:36:08.5115942Z Getting action download info
+pins	Set up job	2026-10-13T08:36:08.7312175Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+pins	Set up job	2026-10-13T08:36:08.8250588Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+pins	Set up job	2026-10-13T08:36:09.0627405Z Complete job name: pins
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-13T08:36:09.1448751Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1449887Z with:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1450370Z   persist-credentials: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1450905Z   fetch-depth: 0
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1451401Z   repository: renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1455521Z   token: ***
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1455987Z   ssh-strict: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1456450Z   ssh-user: git
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1456900Z   clean: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1457367Z   sparse-checkout-cone-mode: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1457920Z   fetch-tags: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1458398Z   show-progress: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1458879Z   lfs: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1459319Z   submodules: false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1459791Z   set-safe-directory: true
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.1460586Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2755840Z Syncing repository: renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2759203Z ##[group]Getting Git version info
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2761091Z Working directory is '/home/runner/work/assize/assize'
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2764187Z [command]/usr/bin/git version
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2902833Z git version 2.55.0
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2948677Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2994415Z Temporarily overriding HOME='/home/runner/work/_temp/615c40b0-f1e8-4b73-b1fb-4ea626d78ddc' before making global git config changes
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.2997590Z Adding repository directory to the temporary git global config as a safe directory
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3021430Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3026033Z Deleting the contents of '/home/runner/work/assize/assize'
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3028268Z ##[group]Initializing the repository
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3030480Z [command]/usr/bin/git init /home/runner/work/assize/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3149148Z hint: Using 'master' as the name for the initial branch. This default branch name
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3151837Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3153703Z hint: to use in all of your new repositories, which will suppress this warning,
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3155211Z hint: call:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3156156Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3157170Z hint: 	git config --global init.defaultBranch <name>
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3158308Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3159372Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3161163Z hint: 'development'. The just-created branch can be renamed via this command:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3162976Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3163955Z hint: 	git branch -m <name>
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3164818Z hint:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3166042Z hint: Disable this message with "git config set advice.defaultBranchName false"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3167984Z Initialized empty Git repository in /home/runner/work/assize/assize/.git/
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3174938Z [command]/usr/bin/git remote add origin https://github.com/renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3253780Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3255581Z ##[group]Disabling automatic garbage collection
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3257632Z [command]/usr/bin/git config --local gc.auto 0
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3312941Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3314210Z ##[group]Setting up auth
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3315487Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3434662Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3870540Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.3933613Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.4610049Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.4612830Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.4613615Z ##[group]Fetching the repository
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.4615217Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +edfa38728d9d642bcc1c7166cf14911f1710427e:refs/remotes/pull/143/merge
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9917351Z From https://github.com/renavondata/assize
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9921906Z  * [new branch]      add-constitution-and-briefs              -> origin/add-constitution-and-briefs
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9924820Z  * [new branch]      audit-8aae43c8c792                       -> origin/audit-8aae43c8c792
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9927329Z  * [new branch]      constitution-6                           -> origin/constitution-6
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9930040Z  * [new branch]      instr-102-awaits-guy-builds-master       -> origin/instr-102-awaits-guy-builds-master
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9932974Z  * [new branch]      instr-111-chooser                        -> origin/instr-111-chooser
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9935341Z  * [new branch]      instr-113-w2                             -> origin/instr-113-w2
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9937880Z  * [new branch]      instr-132-pins-cap                       -> origin/instr-132-pins-cap
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9940302Z  * [new branch]      instr-139-models-price                   -> origin/instr-139-models-price
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9942914Z  * [new branch]      instr-39-brief2-amendments               -> origin/instr-39-brief2-amendments
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9945212Z  * [new branch]      instr-46-auditor-role                    -> origin/instr-46-auditor-role
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9947549Z  * [new branch]      instr-49-vizier                          -> origin/instr-49-vizier
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9949852Z  * [new branch]      instr-64-elect-by-exp3                   -> origin/instr-64-elect-by-exp3
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9952644Z  * [new branch]      instr-64-exp3-election                   -> origin/instr-64-exp3-election
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9954945Z  * [new branch]      instr-65-review-sender                   -> origin/instr-65-review-sender
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9957250Z  * [new branch]      instr-68-wish-latency-price              -> origin/instr-68-wish-latency-price
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9959594Z  * [new branch]      instr-70-price-line                      -> origin/instr-70-price-line
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9962366Z  * [new branch]      l1-s2-crafter-binding-wip                -> origin/l1-s2-crafter-binding-wip
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9964982Z  * [new branch]      l2a-o3-replay-verified                   -> origin/l2a-o3-replay-verified
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9967248Z  * [new branch]      l2a-replay-verified                      -> origin/l2a-replay-verified
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9969307Z  * [new branch]      ledger/draws                             -> origin/ledger/draws
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9971409Z  * [new branch]      master                                   -> origin/master
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9973865Z  * [new ref]         edfa38728d9d642bcc1c7166cf14911f1710427e -> pull/143/merge
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9977628Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9979318Z ##[group]Determining the checkout info
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9980694Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:09.9981885Z [command]/usr/bin/git sparse-checkout disable
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.0006009Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.0049271Z ##[group]Checking out the ref
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.0054725Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/143/merge
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1731462Z Note: switching to 'refs/remotes/pull/143/merge'.
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1732933Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1740589Z You are in 'detached HEAD' state. You can look around, make experimental
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1757158Z changes and commit them, and you can discard any commits you make in this
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1760435Z state without impacting any branches by switching back to a branch.
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1762669Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1764083Z If you want to create a new branch to retain commits you create, you may
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1767431Z do so (now or later) by using -c with the switch command. Example:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1768361Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1769604Z   git switch -c <new-branch-name>
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1779843Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1786409Z Or undo this operation with:
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1787684Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1788976Z   git switch -
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1790027Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1792025Z Turn off this advice by setting config variable advice.detachedHead to false
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1793793Z 
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1796083Z HEAD is now at edfa387 Merge 17840e3d76b6f317821ff8d673420b85c0cab431 into 5d1119e95269eb5670bf39da3ef1fc263f8df5b4
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1802885Z ##[endgroup]
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1824775Z [command]/usr/bin/git log -1 --format=%H
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1862159Z edfa38728d9d642bcc1c7166cf14911f1710427e
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1868077Z ##[group]Removing auth
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1873082Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.1913435Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.2173259Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.2195071Z http.https://github.com/.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.2214401Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.2246317Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T08:36:10.2485126Z ##[endgroup]
+pins	Install uv	﻿2026-10-13T08:36:10.2805385Z ##[group]Run pipx install uv==0.8.17
+pins	Install uv	2026-10-13T08:36:10.2806278Z ^[[36;1mpipx install uv==0.8.17^[[0m
+pins	Install uv	2026-10-13T08:36:10.3073628Z shell: /usr/bin/bash -e {0}
+pins	Install uv	2026-10-13T08:36:10.3074523Z ##[endgroup]
+pins	Install uv	2026-10-13T08:36:10.9518412Z creating virtual environment...
+pins	Install uv	2026-10-13T08:36:11.2097199Z installing uv from spec 'uv==0.8.17'...
+pins	Install uv	2026-10-13T08:36:13.5295552Z done! ✨ 🌟 ✨
+pins	Install uv	2026-10-13T08:36:13.5312615Z   installed package uv 0.8.17, installed using Python 3.12.3
+pins	Install uv	2026-10-13T08:36:13.5313449Z   These apps are now available
+pins	Install uv	2026-10-13T08:36:13.5313961Z     - uv
+pins	Install uv	2026-10-13T08:36:13.5314375Z     - uvx
+pins	Sync environment	﻿2026-10-13T08:36:13.5656208Z ##[group]Run uv sync --frozen
+pins	Sync environment	2026-10-13T08:36:13.5656606Z ^[[36;1muv sync --frozen^[[0m
+pins	Sync environment	2026-10-13T08:36:13.5723110Z shell: /usr/bin/bash -e {0}
+pins	Sync environment	2026-10-13T08:36:13.5723409Z ##[endgroup]
+pins	Sync environment	2026-10-13T08:36:13.7184249Z Downloading cpython-3.11.13-linux-x86_64-gnu (download) (27.7MiB)
+pins	Sync environment	2026-10-13T08:36:14.7019851Z  Downloading cpython-3.11.13-linux-x86_64-gnu (download)
+pins	Sync environment	2026-10-13T08:36:14.8323101Z Using CPython 3.11.13
+pins	Sync environment	2026-10-13T08:36:14.8323702Z Creating virtual environment at: .venv
+pins	Sync environment	2026-10-13T08:36:14.8527200Z Downloading pillow (6.6MiB)
+pins	Sync environment	2026-10-13T08:36:14.8529294Z Downloading numpy (16.1MiB)
+pins	Sync environment	2026-10-13T08:36:14.9490383Z    Building crafter==1.8.3
+pins	Sync environment	2026-10-13T08:36:15.0443914Z  Downloading pillow
+pins	Sync environment	2026-10-13T08:36:15.3902150Z  Downloading numpy
+pins	Sync environment	2026-10-13T08:36:16.0280080Z       Built crafter==1.8.3
+pins	Sync environment	2026-10-13T08:36:16.0328079Z Prepared 12 packages in 1.19s
+pins	Sync environment	2026-10-13T08:36:16.0627644Z Installed 12 packages in 29ms
+pins	Sync environment	2026-10-13T08:36:16.0628935Z  + attrs==26.1.0
+pins	Sync environment	2026-10-13T08:36:16.0629740Z  + crafter==1.8.3
+pins	Sync environment	2026-10-13T08:36:16.0630467Z  + imageio==2.38.0
+pins	Sync environment	2026-10-13T08:36:16.0631022Z  + jsonschema==4.26.0
+pins	Sync environment	2026-10-13T08:36:16.0632306Z  + jsonschema-specifications==2025.9.1
+pins	Sync environment	2026-10-13T08:36:16.0633090Z  + numpy==2.4.6
+pins	Sync environment	2026-10-13T08:36:16.0633755Z  + opensimplex==0.4.5.1
+pins	Sync environment	2026-10-13T08:36:16.0634434Z  + pillow==12.3.0
+pins	Sync environment	2026-10-13T08:36:16.0635099Z  + referencing==0.37.0
+pins	Sync environment	2026-10-13T08:36:16.0635878Z  + rpds-py==2026.9.1
+pins	Sync environment	2026-10-13T08:36:16.0636614Z  + ruamel-yaml==0.19.1
+pins	Sync environment	2026-10-13T08:36:16.0637344Z  + typing-extensions==4.16.0
+pins	Self-run the session workflows	﻿2026-10-13T08:36:16.0848296Z ##[group]Run uv run --frozen python -m harness.selfrun
+pins	Self-run the session workflows	2026-10-13T08:36:16.0848797Z ^[[36;1muv run --frozen python -m harness.selfrun^[[0m
+pins	Self-run the session workflows	2026-10-13T08:36:16.0910988Z shell: /usr/bin/bash -e {0}
+pins	Self-run the session workflows	2026-10-13T08:36:16.0911263Z ##[endgroup]
+pins	Self-run the session workflows	2026-10-13T08:36:17.0784406Z selfrun: ok   build.yml: python -m harness.ledger elect build --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0789663Z selfrun: ok   build.yml: python -m harness.sessions limit build.log --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0791462Z selfrun: ok   review.yml: python -m harness.ledger elect audit --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0794782Z selfrun: ok   review.yml: python -m harness.ledger elect build --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0796995Z selfrun: ok   review.yml: python -m harness.ledger elect review --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0799326Z selfrun: ok   review.yml: python -m harness.ledger elect vizier --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0801069Z selfrun: ok   review.yml: python -m harness.sessions limit review.log --dry-run -> exit 0
+pins	Self-run the session workflows	2026-10-13T08:36:17.0802803Z selfrun: 0 failures
+pins	Choose the base	﻿2026-10-13T08:36:17.0989510Z ##[group]Run echo "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"
+pins	Choose the base	2026-10-13T08:36:17.0990362Z ^[[36;1mecho "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"^[[0m
+pins	Choose the base	2026-10-13T08:36:17.1053435Z shell: /usr/bin/bash -e {0}
+pins	Choose the base	2026-10-13T08:36:17.1053865Z env:
+pins	Choose the base	2026-10-13T08:36:17.1058377Z   GH_TOKEN: ***
+pins	Choose the base	2026-10-13T08:36:17.1058638Z   BASE_REF: master
+pins	Choose the base	2026-10-13T08:36:17.1058859Z ##[endgroup]
+pins	Choose the base	2026-10-13T08:36:24.3005447Z base: run 38366457249 on ce5ea5c8087c4da5155a4c3cd4c81d1cd238992a
+pins	make pins	﻿2026-10-13T08:36:24.3175742Z ##[group]Run make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+pins	make pins	2026-10-13T08:36:24.3176249Z ^[[36;1mmake pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"^[[0m
+pins	make pins	2026-10-13T08:36:24.3237247Z shell: /usr/bin/bash -e {0}
+pins	make pins	2026-10-13T08:36:24.3237516Z env:
+pins	make pins	2026-10-13T08:36:24.3240298Z   GH_TOKEN: ***
+pins	make pins	2026-10-13T08:36:24.3240696Z   PINS_SINCE: --since ce5ea5c8087c4da5155a4c3cd4c81d1cd238992a --since-run 38366457249
+pins	make pins	2026-10-13T08:36:24.3241144Z ##[endgroup]
+pins	make pins	2026-10-13T08:36:26.1288195Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since ce5ea5c8087c4da5155a4c3cd4c81d1cd238992a --since-run 38366457249
+pins	make pins	2026-10-13T08:43:56.9496744Z registry harness: 69 pins, 199 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+pins	make pins	2026-10-13T08:43:56.9498236Z [clean ] P0: observed pass -> ok (3.544s) out/pins/runs/P0/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9499588Z [clean ] P0b: observed pass -> ok (0.536s) out/pins/runs/P0b/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9500806Z [clean ] P0c: observed pass -> ok (1.238s) out/pins/runs/P0c/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9502477Z [clean ] P0d: observed pass -> ok (5.348s) out/pins/runs/P0d/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9503710Z [clean ] P0e: observed pass -> ok (1.939s) out/pins/runs/P0e/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9504893Z [clean ] P0f: observed pass -> ok (1.589s) out/pins/runs/P0f/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9506095Z [clean ] P0g: observed pass -> ok (2.04s) out/pins/runs/P0g/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9511371Z [clean ] P0h: observed pass -> ok (12.667s) out/pins/runs/P0h/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9513120Z [clean ] P0i: observed pass -> ok (0.436s) out/pins/runs/P0i/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9514369Z [clean ] P0j: observed pass -> ok (0.687s) out/pins/runs/P0j/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9515680Z [clean ] P0k: observed pass -> ok (0.436s) out/pins/runs/P0k/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9516954Z [clean ] P0l: observed pass -> ok (0.387s) out/pins/runs/P0l/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9518204Z [clean ] P0m: observed pass -> ok (0.787s) out/pins/runs/P0m/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9519525Z [clean ] P0n: observed pass -> ok (0.887s) out/pins/runs/P0n/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9520720Z [clean ] P0o: observed pass -> ok (0.687s) out/pins/runs/P0o/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9522191Z [clean ] P0q: observed pass -> ok (0.637s) out/pins/runs/P0q/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9523414Z [clean ] P0r: observed pass -> ok (0.987s) out/pins/runs/P0r/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9524647Z [clean ] P0s: observed pass -> ok (0.436s) out/pins/runs/P0s/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9525862Z [clean ] P0t: observed pass -> ok (0.436s) out/pins/runs/P0t/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9527098Z [clean ] P0u: observed pass -> ok (5.703s) out/pins/runs/P0u/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9528336Z [clean ] P0v: observed pass -> ok (0.386s) out/pins/runs/P0v/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9529657Z [clean ] P0w: observed pass -> ok (10.01s) out/pins/runs/P0w/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9530882Z [clean ] P0x: observed pass -> ok (10.014s) out/pins/runs/P0x/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9532369Z [clean ] P0y: observed pass -> ok (1.689s) out/pins/runs/P0y/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9533575Z [clean ] P0z: observed pass -> ok (0.386s) out/pins/runs/P0z/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9534809Z [clean ] P0aa: observed pass -> ok (0.486s) out/pins/runs/P0aa/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9536061Z [clean ] P0ab: observed pass -> ok (0.386s) out/pins/runs/P0ab/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9537313Z [clean ] P0ac: observed pass -> ok (0.888s) out/pins/runs/P0ac/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9538563Z [clean ] P0ad: observed pass -> ok (1.589s) out/pins/runs/P0ad/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9540143Z [clean ] P0ae: observed pass -> ok (0.436s) out/pins/runs/P0ae/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9541924Z [clean ] P0af: observed pass -> ok (0.436s) out/pins/runs/P0af/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9543277Z [clean ] P0ag: observed pass -> ok (1.389s) out/pins/runs/P0ag/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9544623Z [clean ] P0ah: observed pass -> ok (0.436s) out/pins/runs/P0ah/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9545936Z [clean ] P0ai: observed pass -> ok (0.436s) out/pins/runs/P0ai/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9547244Z [clean ] P0aj: observed pass -> ok (0.386s) out/pins/runs/P0aj/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9548508Z [clean ] P0as: observed pass -> ok (7.759s) out/pins/runs/P0as/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9549738Z [clean ] P0at: observed pass -> ok (4.848s) out/pins/runs/P0at/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9550984Z [clean ] P0au: observed pass -> ok (0.437s) out/pins/runs/P0au/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9552460Z [clean ] P0av: observed pass -> ok (1.689s) out/pins/runs/P0av/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9553736Z [clean ] P0ao: observed pass -> ok (0.386s) out/pins/runs/P0ao/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9554967Z [clean ] P0ap: observed pass -> ok (0.437s) out/pins/runs/P0ap/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9556220Z [clean ] P0ak: observed pass -> ok (0.436s) out/pins/runs/P0ak/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9557461Z [clean ] P0al: observed pass -> ok (0.436s) out/pins/runs/P0al/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9558781Z [clean ] P0am: observed pass -> ok (0.385s) out/pins/runs/P0am/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9560121Z [clean ] P0an: observed pass -> ok (0.385s) out/pins/runs/P0an/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9561403Z [clean ] P0aq: observed pass -> ok (0.386s) out/pins/runs/P0aq/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9563274Z [clean ] P0ar: observed pass -> ok (0.536s) out/pins/runs/P0ar/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9564619Z [clean ] P0aw: observed pass -> ok (0.386s) out/pins/runs/P0aw/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9565995Z [clean ] P1: observed pass -> ok (2.793s) out/pins/runs/P1/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9567252Z [clean ] P2: observed pass -> ok (10.265s) out/pins/runs/P2/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9568481Z [clean ] P3: observed pass -> ok (37.833s) out/pins/runs/P3/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9569688Z [clean ] P4: observed pass -> ok (11.624s) out/pins/runs/P4/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9571059Z [clean ] P5: observed pass -> ok (7.462s) out/pins/runs/P5/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9572669Z [clean ] P14: observed pass -> ok (9.067s) out/pins/runs/P14/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9583443Z [clean ] P15: observed pass -> ok (12.164s) out/pins/runs/P15/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9584743Z [clean ] P7: observed pass -> ok (17.303s) out/pins/runs/P7/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9585954Z [clean ] P13: observed pass -> ok (3.091s) out/pins/runs/P13/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9587172Z [clean ] P9: observed pass -> ok (4.996s) out/pins/runs/P9/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9588378Z [clean ] P16: observed pass -> ok (4.649s) out/pins/runs/P16/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9589607Z [clean ] P17: observed pass -> ok (12.537s) out/pins/runs/P17/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9590824Z [clean ] P18: observed pass -> ok (1.137s) out/pins/runs/P18/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9592304Z [clean ] P12: observed pass -> ok (9.616s) out/pins/runs/P12/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9593548Z [clean ] P19: observed pass -> ok (1.189s) out/pins/runs/P19/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9594770Z [clean ] P20: observed pass -> ok (1.341s) out/pins/runs/P20/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9596130Z [clean ] P22: observed pass -> ok (0.536s) out/pins/runs/P22/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9597419Z [clean ] P23: observed pass -> ok (10.007s) out/pins/runs/P23/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9599043Z [clean ] P10: observed pass -> ok (10.075s) out/pins/runs/P10/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9600503Z [clean ] P6: observed pass -> ok (0.586s) out/pins/runs/P6/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9602084Z [clean ] P11: observed pass -> ok (24.91s) out/pins/runs/P11/clean/transcript.log
+pins	make pins	2026-10-13T08:43:56.9603704Z [mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (3.579s + 3.578s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9605566Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.421s + 0.421s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9607490Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9609565Z [mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.274s + 1.274s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9611924Z [mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.334s + 5.385s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9613962Z [mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.94s + 1.976s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9615836Z [mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.626s + 1.625s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9617706Z [mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.627s + 2.076s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9619684Z [mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.808s + 12.757s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9621905Z [mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.756s + 12.704s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9624055Z [mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.754s + 12.706s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9628326Z [mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (10.65s + 12.756s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9630416Z [mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.549s + 12.651s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9632639Z [mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.471s + 0.47s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9634747Z [mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.471s + 0.472s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+pins	make pins	2026-10-13T08:43:56.9636878Z [mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.622s + 0.622s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7833700Z [mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7836093Z [mutant] P0k/self_resolution_admitted: mutant fail, twin pass -> KILLED (0.477s + 0.472s) out/pins/runs/P0k/self_resolution_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7838473Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7840607Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.822s + 0.873s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7843041Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.825s + 0.822s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7845058Z [mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.823s + 0.822s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7847656Z [mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.877s + 0.823s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7849776Z [mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.824s + 0.823s) out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7852262Z [mutant] P0m/instruction_author_unchecked: mutant fail, twin pass -> KILLED (0.873s + 0.822s) out/pins/runs/P0m/instruction_author_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7854491Z [mutant] P0m/instruction_label_unchecked: mutant fail, twin pass -> KILLED (0.824s + 0.822s) out/pins/runs/P0m/instruction_label_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7856792Z [mutant] P0m/instruction_labeler_unchecked: mutant fail, twin pass -> KILLED (0.822s + 0.822s) out/pins/runs/P0m/instruction_labeler_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7858987Z [mutant] P0m/body_edit_unchecked: mutant fail, twin pass -> KILLED (0.823s + 0.823s) out/pins/runs/P0m/body_edit_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7861060Z [mutant] P0m/inert_exemption_admitted: mutant fail, twin pass -> KILLED (0.824s + 0.824s) out/pins/runs/P0m/inert_exemption_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7863451Z [mutant] P0n/ranking_reversed: mutant fail, twin pass -> KILLED (0.823s + 0.872s) out/pins/runs/P0n/ranking_reversed/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7865521Z [mutant] P0o/overturned_scored_success: mutant fail, twin pass -> KILLED (0.723s + 0.726s) out/pins/runs/P0o/overturned_scored_success/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7867668Z [mutant] P0q/ledger_rewrite_admitted: mutant fail, twin pass -> KILLED (0.471s + 0.621s) out/pins/runs/P0q/ledger_rewrite_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7869754Z [mutant] P0q/draws_not_append_only: mutant fail, twin pass -> KILLED (0.622s + 0.671s) out/pins/runs/P0q/draws_not_append_only/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7872172Z [mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (1.272s + 1.323s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7874204Z [mutant] P0s/outcome_inverted: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0s/outcome_inverted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7876265Z [mutant] P0s/free_resolved_by_mechanism: mutant fail, twin pass -> KILLED (0.471s + 0.471s) out/pins/runs/P0s/free_resolved_by_mechanism/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7878480Z [mutant] P0s/branch_most_recent_pr: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0s/branch_most_recent_pr/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7880476Z [mutant] P0t/latency_dropped: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0t/latency_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7882771Z [mutant] P0t/guy_items_undercounted: mutant fail, twin pass -> KILLED (0.472s + 0.473s) out/pins/runs/P0t/guy_items_undercounted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7884858Z [mutant] P0t/wish_from_instruction: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0t/wish_from_instruction/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7886847Z [mutant] P0t/first_entrant_only: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0t/first_entrant_only/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7888878Z [mutant] P0t/costless_session_dropped: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0t/costless_session_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7903202Z [mutant] P0t/cost_pooled: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0t/cost_pooled/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7905178Z [mutant] P0t/first_result_charged: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0t/first_result_charged/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7907247Z [mutant] P0t/result_per_session: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0t/result_per_session/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7909558Z [mutant] P0u/argmin_election: mutant fail, twin pass -> KILLED (5.082s + 5.383s) out/pins/runs/P0u/argmin_election/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7911456Z [mutant] P0u/hedge_election: mutant fail, twin pass -> KILLED (5.232s + 5.382s) out/pins/runs/P0u/hedge_election/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7913650Z [mutant] P0u/unweighted_estimate: mutant fail, twin pass -> KILLED (5.34s + 5.347s) out/pins/runs/P0u/unweighted_estimate/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7915645Z [mutant] P0u/draw_not_published: mutant fail, twin pass -> KILLED (5.131s + 5.331s) out/pins/runs/P0u/draw_not_published/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7917576Z [mutant] P0u/draw_push_forced: mutant fail, twin pass -> KILLED (5.282s + 5.381s) out/pins/runs/P0u/draw_push_forced/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7919497Z [mutant] P0u/entrants_from_head: mutant fail, twin pass -> KILLED (5.333s + 5.382s) out/pins/runs/P0u/entrants_from_head/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7922030Z [mutant] P0u/entrants_beyond_second_ignored: mutant fail, twin pass -> KILLED (5.183s + 5.331s) out/pins/runs/P0u/entrants_beyond_second_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7924261Z [mutant] P0v/reviewer_label_excluded: mutant fail, twin pass -> KILLED (0.421s + 0.421s) out/pins/runs/P0v/reviewer_label_excluded/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7926254Z [mutant] P0w/witness_ignored: mutant fail, twin pass -> KILLED (9.039s + 9.992s) out/pins/runs/P0w/witness_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7928193Z [mutant] P0w/harness_change_skips: mutant fail, twin pass -> KILLED (8.088s + 9.943s) out/pins/runs/P0w/harness_change_skips/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7930121Z [mutant] P0w/skip_counted_ok: mutant fail, twin pass -> KILLED (9.941s + 9.946s) out/pins/runs/P0w/skip_counted_ok/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7932208Z [mutant] P0w/non_ancestor_base: mutant fail, twin pass -> KILLED (9.941s + 9.991s) out/pins/runs/P0w/non_ancestor_base/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7934172Z [mutant] P0x/price_line_dropped: mutant fail, twin pass -> KILLED (10.445s + 11.097s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7936241Z [mutant] P0x/none_on_workflow_admitted: mutant fail, twin pass -> KILLED (9.845s + 9.743s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7938274Z [mutant] P0x/scoped_by_number: mutant fail, twin pass -> KILLED (9.796s + 9.945s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7940371Z [mutant] P0y/split_trailer_block_admitted: mutant fail, twin pass -> KILLED (1.725s + 1.674s) out/pins/runs/P0y/split_trailer_block_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7942855Z [mutant] P0y/hook_unconditioned: mutant fail, twin pass -> KILLED (1.674s + 1.724s) out/pins/runs/P0y/hook_unconditioned/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7944918Z [mutant] P0z/pins_failure_unrouted: mutant fail, twin pass -> KILLED (0.421s + 0.422s) out/pins/runs/P0z/pins_failure_unrouted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7946923Z [mutant] P0aa/held_item_retaken: mutant fail, twin pass -> KILLED (0.522s + 0.521s) out/pins/runs/P0aa/held_item_retaken/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7948899Z [mutant] P0ab/shell_edit_admitted: mutant fail, twin pass -> KILLED (0.422s + 0.421s) out/pins/runs/P0ab/shell_edit_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7951022Z [mutant] P0ab/silent_master_stop_admitted: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0ab/silent_master_stop_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7953633Z [mutant] P0ac/instruction_without_because_admitted: mutant fail, twin pass -> KILLED (0.922s + 0.922s) out/pins/runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7955897Z [mutant] P0ac/both_forms_admitted: mutant fail, twin pass -> KILLED (0.922s + 0.871s) out/pins/runs/P0ac/both_forms_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7958028Z [mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (1.573s + 1.573s) out/pins/runs/P0ad/seal_after_act/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7960220Z [mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (1.574s + 1.623s) out/pins/runs/P0ad/seal_same_commit_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7962636Z [mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (1.575s + 1.574s) out/pins/runs/P0ad/candidate_omitted_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:48:33.7964776Z [mutant] P0ad/deleted_status_read: mutant fail, twin pass -> KILLED (1.124s + 1.574s) out/pins/runs/P0ad/deleted_status_read/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5349353Z [mutant] P0ae/exposure_inferred: mutant fail, twin pass -> KILLED (0.473s + 0.471s) out/pins/runs/P0ae/exposure_inferred/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5351333Z [mutant] P0ae/void_scored: mutant fail, twin pass -> KILLED (0.476s + 0.473s) out/pins/runs/P0ae/void_scored/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5353677Z [mutant] P0ae/void_not_counted: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ae/void_not_counted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5355721Z [mutant] P0ae/later_label_ignored: mutant fail, twin pass -> KILLED (0.473s + 0.471s) out/pins/runs/P0ae/later_label_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5357713Z [mutant] P0ae/label_by_anyone: mutant fail, twin pass -> KILLED (0.471s + 0.472s) out/pins/runs/P0ae/label_by_anyone/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5359599Z [mutant] P0af/alpha_zero: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0af/alpha_zero/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5361972Z [mutant] P0af/fixed_order_dropped: mutant fail, twin pass -> KILLED (0.471s + 0.471s) out/pins/runs/P0af/fixed_order_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5363962Z [mutant] P0af/fixed_order_not_required: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0af/fixed_order_not_required/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5366082Z [mutant] P0af/silence_is_an_act: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0af/silence_is_an_act/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5368100Z [mutant] P0ag/regime_after_seed: mutant fail, twin pass -> KILLED (1.376s + 1.374s) out/pins/runs/P0ag/regime_after_seed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5370241Z [mutant] P0ag/seed_after_act_admitted: mutant fail, twin pass -> KILLED (1.374s + 1.374s) out/pins/runs/P0ag/seed_after_act_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5372658Z [mutant] P0ah/kept_not_filed: mutant fail, twin pass -> KILLED (0.471s + 0.471s) out/pins/runs/P0ah/kept_not_filed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5374633Z [mutant] P0ah/merged_not_filed: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ah/merged_not_filed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5376700Z [mutant] P0ah/kept_without_exposure: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ah/kept_without_exposure/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5378782Z [mutant] P0ah/item_always_pr: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ah/item_always_pr/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5380799Z [mutant] P0ai/probe_from_unkept: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ai/probe_from_unkept/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5383147Z [mutant] P0ai/probe_unseeded: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ai/probe_unseeded/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5385166Z [mutant] P0ai/probe_needs_exposure: mutant fail, twin pass -> KILLED (0.473s + 0.471s) out/pins/runs/P0ai/probe_needs_exposure/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5387188Z [mutant] P0ai/probe_not_priced: mutant fail, twin pass -> KILLED (0.471s + 0.472s) out/pins/runs/P0ai/probe_not_priced/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5389314Z [mutant] P0aj/awaits_guy_clause_removed: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0aj/awaits_guy_clause_removed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5392255Z [mutant] P0as/selfrun_step_skipped: mutant fail, twin pass -> KILLED (7.65s + 7.641s) out/pins/runs/P0as/selfrun_step_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5394268Z [mutant] P0as/exit_ignored: mutant fail, twin pass -> KILLED (7.591s + 7.641s) out/pins/runs/P0as/exit_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5396249Z [mutant] P0as/dry_run_not_appended: mutant fail, twin pass -> KILLED (7.64s + 7.643s) out/pins/runs/P0as/dry_run_not_appended/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5398286Z [mutant] P0at/dry_run_publishes: mutant fail, twin pass -> KILLED (5.033s + 4.782s) out/pins/runs/P0at/dry_run_publishes/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5400374Z [mutant] P0at/dry_run_writes_ledger: mutant fail, twin pass -> KILLED (4.786s + 4.884s) out/pins/runs/P0at/dry_run_writes_ledger/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5402652Z [mutant] P0at/dry_run_fetches: mutant fail, twin pass -> KILLED (4.883s + 4.785s) out/pins/runs/P0at/dry_run_fetches/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5404837Z [mutant] P0at/resolve_dry_run_appends: mutant fail, twin pass -> KILLED (4.734s + 4.782s) out/pins/runs/P0at/resolve_dry_run_appends/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5407004Z [mutant] P0au/dispatch_always_review: mutant fail, twin pass -> KILLED (0.471s + 0.421s) out/pins/runs/P0au/dispatch_always_review/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5410066Z [mutant] P0au/dispatch_pr_required: mutant fail, twin pass -> KILLED (0.422s + 0.421s) out/pins/runs/P0au/dispatch_pr_required/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5412582Z [mutant] P0au/audit_group_shared: mutant fail, twin pass -> KILLED (0.423s + 0.422s) out/pins/runs/P0au/audit_group_shared/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5414757Z [mutant] P0av/unlisted_trigger_admitted: mutant fail, twin pass -> KILLED (1.676s + 1.675s) out/pins/runs/P0av/unlisted_trigger_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5416979Z [mutant] P0av/ghost_row_admitted: mutant fail, twin pass -> KILLED (1.674s + 1.674s) out/pins/runs/P0av/ghost_row_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5419103Z [mutant] P0av/unpriced_row_admitted: mutant fail, twin pass -> KILLED (1.674s + 1.675s) out/pins/runs/P0av/unpriced_row_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5421359Z [mutant] P0ao/build_pull_request_restored: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0ao/build_pull_request_restored/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5423909Z [mutant] P0ao/review_pull_request_restored: mutant fail, twin pass -> KILLED (0.422s + 0.421s) out/pins/runs/P0ao/review_pull_request_restored/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5425985Z [mutant] P0ap/pr_hook_runs: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ap/pr_hook_runs/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5427989Z [mutant] P0ap/review_restore_dropped: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ap/review_restore_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5430091Z [mutant] P0ap/grant_undeclared: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ap/grant_undeclared/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5432565Z [mutant] P0ap/review_grant_undeclared: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ap/review_grant_undeclared/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5434809Z [mutant] P0ap/skip_permissions_admitted: mutant fail, twin pass -> KILLED (0.471s + 0.471s) out/pins/runs/P0ap/skip_permissions_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5437080Z [mutant] P0ak/undeclared_session_admitted: mutant fail, twin pass -> KILLED (0.471s + 0.472s) out/pins/runs/P0ak/undeclared_session_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5439296Z [mutant] P0ak/duration_misresolved: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ak/duration_misresolved/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5441454Z [mutant] P0ak/cancelled_scored: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ak/cancelled_scored/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5444262Z [mutant] P0ak/over_bound_uncounted: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ak/over_bound_uncounted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5446307Z [mutant] P0ak/limit_uncounted: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ak/limit_uncounted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5448359Z [mutant] P0al/after_edit_as_drafted: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0al/after_edit_as_drafted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5450444Z [mutant] P0al/other_editor_counted: mutant fail, twin pass -> KILLED (0.475s + 0.472s) out/pins/runs/P0al/other_editor_counted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5452999Z [mutant] P0al/unreadable_edits_resolved: mutant fail, twin pass -> KILLED (0.473s + 0.471s) out/pins/runs/P0al/unreadable_edits_resolved/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5455158Z [mutant] P0al/detail_uncounted: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0al/detail_uncounted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5457304Z [mutant] P0am/draft_check_clause_removed: mutant fail, twin pass -> KILLED (0.421s + 0.421s) out/pins/runs/P0am/draft_check_clause_removed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5459601Z [mutant] P0an/pr_branch_forecast_admitted: mutant fail, twin pass -> KILLED (0.422s + 0.421s) out/pins/runs/P0an/pr_branch_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5462118Z [mutant] P0an/silent_stop_admitted: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0an/silent_stop_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5464236Z [mutant] P0aq/label_branch_removed: mutant fail, twin pass -> KILLED (0.422s + 0.421s) out/pins/runs/P0aq/label_branch_removed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5466253Z [mutant] P0aq/round_cap_removed: mutant fail, twin pass -> KILLED (0.422s + 0.421s) out/pins/runs/P0aq/round_cap_removed/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5468239Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.421s + 0.421s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+pins	make pins	2026-10-13T08:50:54.5470231Z [mutant] P0ar/forecasts_shared: mutant fail, twin pass -> KILLED (0.522s + 0.572s) out/pins/runs/P0ar/forecasts_shared/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9280444Z [mutant] P0ar/status_shared: mutant fail, twin pass -> KILLED (0.521s + 0.57s) out/pins/runs/P0ar/status_shared/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9282834Z [mutant] P0ar/registry_frozen_only: mutant fail, twin pass -> KILLED (0.575s + 0.572s) out/pins/runs/P0ar/registry_frozen_only/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9284882Z [mutant] P0ar/status_by_date: mutant fail, twin pass -> KILLED (0.572s + 0.571s) out/pins/runs/P0ar/status_by_date/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9286905Z [mutant] P0ar/duplicate_overrides: mutant fail, twin pass -> KILLED (0.572s + 0.572s) out/pins/runs/P0ar/duplicate_overrides/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9289091Z [mutant] P0aw/checkout_without_contents: mutant fail, twin pass -> KILLED (0.421s + 0.422s) out/pins/runs/P0aw/checkout_without_contents/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9291168Z [mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (3.028s + 2.778s) out/pins/runs/P1/seed_reissued/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9293487Z [mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.778s + 2.879s) out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9295530Z [mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (2.928s + 2.726s) out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9297556Z [mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (2.528s + 2.878s) out/pins/runs/P1/training_undomained/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9299524Z [mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.858s + 1.747s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9307869Z [mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.798s + 1.748s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9309785Z [mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.797s + 1.801s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9312029Z [mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.798s + 1.797s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9314018Z [mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (38.101s + 37.603s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9315885Z [mutant] P3/played_at_end: mutant fail, twin pass -> KILLED (37.699s + 37.681s) out/pins/runs/P3/played_at_end/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9317716Z [mutant] P4/self_reported: mutant fail, twin pass -> KILLED (11.637s + 11.737s) out/pins/runs/P4/self_reported/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9319588Z [mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (11.683s + 11.73s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9321505Z [mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (11.677s + 11.636s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9323690Z [mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (11.637s + 11.74s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9325587Z [mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (9.025s + 7.382s) out/pins/runs/P5/next_sent_early/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9327502Z [mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (9.233s + 8.872s) out/pins/runs/P14/first_legal_action/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9329510Z [mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (9.036s + 8.822s) out/pins/runs/P14/floor_unsmoothed/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9331446Z [mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (9.028s + 8.871s) out/pins/runs/P14/seen_not_reset/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9333694Z [mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (1.174s + 12.149s) out/pins/runs/P15/abs_difference/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9335612Z [mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (5.484s + 12.149s) out/pins/runs/P15/shift_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9337395Z [mutant] P15/one_arm: mutant fail, twin pass -> KILLED (4.181s + 12.147s) out/pins/runs/P15/one_arm/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9339186Z [mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (13.803s + 12.199s) out/pins/runs/P15/budget_one_arm/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9341058Z [mutant] P7/clipped: mutant fail, twin pass -> KILLED (17.418s + 17.422s) out/pins/runs/P7/clipped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9343100Z [mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (17.506s + 17.328s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9345000Z [mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (17.355s + 17.524s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9346984Z [mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (3.179s + 3.18s) out/pins/runs/P13/infinite_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9348946Z [mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (3.18s + 3.181s) out/pins/runs/P13/realised_row_only/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9350984Z [mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (3.18s + 3.178s) out/pins/runs/P13/entropy_missing_imputed/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9353395Z [mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (5.033s + 5.035s) out/pins/runs/P9/record_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9355319Z [mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (5.035s + 5.083s) out/pins/runs/P9/utility_altered/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9357958Z [mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (5.033s + 5.083s) out/pins/runs/P9/chain_update_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9359971Z [mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.422s + 5.034s) out/pins/runs/P9/opened_for_rewrite/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9362132Z [mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (5.084s + 5.034s) out/pins/runs/P9/genesis_empty/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9364097Z [mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (5.085s + 5.033s) out/pins/runs/P9/signature_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9366065Z [mutant] P9/independent_heads: mutant fail, twin pass -> KILLED (5.084s + 5.033s) out/pins/runs/P9/independent_heads/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9368094Z [mutant] P16/unattributed_admitted: mutant fail, twin pass -> KILLED (4.632s + 4.686s) out/pins/runs/P16/unattributed_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9370115Z [mutant] P16/any_credential: mutant fail, twin pass -> KILLED (4.683s + 4.682s) out/pins/runs/P16/any_credential/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9372391Z [mutant] P16/registration_taken_over: mutant fail, twin pass -> KILLED (4.683s + 4.682s) out/pins/runs/P16/registration_taken_over/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9374538Z [mutant] P17/fixed_proposer: mutant fail, twin pass -> KILLED (13.121s + 12.603s) out/pins/runs/P17/fixed_proposer/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9376553Z [mutant] P17/seeds_before_proposer: mutant fail, twin pass -> KILLED (13.194s + 12.291s) out/pins/runs/P17/seeds_before_proposer/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9378634Z [mutant] P17/idempotency_dropped: mutant fail, twin pass -> KILLED (14.302s + 12.759s) out/pins/runs/P17/idempotency_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9380669Z [mutant] P17/conflict_unchecked: mutant fail, twin pass -> KILLED (12.697s + 13.108s) out/pins/runs/P17/conflict_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9382993Z [mutant] P17/hash_partial: mutant fail, twin pass -> KILLED (12.491s + 12.039s) out/pins/runs/P17/hash_partial/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9384827Z [mutant] P18/cap_ignored: mutant fail, twin pass -> KILLED (1.477s + 1.174s) out/pins/runs/P18/cap_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9386696Z [mutant] P18/failures_dropped: mutant fail, twin pass -> KILLED (1.074s + 1.173s) out/pins/runs/P18/failures_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9388784Z [mutant] P18/throughput_from_episodes: mutant fail, twin pass -> KILLED (1.174s + 1.175s) out/pins/runs/P18/throughput_from_episodes/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9390900Z [mutant] P18/proposer_from_config: mutant fail, twin pass -> KILLED (1.425s + 1.174s) out/pins/runs/P18/proposer_from_config/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9393270Z [mutant] P18/mixed_proposers_admitted: mutant fail, twin pass -> KILLED (1.425s + 1.174s) out/pins/runs/P18/mixed_proposers_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9395422Z [mutant] P18/infinite_pooled_finite: mutant fail, twin pass -> KILLED (1.125s + 1.176s) out/pins/runs/P18/infinite_pooled_finite/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9397529Z [mutant] P18/short_request_admitted: mutant fail, twin pass -> KILLED (1.425s + 1.173s) out/pins/runs/P18/short_request_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9399566Z [mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (9.669s + 9.772s) out/pins/runs/P12/peak_differenced/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9401486Z [mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (9.769s + 9.718s) out/pins/runs/P12/unmeasured_free/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9403840Z [mutant] P19/world_table_hardcoded: mutant fail, twin pass -> KILLED (1.276s + 1.225s) out/pins/runs/P19/world_table_hardcoded/mutant/transcript.log
+pins	make pins	2026-10-13T09:04:56.9405930Z [mutant] P20/crafter_price_fallback: mutant fail, twin pass -> KILLED (1.377s + 1.375s) out/pins/runs/P20/crafter_price_fallback/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4204486Z [mutant] P22/replay_unchecked: mutant fail, twin pass -> KILLED (0.573s + 0.572s) out/pins/runs/P22/replay_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4206399Z [mutant] P23/partial_dropped: mutant fail, twin pass -> KILLED (9.998s + 10.148s) out/pins/runs/P23/partial_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4208466Z [mutant] P23/interrupted_unsealed: mutant fail, twin pass -> KILLED (10.798s + 10.197s) out/pins/runs/P23/interrupted_unsealed/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4210345Z [mutant] P23/closing_unattributed: mutant fail, twin pass -> KILLED (9.998s + 9.844s) out/pins/runs/P23/closing_unattributed/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4212433Z [mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (20.043s + 10.077s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4214324Z [mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.623s + 0.623s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4216139Z [mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (24.899s + 25.112s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4217872Z [mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (26.717s + 25.371s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4219417Z [mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (25.623s + 25.469s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4220953Z [mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (24.466s + 25.115s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4222970Z [mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (8.157s + 25.623s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4224748Z [mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (25.564s + 25.016s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+pins	make pins	2026-10-13T09:11:16.4225897Z clean: 69/69 passed, 0/69 failed
+pins	make pins	2026-10-13T09:11:16.4226857Z mutants: 199/199 killed, 0/199 survived, 0/199 inconclusive, 0/199 stale, 0/199 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-13T09:11:16.4227850Z twins: 199/199 passed
+pins	make pins	2026-10-13T09:11:16.4228481Z skipped: 0/69 pins, 0 mutants since ce5ea5c (run 38366457249)
+pins	make pins	2026-10-13T09:11:16.4229196Z report: out/pins/pins.jsonl
+pins	make pins	2026-10-13T09:11:16.4229772Z PINS PASSED
+pins	Upload pins report	﻿2026-10-13T09:11:16.4502665Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+pins	Upload pins report	2026-10-13T09:11:16.4503124Z with:
+pins	Upload pins report	2026-10-13T09:11:16.4503337Z   name: pins-report
+pins	Upload pins report	2026-10-13T09:11:16.4503558Z   path: out/pins
+pins	Upload pins report	2026-10-13T09:11:16.4503777Z   if-no-files-found: error
+pins	Upload pins report	2026-10-13T09:11:16.4504033Z   compression-level: 6
+pins	Upload pins report	2026-10-13T09:11:16.4504260Z   overwrite: false
+pins	Upload pins report	2026-10-13T09:11:16.4504496Z   include-hidden-files: false
+pins	Upload pins report	2026-10-13T09:11:16.4504754Z ##[endgroup]
+pins	Upload pins report	2026-10-13T09:11:16.6301031Z (node:60799) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+pins	Upload pins report	2026-10-13T09:11:16.6302880Z (Use `node --trace-deprecation ...` to show where the warning was created)
+pins	Upload pins report	2026-10-13T09:11:17.4146872Z With the provided path, there will be 1105 files uploaded
+pins	Upload pins report	2026-10-13T09:11:17.4148134Z Artifact name is valid!
+pins	Upload pins report	2026-10-13T09:11:17.4148731Z Root directory input is valid!
+pins	Upload pins report	2026-10-13T09:11:17.6185322Z Beginning upload of artifact content to blob storage
+pins	Upload pins report	2026-10-13T09:11:18.4734767Z (node:60799) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+pins	Upload pins report	2026-10-13T09:11:18.5876890Z Uploaded bytes 1007180
+pins	Upload pins report	2026-10-13T09:11:18.6074113Z Finished uploading artifact content to blob storage!
+pins	Upload pins report	2026-10-13T09:11:18.6076247Z SHA256 digest of uploaded artifact zip is 01ebfdb4ada951cc104df4d0219cb0f506709c73b534491c3b99da2af8935d3d
+pins	Upload pins report	2026-10-13T09:11:18.6077493Z Finalizing artifact upload
+pins	Upload pins report	2026-10-13T09:11:18.8575446Z Artifact pins-report.zip successfully finalized. Artifact ID 11799634467
+pins	Upload pins report	2026-10-13T09:11:18.8577287Z Artifact pins-report has been successfully uploaded! Final size is 1007180 bytes. Artifact ID is 11799634467
+pins	Upload pins report	2026-10-13T09:11:18.8585740Z Artifact download URL: https://github.com/renavondata/assize/actions/runs/38370359587/artifacts/11799634467
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-13T09:11:18.8888095Z Post job cleanup.
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:18.9919294Z [command]/usr/bin/git version
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0005909Z git version 2.55.0
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0054357Z Temporarily overriding HOME='/home/runner/work/_temp/3ed48dcd-a948-43dc-9c24-6f6e302e3c4e' before making global git config changes
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0068330Z Adding repository directory to the temporary git global config as a safe directory
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0069747Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0142615Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0207817Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0575531Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-13T09:11:19.0646540Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	Complete job	﻿2026-10-13T09:11:19.1357265Z Cleaning up orphan processes
+pins	Complete job	2026-10-13T09:11:19.1720176Z Terminate orphan process: pid (2348) (catatonit)
+pins	Complete job	2026-10-13T09:11:19.1807962Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
