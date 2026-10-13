@@ -1,0 +1,6 @@
+pins	UNKNOWN STEP	2026-10-13T09:26:19.0916418Z [clean ] P0l: observed fail -> FAILED (0.33s) out/pins/runs/P0l/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-13T09:26:19.0917016Z CLEAN FAILED: P0l (observed fail)
+pins	UNKNOWN STEP	2026-10-13T09:26:19.0927067Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.356s + 0.356s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-13T09:26:19.0927929Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+pins	UNKNOWN STEP	2026-10-13T09:26:19.0968804Z PINS FAILED
+pins	UNKNOWN STEP	2026-10-13T09:26:19.1078258Z ##[error]Process completed with exit code 2.
