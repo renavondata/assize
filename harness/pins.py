@@ -3370,7 +3370,8 @@ def p3_survivorship() -> bool:
     """Every episode is recorded with its termination code, failures included: under every usable runtime, a fixture
     candidate that crashes, garbles its reply, plays an illegal action, stalls a step or overruns the episode yields
     exactly one record per requested episode, in order, each with that failure's code; a polite candidate's episodes
-    end as the World ends them. No candidate container is left listed (brief 1 section 2)."""
+    end as the World ends them. Each record is yielded by `episodes.played` once final, before the World after the next
+    is drawn (reports/L1/REPORT.md obligation 4 on L2). No candidate container is left listed (brief 1 section 2)."""
     import dataclasses
 
     from harness.fixtures import candidates
@@ -3390,9 +3391,20 @@ def p3_survivorship() -> bool:
     def case(rt, expect, say):
         before = _candidates(rt)
         for behaviour, n, tt, want in cases:
-            records = episodes.run(rt, image, _short_crafter(n), binding.manifest(),
-                                   command=candidates.command(behaviour), t=tt)
+            records: list[dict] = []
+            drawn: list[int] = []
+
+            def worlds():
+                for w in _short_crafter(n):
+                    drawn.append(len(records))
+                    yield w
+
+            records.extend(r for r in episodes.played(rt, image, worlds(), binding.manifest(),
+                                                      command=candidates.command(behaviour), t=tt))
             say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
+            expect(all(d >= i - 1 for i, d in enumerate(drawn)),
+                   f"{rt.name} {behaviour}: each record is yielded before the World after next is drawn, so it can "
+                   f"be written as its episode ends (records yielded at each draw: {drawn})")
             expect(len(records) == n and [r["episode"] for r in records] == list(range(n)),
                    f"{rt.name} {behaviour}: {len(records)} of {n} requested episodes recorded, in order")
             expect(all(r["termination"] == want for r in records),
@@ -3881,6 +3893,95 @@ def p22_replay_verified() -> bool:
     finally:
         shutil.rmtree(work, ignore_errors=True)
     return ok()
+
+# P23's child judge (brief 2 A2, L2a obligation 4): `evaluate()` as written, over Crafter, with the runtime, the image
+# check and the episode loop faked so no container starts. The fake loop keeps `episodes.played`'s contract, each
+# record yielded once the next World is drawn, and the judge kills itself with SIGKILL on drawing episode KILL_AT's
+# World. Prints the request's records, or its refusal code.
+P23_RUN = """
+import json, os, signal, sys, types
+from pathlib import Path
+from judge import episodes, evaluate, registry
+private, ledgers, party, rid, n, kill_at = (Path(sys.argv[1]), Path(sys.argv[2]), json.loads(sys.argv[3]),
+                                            sys.argv[4], int(sys.argv[5]), int(sys.argv[6]))
+image = "sha256:" + "c" * 64
+try:
+    registry.proposer_of(private, image)
+except registry.Refused:
+    registry.register(private, image, registry.credential(private, party))
+
+def played(rt, image, worlds, manifest, **kw):
+    pending = []
+    for i, w in enumerate(worlds):
+        yield from pending
+        if i == kill_at:
+            os.kill(os.getpid(), signal.SIGKILL)
+        pending = [{"episode": i, "termination": "terminal", "detail": "", "steps": w.t, "utility": w.utility}]
+    yield from pending
+
+episodes.played = played
+evaluate._usable = lambda name: types.SimpleNamespace(name=name)
+evaluate._present = lambda rt, image: None
+try:
+    print(json.dumps(evaluate.evaluate(image, "crafter", n, rid, private=private, ledgers=ledgers, runtime_name="fake")))
+except registry.Refused as e:
+    print(json.dumps(e.code))
+"""
+P23_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p23-fixture-party"}
+P23_ASKED, P23_KILL_AT = 3, 2  # the killed request asks 3 episodes and dies drawing the third's World: 2 played
+
+
+def p23_interrupted_recorded() -> bool:
+    """An interrupted request's played episodes are in the ledger (brief 2 A2, L2a obligation 4; review 6debf231b630
+    F3). A child judge asked for 3 Crafter episodes is killed by SIGKILL drawing the third's World: the ledger then holds
+    the 2 episodes it played, unsigned. The next request of the World, under another request_id and from another
+    child, first seals the killed one: its 2 records and one closing record stating `interrupted`, 3 seeds issued and 2
+    recorded, signed; then its own 2 records. The ledger verifies at its last head and holds exactly these. The killed
+    request asked again is refused `interrupted`, changing nothing. No container starts: the runtime and loop are
+    faked, keeping `episodes.played`'s contract, which P3 pins on the real loop."""
+    from judge import evaluate, ledger
+
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p23-", dir=context.scratch))
+    try:
+        private, ledgers = work / "private", work / "ledgers"
+        led = evaluate.ledger_path(ledgers, "crafter")
+
+        def child(rid: str, n: int, kill_at: int = -1) -> tuple[int, object]:
+            r = subprocess.run(proc.python("-c", P23_RUN, str(private), str(ledgers), json.dumps(P23_PARTY), rid,
+                                           str(n), str(kill_at)),
+                               cwd=ROOT, env=proc.child_env(), capture_output=True, text=True, timeout=120)
+            return r.returncode, json.loads(r.stdout) if r.stdout.strip() else r.stderr.strip()[-500:]
+
+        def rows() -> list[tuple]:
+            return [(r["request_id"], r.get("episode"), r.get("interrupted"), r.get("issued"), r.get("recorded"))
+                    for r in ledger._lines(led)] if led.exists() else []
+
+        code, out = child("p23-killed", P23_ASKED, P23_KILL_AT)
+        print(f"  killed child: exit {code}; ledger {rows()}")
+        expect(code == -signal.SIGKILL, f"the child judge died by SIGKILL mid-request (exit {code}: {out})")
+        played = [("p23-killed", i, None, None, None) for i in range(P23_KILL_AT)]
+        expect(rows() == played, f"the ledger holds the {P23_KILL_AT} episodes the killed request played ({rows()})")
+
+        code, out = child("p23-next", 2)
+        print(f"  next child: exit {code}; ledger {rows()}")
+        want = played + [("p23-killed", None, True, P23_ASKED, P23_KILL_AT)] + [("p23-next", i, None, None, None)
+                                                                                for i in range(2)]
+        expect(code == 0 and rows() == want,
+               f"the next request seals the killed one, {P23_ASKED} seeds issued and {P23_KILL_AT} recorded, before "
+               f"its own 2 records (exit {code}; {rows()})")
+        anchor = out[-1]["sha256"] if code == 0 and out else ""
+        found = ledger.verify(led, private, anchor)
+        expect(found == [], f"the ledger verifies at the next request's head ({found})")
+
+        was = led.read_bytes()
+        code, out = child("p23-killed", P23_ASKED)
+        expect(code == 0 and out == "interrupted" and led.read_bytes() == was,
+               f"the killed request asked again is refused interrupted, the ledger unchanged (exit {code}: {out})")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
 
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
@@ -4392,7 +4493,7 @@ def p17_evaluate() -> bool:
     The same request asked again, from a child interpreter, prints the same records and changes nothing; asked of
     another episode count it is refused `request_conflict`. A present but unregistered image is refused `unregistered`
     with the seed store and ledger unchanged, so no seed is issued to it; a request whose seeds were issued but never
-    signed is refused `interrupted`. The judge hash changes when any of judge config and code, the interface, the
+    signed is refused `interrupted`, and sealed into the ledger as such. The judge hash changes when any of judge config and code, the interface, the
     Crafter binding and manifest, or the lock file changes."""
     from judge import episodes, evaluate, ledger, registry, runtime, seeds
     from worlds.crafter import binding
@@ -4474,7 +4575,19 @@ def p17_evaluate() -> bool:
                 refused("p17-a of another episode count", "request_conflict", image, "crafter",
                         EVALUATE_EPISODES + 1, "p17-a")
                 seeds.issue(private, "crafter", binding.world_seed, 1, "p17-b")
-                refused("seeds issued, records never signed", "interrupted", image, "crafter", 1, "p17-b")
+                try:
+                    evaluate.evaluate(image, "crafter", 1, "p17-b", private=private, ledgers=ledgers,
+                                      runtime_name=rt.name)
+                    code = "evaluated"
+                except registry.Refused as e:
+                    code = e.code
+                sealed = ledger._lines(led)[len(got):]
+                expect(code == "interrupted" and [(r["request_id"], r.get("interrupted"), r.get("issued"),
+                                                   r.get("recorded")) for r in sealed] == [("p17-b", True, 1, 0)]
+                       and ledger.verify(led, private, sealed[-1]["sha256"]) == [],
+                       f"{rt.name} seeds issued, records never signed: refused interrupted ({code}), and sealed into "
+                       f"the ledger as interrupted with its 1 seed issued and 0 episodes recorded, verifying "
+                       f"({[{k: r.get(k) for k in ('request_id', 'interrupted', 'issued', 'recorded')} for r in sealed]})")
             finally:
                 subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
             strays = _removing_strays(rt, before)
@@ -4800,7 +4913,8 @@ PINS = [
                   Mutant("rootfs_writable", _edits("P2_rootfs_writable")),
                   Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped"))), JUDGE_SIDE),
     Pin("P3", "every requested episode is recorded with its termination code, failures included",
-        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),), JUDGE_SIDE),
+        p3_survivorship, (Mutant("failures_dropped", _edits("P3_failures_dropped")),
+                          Mutant("played_at_end", _edits("P3_played_at_end"))), JUDGE_SIDE),
     Pin("P4", "an episode's CPU and peak memory are measured from its container's cgroup, never self-reported",
         p4_measured_compute, (Mutant("self_reported", _edits("P4_self_reported")),
                               Mutant("client_rusage", _edits("P4_client_rusage")),
@@ -4861,6 +4975,10 @@ PINS = [
         p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),), JUDGE_SIDE),
     Pin("P22", "replay returns a request's records only if they match its signed head, else refuses ledger_unverified",
         p22_replay_verified, (Mutant("replay_unchecked", _edits("P22_replay_unchecked")),), JUDGE_SIDE),
+    Pin("P23", "an interrupted request's played episodes and spent seeds are sealed into the ledger by the next "
+               "request of its World",
+        p23_interrupted_recorded, (Mutant("partial_dropped", _edits("P23_partial_dropped")),
+                                   Mutant("interrupted_unsealed", _edits("P23_interrupted_unsealed"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

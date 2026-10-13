@@ -2,5 +2,5 @@
 # SHA-256 of its request_id.
 [[edit]]
 path = "judge/ledger.py"
-old = '    prev = genesis(request_id)'
-new = '    prev = ""'
+old = '    prev = held[-1]["sha256"] if held else genesis(request_id)'
+new = '    prev = held[-1]["sha256"] if held else ""'

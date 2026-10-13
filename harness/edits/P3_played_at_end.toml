@@ -1,0 +1,6 @@
+# P3's mutant `played_at_end` (brief 2 A2, L2a obligation 4): the episode loop yields no record until every World is
+# played, so a judge that dies mid-request has written none of the episodes it played.
+[[edit]]
+path = "judge/episodes.py"
+old = "        yield from records[final:]\n        final = len(records)\n"
+new = ""

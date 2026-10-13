@@ -1,0 +1,7 @@
+# P23's mutant `partial_dropped` (brief 2 A2, L2a obligation 4; review 6debf231b630 F3): evaluate() holds a request's
+# records in memory and writes them only after the last episode, so a judge killed mid-request leaves its played
+# episodes unrecorded.
+[[edit]]
+path = "judge/evaluate.py"
+old = "        records = episodes.played(rt, image, _played(binding, issued, m, achieved), m)\n"
+new = "        records = list(episodes.played(rt, image, _played(binding, issued, m, achieved), m))\n"
