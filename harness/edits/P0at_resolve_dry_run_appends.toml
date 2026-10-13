@@ -1,0 +1,7 @@
+# P0at's mutant (instruction #113 Part A item 2): `resolve --dry-run` appends the resolutions to the ledger.
+[[edit]]
+path = "harness/ledger.py"
+old = """        if not dry_run:
+            path.parent.mkdir(exist_ok=True)"""
+new = """        if True:
+            path.parent.mkdir(exist_ok=True)"""

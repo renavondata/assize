@@ -1,0 +1,5 @@
+# P0ap's mutant (instruction #113 Part E item 1): build.yml's `claude` call declares no `--allowedTools`.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """ --allowedTools "Bash(gh:*) Bash(make:*) Bash(podman:*)\""""
+new = """"""

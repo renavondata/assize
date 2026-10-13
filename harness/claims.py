@@ -710,6 +710,89 @@ def load_drafts(repo: Path, since: str) -> dict[int, tuple[str, str]]:
             if _after(e["opened"], since)}
 
 
+# Instruction #113 Part C: the trusted base is written down once, in `ops/trusted-base.md`: one row per thing outside every
+# loop. Rows of the kinds below are checked against the files they name, both ways; the other kinds (`token`, `grant`,
+# `sovereign`) are listed but read from nowhere a file can state.
+TRUSTED_BASE = "ops/trusted-base.md"
+TRUSTED_KINDS = ("workflow", "command", "secret", "runner", "scope")
+TRUSTED_REMOVE = "REMOVE"
+EVENT_LINE = re.compile(r"^  ([a-z_]+):")
+TYPES_LINE = re.compile(r"^    types: \[([^\]]*)\]")
+
+
+def workflow_triggers(name: str, text: str) -> set[str]:
+    """`workflow:<file>:<event>:<type>` for each activity type the workflow's `on:` block lists for an event, and
+    `workflow:<file>:<event>` for an event listing none; comment lines are not read."""
+    lines = [x for x in text.splitlines() if not x.lstrip().startswith("#")]
+    start = next((i for i, x in enumerate(lines) if x.rstrip() == "on:"), None)
+    if start is None:
+        return set()
+    block = list(itertools.takewhile(lambda x: not x.strip() or x.startswith(" "), lines[start + 1:]))
+    types: dict[str, set[str]] = {}
+    event = ""
+    for line in block:
+        if m := EVENT_LINE.match(line):
+            event = m.group(1)
+            types[event] = set()
+        elif (t := TYPES_LINE.match(line)) and event:
+            types[event] |= {x.strip() for x in t.group(1).split(",") if x.strip()}
+    return {f"workflow:{name}:{e}:{t}" for e, ts in types.items() for t in ts} | {
+        f"workflow:{name}:{e}" for e, ts in types.items() if not ts}
+
+
+def workflow_scopes(name: str, code: str) -> set[str]:
+    """`scope:<file>:<scope>:<access>` for each line of each `permissions:` block (the job token's grant)."""
+    lines = code.splitlines()
+    found: set[str] = set()
+    for i, line in enumerate(lines):
+        if m := re.fullmatch(r"(\s*)permissions:\s*", line):
+            depth = len(m.group(1))
+            for sub in itertools.takewhile(lambda x: not x.strip() or len(x) - len(x.lstrip()) > depth, lines[i + 1:]):
+                if g := re.fullmatch(r"\s+([a-z-]+): (read|write|none)\s*", sub):
+                    found.add(f"scope:{name}:{g.group(1)}:{g.group(2)}")
+    return found
+
+
+def trusted_entries(repo: Path) -> set[str]:
+    """Every checked entry the checkout holds: workflow triggers, command files, repository secrets a workflow reads, the
+    runner labels its jobs ask for and the scopes of the job token."""
+    found: set[str] = set()
+    for path in sorted((repo / ".github" / "workflows").glob("*.yml")):
+        text = path.read_text()
+        code = "\n".join(x for x in text.splitlines() if not x.lstrip().startswith("#"))
+        found |= workflow_triggers(path.name, text) | workflow_scopes(path.name, code)
+        found |= {f"secret:{s}" for s in re.findall(r"secrets\.(\w+)", code)}
+        found |= {"runner:" + re.sub(r"[\[\]\s]", "", r) for r in re.findall(r"^\s+runs-on:\s*(.+?)\s*$", code, re.M)}
+    found |= {f"command:{p.stem}" for p in (repo / ".claude" / "commands").glob("*.md")}
+    return found
+
+
+def trusted_rows(table: str) -> list[list[str]]:
+    """The cells of each data row of the markdown table (the header and the rule under it are skipped)."""
+    rows = [[c.strip() for c in line.strip().strip("|").split("|")] for line in table.splitlines()
+            if line.strip().startswith("|")]
+    return [r for r in rows[2:]]
+
+
+def trusted_findings(repo: Path, table: str) -> list[Finding]:
+    """What the table and the checkout disagree on: an entry the checkout holds that no row lists, a row of a checked kind
+    with nothing behind it, a duplicated row, and a row naming neither a price quantity and a pin nor `REMOVE`."""
+    rows = trusted_rows(table)
+    ids = [r[0].strip("`") for r in rows]
+    present = trusted_entries(repo)
+    listed = set(ids)
+    where = TRUSTED_BASE
+    shape = [Finding(where, "malformed_row", f"{r[0].strip('`')}: expects four cells, got {len(r)}") for r in rows
+             if len(r) != 4]
+    bare = [Finding(where, "unnamed_price_or_pin",
+                    f"{r[0].strip('`')}: price or pin empty and the row is not marked {TRUSTED_REMOVE}")
+            for r in rows if len(r) == 4 and not all(r[2:]) and not any(c.startswith(TRUSTED_REMOVE) for c in r[1:])]
+    dup = [Finding(where, "duplicate_row", i) for i in sorted(n for n in set(ids) if ids.count(n) > 1)]
+    unlisted = [Finding(where, "unlisted", e) for e in sorted(present - listed)]
+    ghosts = [Finding(where, "ghost_row", i) for i in sorted(listed - present) if i.split(":")[0] in TRUSTED_KINDS]
+    return shape + bare + dup + unlisted + ghosts
+
+
 def _edits_said(i: Issue) -> str:
     if i.edits is None:
         return "body edits not read"
@@ -733,7 +816,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     x = sub.add_parser("next", help="the first candidate item, in order, that no open pull request holds")
     x.add_argument("items", nargs="+", help="`#<n>` for an instruction, else a brief item's name")
     x.add_argument("--repo", type=Path, default=Path("."))
+    u = sub.add_parser("trusted-base", help="every trigger, command, secret and runner not listed in the table, and every "
+                                            "listed one with nothing behind it (instruction #113 Part C)")
+    u.add_argument("--repo", type=Path, default=Path("."))
+    u.add_argument("--table", default=TRUSTED_BASE)
     a = ap.parse_args(argv)
+    if a.cmd == "trusted-base":
+        table = a.repo / a.table
+        if not table.is_file():
+            print(f"{a.table}: not found", file=sys.stderr)
+            return 1
+        found = trusted_findings(a.repo, table.read_text())
+        for f in found:
+            print(f)
+        print(f"trusted-base: {len(trusted_entries(a.repo))} entries present, {len(found)} findings")
+        return 1 if found else 0
     if a.cmd == "trailers":
         found = trailer_findings(a.repo, a.revisions)
         for f in found:

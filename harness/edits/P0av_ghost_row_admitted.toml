@@ -1,0 +1,5 @@
+# P0av's mutant (instruction #113 Part C item 3b): a row whose trigger was deleted is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = """    return shape + bare + dup + unlisted + ghosts"""
+new = """    return shape + bare + dup + unlisted"""

@@ -3,7 +3,7 @@
 [[edit]]
 path = ".github/workflows/review.yml"
 old = """      (github.event.sender.login != 'assize-reviewer' ||
-        (github.event_name == 'pull_request' && github.event.label.name == 'needs-review')) && (
+        (github.event_name == 'pull_request_target' && github.event.label.name == 'needs-review')) && (
 """
 new = """      github.event.sender.login != 'assize-reviewer' && (
 """

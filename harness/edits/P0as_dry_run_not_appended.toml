@@ -1,0 +1,6 @@
+# P0as's mutant (instruction #113 Part A item 1): the self-run runs each harness call as the workflow wrote it, without
+# `--dry-run`, so it would elect and publish for real.
+[[edit]]
+path = "harness/selfrun.py"
+old = """command = [sys.executable, "-B", "-m", module, *vector, "--dry-run"]"""
+new = """command = [sys.executable, "-B", "-m", module, *vector]"""
