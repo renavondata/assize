@@ -1581,6 +1581,13 @@ def _dry_run_tree(dest: Path, remote: Path) -> Path:
     git = _git_fixture(dest)
     subprocess.run(["git", "init", "-q", "--bare", "-b", "master", str(remote)], check=True, capture_output=True,
                    env=os.environ | claims.GIT_ENV)
+    # A fetch or push starts a detached `git maintenance run --auto` (a receive, `gc --auto`) that can still be writing
+    # into `.git` when the pin removes its scratch directory (review db9577f F1); both repositories run none.
+    quiet = (("gc.auto", "0"), ("maintenance.auto", "false"), ("maintenance.autoDetach", "false"),
+             ("gc.autoDetach", "false"), ("receive.autogc", "false"))
+    for key, value in quiet:
+        git("config", key, value)
+        _git_fixture(remote)("config", key, value)
     git("remote", "add", "origin", str(remote))
     git("push", "-q", "origin", "master")
     return dest
