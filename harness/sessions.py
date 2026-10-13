@@ -202,9 +202,11 @@ def limit_reached(events: Sequence[Mapping]) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = sys.argv[1:] if argv is None else argv
+    # Instruction #113 Part A: the self-run appends `--dry-run` to every harness call of the session workflows. Both
+    # commands only read the log and print, so the flag is accepted and changes nothing.
+    args = [a for a in (sys.argv[1:] if argv is None else argv) if a != "--dry-run"]
     if len(args) != 2 or args[0] not in ("tokens", "limit"):
-        print("usage: python -m harness.sessions tokens|limit <stream-json log>", file=sys.stderr)
+        print("usage: python -m harness.sessions tokens|limit <stream-json log> [--dry-run]", file=sys.stderr)
         return 2
     try:
         with open(args[1]) as f:
