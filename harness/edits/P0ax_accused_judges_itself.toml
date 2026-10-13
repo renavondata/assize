@@ -1,0 +1,6 @@
+# P0ax's mutant (instruction #176 item 3a): the restore step checks nothing out of master, so the pull request's own
+# harness judges it and a pin it deleted is not run.
+[[edit]]
+path = ".github/workflows/pins-master.yml"
+old = "git checkout origin/master -- harness Makefile pyproject.toml uv.lock"
+new = "true"

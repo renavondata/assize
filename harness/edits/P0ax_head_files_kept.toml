@@ -1,0 +1,7 @@
+# P0ax's mutant: the head's harness/ files are not removed before master's are checked out, so a file only the head has
+# stays in the judge's tree.
+[[edit]]
+path = ".github/workflows/pins-master.yml"
+old = """          git ls-files -z -- harness ':(exclude)harness/proposer.d' | xargs -0 -r rm -f
+"""
+new = ""

@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-176-pins-master (instruction #176): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "5859a2e6-db84-456b-9616-a108ae390357"

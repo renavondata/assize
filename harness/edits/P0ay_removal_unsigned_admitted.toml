@@ -1,0 +1,5 @@
+# P0ay's mutant: the `Removes:` line of any cited issue counts, signed by gfrmin or not.
+[[edit]]
+path = "harness/claims.py"
+old = "for n in cited if authorises(issues.get(n))"
+new = "for n in cited if issues.get(n) is not None"

@@ -14,6 +14,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import textwrap
 from pathlib import Path
 
 from harness import claims, config, context, edits, proc, runner, scan, tree
@@ -2080,6 +2081,157 @@ def p0aw_checkout_granted() -> bool:
         text = f.read_text()
         bad = _checkout_ungranted(text)
         expect(not bad, f"{f.name}: jobs {sorted(_job_blocks(text))}; checking out without contents: {bad}")
+    return ok()
+
+
+PINS_MASTER = ".github/workflows/pins-master.yml"
+MASTER_REGISTRY = ('PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n'
+                   '    Pin("B", "b", g, (Mutant("m3", e),), W),\n]\n')
+HEAD_REGISTRY = 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n]\n'
+
+
+def _step_run(text: str, name: str) -> str | None:
+    """The script of the workflow step called `name` (a `run: |` block), or None."""
+    m = re.search(rf"^      - name: {re.escape(name)}\n(?:        .*\n)*?        run: \|\n((?:          .*\n|\n)+)", text, re.M)
+    return textwrap.dedent(m.group(1)) if m else None
+
+
+def _accused_repo(root: Path) -> tuple[Path, str, str]:
+    """A fixture origin whose master registers pins A (mutants m1, m2) and B (m3), and a pull request branch that
+    deletes B and rewrites master's other harness file. Returns the clone on the branch, master's sha and the head's."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+    origin, work = root / "origin.git", root / "work"
+    subprocess.run(["git", "init", "-q", "--bare", str(origin)], check=True, capture_output=True, env=env)
+    subprocess.run(["git", "clone", "-q", str(origin), str(work)], check=True, capture_output=True, env=env)
+    git = _git_fixture(work)
+    git("checkout", "-q", "-B", "master")
+    for path, text in ((claims.REGISTRY_PATH, MASTER_REGISTRY), ("harness/judge.py", "master's judge\n"),
+                       ("harness/proposer.d/old.toml", "old\n"), ("Makefile", "pins:\n"), ("pyproject.toml", "p\n"),
+                       ("uv.lock", "l\n"), ("judge/world.py", "world\n")):
+        _append(work, path, text)
+    git("add", "-A")
+    git("commit", "-q", "-m", "master")
+    git("push", "-q", "origin", "master")
+    base = git("rev-parse", "HEAD")
+    git("checkout", "-q", "-b", "pr")
+    (work / claims.REGISTRY_PATH).write_text(HEAD_REGISTRY)
+    (work / "harness/judge.py").write_text("a judge that passes everything\n")
+    _append(work, "harness/rogue.py", "import sitecustomize\n")
+    _append(work, "harness/proposer.d/new.toml", "new\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "the accused")
+    return work, base, git("rev-parse", "HEAD")
+
+
+def p0ax_judge_from_master() -> bool:
+    """The `pins-master` workflow checks out the pull request's head and restores master's harness/, Makefile,
+    pyproject.toml and uv.lock over it, keeping only the pull request's proposer rows, before it runs the full `make
+    pins` and the monotone check (instruction #176 items 1 and 3a). A fixture pull request that deletes pin B passes
+    its own registry, fails master's, and is refused by `pins-monotone`."""
+    expect, ok = _expecter()
+    text = (ROOT / PINS_MASTER).read_text()
+    expect(re.search(r"^on:\n  pull_request_target:\n    types: \[opened, synchronize, reopened, labeled\]\n", text, re.M)
+           is not None and "\n  pull_request:" not in text, "the workflow runs on pull_request_target, not pull_request")
+    expect(list(_job_blocks(text)) == ["pins-master"], f"its one job is pins-master ({list(_job_blocks(text))})")
+    expect("ref: ${{ github.event.pull_request.head.sha }}" in text, "it checks out the pull request's head")
+    expect("run: make pins PINS_OUT=out/pins\n" in text and "PINS_SINCE" not in text, "it runs the full `make pins`")
+    expect("pins-monotone" in text, "it runs the monotone check")
+    expect("pins-monotone" in (ROOT / ".github/workflows/pins.yml").read_text(), "pins.yml runs the monotone check")
+    script = _step_run(text, "Restore the judge from master")
+    expect(script is not None, "the restore step is found")
+    root = Path(tempfile.mkdtemp(prefix="assize-p0ax-", dir=context.scratch))
+    work, base, head = _accused_repo(root)
+    git = _git_fixture(work)
+    own = claims.registry_names((work / claims.REGISTRY_PATH).read_text())
+    expect("B" not in own, f"the accused passes its own registry: B absent from {sorted(own)}")
+    if script is not None:
+        done = subprocess.run(["bash", "-c", script], cwd=work, capture_output=True, text=True,
+                              env=os.environ | claims.GIT_ENV | FIXTURE_GIT)
+        expect(done.returncode == 0, f"the restore step runs ({done.returncode}: {done.stderr.strip()[-200:]})")
+        registry = work / claims.REGISTRY_PATH  # a restore that deleted the head's harness leaves none
+        judged = claims.registry_names(registry.read_text() if registry.is_file() else "")
+        expect("B" in judged and "B/m3" in judged, f"the judge's registry is master's: {sorted(judged)}")
+        judge = work / "harness/judge.py"
+        expect(judge.is_file() and judge.read_text() == "master's judge\n", "master's harness file replaces the head's")
+        expect(not (work / "harness/rogue.py").exists(), "a harness file only the head has is gone")
+        expect((work / "harness/proposer.d/new.toml").exists(), "the head's proposer row is kept")
+    git("checkout", "-q", "-f", head)
+    got = {f.where for f in claims.pins_monotone(work, base, head)}
+    expect(got == {"B", "B/m3"}, f"pins-monotone refuses the deletion of B: {sorted(got)}")
+    expect(not claims.pins_monotone(work, base, base), "a head equal to the base is monotone")
+    return ok()
+
+
+def p0ay_pins_monotone() -> bool:
+    """A pin or mutant at the base and absent at the head is refused unless a head commit cites an instruction that
+    carries Guy's authority and has a `Removes:` line naming it; adding pins is free (instruction #176 items 2 and 3b)."""
+    expect, ok = _expecter()
+    signed = claims.Issue("gfrmin", ("instruction",), "open", "gfrmin", SIGNED_AT, (), "Delete B.\nRemoves: B\n")
+    cases = (
+        ("no instruction", (), {}, {"B", "B/m3"}),
+        ("instruction naming the pin", (5,), {5: signed}, set()),
+        ("instruction naming only the mutant", (5,), {5: dataclasses.replace(signed, body="Removes: B/m3\n")}, {"B"}),
+        ("instruction naming both, comma separated", (5,),
+         {5: dataclasses.replace(signed, body="Removes: B/m3, B\n")}, set()),
+        ("instruction not signed by gfrmin", (5,), {5: dataclasses.replace(signed, labeled_by="assize-builder")},
+         {"B", "B/m3"}),
+        ("issue not cited by the commit", (6,), {5: signed}, {"B", "B/m3"}),
+        ("prose, not a Removes line", (5,), {5: dataclasses.replace(signed, body="Please delete B.\n")}, {"B", "B/m3"}),
+        ("another pin named", (5,), {5: dataclasses.replace(signed, body="Removes: A\n")}, {"B", "B/m3"}),
+    )
+    for what, cited, issues, want in cases:
+        commits = [claims.Commit("c" * 40, ("guy",), (), instructions=cited)]
+        removed = claims.declared_removals(commits, issues)
+        got = {f.where for f in claims.monotone_findings(MASTER_REGISTRY, HEAD_REGISTRY, removed)}
+        expect(got == want, f"{what}: refused {sorted(got)}, want {sorted(want)}")
+    got = {f.where for f in claims.monotone_findings(HEAD_REGISTRY, MASTER_REGISTRY, frozenset())}
+    expect(not got, f"a head adding pin B is monotone ({sorted(got)})")
+    got = {f.code for f in claims.monotone_findings(MASTER_REGISTRY, "PINS = []\n", frozenset({"A", "B"}))}
+    expect(got == {"registry_unreadable"}, f"a head registering no pin is refused even if all are named ({sorted(got)})")
+    return ok()
+
+
+def _workflow_privileges(text: str) -> list[str]:
+    """What a workflow grants beyond read: a missing top-level `permissions:`, any scope not `read` or `none`, a scalar
+    grant, a job-level grant, or any use of `secrets.` outside a comment."""
+    found = []
+    top = re.search(r"^permissions:[ \t]*(\S*)[ \t]*\n((?:  .*\n)*)", text, re.M)
+    if top is None:
+        found.append("no top-level permissions")
+    elif top.group(1):
+        found.append(f"scalar permissions {top.group(1)}")
+    else:
+        found += [f"{m.group(1)}: {m.group(2)}" for m in re.finditer(r"^  ([\w-]+):[ \t]*(\S+)", top.group(2), re.M)
+                  if m.group(2) not in ("read", "none")]
+    for job, block in _job_blocks(text).items():
+        perms = _job_permissions(block)
+        if perms is not None:
+            found.append(f"job {job} sets permissions")
+    found += [f"secret {m}" for line in text.splitlines() for m in re.findall(r"secrets\.\w+", line.split("#")[0])]
+    return found
+
+
+PRIVILEGE_FIXTURE = (
+    ("read scopes", "permissions:\n  contents: read\n  issues: none\njobs:\n  j:\n    steps: []\n", []),
+    ("a write scope", "permissions:\n  contents: read\n  issues: write\njobs:\n  j:\n    steps: []\n", ["issues: write"]),
+    ("write-all", "permissions: write-all\njobs:\n  j:\n    steps: []\n", ["scalar permissions write-all"]),
+    ("no permissions", "jobs:\n  j:\n    steps: []\n", ["no top-level permissions"]),
+    ("a job grant", "permissions:\n  contents: read\njobs:\n  j:\n    permissions:\n      contents: write\n",
+     ["job j sets permissions"]),
+    ("a secret", "permissions:\n  contents: read\njobs:\n  j:\n    env: ${{ secrets.T }}\n", ["secret secrets.T"]),
+    ("a secret in a comment", "permissions:\n  contents: read\n# no secrets.T\njobs:\n  j:\n    steps: []\n", []),
+)
+
+
+def p0az_pins_master_unprivileged() -> bool:
+    """`pins-master` runs the pull request's code, so it grants no write scope, sets no job-level grant and uses no
+    secret (instruction #176 item 3c)."""
+    expect, ok = _expecter()
+    for what, text, want in PRIVILEGE_FIXTURE:
+        got = _workflow_privileges(text)
+        expect(got == want, f"{what}: {got}, want {want}")
+    got = _workflow_privileges((ROOT / PINS_MASTER).read_text())
+    expect(not got, f"{PINS_MASTER} grants beyond read: {got}")
     return ok()
 
 
@@ -4978,6 +5130,19 @@ PINS = [
     Pin("P0aw", "a workflow job that sets permissions and checks out the repository grants contents access",
         p0aw_checkout_granted, (Mutant("checkout_without_contents", _edits("P0aw_checkout_without_contents")),),
         HARNESS + (".github/workflows/**",)),
+    Pin("P0ax", "master's harness judges every pull request: the pins-master workflow restores it over the head's, and "
+                "a deleted pin fails",
+        p0ax_judge_from_master, (Mutant("accused_judges_itself", _edits("P0ax_accused_judges_itself")),
+                                 Mutant("head_files_kept", _edits("P0ax_head_files_kept"))),
+        HARNESS + (".github/workflows/pins-master.yml", ".github/workflows/pins.yml")),
+    Pin("P0ay", "a pin or mutant absent at the head is refused unless a signed instruction a head commit cites names it "
+                "removed",
+        p0ay_pins_monotone, (Mutant("monotone_ignores_instruction", _edits("P0ay_monotone_ignores_instruction")),
+                             Mutant("removal_unsigned_admitted", _edits("P0ay_removal_unsigned_admitted"))), HARNESS),
+    Pin("P0az", "the workflow that runs a pull request's code under master's harness grants no write scope and no secret",
+        p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
+                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
+        HARNESS + (".github/workflows/pins-master.yml",)),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

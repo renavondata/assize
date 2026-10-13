@@ -248,6 +248,7 @@ class Issue:
     labeled_by: str | None = None  # the account that applied the standing `instruction` label, from the timeline
     labeled_at: str | None = None  # when it applied it
     edits: tuple[Edit, ...] | None = None  # the body's edits (GraphQL `userContentEdits`); None: not read
+    body: str = ""
 
 
 def _standing(events: Sequence[Mapping]) -> Mapping | None:
@@ -581,7 +582,7 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
     def read(n: int) -> Issue | None:
         try:
             out = gh(f"repos/{{owner}}/{{repo}}/issues/{n}", "--jq",
-                     "{author: .user.login, labels: [.labels[].name], state: .state}")
+                     "{author: .user.login, labels: [.labels[].name], state: .state, body: (.body // \"\")}")
             timeline = gh(f"repos/{{owner}}/{{repo}}/issues/{n}/timeline?per_page=100", "--paginate", "--jq", ".[]")
         except (OSError, subprocess.SubprocessError) as e:
             print(f"    issue #{n}: not read ({e})")
@@ -589,7 +590,7 @@ def load_issues(repo: Path, numbers: Sequence[int]) -> dict[int, Issue]:
         row = json.loads(out)
         events = [json.loads(line) for line in timeline.splitlines() if line.strip()]
         return Issue(str(row["author"]), tuple(row["labels"]), str(row["state"]), instruction_labeler(events),
-                     instruction_labeled_at(events), edits(n))
+                     instruction_labeled_at(events), edits(n), str(row["body"]))
 
     read_ = {n: read(n) for n in sorted(set(numbers))}
     return {n: i for n, i in read_.items() if i is not None}
@@ -718,6 +719,52 @@ def _edits_said(i: Issue) -> str:
             else f"{len(i.edits)} body edits, none by another account after the signature")
 
 
+# Instruction #176 item 2: pins are monotone. Every pin and mutant of the registry at the base is in the registry at the
+# head, unless a head commit cites `Instruction: #<n>` and issue <n>, which carries Guy's authority, has a line
+# `Removes: <name>, ...` naming it. A mutant's name is `<pin>/<mutant>`; naming a pin removes its mutants with it.
+REGISTRY_PATH = "harness/pins.py"
+PIN_HEAD = re.compile(r'^    Pin\("([^"]+)"', re.M)
+MUTANT_HEAD = re.compile(r'\bMutant\("([^"]+)"')
+REMOVES_LINE = re.compile(r"^Removes: (.*?)\s*$", re.M)
+
+
+def registry_names(text: str) -> frozenset[str]:
+    """The pins and mutants a `harness/pins.py` registers: `<pin>` and `<pin>/<mutant>`, read from the text."""
+    heads = list(PIN_HEAD.finditer(text))
+    ends = [m.start() for m in heads[1:]] + [len(text)]
+    return frozenset(name for m, end in zip(heads, ends)
+                     for name in (m.group(1), *(f"{m.group(1)}/{x}" for x in MUTANT_HEAD.findall(text[m.start():end]))))
+
+
+def declared_removals(commits: Sequence[Commit], issues: Mapping[int, Issue]) -> frozenset[str]:
+    """The names removed by `Removes:` lines of the signed instruction issues the commits cite."""
+    cited = {n for c in commits for n in c.instructions}
+    return frozenset(name for n in cited if authorises(issues.get(n))
+                     for line in REMOVES_LINE.findall(issues[n].body) for name in re.split(r"[,\s]+", line) if name)
+
+
+def monotone_findings(base_text: str, head_text: str, removed: frozenset[str]) -> list[Finding]:
+    """Findings for each name at the base absent at the head and not declared removed; an empty head registry is one."""
+    head = registry_names(head_text)
+    if not head:
+        return [Finding(REGISTRY_PATH, "registry_unreadable", "no pin is registered at the head")]
+    return [Finding(name, "pin_removed", "registered at the base, absent at the head, and no signed instruction names it")
+            for name in sorted(registry_names(base_text) - head)
+            if name not in removed and name.split("/")[0] not in removed]
+
+
+def pins_monotone(repo: Path, base: str, head: str = "HEAD") -> list[Finding]:
+    """The monotone check between two revisions. Issues are read only when something is missing and a head commit cites
+    an instruction."""
+    base_text, head_text = (_git(repo, "show", f"{rev}:{REGISTRY_PATH}") for rev in (base, head))
+    found = monotone_findings(base_text, head_text, frozenset())
+    commits = branch_commits(repo, base, head) if found else []
+    cited = sorted({n for c in commits for n in c.instructions})
+    if not found or not cited:
+        return found
+    return monotone_findings(base_text, head_text, declared_removals(commits, load_issues(repo, cited)))
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """`python -m harness.claims signed <n>...`: whether each issue carries Guy's authority (Amendment 3). The Builder
     acts only on an issue printed `signed`. `trailers <revisions>`: exits non-zero if a commit's trailers do not parse
@@ -733,7 +780,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     x = sub.add_parser("next", help="the first candidate item, in order, that no open pull request holds")
     x.add_argument("items", nargs="+", help="`#<n>` for an instruction, else a brief item's name")
     x.add_argument("--repo", type=Path, default=Path("."))
+    m = sub.add_parser("pins-monotone", help="refuse a head whose registry lacks a pin or mutant of the base's")
+    m.add_argument("base")
+    m.add_argument("head")
+    m.add_argument("--repo", type=Path, default=Path("."))
     a = ap.parse_args(argv)
+    if a.cmd == "pins-monotone":
+        found = pins_monotone(a.repo, a.base, a.head)
+        for f in found:
+            print(f, file=sys.stderr)
+        print(f"pins-monotone {a.base}..{a.head}: {len(found)} findings", file=sys.stderr)
+        return 1 if found else 0
     if a.cmd == "trailers":
         found = trailer_findings(a.repo, a.revisions)
         for f in found:

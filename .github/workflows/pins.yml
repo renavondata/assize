@@ -24,6 +24,13 @@ jobs:
         run: pipx install uv==0.8.17
       - name: Sync environment
         run: uv sync --frozen
+      # Instruction #176 item 2: no pin or mutant of master's registry is absent at the head unless an instruction
+      # signed by gfrmin and cited by a head commit names it as removed. pins-master.yml runs the same check.
+      - name: Pins are monotone
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.base_ref }}
+        run: uv run --frozen python -m harness.claims pins-monotone "$(git merge-base "origin/$BASE_REF" HEAD)" HEAD
       # Instruction #108 item 3: the base is the newest successful `pins` run whose head is an ancestor of HEAD and
       # whose `pins-report` artifact records every pin ok and nothing skipped, so a run that itself skipped pins is never
       # a base and a skip always cites a full run. With no such run, or on a pull request that records a layer verdict

@@ -1,0 +1,5 @@
+# P0az's mutant (instruction #176 item 3c): the workflow that runs the pull request's code may write the repository.
+[[edit]]
+path = ".github/workflows/pins-master.yml"
+old = "  contents: read\n"
+new = "  contents: write\n"
