@@ -706,6 +706,54 @@ ROUTES = ("awaits-guy", "assigned", "needs-you", PROBE)
 SESSION_WORKFLOWS = (".github/workflows/build.yml", ".github/workflows/review.yml")
 
 
+UNKNOWN_MODEL = "unknown"  # the model of a session run with no recorded draw
+
+
+@dataclass(frozen=True)
+class ModelPrice:
+    """What one model's sessions cost in the window (instruction #139 item 2)."""
+    model: str
+    sessions: int
+    minutes: float
+    cost_usd: float  # of the sessions whose cost is known
+    cost_unknown: int  # sessions of this model with no draw's log or no `result` cost: in `sessions`, never dropped
+
+    def entry(self) -> str:
+        cost = "?" if self.cost_unknown == self.sessions else (
+            f"{self.cost_usd:.2f}" + ("+?" if self.cost_unknown else ""))
+        return f"{self.model} s{self.sessions}/{self.minutes:.0f}m/${cost}"
+
+
+def result_costs(events: Sequence[Mapping]) -> list[float | None]:
+    """The `total_cost_usd` of each session's final `result` event in a stream-json log, in log order; None for a
+    `result` event that carries none."""
+    return [r.get("total_cost_usd") if isinstance(r.get("total_cost_usd"), (int, float))
+            and not isinstance(r.get("total_cost_usd"), bool) else None
+            for r in events if r.get("type") == "result"]
+
+
+def model_price(minutes: Mapping[int, float], draws: Sequence[Mapping],
+                costs: Mapping[int, Sequence[float | None]]) -> tuple[ModelPrice, ...]:
+    """Each session run attributed to the model(s) it drew: `minutes`: session run id -> runner-minutes; `draws`: the
+    draw ledger's rows (`run`, `drawn`), in ledger order; `costs`: run id -> `result_costs` of its uploaded log (absent
+    when there is no log). A run's draws and its log's `result` events pair in order, and a run's minutes divide equally
+    among its sessions. A run with no draw is one `unknown` session; a session with no log, or no `result` beyond the
+    log's last, has its cost unknown; a `result` with no draw left is an `unknown` session with its cost. None dropped."""
+    rows: list[tuple[str, float, float | None]] = []
+    for run, mins in sorted(minutes.items()):
+        drawn = [str(d["drawn"]) for d in draws if "drawn" in d and str(d.get("run")) == str(run)] or [UNKNOWN_MODEL]
+        got = list(costs.get(run) or ())
+        paired = [(m, mins / len(drawn), got[i] if i < len(got) else None) for i, m in enumerate(drawn)]
+        extra = [(UNKNOWN_MODEL, 0.0, c) for c in got[len(drawn):]]
+        rows.extend(paired + extra)
+    def of(model: str) -> ModelPrice:
+        mine = [r for r in rows if r[0] == model]
+        return ModelPrice(model, len(mine), sum(r[1] for r in mine), sum(r[2] for r in mine if r[2] is not None),
+                          sum(1 for r in mine if r[2] is None))
+
+    return tuple(of(m) for m in sorted({r[0] for r in rows}))
+
+
 @dataclass(frozen=True)
 class Price:
     items: tuple[int, ...]
@@ -720,6 +768,10 @@ class Price:
     over_bound: int = 0  # session_minutes forecasts resolved false: runs that exceeded their own bound
     bounded: int = 0  # session_minutes forecasts made in the window, open and void included
     lost_to_limit: int = 0  # session runs whose LIMIT_STEP failed: ended with usage_limit_reached
+    models: tuple[ModelPrice, ...] = ()  # sessions, minutes and cost per drawn model (instruction #139)
+
+    def models_segment(self) -> str:
+        return "models " + (", ".join(m.entry() for m in self.models) or "none")
 
     def quantities(self) -> dict[str, float]:
         lat = self.latencies_h or (0.0,)
@@ -732,7 +784,7 @@ class Price:
         w = self.wish_latencies_h or (0.0,)
         return (f"price: guy-items {len(self.items)}; guy-latency median {q['guy-latency-median']:.1f}h max "
                 f"{q['guy-latency-max']:.1f}h; sessions {self.sessions}; runner-min {q['runner-min']:.0f}; "
-                f"wish-latency median {statistics.median(w):.1f}h max {max(w):.1f}h open {len(self.open_wishes)}; "
+                f"{self.models_segment()}; wish-latency median {statistics.median(w):.1f}h max {max(w):.1f}h open {len(self.open_wishes)}; "
                 f"sessions-over-bound {self.over_bound}/{self.bounded}; sessions-lost-to-limit {self.lost_to_limit}")
 
 
@@ -741,9 +793,10 @@ def _hours(a: str, b: str) -> float:
 
 
 def price(reached: Sequence[Mapping], actions: Mapping[int, Sequence[str]], runs: Sequence[Mapping], since: str,
-          until: str) -> Price:
+          until: str, draws: Sequence[Mapping] = (), costs: Mapping[int, Sequence[float | None]] = {}) -> Price:
     """`reached`: events {item, route, at} by which an item reached Guy; `actions`: per item, the times of gfrmin's
-    actions on it; `runs`: Actions API runs. Everything is counted in [since, until): each item once, at its first
+    actions on it; `runs`: Actions API runs; `draws`, `costs`: the draw ledger's rows and each session run's
+    `result_costs`, for the per-model price (`model_price`). Everything is counted in [since, until): each item once, at its first
     arrival, its latency to gfrmin's first action after that, or, with none yet, to `until` (a lower bound, never
     dropped)."""
     inside = [e for e in reached if e["route"] in ROUTES and _at_or_after(e["at"], since)
@@ -765,7 +818,8 @@ def price(reached: Sequence[Mapping], actions: Mapping[int, Sequence[str]], runs
     return Price(tuple(items), latencies, tuple(n for n in items if answered[n] is None), len(sessions), per,
                  per.get(PINS_WORKFLOW, 0.0),
                  lost_to_limit=sum(1 for r in sessions if any(s.get("name") == LIMIT_STEP and s.get("conclusion")
-                                                              == "failure" for s in r.get("steps") or ())))
+                                                              == "failure" for s in r.get("steps") or ())),
+                 models=model_price({int(r["id"]): minutes(r) for r in sessions}, draws, costs))
 
 
 LIMIT_STEP = "usage limit"  # the step of build.yml and review.yml that fails when the session hit the usage limit
@@ -849,8 +903,48 @@ def github_price(repo: Path, since_sha: str, until: str | None, head: str = "HEA
                                      ".jobs[].steps[] | {name, conclusion}")}
                  if r.get("path") in SESSION_WORKFLOWS and r.get("conclusion") == "failure" else {}) for r in runs]
     k, n = over_bound(ledger_rows(repo, head), since, end)
-    return replace(price(reached, actions, runs, since, end), **_wish_fields(repo, since, end), over_bound=k,
-                   bounded=n), since, end
+    session_ids = [int(r["id"]) for r in runs if r.get("path") in SESSION_WORKFLOWS]
+    return replace(price(reached, actions, runs, since, end, published_draws(repo, head), session_costs(repo, session_ids)),
+                   **_wish_fields(repo, since, end), over_bound=k, bounded=n), since, end
+
+
+def published_draws(repo: Path, head: str = "HEAD", remote: str = "origin") -> list[dict]:
+    """The draws on `head`'s draw ledger and on the remote's `ledger/draws` branch (where `elect --publish` commits
+    them); a remote that cannot be reached contributes none, and the per-model table then says `unknown`."""
+    try:
+        tip = draw_tip(repo, remote)
+    except (OSError, subprocess.SubprocessError):
+        tip = None
+    return draw_rows(repo, head) + (draw_rows(repo, tip) if tip else [])
+
+
+SESSION_LOGS = ("build.log", "review.log")
+
+
+def session_costs(repo: Path, run_ids: Sequence[int]) -> dict[int, list[float | None]]:
+    """For each session run whose uploaded log is still retained, `result_costs` of that log; a run whose artifact is
+    expired or missing is absent, so its sessions are counted with cost unknown."""
+    import io
+    import zipfile
+
+    from harness import sessions
+
+    def log_of(run: int) -> list[float | None] | None:
+        try:
+            ids = _gh(repo, f"repos/{{owner}}/{{repo}}/actions/runs/{run}/artifacts", "--jq",
+                      '.artifacts[] | select(.expired == false) | .id').split()
+            for aid in ids:
+                blob = subprocess.run(["gh", "api", f"repos/{{owner}}/{{repo}}/actions/artifacts/{aid}/zip"], cwd=repo,
+                                      check=True, capture_output=True, timeout=300).stdout
+                with zipfile.ZipFile(io.BytesIO(blob)) as z:
+                    for name in z.namelist():
+                        if name in SESSION_LOGS:
+                            return result_costs(sessions.parse(z.read(name).decode(errors="replace")))
+        except (OSError, subprocess.SubprocessError, zipfile.BadZipFile, Unreadable):
+            return None
+        return None
+
+    return {run: got for run in run_ids if (got := log_of(run)) is not None}
 
 
 WISH_CITE = re.compile(r"^Wish: #(\d+)", re.M)
@@ -1128,6 +1222,11 @@ def main(argv: list[str] | None = None) -> int:
         for w, m in got.runner_min.items():
             print(f"workflow {w} runner-min {m:.0f}")
         print(f"pins CI minutes {got.pins_min:.0f}")
+        for m in got.models:
+            print(f"model {m.model}: sessions {m.sessions}, runner-min {m.minutes:.0f}, cost ${m.cost_usd:.2f} over "
+                  f"{m.sessions - m.cost_unknown} sessions with a cost, cost unknown {m.cost_unknown}")
+        print(f"sessions with cost unknown {sum(m.cost_unknown for m in got.models)} of "
+              f"{sum(m.sessions for m in got.models)}")
         print(f"wishes filed {len(got.wishes)}: merged {len(got.wish_latencies_h)}, open {len(got.open_wishes)}")
         print(got.status_line())
         return 0

@@ -2,10 +2,12 @@
 # `python -m harness.ledger elect <procedure> --seed <run id>` draws one by EXP3 over their log-loss on that
 # procedure's resolved forecasts (instruction #64); every `claude` invocation in .github/workflows/ takes its model
 # from that draw. This file is read from the checkout, never from the ledger's head.
+# Instruction #139 item 1: Haiku and Fable enter review, audit and vizier as every entrant does, with EXP3's uniform start
+# and no head start; `build` is unchanged. No model is named in a workflow.
 build = ["claude-opus-5-5", "claude-sonnet-5-5"]
-review = ["claude-opus-5-5", "claude-sonnet-5-5"]
-audit = ["claude-opus-5-5", "claude-sonnet-5-5"]
-vizier = ["claude-opus-5-5", "claude-sonnet-5-5"]
+review = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"]
+audit = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-1"]
+vizier = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
 
 # Instruction #111 Part B item 7: the entrants that forecast Guy's pick among the open candidates (`python -m
 # harness.chooser`). `fixed-order` (A1.5's order) is always one; `priorities-literal` reads the most recent open

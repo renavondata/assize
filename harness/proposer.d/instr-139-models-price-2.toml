@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-139-models-price-2 (instruction #139, rebuilt from master after PR #163 closed): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "15185207-cbdc-4c0c-9c30-5077204d1b1d"
