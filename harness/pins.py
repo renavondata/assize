@@ -1956,6 +1956,86 @@ def p0aq_red_returns_to_builder() -> bool:
     return ok()
 
 
+def _job_blocks(text: str) -> dict[str, str]:
+    """Each job's text in a workflow file, by job id: the lines from `  <id>:` under `jobs:` to the next job, or to the
+    next top-level key or the file's end."""
+    text = "\n" + text
+    after = text.split("\njobs:\n", 1)[1] if "\njobs:\n" in text else ""
+    body = re.split(r"^\S", after, maxsplit=1, flags=re.M)[0]
+    heads = list(re.finditer(r"^  ([A-Za-z0-9_-]+):[ \t]*$", body, re.M))
+    ends = [m.start() for m in heads[1:]] + [len(body)]
+    return {m.group(1): body[m.start():end] for m, end in zip(heads, ends)}
+
+
+def _job_permissions(job: str) -> dict[str, str] | str | None:
+    """A job's `permissions:`: None if it sets none, the scalar (`read-all`, `write-all`) if one is given, else the
+    scope-to-access map, in block or flow form."""
+    m = re.search(r"^    permissions:[ \t]*(.*)$", job, re.M)
+    if m is None:
+        return None
+    inline = m.group(1).split("#")[0].strip()
+    if inline.startswith("{"):
+        pairs = (p.split(":", 1) for p in inline.strip("{} ").split(",") if ":" in p)
+        return {k.strip(): v.strip() for k, v in pairs}
+    if inline:
+        return inline
+    rest = job[m.end():].split("\n")[1:]
+    block = []
+    for line in rest:
+        if line.strip() and not line.startswith("      "):
+            break
+        block.append(line)
+    pairs = (re.match(r"^      ([A-Za-z-]+):[ \t]*([A-Za-z-]+)", line) for line in block)
+    return {p.group(1): p.group(2) for p in pairs if p}
+
+
+def _checkout_ungranted(text: str) -> list[str]:
+    """The jobs of a workflow file that set `permissions:` and use `actions/checkout` but grant no `contents` access:
+    a job-level `permissions:` replaces the default token's, so such a checkout fails with "repository not found"."""
+    def granted(perms) -> bool:
+        return (perms in ("read-all", "write-all") if isinstance(perms, str)
+                else perms.get("contents") in ("read", "write"))
+    jobs = _job_blocks(text)
+    return [name for name, job in jobs.items()
+            if re.search(r"uses:\s*actions/checkout@", job) and (perms := _job_permissions(job)) is not None
+            and not granted(perms)]
+
+
+CHECKOUT_FIXTURE = (  # (what, workflow text, ungranted jobs) -- instruction #162
+    ("a block grant without contents is flagged",
+     "jobs:\n  a:\n    permissions:\n      issues: write\n    steps:\n      - uses: actions/checkout@v5\n", ["a"]),
+    ("a block grant with contents: read passes",
+     "jobs:\n  a:\n    permissions:\n      issues: write\n      contents: read\n    steps:\n"
+     "      - uses: actions/checkout@v5\n", []),
+    ("a flow grant without contents is flagged",
+     "jobs:\n  a:\n    permissions: { issues: write }\n    steps:\n      - uses: actions/checkout@v5\n", ["a"]),
+    ("read-all passes", "jobs:\n  a:\n    permissions: read-all\n    steps:\n      - uses: actions/checkout@v5\n", []),
+    ("a job setting no permissions passes",
+     "jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v5\n", []),
+    ("a job with no checkout passes", "jobs:\n  a:\n    permissions:\n      issues: write\n    steps:\n      - run: x\n",
+     []),
+    ("only the offending job of two is flagged",
+     "jobs:\n  a:\n    permissions:\n      contents: write\n    steps:\n      - uses: actions/checkout@v5\n"
+     "  b:\n    permissions:\n      issues: write\n    steps:\n      - uses: actions/checkout@v5\n", ["b"]),
+)
+
+
+def p0aw_checkout_granted() -> bool:
+    """Every job in every workflow file that sets `permissions:` and uses `actions/checkout` grants `contents` access
+    (instruction #162: since #153 merged, both `failed.yml` jobs failed at checkout with "repository not found")."""
+    expect, ok = _expecter()
+    for what, text, want in CHECKOUT_FIXTURE:
+        got = _checkout_ungranted(text)
+        expect(got == want, f"{what}: {got}, want {want}")
+    files = sorted((ROOT / ".github" / "workflows").glob("*.yml"))
+    expect(bool(files), f"workflow files read: {len(files)}")
+    for f in files:
+        text = f.read_text()
+        bad = _checkout_ungranted(text)
+        expect(not bad, f"{f.name}: jobs {sorted(_job_blocks(text))}; checking out without contents: {bad}")
+    return ok()
+
+
 def _session_branch(git, repo: Path, base: str, branch: str, session: str, date: str) -> str:
     """A synthetic branch off `base` doing what one Builder session does: a forecast, a STATUS and a proposer row, each
     at the path `claims.session_files` gives. Returns the branch's name."""
@@ -4657,6 +4737,9 @@ PINS = [
                             Mutant("status_by_date", _edits("P0ar_status_by_date")),
                             Mutant("duplicate_overrides", _edits("P0ar_duplicate_overrides"))),
         HARNESS + (".claude/commands/**", "reports/**")),
+    Pin("P0aw", "a workflow job that sets permissions and checks out the repository grants contents access",
+        p0aw_checkout_granted, (Mutant("checkout_without_contents", _edits("P0aw_checkout_without_contents")),),
+        HARNESS + (".github/workflows/**",)),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
