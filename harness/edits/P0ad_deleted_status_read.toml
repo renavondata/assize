@@ -1,0 +1,6 @@
+# P0ad's mutant `deleted_status_read` (review 0a2c02c F1, round 2): `chose_history` reads every STATUS path a commit
+# touched, a deleted one included, so a commit that withdraws a STATUS makes the chooser check raise.
+[[edit]]
+path = "harness/chooser.py"
+old = "                                \"--diff-filter=d\", c, \"--\", *claims.STATUS_GLOBS).split():\n"
+new = "                                c, \"--\", *claims.STATUS_GLOBS).split():\n"

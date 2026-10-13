@@ -2398,8 +2398,11 @@ def p0ad_chooser_sealed() -> bool:
     _commit(git, "forecasts")
     (cli / "reports/L2/STATUS.md").write_text("# STATUS — L2 — 2026-10-12 — abc1234 — PR #1\n" + lines[-1] + "\n")
     _commit(git, "act")
+    (cli / "reports/L2/STATUS.md").unlink()
+    _commit(git, "withdraw")
     found = chooser.chose_findings(cli)
-    expect(not found, f"the printed rows, committed first, then the line, pass the check ({[str(f) for f in found]})")
+    expect(not found, f"the printed rows, committed first, then the line, pass the check, a later commit deleting the "
+                      f"STATUS read as no text ({[str(f) for f in found]})")
     root = _real_root()
     found = chooser.chose_findings(root)
     print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
@@ -4848,7 +4851,8 @@ PINS = [
     Pin("P0ad", "the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate",
         p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
                               Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),
-                              Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted"))),
+                              Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted")),
+                              Mutant("deleted_status_read", _edits("P0ad_deleted_status_read"))),
         ALWAYS),
     Pin("P0ae", "Guy's pick is resolved by the labels he applies; silence counts only after a declared exposure, else void",
         p0ae_exposure_and_labels, (Mutant("exposure_inferred", _edits("P0ae_exposure_inferred")),
