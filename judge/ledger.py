@@ -101,11 +101,12 @@ def append(ledger: Path, private: Path, request_id: str, records: Iterable[Mappi
     return chained
 
 
-def seal_interrupted(ledger: Path, private: Path, issued: Mapping[str, int], stamp: Mapping) -> list[str]:
-    """Sign every request of `issued` (request_id: seeds issued, in issuance order) that has no signed head for
-    `ledger`: such a request was interrupted (reports/L1/REPORT.md obligation 4 on L2). Its records past the last signed
-    head are kept, and closed by one record carrying `stamp`, `interrupted`, the seeds `issued` and the episodes
-    `recorded`, so that its played episodes and its spent seeds are in the ledger, signed. Returns the request_ids
+def seal_interrupted(ledger: Path, private: Path, issued: Mapping[str, Mapping]) -> list[str]:
+    """Sign every request of `issued` (request_id: its closing record, stating the seeds `issued` and whom they were
+    issued to, in issuance order) that has no signed head for `ledger`: such a request was interrupted
+    (reports/L1/REPORT.md obligation 4 on L2). Its records past the last signed head are kept, and closed by its closing
+    record with `interrupted` and the episodes `recorded`, so that its played episodes and its spent seeds are in the
+    ledger, signed, charged to its proposer. Returns the request_ids
     sealed. Only one request writes a ledger at a time (the caller's lock), so at most one request has records past the
     last signed head; anything else there is refused by ValueError, writing nothing."""
     heads = [h for h in _lines(private / HEADS) if h.get("ledger") == ledger.name]
@@ -123,8 +124,7 @@ def seal_interrupted(ledger: Path, private: Path, issued: Mapping[str, int], sta
     held = dict(groups)
     for rid in open_:
         rows = held.get(rid, [])
-        append(ledger, private, rid, [dict(stamp) | {"interrupted": True, "issued": issued[rid], "recorded": len(rows)}],
-               held=rows)
+        append(ledger, private, rid, [dict(issued[rid]) | {"interrupted": True, "recorded": len(rows)}], held=rows)
     return open_
 
 

@@ -1,4 +1,4 @@
-# Who built the harness state of branch l2a-o4-interrupted-recorded (brief 2 A2, L2a obligation 4 of reports/L1/REPORT.md): this pull request's own proposer row.
+# Who built the harness state of branch l2a-o4-interrupted-recorded (brief 2 A2, L2a obligation 4 of reports/L1/REPORT.md): this pull request's own proposer row. Round 2 (review 0a2c02c F1, F2) is session e7cd4d37; round 1 was ebcacc87-6eaa-418b-ac92-68ab98f3e69c.
 kind = "builder"
 model = "claude-opus-5-5"
-session = "ebcacc87-6eaa-418b-ac92-68ab98f3e69c"
+session = "e7cd4d37-e94e-475e-8f52-4b8b23bde57e"

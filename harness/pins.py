@@ -3902,9 +3902,8 @@ P23_RUN = """
 import json, os, signal, sys, types
 from pathlib import Path
 from judge import episodes, evaluate, registry
-private, ledgers, party, rid, n, kill_at = (Path(sys.argv[1]), Path(sys.argv[2]), json.loads(sys.argv[3]),
-                                            sys.argv[4], int(sys.argv[5]), int(sys.argv[6]))
-image = "sha256:" + "c" * 64
+private, ledgers, party, rid, n, kill_at, image = (Path(sys.argv[1]), Path(sys.argv[2]), json.loads(sys.argv[3]),
+                                                   sys.argv[4], int(sys.argv[5]), int(sys.argv[6]), sys.argv[7])
 try:
     registry.proposer_of(private, image)
 except registry.Refused:
@@ -3928,17 +3927,21 @@ except registry.Refused as e:
     print(json.dumps(e.code))
 """
 P23_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p23-fixture-party"}
+P23_IMAGE = "sha256:" + "c" * 64
 P23_ASKED, P23_KILL_AT = 3, 2  # the killed request asks 3 episodes and dies drawing the third's World: 2 played
 
 
 def p23_interrupted_recorded() -> bool:
     """An interrupted request's played episodes are in the ledger (brief 2 A2, L2a obligation 4; review 6debf231b630
     F3). A child judge asked for 3 Crafter episodes is killed by SIGKILL drawing the third's World: the ledger then holds
-    the 2 episodes it played, unsigned. The next request of the World, under another request_id and from another
-    child, first seals the killed one: its 2 records and one closing record stating `interrupted`, 3 seeds issued and 2
-    recorded, signed; then its own 2 records. The ledger verifies at its last head and holds exactly these. The killed
-    request asked again is refused `interrupted`, changing nothing. No container starts: the runtime and loop are
-    faked, keeping `episodes.played`'s contract, which P3 pins on the real loop."""
+    the 2 episodes it played, unsigned. A second request, from another child, first seals the killed one: its 2 records
+    and one closing record stating `interrupted`, 3 seeds issued and 2 recorded, signed; it is then killed drawing its
+    own first World, so it played nothing. The next request seals that one too (1 seed issued, 0 recorded), then writes
+    its own 2 records. Every record, each closing record included, carries the image and the registering `proposer`
+    (A1.7; review 0a2c02c F2), which for the request that played nothing only its issuance can supply. The ledger
+    verifies at its last head and holds exactly these. The killed request asked again is refused `interrupted`,
+    changing nothing. No container starts: the runtime and loop are faked, keeping `episodes.played`'s contract, which
+    P3 pins on the real loop."""
     from judge import evaluate, ledger
 
     expect, ok = _expecter()
@@ -3949,27 +3952,35 @@ def p23_interrupted_recorded() -> bool:
 
         def child(rid: str, n: int, kill_at: int = -1) -> tuple[int, object]:
             r = subprocess.run(proc.python("-c", P23_RUN, str(private), str(ledgers), json.dumps(P23_PARTY), rid,
-                                           str(n), str(kill_at)),
+                                           str(n), str(kill_at), P23_IMAGE),
                                cwd=ROOT, env=proc.child_env(), capture_output=True, text=True, timeout=120)
             return r.returncode, json.loads(r.stdout) if r.stdout.strip() else r.stderr.strip()[-500:]
 
         def rows() -> list[tuple]:
-            return [(r["request_id"], r.get("episode"), r.get("interrupted"), r.get("issued"), r.get("recorded"))
+            return [(r["request_id"], r.get("episode"), r.get("interrupted"), r.get("issued"), r.get("recorded"),
+                     r.get("image") == P23_IMAGE and r.get("proposer") == P23_PARTY)
                     for r in ledger._lines(led)] if led.exists() else []
 
         code, out = child("p23-killed", P23_ASKED, P23_KILL_AT)
         print(f"  killed child: exit {code}; ledger {rows()}")
         expect(code == -signal.SIGKILL, f"the child judge died by SIGKILL mid-request (exit {code}: {out})")
-        played = [("p23-killed", i, None, None, None) for i in range(P23_KILL_AT)]
+        played = [("p23-killed", i, None, None, None, True) for i in range(P23_KILL_AT)]
         expect(rows() == played, f"the ledger holds the {P23_KILL_AT} episodes the killed request played ({rows()})")
+
+        code, out = child("p23-unplayed", 1, 0)
+        print(f"  unplayed child: exit {code}; ledger {rows()}")
+        sealed = played + [("p23-killed", None, True, P23_ASKED, P23_KILL_AT, True)]
+        expect(code == -signal.SIGKILL and rows() == sealed,
+               f"a second child seals the killed request, {P23_ASKED} seeds issued and {P23_KILL_AT} recorded, "
+               f"attributed, and dies by SIGKILL before playing (exit {code}; {rows()})")
 
         code, out = child("p23-next", 2)
         print(f"  next child: exit {code}; ledger {rows()}")
-        want = played + [("p23-killed", None, True, P23_ASKED, P23_KILL_AT)] + [("p23-next", i, None, None, None)
-                                                                                for i in range(2)]
+        want = sealed + [("p23-unplayed", None, True, 1, 0, True)] + [("p23-next", i, None, None, None, True)
+                                                                      for i in range(2)]
         expect(code == 0 and rows() == want,
-               f"the next request seals the killed one, {P23_ASKED} seeds issued and {P23_KILL_AT} recorded, before "
-               f"its own 2 records (exit {code}; {rows()})")
+               f"the next request seals the unplayed one, 1 seed issued and 0 recorded, attributed to its image and "
+               f"proposer, before its own 2 records (exit {code}; {rows()})")
         anchor = out[-1]["sha256"] if code == 0 and out else ""
         found = ledger.verify(led, private, anchor)
         expect(found == [], f"the ledger verifies at the next request's head ({found})")
@@ -4976,9 +4987,10 @@ PINS = [
     Pin("P22", "replay returns a request's records only if they match its signed head, else refuses ledger_unverified",
         p22_replay_verified, (Mutant("replay_unchecked", _edits("P22_replay_unchecked")),), JUDGE_SIDE),
     Pin("P23", "an interrupted request's played episodes and spent seeds are sealed into the ledger by the next "
-               "request of its World",
+               "request of its World, charged to the image and proposer they were issued to",
         p23_interrupted_recorded, (Mutant("partial_dropped", _edits("P23_partial_dropped")),
-                                   Mutant("interrupted_unsealed", _edits("P23_interrupted_unsealed"))), JUDGE_SIDE),
+                                   Mutant("interrupted_unsealed", _edits("P23_interrupted_unsealed")),
+                                   Mutant("closing_unattributed", _edits("P23_closing_unattributed"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

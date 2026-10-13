@@ -25,7 +25,8 @@ Non-interactive and idempotent per `request_id`. In order:
    achievement set, then chained and appended to the World's append-only ledger as its episode ends, and the request's
    head signed after the last (`ledger.append`). Steps 4 to 6 hold the World's request lock, and begin by sealing
    every interrupted request of the World (`ledger.seal_interrupted`): the episodes it played stay in the ledger, and
-   one closing record states its seeds issued and episodes recorded, all signed. So a request killed and asked again
+   one closing record states its seeds issued, the image and proposer they were issued to (recorded with them at
+   issue) and its episodes recorded, all signed. So a request killed and asked again
    under another id leaves its played episodes and its spent seeds on the record, and cannot be selected away."""
 
 from __future__ import annotations
@@ -156,11 +157,19 @@ def _alone(private: Path, world: str):
 
 def _seal(led: Path, private: Path, world: str) -> list[str]:
     """Seal into the ledger every interrupted request of `world` (`ledger.seal_interrupted`), its played episodes and
-    spent seeds included; the request_ids sealed. A ledger tail that is no interrupted request's is `ledger_unverified`."""
-    issued = collections.Counter(r["request_id"] for r in seeds.records(private, world))
+    spent seeds included; the request_ids sealed. Each closing record carries the `image` and `proposer` its seeds were
+    issued to (A1.7; brief 1 A4 item 2), so a request's spent seeds are charged to the party that asked it. A ledger
+    tail that is no interrupted request's is `ledger_unverified`."""
+    held = seeds.records(private, world)
+    issued = collections.Counter(r["request_id"] for r in held)
+    first = {r["request_id"]: r for r in reversed(held)}
+    stamp = {"schema_version": episodes.SCHEMA_VERSION, "judge_sha256": judge_hash(), "world": world}
+    closing = {rid: stamp | {"issued": n,
+                             "image": first[rid].get("image"),
+                             "proposer": first[rid].get("proposer")}
+               for rid, n in issued.items()}
     try:
-        return ledger.seal_interrupted(led, private, issued, {"schema_version": episodes.SCHEMA_VERSION,
-                                                              "judge_sha256": judge_hash(), "world": world})
+        return ledger.seal_interrupted(led, private, closing)
     except ValueError as e:
         raise Refused("ledger_unverified", str(e)) from e
 
@@ -194,7 +203,8 @@ def evaluate(image: str, world: str, n_episodes: int, request_id: str, *, privat
             raise Refused("interrupted", f"request {request_id!r} had seeds but no signed records; sealed as "
                                          f"interrupted, its seeds are spent, ask again under a new request_id")
         try:
-            issued = seeds.issue(private, world, binding.world_seed, n_episodes, request_id)
+            issued = seeds.issue(private, world, binding.world_seed, n_episodes, request_id,
+                                 {"image": image, "proposer": proposer})
         except seeds.SeedError as e:
             if e.code == "request_reused":
                 raise Refused("interrupted", f"request {request_id!r} has seeds but no signed records; its seeds "

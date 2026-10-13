@@ -1,0 +1,7 @@
+# P23's mutant `closing_unattributed` (CLAUDE.md A1.7; brief 1 A4 item 2; review 0a2c02c F2): an interrupted request's
+# closing record carries no `proposer`, so its spent seeds are charged to no party, and a request that played nothing
+# leaves no record of who asked it.
+[[edit]]
+path = "judge/evaluate.py"
+old = "                             \"proposer\": first[rid].get(\"proposer\")}\n"
+new = "                             }\n"
