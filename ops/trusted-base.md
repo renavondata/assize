@@ -52,6 +52,7 @@ session. At this commit no row is.
 | `scope:failed.yml:issues:write` | job token, `failed.yml` (files the issue) | guy-latency | P0z (pins_failure_unrouted) |
 | `scope:failed.yml:actions:read` | job token, `failed.yml` (reads the dead run's jobs and log) | guy-latency | P0z (pins_failure_unrouted) |
 | `scope:failed.yml:pull-requests:read` | job token, `failed.yml` (the conflicts job lists open pull requests and their `mergeable`) | guy-latency | P0aq (conflict_as_clean) |
+| `scope:failed.yml:contents:read` | job token, `failed.yml` (both jobs' `actions/checkout` of `harness`, instruction #162) | guy-latency | P0aw (checkout_without_contents) |
 | `scope:stale.yml:issues:write` | job token, `stale.yml` (files and closes the sweep issue) | guy-latency | P0av (ghost_row_admitted) |
 | `scope:stale.yml:pull-requests:read` | job token, `stale.yml` (lists stuck pull requests) | guy-latency | P0av (ghost_row_admitted) |
 | `scope:measure.yml:contents:read` | job token, `measure.yml` | guy-items | P0av (ghost_row_admitted) |
