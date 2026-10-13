@@ -2,4 +2,4 @@
 [[edit]]
 path = "harness/ledger.py"
 old = "        paired = [(m, mins / len(drawn), got[i] if i < len(got) else None) for i, m in enumerate(drawn)]"
-new = "        paired = [(str(draws[0][\"drawn\"]), mins / len(drawn), got[i] if i < len(got) else None) for i, m in enumerate(drawn)]"
+new = "        paired = [(str((draws or [{\"drawn\": m}])[0][\"drawn\"]), mins / len(drawn), got[i] if i < len(got) else None) for i, m in enumerate(drawn)]"
