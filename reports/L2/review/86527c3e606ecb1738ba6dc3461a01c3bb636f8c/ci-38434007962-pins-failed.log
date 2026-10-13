@@ -1,0 +1,123 @@
+pins	make pins	﻿2026-10-13T16:52:35.9976661Z ##[group]Run make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+pins	make pins	2026-10-13T16:52:35.9977187Z ^[[36;1mmake pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"^[[0m
+pins	make pins	2026-10-13T16:52:36.0039030Z shell: /usr/bin/bash -e {0}
+pins	make pins	2026-10-13T16:52:36.0039700Z env:
+pins	make pins	2026-10-13T16:52:36.0042727Z   GH_TOKEN: ***
+pins	make pins	2026-10-13T16:52:36.0043153Z   PINS_SINCE: --since e5d115886969e86fdd7dff5b97a447de04e7186b --since-run 38428487917
+pins	make pins	2026-10-13T16:52:36.0043676Z ##[endgroup]
+pins	make pins	2026-10-13T16:52:37.7253582Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since e5d115886969e86fdd7dff5b97a447de04e7186b --since-run 38428487917
+pins	make pins	2026-10-13T16:52:37.9235230Z registry harness: 70 pins, 200 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+pins	make pins	2026-10-13T16:52:37.9236857Z [skip  ] P0: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9238889Z [skip  ] P0b: no changed path matches ['**/*.py', '**/*.sh', '**/*.yml', '**/*.yaml', '**/Makefile', '**/Dockerfile', '**/Containerfile'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9241620Z [skip  ] P0c: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9256605Z [skip  ] P0d: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9258344Z [skip  ] P0e: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9260386Z [skip  ] P0f: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9262026Z [skip  ] P0g: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9263845Z [skip  ] P0h: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9266347Z [skip  ] P0i: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9267966Z [skip  ] P0j: no changed path matches ['scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9269812Z [skip  ] P0n: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9271426Z [skip  ] P0o: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9272970Z [skip  ] P0s: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9274515Z [skip  ] P0t: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9276060Z [skip  ] P0u: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9277795Z [skip  ] P0v: no changed path matches ['.github/workflows/review.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9279718Z [skip  ] P0w: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9281467Z [skip  ] P0z: no changed path matches ['.github/workflows/failed.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9283638Z [skip  ] P0aa: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9285239Z [skip  ] P0ab: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9286799Z [skip  ] P0ae: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9288351Z [skip  ] P0af: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9290647Z [skip  ] P0ah: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9292488Z [skip  ] P0ai: no changed path matches ['harness/**', 'docs/briefs/brief-2-nethack.md'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9294415Z [skip  ] P0aj: no changed path matches ['.github/workflows/build.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9296186Z [skip  ] P0as: no changed path matches ['.github/workflows/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9297887Z [skip  ] P0at: no changed path matches ['.github/workflows/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9299885Z [skip  ] P0au: no changed path matches ['.github/workflows/review.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9301878Z [skip  ] P0av: no changed path matches ['.github/workflows/**', '.claude/commands/**', 'ops/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9304014Z [skip  ] P0ao: no changed path matches ['.github/workflows/build.yml', '.github/workflows/review.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9306321Z [skip  ] P0ap: no changed path matches ['.github/workflows/build.yml', '.github/workflows/review.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9308756Z [skip  ] P0ak: no changed path matches ['harness/**', '.github/workflows/build.yml', '.github/workflows/review.yml', '.claude/commands/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9311306Z [skip  ] P0al: no changed path matches ['harness/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9313262Z [skip  ] P0am: no changed path matches ['.github/workflows/review.yml', '.claude/commands/review.md', '.claude/commands/vizier.md'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9315126Z [skip  ] P0an: no changed path matches ['harness/**', '.claude/commands/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9316852Z [skip  ] P0aq: no changed path matches ['harness/**', '.github/workflows/failed.yml'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9318577Z [skip  ] P0aw: no changed path matches ['harness/**', '.github/workflows/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9320471Z [skip  ] P1: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9330834Z [skip  ] P2: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9332834Z [skip  ] P3: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9334928Z [skip  ] P4: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9337275Z [skip  ] P5: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9339239Z [skip  ] P14: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9341423Z [skip  ] P15: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9343608Z [skip  ] P7: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9345598Z [skip  ] P13: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9349147Z [skip  ] P9: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9351409Z [skip  ] P16: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9353445Z [skip  ] P17: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9355503Z [skip  ] P18: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9357659Z [skip  ] P12: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9360537Z [skip  ] P19: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9363335Z [skip  ] P20: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9365360Z [skip  ] P22: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:52:37.9367341Z [skip  ] P23: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:55:16.3099101Z [skip  ] P24: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:55:16.3101684Z [skip  ] P10: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:55:16.3103615Z [skip  ] P6: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:55:16.3105400Z [skip  ] P11: no changed path matches ['judge/**', 'worlds/**', 'incumbents/**', 'pilot/**', 'scripts/**'] since e5d115886969e86fdd7dff5b97a447de04e7186b (run 38428487917)
+pins	make pins	2026-10-13T16:55:16.3106835Z [clean ] P0k: observed pass -> ok (0.44s) out/pins/runs/P0k/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3107814Z [clean ] P0l: observed fail -> FAILED (0.386s) out/pins/runs/P0l/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3108605Z CLEAN FAILED: P0l (observed fail)
+pins	make pins	2026-10-13T16:55:16.3109506Z [clean ] P0m: observed pass -> ok (0.787s) out/pins/runs/P0m/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3110465Z [clean ] P0q: observed pass -> ok (0.485s) out/pins/runs/P0q/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3111763Z [clean ] P0r: observed pass -> ok (0.99s) out/pins/runs/P0r/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3112696Z [clean ] P0x: observed pass -> ok (12.978s) out/pins/runs/P0x/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3113620Z [clean ] P0y: observed pass -> ok (1.689s) out/pins/runs/P0y/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3114519Z [clean ] P0ac: observed pass -> ok (1.039s) out/pins/runs/P0ac/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3115415Z [clean ] P0ad: observed pass -> ok (1.539s) out/pins/runs/P0ad/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3116542Z [clean ] P0ag: observed pass -> ok (1.338s) out/pins/runs/P0ag/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3117432Z [clean ] P0ar: observed pass -> ok (0.536s) out/pins/runs/P0ar/clean/transcript.log
+pins	make pins	2026-10-13T16:55:16.3118684Z [mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3121009Z [mutant] P0k/self_resolution_admitted: mutant fail, twin pass -> KILLED (0.473s + 0.474s) out/pins/runs/P0k/self_resolution_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3122667Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.423s + 0.422s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3123824Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+pins	make pins	2026-10-13T16:55:16.3124903Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.825s + 0.824s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3126506Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.823s + 0.824s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3127999Z [mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.824s + 0.823s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3129759Z [mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.823s + 0.823s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3131737Z [mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.824s + 0.823s) out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3133597Z [mutant] P0m/instruction_author_unchecked: mutant fail, twin pass -> KILLED (0.824s + 0.823s) out/pins/runs/P0m/instruction_author_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3135945Z [mutant] P0m/instruction_label_unchecked: mutant fail, twin pass -> KILLED (0.824s + 0.823s) out/pins/runs/P0m/instruction_label_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3137988Z [mutant] P0m/instruction_labeler_unchecked: mutant fail, twin pass -> KILLED (0.823s + 0.824s) out/pins/runs/P0m/instruction_labeler_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3140156Z [mutant] P0m/body_edit_unchecked: mutant fail, twin pass -> KILLED (0.83s + 0.824s) out/pins/runs/P0m/body_edit_unchecked/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3142700Z [mutant] P0m/inert_exemption_admitted: mutant fail, twin pass -> KILLED (0.774s + 0.824s) out/pins/runs/P0m/inert_exemption_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3144611Z [mutant] P0q/ledger_rewrite_admitted: mutant fail, twin pass -> KILLED (0.523s + 0.572s) out/pins/runs/P0q/ledger_rewrite_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3146345Z [mutant] P0q/draws_not_append_only: mutant fail, twin pass -> KILLED (0.523s + 0.528s) out/pins/runs/P0q/draws_not_append_only/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3148023Z [mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (1.023s + 1.075s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3149975Z [mutant] P0x/price_line_dropped: mutant fail, twin pass -> KILLED (12.56s + 13.11s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3151856Z [mutant] P0x/none_on_workflow_admitted: mutant fail, twin pass -> KILLED (13.916s + 12.762s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3153932Z [mutant] P0x/scoped_by_number: mutant fail, twin pass -> KILLED (12.613s + 12.266s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3155799Z [mutant] P0y/split_trailer_block_admitted: mutant fail, twin pass -> KILLED (1.828s + 1.777s) out/pins/runs/P0y/split_trailer_block_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3157685Z [mutant] P0y/hook_unconditioned: mutant fail, twin pass -> KILLED (1.728s + 1.776s) out/pins/runs/P0y/hook_unconditioned/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3160064Z [mutant] P0ac/instruction_without_because_admitted: mutant fail, twin pass -> KILLED (1.026s + 1.025s) out/pins/runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3162069Z [mutant] P0ac/both_forms_admitted: mutant fail, twin pass -> KILLED (0.977s + 0.925s) out/pins/runs/P0ac/both_forms_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3163594Z [mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (1.627s + 1.626s) out/pins/runs/P0ad/seal_after_act/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3165302Z [mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (1.629s + 1.63s) out/pins/runs/P0ad/seal_same_commit_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3167153Z [mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (1.629s + 1.678s) out/pins/runs/P0ad/candidate_omitted_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3169045Z [mutant] P0ad/deleted_status_read: mutant fail, twin pass -> KILLED (1.226s + 1.678s) out/pins/runs/P0ad/deleted_status_read/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3171040Z [mutant] P0ag/regime_after_seed: mutant fail, twin pass -> KILLED (1.427s + 1.426s) out/pins/runs/P0ag/regime_after_seed/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3172683Z [mutant] P0ag/seed_after_act_admitted: mutant fail, twin pass -> KILLED (1.427s + 1.426s) out/pins/runs/P0ag/seed_after_act_admitted/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3174277Z [mutant] P0ar/forecasts_shared: mutant fail, twin pass -> KILLED (0.575s + 0.573s) out/pins/runs/P0ar/forecasts_shared/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3175925Z [mutant] P0ar/status_shared: mutant fail, twin pass -> KILLED (0.574s + 0.627s) out/pins/runs/P0ar/status_shared/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3177556Z [mutant] P0ar/registry_frozen_only: mutant fail, twin pass -> KILLED (0.625s + 0.575s) out/pins/runs/P0ar/registry_frozen_only/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3179159Z [mutant] P0ar/status_by_date: mutant fail, twin pass -> KILLED (0.625s + 0.624s) out/pins/runs/P0ar/status_by_date/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3180963Z [mutant] P0ar/duplicate_overrides: mutant fail, twin pass -> KILLED (0.624s + 0.589s) out/pins/runs/P0ar/duplicate_overrides/mutant/transcript.log
+pins	make pins	2026-10-13T16:55:16.3182093Z clean: 10/11 passed, 1/11 failed
+pins	make pins	2026-10-13T16:55:16.3182990Z mutants: 33/34 killed, 0/34 survived, 0/34 inconclusive, 0/34 stale, 1/34 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-13T16:55:16.3183909Z twins: 33/34 passed
+pins	make pins	2026-10-13T16:55:16.3184462Z skipped: 59/70 pins, 166 mutants since e5d1158 (run 38428487917)
+pins	make pins	2026-10-13T16:55:16.3185131Z report: out/pins/pins.jsonl
+pins	make pins	2026-10-13T16:55:16.3185605Z PINS FAILED
+pins	make pins	2026-10-13T16:55:16.3270977Z make: *** [Makefile:24: pins] Error 1
+pins	make pins	2026-10-13T16:55:16.3290692Z ##[error]Process completed with exit code 2.
