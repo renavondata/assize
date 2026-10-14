@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-181-obligations-44-55 (instruction #181, Wish #179): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "02147ce1-fc95-451f-8721-4b19396f801c"
