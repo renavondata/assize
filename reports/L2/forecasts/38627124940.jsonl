@@ -1,0 +1,3 @@
+{"id": "390ae27e9af4", "ts": "2026-10-14T20:16:13Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38627124940"}, "outcome": true, "witness": "reports/L2/review-d3bed1857d0a5edf3adcfe2cc471dd991868b902.md at d9cc203b63e1: ACCEPT"}
+{"id": "f5facda34330", "ts": "2026-10-14T20:16:13Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38627124940"}, "outcome": false, "witness": "run 38613309035: 98.0 minutes, bound 40"}
+{"id": "ee74069c2b6d", "ts": "2026-10-14T20:25:10Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38627124940"}, "outcome": false, "witness": "pins run 38627114916 attempt 1 on 306b313cd5e9: failure"}
