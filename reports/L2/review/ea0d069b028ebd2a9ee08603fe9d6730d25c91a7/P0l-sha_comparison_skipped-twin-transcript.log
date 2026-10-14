@@ -1,0 +1,31 @@
+copy of /tmp/rv185/repo
+  at /tmp/assize-scratch-sk90te8l/assize-copy-rfpgp0nu/repo
+twin: no edits applied
+pin:       P0l
+protects:  a verdict citing a pins run on another sha, or one not concluded success, is rejected
+role:      twin
+tree:      /tmp/assize-scratch-sk90te8l/assize-copy-rfpgp0nu/repo
+invoked:   /tmp/rv185/repo
+scratch:   /tmp/assize-scratch-sk90te8l
+  [ok] STATUS cites a successful pins run on its own sha: findings [], want []
+  [ok] STATUS cites a run on an older sha: findings ['head_mismatch'], want ['head_mismatch']
+  [ok] STATUS cites a failed run: findings ['not_success'], want ['not_success']
+  [ok] STATUS STOPPED, cites a failed run on its own sha: findings [], want []
+  [ok] STATUS cites no run: findings ['uncited'], want ['uncited']
+  [ok] STATUS cites an unrecorded run: findings ['unrecorded'], want ['unrecorded']
+  [ok] STATUS cites a measure run: findings ['not_pins'], want ['not_pins']
+  [ok] STATUS cites a run under the wrong sha: findings ['citation_mismatch'], want ['citation_mismatch']
+  [ok] REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({('REPORT:3', 'citation_mismatch'), ('REPORT:4', 'uncited'), ('REPORT:3', 'head_mismatch')})
+  [ok] real STATUS files from L1: ['reports/L1/STATUS.md', 'reports/L2/STATUS.md', 'reports/L2/status/instr-113-w2-rebuild.md', 'reports/L2/status/instr-135-per-pr-files.md', 'reports/L2/status/instr-139-models-price-2.md', 'reports/L2/status/instr-140-fable-build-election.md', 'reports/L2/status/instr-162-checkout-contents.md', 'reports/L2/status/l2a-o3-replay-checked.md', 'reports/L2/status/l2a-o4-interrupted-recorded.md', 'reports/L2/status/l2a-o5-episode-guard.md']; 85 committed run records
+  [ok] reports/L1/STATUS.md: cites [('37840644452', '25f36e6')]; findings []
+  [ok] reports/L2/STATUS.md: cites [('38277028583', 'cb9b1c6')]; findings []
+  [FAIL] reports/L2/status/instr-113-w2-rebuild.md: cites [('38488487077', '31c9f20'), ('38428487917', 'e5d1158')]; findings ['reports/L2/status/instr-113-w2-rebuild.md: head_mismatch: run 38428487917 ran on e5d115886969e86fdd7dff5b97a447de04e7186b; the verdict names 31c9f20']
+  [ok] reports/L2/status/instr-135-per-pr-files.md: cites [('38296279268', 'd0c7a88')]; findings []
+  [ok] reports/L2/status/instr-139-models-price-2.md: cites [('38348646803', '9f59867')]; findings []
+  [ok] reports/L2/status/instr-140-fable-build-election.md: cites [('38345714403', '41682c2')]; findings []
+  [ok] reports/L2/status/instr-162-checkout-contents.md: cites [('38333955051', '961f77a')]; findings []
+  [ok] reports/L2/status/l2a-o3-replay-checked.md: cites [('38336299013', 'eaed455')]; findings []
+  [ok] reports/L2/status/l2a-o4-interrupted-recorded.md: cites [('38359040477', '38aa0e3')]; findings []
+  [ok] reports/L2/status/l2a-o5-episode-guard.md: cites [('38399300458', '1da5f51')]; findings []
+  [ok] REPORT.md: 1 verdict lines from L1; findings []
+result:    FAIL
