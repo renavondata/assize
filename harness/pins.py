@@ -4480,6 +4480,69 @@ def p27_sum_tolerance() -> bool:
     return ok()
 
 
+# P28's fixture (brief 2 A2, L2a obligation 11): a seeded stream of observations of one target over this support.
+MISSING_SEED, MISSING_STEPS, MISSING_SUPPORT = 11, 40, (0, 1, 2)
+
+
+def p28_missing_priced() -> bool:
+    """Missing predictions are priced in comparisons: two candidates' log-losses on a target are compared per step over
+    every completed step, a missing one at +inf. On a seeded stream, a candidate that predicts only at the steps where
+    it is certain and right (loss 0) and omits the rest has a lower log-loss per scored step than the predictive floor,
+    yet does not beat the floor, and the floor beats it; the same candidate predicting the floor where it had omitted
+    beats the floor, so the comparison can be won; two candidates with missing steps tie. Every row is scored by the
+    judge's own `step_losses` and `summary` (brief 2 A2, L2a obligation 11; review c2a87f6478ad F4)."""
+    import random
+
+    from judge import scoring
+
+    expect, ok = _expecter()
+    rng = random.Random(MISSING_SEED)
+    target = {"name": "t", "field": "v", "support": list(MISSING_SUPPORT)}
+    obs = [{"v": rng.choice(MISSING_SUPPORT)} for _ in range(MISSING_STEPS + 1)]
+    n = len(MISSING_SUPPORT)
+
+    def floor(i: int) -> list[float]:
+        seen = [o["v"] for o in obs[:i + 1]]
+        return [(1 + seen.count(v)) / (n + i + 1) for v in MISSING_SUPPORT]
+
+    def certain(i: int) -> list[float]:
+        return [float(v == obs[i + 1]["v"]) for v in MISSING_SUPPORT]
+
+    known = {i for i in range(MISSING_STEPS) if i % 2 == 0}
+
+    def row(predict) -> dict:
+        steps = [scoring.step_losses({} if p is None else {"t": p}, [target], obs[i + 1])
+                 for i, p in ((i, predict(i)) for i in range(MISSING_STEPS))]
+        return scoring.summary(steps, [target])["t"]
+
+    fl = row(floor)
+    selective = row(lambda i: certain(i) if i in known else None)
+    honest = row(lambda i: certain(i) if i in known else floor(i))
+    sparse = row(lambda i: floor(i) if i in known else None)
+    expect(fl["scored"] == MISSING_STEPS and fl["missing"] == 0 and fl["infinite"] == 0 and fl["finite_sum"] > 0,
+           f"non-vacuous: the floor scores all {MISSING_STEPS} steps finite, summing {fl['finite_sum']}")
+    expect(selective["scored"] == len(known) and selective["missing"] == MISSING_STEPS - len(known)
+           and selective["finite_sum"] == 0 and selective["infinite"] == 0,
+           f"non-vacuous: the selective candidate scores {selective['scored']} steps at loss 0 and omits "
+           f"{selective['missing']}")
+    expect(selective["finite_sum"] / selective["scored"] < fl["finite_sum"] / fl["scored"],
+           "non-vacuous: per scored step the selective candidate's log-loss is below the floor's")
+    expect(scoring.per_step(selective) == math.inf,
+           f"the selective candidate's log-loss per completed step is +inf ({scoring.per_step(selective)})")
+    expect(not scoring.beats(selective, fl), "the selective candidate does not beat the floor")
+    expect(scoring.beats(fl, selective), "the floor beats the selective candidate")
+    expect(scoring.beats(honest, fl) and not scoring.beats(fl, honest),
+           f"the candidate predicting the floor where it had omitted beats it: "
+           f"{scoring.per_step(honest)} < {scoring.per_step(fl)}")
+    expect(not scoring.beats(selective, sparse) and not scoring.beats(sparse, selective),
+           "two candidates with missing steps tie")
+    expect(not scoring.beats(fl, fl), "a candidate does not beat itself")
+    empty = {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0}
+    expect(scoring.per_step(empty) is None and not scoring.beats(empty, fl) and not scoring.beats(fl, empty),
+           "a target with no step compares with nothing")
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5516,6 +5579,9 @@ PINS = [
                "invalid, one bound in and an adversarially summed softmax are scored",
         p27_sum_tolerance, (Mutant("tolerance_loose", _edits("P27_tolerance_loose")),
                             Mutant("tolerance_zero", _edits("P27_tolerance_zero"))), JUDGE_SIDE),
+    Pin("P28", "missing predictions are priced in comparisons: a candidate predicting only its 0-loss steps does not "
+               "beat the floor",
+        p28_missing_priced, (Mutant("scored_only", _edits("P28_scored_only")),), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

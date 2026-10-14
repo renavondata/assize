@@ -1,0 +1,14 @@
+# P28's mutant `scored_only` (brief 2 A2, L2a obligation 11; review c2a87f6478ad F4): the comparison runs over the
+# scored steps only, so a candidate predicting only its 0-loss steps and omitting the rest beats the floor.
+[[edit]]
+path = "judge/scoring.py"
+old = """    steps = row["scored"] + row["missing"]
+    if not steps:
+        return None
+    return math.inf if row["infinite"] or row["missing"] else row["finite_sum"] / steps
+"""
+new = """    steps = row["scored"]
+    if not steps:
+        return None
+    return math.inf if row["infinite"] else row["finite_sum"] / steps
+"""
