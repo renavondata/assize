@@ -1,0 +1,20 @@
+copy of /tmp/rv198
+  at /tmp/assize-scratch-6kkttpop/assize-copy-084heglt/repo
+applied 1 edit(s) from harness/edits/P28_scored_only.toml
+pin:       P28
+protects:  missing predictions are priced in comparisons: a candidate predicting only its 0-loss steps does not beat the floor
+role:      mutant
+tree:      /tmp/assize-scratch-6kkttpop/assize-copy-084heglt/repo
+invoked:   /tmp/rv198
+scratch:   /tmp/assize-scratch-6kkttpop
+  [ok] non-vacuous: the floor scores all 40 steps finite, summing 45.53514973215133
+  [ok] non-vacuous: the selective candidate scores 20 steps at loss 0 and omits 20
+  [ok] non-vacuous: per scored step the selective candidate's log-loss is below the floor's
+  [FAIL] the selective candidate's log-loss per completed step is +inf (0.0)
+  [FAIL] the selective candidate does not beat the floor
+  [FAIL] the floor beats the selective candidate
+  [ok] the candidate predicting the floor where it had omitted beats it: 0.5668919493215391 < 1.1383787433037833
+  [FAIL] two candidates with missing steps tie
+  [ok] a candidate does not beat itself
+  [ok] a target with no step compares with nothing
+result:    FAIL

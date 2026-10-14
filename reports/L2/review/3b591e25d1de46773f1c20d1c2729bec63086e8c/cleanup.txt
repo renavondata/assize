@@ -1,0 +1,15 @@
+Reviewer cleanup witness, review run 38641901417, after removing the scratch worktrees /tmp/rv198 (make pins) and /tmp/rv198-probe (P28 probes) and /tmp/rv198-out, /tmp/rv198-scripts:
+
+$ git worktree list
+/home/g/Downloads/actions-runner/_work/assize/assize 3b591e2 [l2a-o11-missing-priced]
+
+$ ls -d /tmp/rv198*
+ls: cannot access '/tmp/rv198*': No such file or directory
+
+$ pgrep -af 'harness run|rv198' | grep -v pgrep
+(no output, exit 1)
+
+$ podman ps -a --format '{{.Names}} {{.Status}} {{.Created}}'
+20 containers, every one created before this session started (2026-10-14T21:40:12Z); the only assize one is
+assize-candidate-726687a7c95041c8 Created 2026-10-13 03:52:41 +0800, a day before this review. The others are unrelated
+services on the host (tuwunel, mautrix-whatsapp, rssfeed, photoprism, ...). The make pins run reported 0 leaked.

@@ -1,0 +1,6 @@
+pins-master completed failure 38641902317 pull_request_target https://github.com/renavondata/assize/actions/runs/38641902317
+review in_progress null 38641901417 pull_request https://github.com/renavondata/assize/actions/runs/38641901417
+measure completed skipped 38641901397 pull_request https://github.com/renavondata/assize/actions/runs/38641901397
+build completed skipped 38641901291 pull_request https://github.com/renavondata/assize/actions/runs/38641901291
+pins-master completed cancelled 38641895607 pull_request_target https://github.com/renavondata/assize/actions/runs/38641895607
+pins completed success 38641895316 pull_request https://github.com/renavondata/assize/actions/runs/38641895316
