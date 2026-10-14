@@ -1,0 +1,31 @@
+copy of /home/g/git/worktrees/assize/review-191-2e86807
+  at /tmp/assize-scratch-ar3_8kkl/assize-copy-q3xtprwy/repo
+applied 1 edit(s) from harness/edits/P25_verify_unchecked.toml
+pin:       P25
+protects:  judge-private storage is refused when any file in it, not only its directory, has a group or other bit; the registry, the seed store and verify all refuse
+role:      mutant
+tree:      /tmp/assize-scratch-ar3_8kkl/assize-copy-q3xtprwy/repo
+invoked:   /home/g/git/worktrees/assize/review-191-2e86807
+scratch:   /tmp/assize-scratch-ar3_8kkl
+  [ok] registry: file 0644 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/registry-file-0644/x.jsonl is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] seed store: file 0644 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/seed-store-file-0644/x.jsonl is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [FAIL] verify: file 0644 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] registry: file 0640 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/registry-file-0640/x.jsonl is mode 640, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] seed store: file 0640 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/seed-store-file-0640/x.jsonl is mode 640, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [FAIL] verify: file 0640 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] registry: file 0604 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/registry-file-0604/x.jsonl is mode 604, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] seed store: file 0604 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/seed-store-file-0604/x.jsonl is mode 604, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [FAIL] verify: file 0604 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] registry: signing key 0644 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/registry-signing-key-0644/key is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] seed store: signing key 0644 refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/seed-store-signing-key-0644/key is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [FAIL] verify: signing key 0644 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] registry: file 0660 below a subdirectory refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/registry-file-0660-below-a-subdirectory/sub/y.jsonl is mode 660, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] seed store: file 0660 below a subdirectory refused not_private, naming the file (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/seed-store-file-0660-below-a-subdirectory/sub/y.jsonl is mode 660, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [FAIL] verify: file 0660 below a subdirectory is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] registry: a link refused not_private (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/registry-link/l is mode 777, owner 1000, a link; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] seed store: a link refused not_private (not_private: /tmp/assize-scratch-ar3_8kkl/assize-p25-v_o3i7z5/seed-store-link/l is mode 777, owner 1000, a link; judge-private storage is 0700 and the judge's own, and so is every file in it)
+  [ok] registry: 0700 directory and 0600 file accepted
+  [ok] seed store: 0700 directory and 0600 file accepted
+  [ok] verify: clean storage raises no storage finding (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] the judge creates heads.jsonl 0600, not 0o600
+result:    FAIL

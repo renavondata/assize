@@ -1,0 +1,31 @@
+copy of /home/g/git/worktrees/assize/review-191-2e86807
+  at /tmp/assize-scratch-5s05y67f/assize-copy-1ph054j5/repo
+applied 1 edit(s) from harness/edits/P25_entries_unchecked.toml
+pin:       P25
+protects:  judge-private storage is refused when any file in it, not only its directory, has a group or other bit; the registry, the seed store and verify all refuse
+role:      mutant
+tree:      /tmp/assize-scratch-5s05y67f/assize-copy-1ph054j5/repo
+invoked:   /home/g/git/worktrees/assize/review-191-2e86807
+scratch:   /tmp/assize-scratch-5s05y67f
+  [FAIL] registry: file 0644 accepted
+  [FAIL] seed store: file 0644 accepted
+  [FAIL] verify: file 0644 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [FAIL] registry: file 0640 accepted
+  [FAIL] seed store: file 0640 accepted
+  [FAIL] verify: file 0640 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [FAIL] registry: file 0604 accepted
+  [FAIL] seed store: file 0604 accepted
+  [FAIL] verify: file 0604 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [FAIL] registry: signing key 0644 accepted
+  [FAIL] seed store: signing key 0644 accepted
+  [FAIL] verify: signing key 0644 is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [FAIL] registry: file 0660 below a subdirectory accepted
+  [FAIL] seed store: file 0660 below a subdirectory accepted
+  [FAIL] verify: file 0660 below a subdirectory is the only finding, as 'private storage is not the judge's own' (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [FAIL] registry: a link accepted
+  [FAIL] seed store: a link accepted
+  [ok] registry: 0700 directory and 0600 file accepted
+  [ok] seed store: 0700 directory and 0600 file accepted
+  [ok] verify: clean storage raises no storage finding (['the anchor no-anchor is the head of no signed request of l.jsonl'])
+  [ok] the judge creates heads.jsonl 0600, not 0o600
+result:    FAIL

@@ -18,9 +18,10 @@ import json
 import os
 import re
 import secrets
-import stat
 from collections.abc import Mapping
 from pathlib import Path
+
+from judge import private as storage
 
 KINDS = ("builder", "reviewer", "guy", "counsel")
 CREDENTIALS = "credentials.jsonl"
@@ -37,10 +38,9 @@ class Refused(Exception):
 
 def _private(path: Path) -> Path:
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
-    st = path.stat()
-    if st.st_uid != os.getuid() or stat.S_IMODE(st.st_mode) & 0o077:
-        raise Refused("not_private", f"{path} is mode {stat.S_IMODE(st.st_mode):o}, owner {st.st_uid}; "
-                                     f"judge-private storage is 0700 and the judge's own")
+    if found := storage.findings(path):
+        raise Refused("not_private", f"{'; '.join(found)}; judge-private storage is 0700 and the judge's own, "
+                                     f"and so is every file in it")
     return path
 
 

@@ -1,0 +1,6 @@
+# P25's mutant `entries_unchecked` (brief 2 A2, L2a obligation 6; review 02a71436d9ff F3): only the storage directory's
+# own mode is examined, so a 0644 file in a 0700 directory is accepted by every site that shares the rule.
+[[edit]]
+path = "judge/private.py"
+old = "    entries = [path, *sorted(path.rglob(\"*\"))]\n"
+new = "    entries = [path]\n"

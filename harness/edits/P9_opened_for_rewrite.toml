@@ -2,5 +2,5 @@
 # request is written over the start of the file instead of after its end.
 [[edit]]
 path = "judge/ledger.py"
-old = '    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)'
-new = '    fd = os.open(path, os.O_WRONLY | os.O_CREAT, 0o644)'
+old = '    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, mode)'
+new = '    fd = os.open(path, os.O_WRONLY | os.O_CREAT, mode)'
