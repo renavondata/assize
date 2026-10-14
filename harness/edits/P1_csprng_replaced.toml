@@ -1,0 +1,11 @@
+# P1's mutant `csprng_replaced` (review 9d8e7336a6b9 F1, L2a obligation 7): evaluation seeds are drawn from a
+# fixed-seed Mersenne Twister, predictable by anyone who reads the repository, instead of `secrets`.
+[[edit]]
+path = "judge/seeds.py"
+old = "import secrets\n"
+new = "import random\nimport secrets\n\n_RNG = random.Random(0)\n"
+
+[[edit]]
+path = "judge/seeds.py"
+old = "        s = secrets.randbelow(SEED_SPACE)\n"
+new = "        s = _RNG.randrange(SEED_SPACE)\n"

@@ -1,0 +1,30 @@
+copy of /home/g/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-61wx2enc/assize-copy-doy3zn1n/repo
+applied 2 edit(s) from harness/edits/P1_csprng_replaced.toml
+pin:       P1
+protects:  evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds
+role:      mutant
+tree:      /tmp/assize-scratch-61wx2enc/assize-copy-doy3zn1n/repo
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-61wx2enc
+    request-a: [827307999, 1627694678, 1911784257, 903170602, 86939546]
+  [ok] request-a: 5 seeds issued
+    request-b: [1097954097, 1971893209, 2078334659, 1023484162, 1914826684]
+  [ok] request-b: 5 seeds issued
+  [FAIL] every issued seed is a draw of secrets.randbelow(SEED_SPACE) (10 of 10 are not; 0 draws)
+  [ok] 10 issued seeds have 10 distinct World keys
+  [ok] every issued seed is keyed in the evaluation domain (odd)
+  [ok] the store records exactly the issued seeds, in order (10 records)
+  [ok] store directory and file modes 0o700, 0o600
+  [ok] admit([827307999], 'request-c') refused reused, store unchanged (got reused)
+  [ok] admit([1914826684], 'request-d') refused reused, store unchanged (got reused)
+  [ok] admit([0, 0], 'request-e') refused reused, store unchanged (got reused)
+  [ok] admit([0], 'request-a') refused request_reused, store unchanged (got request_reused)
+  [ok] admit([981350210], 'request-f') refused training_domain, store unchanged (got training_domain)
+  [ok] admit([2147483647], 'request-g') refused out_of_space, store unchanged (got out_of_space)
+    training stream: [981350210, 687390719, 1992916002, 459903054, 1498119378]
+  [ok] the training stream is deterministic and its keys distinct
+  [ok] every training seed is keyed in the training domain (even)
+  [ok] no training seed's key is an issued seed's key
+  [ok] a store directory of mode 755 refused not_private (got not_private)
+result:    FAIL
