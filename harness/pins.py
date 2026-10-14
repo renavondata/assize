@@ -506,6 +506,29 @@ def p0l_ci_claims() -> bool:
     lines = [m for m in claims.VERDICT_LINE.finditer(text) if int(m.group(1)) >= 1]
     got = claims.report_findings("REPORT.md", text, runs, 1)
     expect(not got, f"REPORT.md: {len(lines)} verdict lines from L1; findings {[str(f) for f in got]}")
+
+    # Wish #179 (instruction #181): the disposition of L1 obligations 44-55.
+    registry = {p.name: frozenset(p.label(m) for m in p.mutants) for p in PINS}
+    carried = "carried to the agent repository as a design input: x"
+    good = f"discharged by P0l (instruction #1); mutant P0l/sha_comparison_skipped; pins CI run 1 on {a}: x"
+    table = lambda **over: "\n".join(f"{i}. {over.get(f'n{i}', carried)}" for i in range(44, 56) if f"n{i}" not in over
+                                      or over[f"n{i}"] is not None)
+    for label, text, want in (
+            ("every row carried", table(), set()),
+            ("one row discharged by a registry pin and mutant", table(n45=good), set()),
+            ("a number missing", table(n50=None), {"missing"}),
+            ("a number twice", table() + f"\n47. {carried}", {"duplicate"}),
+            ("both dispositions", table(n46=f"{good} and {carried}"), {"disposition"}),
+            ("neither disposition", table(n47="x"), {"disposition"}),
+            ("a nonexistent pin", table(n48=good.replace("P0l (", "P0zz (").replace("P0l/", "P0zz/")), {"not_in_registry"}),
+            ("a nonexistent mutant", table(n49=good.replace("sha_comparison_skipped", "nope")), {"not_in_registry"}),
+            ("no CI run cited", table(n51=good.split("; pins CI")[0]), {"discharge_uncited"})):
+        got = {f.code for f in claims.obligation_findings("fixture", text, registry, 44, 55)}
+        expect(got == want, f"obligations table {label}: findings {sorted(got)}, want {sorted(want)}")
+    path = root / "reports" / "L2" / "obligations-44-55.md"
+    expect(path.exists(), "reports/L2/obligations-44-55.md exists")
+    got = claims.obligation_findings(str(path.relative_to(root)), path.read_text() if path.exists() else "", registry, 44, 55)
+    expect(not got, f"reports/L2/obligations-44-55.md: findings {[str(f) for f in got]}")
     return ok()
 
 
@@ -4864,7 +4887,8 @@ PINS = [
         p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),
                               Mutant("self_resolution_admitted", _edits("P0k_self_resolution_admitted"))), ALWAYS),
     Pin("P0l", "a verdict citing a pins run on another sha, or one not concluded success, is rejected",
-        p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),), ALWAYS),
+        p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),
+                        Mutant("obligation_registry_skipped", _edits("P0l_obligation_registry_skipped"))), ALWAYS),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
         "every party is read",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
