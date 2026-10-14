@@ -1,0 +1,6 @@
+# P26's mutant `key_version_ignored` (brief 2 A2, L2a obligation 8; review 9d8e7336a6b9 F2): the issuance check compares
+# a seed's key with every earlier record's, whichever interpreter version computed that record's key.
+[[edit]]
+path = "judge/seeds.py"
+old = "        if foreign:\n"
+new = "        if []:\n"

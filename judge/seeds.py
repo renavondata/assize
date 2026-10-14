@@ -18,7 +18,9 @@ import fcntl
 import hashlib
 import json
 import os
+import platform
 import secrets
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
@@ -26,6 +28,9 @@ from judge import private as storage
 
 SEED_SPACE = 2**31 - 1  # Crafter's own default seed range, [0, 2**31 - 1)
 EVAL, TRAIN = 1, 0  # a key's domain is its parity
+# A key is computed by the interpreter (CPython's tuple hash, for Crafter), which does not promise the same key across
+# versions. Every record states the interpreter that computed its key, and keys are compared only under one.
+KEY_VERSION = f"{sys.implementation.name}-{platform.python_version()}"
 TRAIN_TAG = b"assize/training-seeds/"
 
 Key = Callable[[int], int]
@@ -80,8 +85,9 @@ def admit(root: Path, world: str, key: Key, seeds: Sequence[int], request_id: st
           issued_to: Mapping = {}) -> list[int]:
     """The issuance check. Refuses the whole request, recording nothing, if any seed is outside the seed space,
     keyed outside the evaluation domain, keyed like an earlier issued seed or another seed of this request, or if
-    `request_id` was used before; otherwise appends one record per seed, carrying `issued_to` (the image and proposer
-    the seeds are issued to), and syncs. Returns the seeds."""
+    `request_id` was used before, or if any earlier record's key was computed under another interpreter version
+    (`key_version`, a record without one included); otherwise appends one record per seed, carrying `issued_to` (the
+    image and proposer the seeds are issued to) and `key_version`, and syncs. Returns the seeds."""
     p = store_path(root, world)
     fd = os.open(p, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
     try:
@@ -89,6 +95,10 @@ def admit(root: Path, world: str, key: Key, seeds: Sequence[int], request_id: st
         past = records(root, world)
         if any(r["request_id"] == request_id for r in past):
             raise SeedError("request_reused", f"request {request_id!r} already has seeds")
+        foreign = sorted({str(r.get("key_version")) for r in past} - {KEY_VERSION})
+        if foreign:
+            raise SeedError("key_version", f"the store holds keys computed under {foreign}, not {KEY_VERSION}; "
+                                           f"keys are not comparable across interpreter versions")
         used = {r["key"] for r in past}
         bad = [s for s in seeds if not (type(s) is int and 0 <= s < SEED_SPACE)]
         if bad:
@@ -102,7 +112,8 @@ def admit(root: Path, world: str, key: Key, seeds: Sequence[int], request_id: st
             raise SeedError("reused", f"{bad} were issued before")
         if len({k for _, k in keyed}) != len(keyed):
             raise SeedError("reused", f"{list(seeds)} repeat a key within request {request_id!r}")
-        os.write(fd, b"".join(json.dumps(dict(issued_to) | {"request_id": request_id, "seed": s, "key": k},
+        os.write(fd, b"".join(json.dumps(dict(issued_to) | {"request_id": request_id, "seed": s, "key": k,
+                                                                 "key_version": KEY_VERSION},
                                          sort_keys=True).encode()
                               + b"\n" for s, k in keyed))
         os.fsync(fd)

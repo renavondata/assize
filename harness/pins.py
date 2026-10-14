@@ -4373,6 +4373,50 @@ def p25_private_files() -> bool:
     return ok()
 
 
+def p26_seed_key_version() -> bool:
+    """Every seed record states the interpreter version that computed its key, and `admit` refuses, recording nothing,
+    to compare keys across versions: a store written under this version admits the next request; the same store with
+    one record rewritten under another version tag, or with the tag removed, refuses `key_version` and is left
+    unchanged (brief 2 A2, L2a obligation 8; review 9d8e7336a6b9 F2)."""
+    from judge import seeds
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    key, world = binding.world_seed, "crafter"
+    work = Path(tempfile.mkdtemp(prefix="assize-p26-", dir=context.scratch))
+    try:
+        def store(label: str) -> tuple[Path, Path]:
+            root = work / label
+            seeds.issue(root, world, key, 2, "request-a")
+            return root, root / f"{world}.seeds.jsonl"
+
+        root, path = store("current")
+        recs = seeds.records(root, world)
+        expect(len(recs) == 2 and all(r.get("key_version") == seeds.KEY_VERSION for r in recs),
+               f"each record states key_version {seeds.KEY_VERSION!r} ({[r.get('key_version') for r in recs]})")
+        try:
+            got = seeds.issue(root, world, key, 1, "request-b")
+        except seeds.SeedError as e:
+            got = e.code
+        expect(isinstance(got, list) and len(got) == 1, f"a store of one version admits the next request (got {got})")
+
+        for label, edit in (("another version", lambda r: r | {"key_version": "cpython-0.0.0"}),
+                            ("no version", lambda r: {k: v for k, v in r.items() if k != "key_version"})):
+            root, path = store(label)
+            lines = [json.loads(line) for line in path.read_text().splitlines()]
+            path.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in [edit(lines[0]), *lines[1:]]))
+            before = path.read_bytes()
+            try:
+                got = seeds.issue(root, world, key, 1, "request-b")
+            except seeds.SeedError as e:
+                got = e.code
+            expect(got == "key_version" and path.read_bytes() == before,
+                   f"a store with one record under {label} refused key_version, store unchanged (got {got})")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5402,6 +5446,9 @@ PINS = [
         p25_private_files, (Mutant("entries_unchecked", _edits("P25_entries_unchecked")),
                             Mutant("verify_unchecked", _edits("P25_verify_unchecked")),
                             Mutant("heads_world_readable", _edits("P25_heads_world_readable"))), JUDGE_SIDE),
+    Pin("P26", "a seed record states the interpreter version that computed its key, and the issuance check refuses "
+               "to compare keys across versions",
+        p26_seed_key_version, (Mutant("key_version_ignored", _edits("P26_key_version_ignored")),), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

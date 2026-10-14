@@ -1,0 +1,14 @@
+copy of /home/g/git/worktrees/assize/review-195-90175c3
+  at /tmp/assize-scratch-5t0pyhch/assize-copy-wb8yx4kr/repo
+applied 1 edit(s) from harness/edits/P26_key_version_ignored.toml
+pin:       P26
+protects:  a seed record states the interpreter version that computed its key, and the issuance check refuses to compare keys across versions
+role:      mutant
+tree:      /tmp/assize-scratch-5t0pyhch/assize-copy-wb8yx4kr/repo
+invoked:   /home/g/git/worktrees/assize/review-195-90175c3
+scratch:   /tmp/assize-scratch-5t0pyhch
+  [ok] each record states key_version 'cpython-3.11.11' (['cpython-3.11.11', 'cpython-3.11.11'])
+  [ok] a store of one version admits the next request (got [677559846])
+  [FAIL] a store with one record under another version refused key_version, store unchanged (got [2012840208])
+  [FAIL] a store with one record under no version refused key_version, store unchanged (got [1789022447])
+result:    FAIL
