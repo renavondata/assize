@@ -1,0 +1,205 @@
+pins-master	UNKNOWN STEP	﻿2026-10-14T15:27:34.9512944Z Current runner version: '2.337.0'
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9542178Z ##[group]Runner Image Provisioner
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9543152Z Hosted Compute Agent
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9543786Z Version: 20261002.596
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9544391Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9545068Z Build Date: 2026-10-02T22:28:27Z
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9545849Z Worker ID: {155d2390-3036-423d-9d43-764f2b77091d}
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9546551Z Region: westus3
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9547247Z Cloud: Azure
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9547843Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9549360Z ##[group]Operating System
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9550035Z Ubuntu
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9550627Z 24.04.5
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9551087Z LTS
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9551641Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9552156Z ##[group]Runner Image
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9552793Z Image: ubuntu-24.04
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9553384Z Version: 20261004.327.1
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9554727Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9556241Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9557538Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9558962Z ##[group]GITHUB_TOKEN Permissions
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9561432Z Actions: read
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9561995Z Contents: read
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9562510Z Issues: read
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9563112Z Metadata: read
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9563659Z PullRequests: read
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9564240Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9566832Z Secret source: Actions
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9567671Z Cache mode: read
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9568498Z Prepare workflow directory
+pins-master	UNKNOWN STEP	2026-10-14T15:27:34.9928751Z Prepare all required actions
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.0006140Z Getting action download info
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.3583710Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.4921402Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.7975043Z Complete job name: pins-master
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8592964Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8593540Z with:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8593884Z   ref: cd59c804cbf70e048942d0414cf84b02c4a2818c
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8594247Z   persist-credentials: false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8594544Z   fetch-depth: 0
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8594815Z   repository: renavondata/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8597470Z   token: ***
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8597725Z   ssh-strict: true
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8597985Z   ssh-user: git
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8598244Z   clean: true
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8598511Z   sparse-checkout-cone-mode: true
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8598822Z   fetch-tags: false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8599085Z   show-progress: true
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8599350Z   lfs: false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8599597Z   submodules: false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8599864Z   set-safe-directory: true
+pins-master	UNKNOWN STEP	2026-10-14T15:27:35.8600264Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.0043477Z Syncing repository: renavondata/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1012399Z ##[group]Getting Git version info
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1013272Z Working directory is '/home/runner/work/assize/assize'
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1014194Z [command]/usr/bin/git version
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1014637Z git version 2.55.0
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1016092Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1025851Z Temporarily overriding HOME='/home/runner/work/_temp/a7a6c5d8-5cb8-4dd9-969a-332addd3142f' before making global git config changes
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1027314Z Adding repository directory to the temporary git global config as a safe directory
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1028326Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1029783Z Deleting the contents of '/home/runner/work/assize/assize'
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1031085Z ##[group]Initializing the repository
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1031699Z [command]/usr/bin/git init /home/runner/work/assize/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1032867Z hint: Using 'master' as the name for the initial branch. This default branch name
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1033828Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1034823Z hint: to use in all of your new repositories, which will suppress this warning,
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1035526Z hint: call:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1035918Z hint:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1036413Z hint: 	git config --global init.defaultBranch <name>
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1037518Z hint:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1038075Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1038941Z hint: 'development'. The just-created branch can be renamed via this command:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1039626Z hint:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1040033Z hint: 	git branch -m <name>
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1040490Z hint:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1041068Z hint: Disable this message with "git config set advice.defaultBranchName false"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1041924Z Initialized empty Git repository in /home/runner/work/assize/assize/.git/
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1043344Z [command]/usr/bin/git remote add origin https://github.com/renavondata/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1045648Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1046308Z ##[group]Disabling automatic garbage collection
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1047179Z [command]/usr/bin/git config --local gc.auto 0
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1047997Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1048406Z ##[group]Setting up auth
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1048814Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1049993Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1051225Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1052608Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1281646Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1294756Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1295556Z ##[group]Fetching the repository
+pins-master	UNKNOWN STEP	2026-10-14T15:27:36.1303792Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5577638Z From https://github.com/renavondata/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5579824Z  * [new branch]      add-constitution-and-briefs -> origin/add-constitution-and-briefs
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5600294Z  * [new branch]      audit-8aae43c8c792     -> origin/audit-8aae43c8c792
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5602686Z  * [new branch]      constitution-6         -> origin/constitution-6
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5604564Z  * [new branch]      instr-102-awaits-guy-builds-master -> origin/instr-102-awaits-guy-builds-master
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5606478Z  * [new branch]      instr-111-chooser      -> origin/instr-111-chooser
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5608194Z  * [new branch]      instr-113-w2           -> origin/instr-113-w2
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5609633Z  * [new branch]      instr-113-w2-rebuild   -> origin/instr-113-w2-rebuild
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5611188Z  * [new branch]      instr-132-pins-cap     -> origin/instr-132-pins-cap
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5612781Z  * [new branch]      instr-139-models-price -> origin/instr-139-models-price
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5614563Z  * [new branch]      instr-174-unavailable-model -> origin/instr-174-unavailable-model
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5616273Z  * [new branch]      instr-176-pins-master  -> origin/instr-176-pins-master
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5618473Z  * [new branch]      instr-181-obligations-44-55 -> origin/instr-181-obligations-44-55
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5620646Z  * [new branch]      instr-181-obligations-44-55-v2 -> origin/instr-181-obligations-44-55-v2
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5623672Z  * [new branch]      instr-39-brief2-amendments -> origin/instr-39-brief2-amendments
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5625688Z  * [new branch]      instr-46-auditor-role  -> origin/instr-46-auditor-role
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5627622Z  * [new branch]      instr-49-vizier        -> origin/instr-49-vizier
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5629377Z  * [new branch]      instr-64-elect-by-exp3 -> origin/instr-64-elect-by-exp3
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5631334Z  * [new branch]      instr-64-exp3-election -> origin/instr-64-exp3-election
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5633314Z  * [new branch]      instr-65-review-sender -> origin/instr-65-review-sender
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5635510Z  * [new branch]      instr-68-wish-latency-price -> origin/instr-68-wish-latency-price
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5638021Z  * [new branch]      instr-70-price-line    -> origin/instr-70-price-line
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5640394Z  * [new branch]      l1-s2-crafter-binding-wip -> origin/l1-s2-crafter-binding-wip
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5642918Z  * [new branch]      l2-obligations-44-55-table -> origin/l2-obligations-44-55-table
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5645553Z  * [new branch]      l2a-o3-replay-verified -> origin/l2a-o3-replay-verified
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5648120Z  * [new branch]      l2a-o5-episode-guard   -> origin/l2a-o5-episode-guard
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5650482Z  * [new branch]      l2a-o6-private-files   -> origin/l2a-o6-private-files
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5652965Z  * [new branch]      l2a-replay-verified    -> origin/l2a-replay-verified
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5655128Z  * [new branch]      ledger/draws           -> origin/ledger/draws
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5657595Z  * [new branch]      master                 -> origin/master
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5662598Z [command]/usr/bin/git rev-parse --verify --quiet cd59c804cbf70e048942d0414cf84b02c4a2818c^{object}
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5664833Z cd59c804cbf70e048942d0414cf84b02c4a2818c
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5668674Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5670603Z ##[group]Determining the checkout info
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5672674Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5673917Z [command]/usr/bin/git sparse-checkout disable
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5716364Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5747457Z ##[group]Checking out the ref
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.5760091Z [command]/usr/bin/git checkout --progress --force cd59c804cbf70e048942d0414cf84b02c4a2818c
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7000662Z Note: switching to 'cd59c804cbf70e048942d0414cf84b02c4a2818c'.
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7007269Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7008398Z You are in 'detached HEAD' state. You can look around, make experimental
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7027328Z changes and commit them, and you can discard any commits you make in this
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7029300Z state without impacting any branches by switching back to a branch.
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7030437Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7031186Z If you want to create a new branch to retain commits you create, you may
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7032966Z do so (now or later) by using -c with the switch command. Example:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7033992Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7034508Z   git switch -c <new-branch-name>
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7035220Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7035645Z Or undo this operation with:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7036324Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7039260Z   git switch -
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7039861Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7040721Z Turn off this advice by setting config variable advice.detachedHead to false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7041939Z 
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7042907Z HEAD is now at cd59c80 STATUS for PR #185 at 3a2acaf: SESSION DONE; pins CI run 38583961089 green
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7046973Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7063467Z [command]/usr/bin/git log -1 --format=%H
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7095459Z cd59c804cbf70e048942d0414cf84b02c4a2818c
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7103302Z ##[group]Removing auth
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7106411Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7140543Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7339169Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7371887Z http.https://github.com/.extraheader
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7381034Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7413379Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7645665Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7926252Z ##[group]Run pipx install uv==0.8.17
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.7927439Z ^[[36;1mpipx install uv==0.8.17^[[0m
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.8152457Z shell: /usr/bin/bash -e {0}
+pins-master	UNKNOWN STEP	2026-10-14T15:27:37.8153176Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:38.5414798Z creating virtual environment...
+pins-master	UNKNOWN STEP	2026-10-14T15:27:38.9381580Z installing uv from spec 'uv==0.8.17'...
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.7006508Z done! ✨ 🌟 ✨
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.7007267Z   installed package uv 0.8.17, installed using Python 3.12.3
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.7007679Z   These apps are now available
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.7007976Z     - uv
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.7008420Z     - uvx
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9005909Z ##[group]Run set -euo pipefail
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9006280Z ^[[36;1mset -euo pipefail^[[0m
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9006522Z ^[[36;1mgit fetch --no-tags origin master^[[0m
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9007106Z ^[[36;1mgit ls-files -z -- harness ':(exclude)harness/proposer.d' | xargs -0 -r rm -f^[[0m
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9007512Z ^[[36;1mgit checkout origin/master -- harness Makefile pyproject.toml uv.lock^[[0m
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9067717Z shell: /usr/bin/bash -e {0}
+pins-master	UNKNOWN STEP	2026-10-14T15:27:43.9067890Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.3613188Z fatal: could not read Username for 'https://github.com': No such device or address
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.3654414Z ##[error]Process completed with exit code 128.
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4590176Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4590604Z with:
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4590793Z   name: pins-master-report
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4590975Z   path: out/pins
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4591106Z   if-no-files-found: error
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4591245Z   compression-level: 6
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4591372Z   overwrite: false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4591501Z   include-hidden-files: false
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.4591646Z ##[endgroup]
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.5851357Z (node:2064) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.5852288Z (Use `node --trace-deprecation ...` to show where the warning was created)
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.5874290Z ##[error]No files were found with the provided path: out/pins. No artifacts will be uploaded.
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.6392427Z Post job cleanup.
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7127643Z [command]/usr/bin/git version
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7190490Z git version 2.55.0
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7266986Z Temporarily overriding HOME='/home/runner/work/_temp/546d71d1-a52e-4ff2-8711-02f9241dbb9f' before making global git config changes
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7273094Z Adding repository directory to the temporary git global config as a safe directory
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7273933Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7342152Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7393810Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7877754Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.7973731Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.8547739Z Cleaning up orphan processes
+pins-master	UNKNOWN STEP	2026-10-14T15:27:44.8774733Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

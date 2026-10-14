@@ -1,0 +1,12 @@
+# probe: harness.claims trusted-base at cd59c80 with master's .github/workflows/pins-master.yml (aaf939a) added, i.e. the merge commit's workflow set; 2026-10-14T16:43:43Z
+A  .github/workflows/pins-master.yml
+ops/trusted-base.md: unlisted: scope:pins-master.yml:actions:read
+ops/trusted-base.md: unlisted: scope:pins-master.yml:contents:read
+ops/trusted-base.md: unlisted: scope:pins-master.yml:issues:read
+ops/trusted-base.md: unlisted: scope:pins-master.yml:pull-requests:read
+ops/trusted-base.md: unlisted: workflow:pins-master.yml:pull_request_target:labeled
+ops/trusted-base.md: unlisted: workflow:pins-master.yml:pull_request_target:opened
+ops/trusted-base.md: unlisted: workflow:pins-master.yml:pull_request_target:reopened
+ops/trusted-base.md: unlisted: workflow:pins-master.yml:pull_request_target:synchronize
+trusted-base: 46 entries present, 8 findings
+exit=1

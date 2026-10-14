@@ -1,0 +1,18 @@
+# uv run --frozen python -m harness.ledger resolve --session 38591374617 at cd59c80; 2026-10-14T16:48:08Z
+# reports/L0/forecasts/38591374617.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/38591374617.jsonl: 1 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/38591374617.jsonl: 41 open, 34 typed; resolved 0, unreadable 7
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404)
+)
+UNREAD 02d749e28bef: pins_green {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103: gh: Not Found (HTTP 404)
+)
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 191a63d44bf2: session_minutes {'run': 'local', 'bound': 25}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 8654ada34181: pins_green {'pr': 184}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/184: gh: Not Found (HTTP 404)
+)
+UNREAD f55d300002ea: review_accept {'pr': 184}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/184/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+exit=1

@@ -1,0 +1,545 @@
+pins	UNKNOWN STEP	﻿2026-10-14T14:49:35.9172421Z Current runner version: '2.337.0'
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9213037Z ##[group]Runner Image Provisioner
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9214544Z Hosted Compute Agent
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9215568Z Version: 20261002.596
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9216730Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9218007Z Build Date: 2026-10-02T22:28:27Z
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9219245Z Worker ID: {eb178420-0694-4553-a181-584707ab2fbe}
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9220955Z Region: eastus
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9221871Z Cloud: Azure
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9223048Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9225742Z ##[group]Operating System
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9226961Z Ubuntu
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9227891Z 24.04.5
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9228778Z LTS
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9230227Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9231252Z ##[group]Runner Image
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9232235Z Image: ubuntu-24.04
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9233384Z Version: 20261004.327.1
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9235561Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9238496Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9240624Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9243087Z ##[group]GITHUB_TOKEN Permissions
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9246360Z Actions: read
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9247419Z Contents: read
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9248353Z Issues: read
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9249769Z Metadata: read
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9250844Z PullRequests: read
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9251970Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9255119Z Secret source: Actions
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9256795Z Cache mode: write
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9258603Z Prepare workflow directory
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9753444Z Prepare all required actions
+pins	UNKNOWN STEP	2026-10-14T14:49:35.9825100Z Getting action download info
+pins	UNKNOWN STEP	2026-10-14T14:49:36.3027469Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+pins	UNKNOWN STEP	2026-10-14T14:49:37.7958766Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+pins	UNKNOWN STEP	2026-10-14T14:49:38.0349949Z Complete job name: pins
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1308504Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1310635Z with:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1311528Z   persist-credentials: false
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1312571Z   fetch-depth: 0
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1313511Z   repository: renavondata/assize
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1323792Z   token: ***
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1324670Z   ssh-strict: true
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1325556Z   ssh-user: git
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1326404Z   clean: true
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1327311Z   sparse-checkout-cone-mode: true
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1328406Z   fetch-tags: false
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1329606Z   show-progress: true
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1330687Z   lfs: false
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1331564Z   submodules: false
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1332496Z   set-safe-directory: true
+pins	UNKNOWN STEP	2026-10-14T14:49:38.1333823Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2569690Z Syncing repository: renavondata/assize
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2574099Z ##[group]Getting Git version info
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2576365Z Working directory is '/home/runner/work/assize/assize'
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2597418Z [command]/usr/bin/git version
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2893986Z git version 2.55.0
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2905858Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2918516Z Temporarily overriding HOME='/home/runner/work/_temp/8de2a8ca-5da1-42a0-96ef-308479c8e2c5' before making global git config changes
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2924132Z Adding repository directory to the temporary git global config as a safe directory
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2928916Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2936412Z Deleting the contents of '/home/runner/work/assize/assize'
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2941005Z ##[group]Initializing the repository
+pins	UNKNOWN STEP	2026-10-14T14:49:38.2943815Z [command]/usr/bin/git init /home/runner/work/assize/assize
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3042632Z hint: Using 'master' as the name for the initial branch. This default branch name
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3047127Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3071202Z hint: to use in all of your new repositories, which will suppress this warning,
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3073387Z hint: call:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3074732Z hint:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3076371Z hint: 	git config --global init.defaultBranch <name>
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3078102Z hint:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3080165Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3082769Z hint: 'development'. The just-created branch can be renamed via this command:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3085102Z hint:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3086709Z hint: 	git branch -m <name>
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3089097Z hint:
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3092657Z hint: Disable this message with "git config set advice.defaultBranchName false"
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3097535Z Initialized empty Git repository in /home/runner/work/assize/assize/.git/
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3106661Z [command]/usr/bin/git remote add origin https://github.com/renavondata/assize
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3144797Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3147873Z ##[group]Disabling automatic garbage collection
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3151240Z [command]/usr/bin/git config --local gc.auto 0
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3363035Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3365987Z ##[group]Setting up auth
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3399783Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3411927Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3836447Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	UNKNOWN STEP	2026-10-14T14:49:38.3899302Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	UNKNOWN STEP	2026-10-14T14:49:38.4147501Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+pins	UNKNOWN STEP	2026-10-14T14:49:38.4195731Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:38.4199267Z ##[group]Fetching the repository
+pins	UNKNOWN STEP	2026-10-14T14:49:38.4212217Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +375d9498dc23bf0d36d538bb555061a87cab4828:refs/remotes/pull/185/merge
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1463699Z From https://github.com/renavondata/assize
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1488308Z  * [new branch]      add-constitution-and-briefs              -> origin/add-constitution-and-briefs
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1489804Z  * [new branch]      audit-8aae43c8c792                       -> origin/audit-8aae43c8c792
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1490732Z  * [new branch]      constitution-6                           -> origin/constitution-6
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1492124Z  * [new branch]      instr-102-awaits-guy-builds-master       -> origin/instr-102-awaits-guy-builds-master
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1493517Z  * [new branch]      instr-111-chooser                        -> origin/instr-111-chooser
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1496183Z  * [new branch]      instr-113-w2                             -> origin/instr-113-w2
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1497344Z  * [new branch]      instr-113-w2-rebuild                     -> origin/instr-113-w2-rebuild
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1498408Z  * [new branch]      instr-132-pins-cap                       -> origin/instr-132-pins-cap
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1499872Z  * [new branch]      instr-139-models-price                   -> origin/instr-139-models-price
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1501128Z  * [new branch]      instr-174-unavailable-model              -> origin/instr-174-unavailable-model
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1502295Z  * [new branch]      instr-176-pins-master                    -> origin/instr-176-pins-master
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1503456Z  * [new branch]      instr-181-obligations-44-55              -> origin/instr-181-obligations-44-55
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1505413Z  * [new branch]      instr-181-obligations-44-55-v2           -> origin/instr-181-obligations-44-55-v2
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1506777Z  * [new branch]      instr-39-brief2-amendments               -> origin/instr-39-brief2-amendments
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1507799Z  * [new branch]      instr-46-auditor-role                    -> origin/instr-46-auditor-role
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1508874Z  * [new branch]      instr-49-vizier                          -> origin/instr-49-vizier
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1510328Z  * [new branch]      instr-64-elect-by-exp3                   -> origin/instr-64-elect-by-exp3
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1511593Z  * [new branch]      instr-64-exp3-election                   -> origin/instr-64-exp3-election
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1513088Z  * [new branch]      instr-65-review-sender                   -> origin/instr-65-review-sender
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1539300Z  * [new branch]      instr-68-wish-latency-price              -> origin/instr-68-wish-latency-price
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1540965Z  * [new branch]      instr-70-price-line                      -> origin/instr-70-price-line
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1541945Z  * [new branch]      l1-s2-crafter-binding-wip                -> origin/l1-s2-crafter-binding-wip
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1542911Z  * [new branch]      l2-obligations-44-55-table               -> origin/l2-obligations-44-55-table
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1543840Z  * [new branch]      l2a-o3-replay-verified                   -> origin/l2a-o3-replay-verified
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1544727Z  * [new branch]      l2a-o5-episode-guard                     -> origin/l2a-o5-episode-guard
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1545616Z  * [new branch]      l2a-o6-private-files                     -> origin/l2a-o6-private-files
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1546493Z  * [new branch]      l2a-replay-verified                      -> origin/l2a-replay-verified
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1547630Z  * [new branch]      ledger/draws                             -> origin/ledger/draws
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1548673Z  * [new branch]      master                                   -> origin/master
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1550592Z  * [new ref]         375d9498dc23bf0d36d538bb555061a87cab4828 -> pull/185/merge
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1552498Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1552905Z ##[group]Determining the checkout info
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1553336Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1553613Z [command]/usr/bin/git sparse-checkout disable
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1578407Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1615263Z ##[group]Checking out the ref
+pins	UNKNOWN STEP	2026-10-14T14:49:39.1620981Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/185/merge
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3810984Z Note: switching to 'refs/remotes/pull/185/merge'.
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3811765Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3812328Z You are in 'detached HEAD' state. You can look around, make experimental
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3813474Z changes and commit them, and you can discard any commits you make in this
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3814628Z state without impacting any branches by switching back to a branch.
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3815327Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3815815Z If you want to create a new branch to retain commits you create, you may
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3816726Z do so (now or later) by using -c with the switch command. Example:
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3817276Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3817570Z   git switch -c <new-branch-name>
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3817992Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3818279Z Or undo this operation with:
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3818665Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3818933Z   git switch -
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3819257Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3820047Z Turn off this advice by setting config variable advice.detachedHead to false
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3820788Z 
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3821546Z HEAD is now at 375d949 Merge 3a2acafb42b3728a252e5f254b7a57ce82632107 into 79578f1cf5fbebb622ec579f16318f30fbf2dfc8
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3829030Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3904275Z [command]/usr/bin/git log -1 --format=%H
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3935155Z 375d9498dc23bf0d36d538bb555061a87cab4828
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3944386Z ##[group]Removing auth
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3948696Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	UNKNOWN STEP	2026-10-14T14:49:39.3985462Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4243467Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4272965Z http.https://github.com/.extraheader
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4282789Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4322406Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4565390Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4888730Z ##[group]Run pipx install uv==0.8.17
+pins	UNKNOWN STEP	2026-10-14T14:49:39.4889152Z ^[[36;1mpipx install uv==0.8.17^[[0m
+pins	UNKNOWN STEP	2026-10-14T14:49:39.5217946Z shell: /usr/bin/bash -e {0}
+pins	UNKNOWN STEP	2026-10-14T14:49:39.5218327Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:40.0737493Z creating virtual environment...
+pins	UNKNOWN STEP	2026-10-14T14:49:40.3270389Z installing uv from spec 'uv==0.8.17'...
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5165438Z done! ✨ 🌟 ✨
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5170294Z   installed package uv 0.8.17, installed using Python 3.12.3
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5170896Z   These apps are now available
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5171389Z     - uv
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5171694Z     - uvx
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5482808Z ##[group]Run uv sync --frozen
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5483148Z ^[[36;1muv sync --frozen^[[0m
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5544855Z shell: /usr/bin/bash -e {0}
+pins	UNKNOWN STEP	2026-10-14T14:49:42.5545128Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:42.7640807Z Downloading cpython-3.11.13-linux-x86_64-gnu (download) (27.7MiB)
+pins	UNKNOWN STEP	2026-10-14T14:49:43.7591461Z  Downloading cpython-3.11.13-linux-x86_64-gnu (download)
+pins	UNKNOWN STEP	2026-10-14T14:49:43.8983266Z Using CPython 3.11.13
+pins	UNKNOWN STEP	2026-10-14T14:49:43.8984120Z Creating virtual environment at: .venv
+pins	UNKNOWN STEP	2026-10-14T14:49:43.9155661Z Downloading numpy (16.1MiB)
+pins	UNKNOWN STEP	2026-10-14T14:49:43.9195158Z Downloading pillow (6.6MiB)
+pins	UNKNOWN STEP	2026-10-14T14:49:44.0221155Z    Building crafter==1.8.3
+pins	UNKNOWN STEP	2026-10-14T14:49:44.1009054Z  Downloading pillow
+pins	UNKNOWN STEP	2026-10-14T14:49:44.3831368Z  Downloading numpy
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1149818Z       Built crafter==1.8.3
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1183998Z Prepared 12 packages in 1.21s
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1470415Z Installed 12 packages in 28ms
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1471728Z  + attrs==26.1.0
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1472554Z  + crafter==1.8.3
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1476052Z  + imageio==2.38.0
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1476706Z  + jsonschema==4.26.0
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1477410Z  + jsonschema-specifications==2025.9.1
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1478145Z  + numpy==2.4.6
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1478979Z  + opensimplex==0.4.5.1
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1489951Z  + pillow==12.3.0
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1500160Z  + referencing==0.37.0
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1502187Z  + rpds-py==2026.9.1
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1520293Z  + ruamel-yaml==0.19.1
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1540066Z  + typing-extensions==4.16.0
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1700587Z ##[group]Run uv run --frozen python -m harness.selfrun
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1701326Z ^[[36;1muv run --frozen python -m harness.selfrun^[[0m
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1784830Z shell: /usr/bin/bash -e {0}
+pins	UNKNOWN STEP	2026-10-14T14:49:45.1785140Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2897417Z selfrun: ok   build.yml: python -m harness.ledger elect build --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2898894Z selfrun: ok   build.yml: python -m harness.sessions limit build.log --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2900632Z selfrun: ok   review.yml: python -m harness.ledger elect audit --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2902141Z selfrun: ok   review.yml: python -m harness.ledger elect build --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2904000Z selfrun: ok   review.yml: python -m harness.ledger elect review --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2905530Z selfrun: ok   review.yml: python -m harness.ledger elect vizier --seed 1 --head origin/master --publish origin --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2906770Z selfrun: ok   review.yml: python -m harness.sessions limit review.log --dry-run -> exit 0
+pins	UNKNOWN STEP	2026-10-14T14:49:46.2907579Z selfrun: 0 failures
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3062951Z ##[group]Run echo "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3063742Z ^[[36;1mecho "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"^[[0m
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3126929Z shell: /usr/bin/bash -e {0}
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3127202Z env:
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3130429Z   GH_TOKEN: ***
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3130668Z   BASE_REF: master
+pins	UNKNOWN STEP	2026-10-14T14:49:46.3130895Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8653795Z base: refused run 38580057645: head 4766d1f is not an ancestor of HEAD
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8654790Z base: refused run 38571080908: head bce6a6d is not an ancestor of HEAD
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8655846Z base: refused run 38568792496: report skipped a pin or is not every pin ok and every mutant KILLED
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8656850Z base: refused run 38566249843: head 735b07f is not an ancestor of HEAD
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8657851Z base: refused run 38564939183: report skipped a pin or is not every pin ok and every mutant KILLED
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8658864Z base: run 38560499027 on 69f31570eeb24f30c5fa837b7dcf92ed936c6ea2
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8827234Z ##[group]Run make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8827718Z ^[[36;1mmake pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"^[[0m
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8890604Z shell: /usr/bin/bash -e {0}
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8890866Z env:
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8893541Z   GH_TOKEN: ***
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8893937Z   PINS_SINCE: --since 69f31570eeb24f30c5fa837b7dcf92ed936c6ea2 --since-run 38560499027
+pins	UNKNOWN STEP	2026-10-14T14:49:56.8894434Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T14:49:59.1795217Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since 69f31570eeb24f30c5fa837b7dcf92ed936c6ea2 --since-run 38560499027
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0410898Z registry harness: 70 pins, 201 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0440334Z [clean ] P0: observed pass -> ok (3.543s) out/pins/runs/P0/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0460441Z [clean ] P0b: observed pass -> ok (0.535s) out/pins/runs/P0b/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0461671Z [clean ] P0c: observed pass -> ok (1.237s) out/pins/runs/P0c/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0462590Z [clean ] P0d: observed pass -> ok (5.348s) out/pins/runs/P0d/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0463473Z [clean ] P0e: observed pass -> ok (1.993s) out/pins/runs/P0e/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0464395Z [clean ] P0f: observed pass -> ok (1.588s) out/pins/runs/P0f/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0465343Z [clean ] P0g: observed pass -> ok (2.039s) out/pins/runs/P0g/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0466238Z [clean ] P0h: observed pass -> ok (12.666s) out/pins/runs/P0h/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0467100Z [clean ] P0i: observed pass -> ok (0.435s) out/pins/runs/P0i/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0467939Z [clean ] P0j: observed pass -> ok (0.686s) out/pins/runs/P0j/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0468777Z [clean ] P0k: observed pass -> ok (0.435s) out/pins/runs/P0k/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0469848Z [clean ] P0l: observed pass -> ok (0.385s) out/pins/runs/P0l/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0470693Z [clean ] P0m: observed pass -> ok (0.785s) out/pins/runs/P0m/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0471485Z [clean ] P0n: observed pass -> ok (0.84s) out/pins/runs/P0n/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0472008Z [clean ] P0o: observed pass -> ok (0.686s) out/pins/runs/P0o/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0472741Z [clean ] P0q: observed pass -> ok (0.535s) out/pins/runs/P0q/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0473232Z [clean ] P0r: observed pass -> ok (1.036s) out/pins/runs/P0r/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0473720Z [clean ] P0s: observed pass -> ok (0.435s) out/pins/runs/P0s/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0474202Z [clean ] P0t: observed pass -> ok (0.435s) out/pins/runs/P0t/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0474685Z [clean ] P0u: observed pass -> ok (5.399s) out/pins/runs/P0u/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0475171Z [clean ] P0v: observed pass -> ok (0.385s) out/pins/runs/P0v/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0475671Z [clean ] P0w: observed pass -> ok (10.008s) out/pins/runs/P0w/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0476184Z [clean ] P0x: observed pass -> ok (13.274s) out/pins/runs/P0x/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0476719Z [clean ] P0y: observed pass -> ok (1.688s) out/pins/runs/P0y/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0477217Z [clean ] P0z: observed pass -> ok (0.386s) out/pins/runs/P0z/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0477723Z [clean ] P0aa: observed pass -> ok (0.486s) out/pins/runs/P0aa/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0478233Z [clean ] P0ab: observed pass -> ok (0.385s) out/pins/runs/P0ab/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0478743Z [clean ] P0ac: observed pass -> ok (1.188s) out/pins/runs/P0ac/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0479241Z [clean ] P0ad: observed pass -> ok (1.637s) out/pins/runs/P0ad/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0480869Z [clean ] P0ae: observed pass -> ok (0.435s) out/pins/runs/P0ae/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0481865Z [clean ] P0af: observed pass -> ok (0.435s) out/pins/runs/P0af/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0482822Z [clean ] P0ag: observed pass -> ok (1.437s) out/pins/runs/P0ag/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0483797Z [clean ] P0ah: observed pass -> ok (0.435s) out/pins/runs/P0ah/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0484738Z [clean ] P0ai: observed pass -> ok (0.435s) out/pins/runs/P0ai/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0485671Z [clean ] P0aj: observed pass -> ok (0.384s) out/pins/runs/P0aj/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0486606Z [clean ] P0as: observed pass -> ok (7.652s) out/pins/runs/P0as/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0487530Z [clean ] P0at: observed pass -> ok (4.846s) out/pins/runs/P0at/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0488472Z [clean ] P0au: observed pass -> ok (0.385s) out/pins/runs/P0au/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0489679Z [clean ] P0av: observed pass -> ok (1.638s) out/pins/runs/P0av/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0490627Z [clean ] P0ao: observed pass -> ok (0.386s) out/pins/runs/P0ao/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0491555Z [clean ] P0ap: observed pass -> ok (0.435s) out/pins/runs/P0ap/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0492484Z [clean ] P0ak: observed pass -> ok (0.435s) out/pins/runs/P0ak/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0493402Z [clean ] P0al: observed pass -> ok (0.435s) out/pins/runs/P0al/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0494338Z [clean ] P0am: observed pass -> ok (0.385s) out/pins/runs/P0am/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0495258Z [clean ] P0an: observed pass -> ok (0.384s) out/pins/runs/P0an/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0496185Z [clean ] P0aq: observed pass -> ok (0.384s) out/pins/runs/P0aq/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0497110Z [clean ] P0ar: observed pass -> ok (0.535s) out/pins/runs/P0ar/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0498055Z [clean ] P0aw: observed pass -> ok (0.385s) out/pins/runs/P0aw/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0498993Z [clean ] P1: observed pass -> ok (3.346s) out/pins/runs/P1/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0500226Z [clean ] P2: observed pass -> ok (10.319s) out/pins/runs/P2/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0501135Z [clean ] P3: observed pass -> ok (37.937s) out/pins/runs/P3/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0502036Z [clean ] P4: observed pass -> ok (11.686s) out/pins/runs/P4/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0503170Z [clean ] P5: observed pass -> ok (7.46s) out/pins/runs/P5/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0504073Z [clean ] P14: observed pass -> ok (9.266s) out/pins/runs/P14/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0504989Z [clean ] P15: observed pass -> ok (12.214s) out/pins/runs/P15/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0505901Z [clean ] P7: observed pass -> ok (17.608s) out/pins/runs/P7/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0506815Z [clean ] P13: observed pass -> ok (3.193s) out/pins/runs/P13/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0507739Z [clean ] P9: observed pass -> ok (5.097s) out/pins/runs/P9/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0508657Z [clean ] P16: observed pass -> ok (4.746s) out/pins/runs/P16/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0509913Z [clean ] P17: observed pass -> ok (12.842s) out/pins/runs/P17/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0510830Z [clean ] P18: observed pass -> ok (1.139s) out/pins/runs/P18/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0511736Z [clean ] P12: observed pass -> ok (9.822s) out/pins/runs/P12/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0512623Z [clean ] P19: observed pass -> ok (1.238s) out/pins/runs/P19/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0513519Z [clean ] P20: observed pass -> ok (1.338s) out/pins/runs/P20/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0514538Z [clean ] P22: observed pass -> ok (0.536s) out/pins/runs/P22/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0515499Z [clean ] P23: observed pass -> ok (10.311s) out/pins/runs/P23/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0516643Z [clean ] P24: observed pass -> ok (4.195s) out/pins/runs/P24/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0517624Z [clean ] P10: observed pass -> ok (10.221s) out/pins/runs/P10/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0549240Z [clean ] P6: observed pass -> ok (0.586s) out/pins/runs/P6/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0550469Z [clean ] P11: observed pass -> ok (25.675s) out/pins/runs/P11/clean/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0551782Z [mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (3.632s + 3.63s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0553294Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.473s + 0.474s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0554858Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0556614Z [mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (1.276s + 1.275s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0558348Z [mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (5.387s + 5.385s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0560232Z [mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (6.992s + 2.028s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0561774Z [mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.632s + 1.691s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0563259Z [mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (2.729s + 2.127s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0564910Z [mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.864s + 12.756s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0566538Z [mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.808s + 12.707s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0568113Z [mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.756s + 12.807s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0572001Z [mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (10.602s + 12.758s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0573661Z [mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (10.603s + 12.859s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0575540Z [mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.524s + 0.524s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0577266Z [mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.474s + 0.523s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T14:57:42.0578973Z [mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.674s + 0.674s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6386372Z [mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6392859Z [mutant] P0k/self_resolution_admitted: mutant fail, twin pass -> KILLED (0.481s + 0.472s) out/pins/runs/P0k/self_resolution_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6395057Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6397170Z [mutant] P0l/obligation_registry_skipped: mutant fail, twin pass -> KILLED (0.423s + 0.422s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6399287Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.825s + 0.874s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6401679Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.823s + 0.874s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6403609Z [mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.874s + 0.825s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6405609Z [mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.874s + 0.824s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6407665Z [mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.824s + 0.875s) out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6410000Z [mutant] P0m/instruction_author_unchecked: mutant fail, twin pass -> KILLED (0.874s + 0.874s) out/pins/runs/P0m/instruction_author_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6412270Z [mutant] P0m/instruction_label_unchecked: mutant fail, twin pass -> KILLED (0.875s + 0.825s) out/pins/runs/P0m/instruction_label_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6414490Z [mutant] P0m/instruction_labeler_unchecked: mutant fail, twin pass -> KILLED (0.825s + 0.824s) out/pins/runs/P0m/instruction_labeler_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6416579Z [mutant] P0m/body_edit_unchecked: mutant fail, twin pass -> KILLED (0.874s + 0.825s) out/pins/runs/P0m/body_edit_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6418601Z [mutant] P0m/inert_exemption_admitted: mutant fail, twin pass -> KILLED (0.832s + 0.823s) out/pins/runs/P0m/inert_exemption_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6420888Z [mutant] P0n/ranking_reversed: mutant fail, twin pass -> KILLED (0.875s + 0.874s) out/pins/runs/P0n/ranking_reversed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6422874Z [mutant] P0o/overturned_scored_success: mutant fail, twin pass -> KILLED (0.774s + 0.774s) out/pins/runs/P0o/overturned_scored_success/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6424940Z [mutant] P0q/ledger_rewrite_admitted: mutant fail, twin pass -> KILLED (0.523s + 0.573s) out/pins/runs/P0q/ledger_rewrite_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6426970Z [mutant] P0q/draws_not_append_only: mutant fail, twin pass -> KILLED (0.623s + 0.573s) out/pins/runs/P0q/draws_not_append_only/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6429069Z [mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (1.374s + 1.375s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6431466Z [mutant] P0s/outcome_inverted: mutant fail, twin pass -> KILLED (0.475s + 0.472s) out/pins/runs/P0s/outcome_inverted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6433487Z [mutant] P0s/free_resolved_by_mechanism: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0s/free_resolved_by_mechanism/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6435541Z [mutant] P0s/branch_most_recent_pr: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0s/branch_most_recent_pr/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6437466Z [mutant] P0t/latency_dropped: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0t/latency_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6439651Z [mutant] P0t/guy_items_undercounted: mutant fail, twin pass -> KILLED (0.475s + 0.473s) out/pins/runs/P0t/guy_items_undercounted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6441675Z [mutant] P0t/wish_from_instruction: mutant fail, twin pass -> KILLED (0.475s + 0.473s) out/pins/runs/P0t/wish_from_instruction/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6443635Z [mutant] P0t/first_entrant_only: mutant fail, twin pass -> KILLED (0.474s + 0.474s) out/pins/runs/P0t/first_entrant_only/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6445612Z [mutant] P0t/costless_session_dropped: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0t/costless_session_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6447490Z [mutant] P0t/cost_pooled: mutant fail, twin pass -> KILLED (0.473s + 0.475s) out/pins/runs/P0t/cost_pooled/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6449906Z [mutant] P0t/first_result_charged: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0t/first_result_charged/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6451910Z [mutant] P0t/result_per_session: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0t/result_per_session/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6453799Z [mutant] P0u/argmin_election: mutant fail, twin pass -> KILLED (5.286s + 5.536s) out/pins/runs/P0u/argmin_election/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6455648Z [mutant] P0u/hedge_election: mutant fail, twin pass -> KILLED (5.487s + 5.486s) out/pins/runs/P0u/hedge_election/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6457534Z [mutant] P0u/unweighted_estimate: mutant fail, twin pass -> KILLED (5.585s + 5.535s) out/pins/runs/P0u/unweighted_estimate/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6459694Z [mutant] P0u/draw_not_published: mutant fail, twin pass -> KILLED (5.285s + 5.435s) out/pins/runs/P0u/draw_not_published/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6461597Z [mutant] P0u/draw_push_forced: mutant fail, twin pass -> KILLED (5.539s + 5.588s) out/pins/runs/P0u/draw_push_forced/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6463498Z [mutant] P0u/entrants_from_head: mutant fail, twin pass -> KILLED (5.537s + 5.485s) out/pins/runs/P0u/entrants_from_head/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6465567Z [mutant] P0u/entrants_beyond_second_ignored: mutant fail, twin pass -> KILLED (5.385s + 5.535s) out/pins/runs/P0u/entrants_beyond_second_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6467717Z [mutant] P0v/reviewer_label_excluded: mutant fail, twin pass -> KILLED (0.423s + 0.422s) out/pins/runs/P0v/reviewer_label_excluded/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6469986Z [mutant] P0w/witness_ignored: mutant fail, twin pass -> KILLED (9.197s + 10.147s) out/pins/runs/P0w/witness_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6471947Z [mutant] P0w/harness_change_skips: mutant fail, twin pass -> KILLED (8.345s + 10.047s) out/pins/runs/P0w/harness_change_skips/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6473839Z [mutant] P0w/skip_counted_ok: mutant fail, twin pass -> KILLED (10.248s + 10.099s) out/pins/runs/P0w/skip_counted_ok/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6475718Z [mutant] P0w/non_ancestor_base: mutant fail, twin pass -> KILLED (10.198s + 10.145s) out/pins/runs/P0w/non_ancestor_base/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6477618Z [mutant] P0x/price_line_dropped: mutant fail, twin pass -> KILLED (14.513s + 15.014s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6480052Z [mutant] P0x/none_on_workflow_admitted: mutant fail, twin pass -> KILLED (13.866s + 15.581s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6482254Z [mutant] P0x/scoped_by_number: mutant fail, twin pass -> KILLED (13.961s + 13.158s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6484274Z [mutant] P0y/split_trailer_block_admitted: mutant fail, twin pass -> KILLED (1.725s + 1.728s) out/pins/runs/P0y/split_trailer_block_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6486321Z [mutant] P0y/hook_unconditioned: mutant fail, twin pass -> KILLED (1.776s + 1.725s) out/pins/runs/P0y/hook_unconditioned/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6488267Z [mutant] P0z/pins_failure_unrouted: mutant fail, twin pass -> KILLED (0.421s + 0.422s) out/pins/runs/P0z/pins_failure_unrouted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6490554Z [mutant] P0aa/held_item_retaken: mutant fail, twin pass -> KILLED (0.522s + 0.522s) out/pins/runs/P0aa/held_item_retaken/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6492488Z [mutant] P0ab/shell_edit_admitted: mutant fail, twin pass -> KILLED (0.422s + 0.472s) out/pins/runs/P0ab/shell_edit_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6494538Z [mutant] P0ab/silent_master_stop_admitted: mutant fail, twin pass -> KILLED (0.473s + 0.422s) out/pins/runs/P0ab/silent_master_stop_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6497009Z [mutant] P0ac/instruction_without_because_admitted: mutant fail, twin pass -> KILLED (1.023s + 1.024s) out/pins/runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6499208Z [mutant] P0ac/both_forms_admitted: mutant fail, twin pass -> KILLED (1.074s + 1.024s) out/pins/runs/P0ac/both_forms_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6501376Z [mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (1.674s + 1.726s) out/pins/runs/P0ad/seal_after_act/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:02:47.6503360Z [mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (1.726s + 1.725s) out/pins/runs/P0ad/seal_same_commit_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2597501Z [mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (1.674s + 1.725s) out/pins/runs/P0ad/candidate_omitted_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2599825Z [mutant] P0ad/deleted_status_read: mutant fail, twin pass -> KILLED (1.177s + 1.724s) out/pins/runs/P0ad/deleted_status_read/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2601869Z [mutant] P0ae/exposure_inferred: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ae/exposure_inferred/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2603594Z [mutant] P0ae/void_scored: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ae/void_scored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2605330Z [mutant] P0ae/void_not_counted: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ae/void_not_counted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2607158Z [mutant] P0ae/later_label_ignored: mutant fail, twin pass -> KILLED (0.472s + 0.473s) out/pins/runs/P0ae/later_label_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2609042Z [mutant] P0ae/label_by_anyone: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0ae/label_by_anyone/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2611202Z [mutant] P0af/alpha_zero: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0af/alpha_zero/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2613042Z [mutant] P0af/fixed_order_dropped: mutant fail, twin pass -> KILLED (0.472s + 0.472s) out/pins/runs/P0af/fixed_order_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2615023Z [mutant] P0af/fixed_order_not_required: mutant fail, twin pass -> KILLED (0.471s + 0.471s) out/pins/runs/P0af/fixed_order_not_required/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2617091Z [mutant] P0af/silence_is_an_act: mutant fail, twin pass -> KILLED (0.47s + 0.471s) out/pins/runs/P0af/silence_is_an_act/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2621671Z [mutant] P0ag/regime_after_seed: mutant fail, twin pass -> KILLED (1.474s + 1.474s) out/pins/runs/P0ag/regime_after_seed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2627093Z [mutant] P0ag/seed_after_act_admitted: mutant fail, twin pass -> KILLED (1.473s + 1.525s) out/pins/runs/P0ag/seed_after_act_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2629025Z [mutant] P0ah/kept_not_filed: mutant fail, twin pass -> KILLED (0.522s + 0.524s) out/pins/runs/P0ah/kept_not_filed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2631114Z [mutant] P0ah/merged_not_filed: mutant fail, twin pass -> KILLED (0.527s + 0.523s) out/pins/runs/P0ah/merged_not_filed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2633032Z [mutant] P0ah/kept_without_exposure: mutant fail, twin pass -> KILLED (0.522s + 0.473s) out/pins/runs/P0ah/kept_without_exposure/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2634912Z [mutant] P0ah/item_always_pr: mutant fail, twin pass -> KILLED (0.523s + 0.522s) out/pins/runs/P0ah/item_always_pr/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2636746Z [mutant] P0ai/probe_from_unkept: mutant fail, twin pass -> KILLED (0.523s + 0.472s) out/pins/runs/P0ai/probe_from_unkept/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2638609Z [mutant] P0ai/probe_unseeded: mutant fail, twin pass -> KILLED (0.472s + 0.522s) out/pins/runs/P0ai/probe_unseeded/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2641196Z [mutant] P0ai/probe_needs_exposure: mutant fail, twin pass -> KILLED (0.523s + 0.522s) out/pins/runs/P0ai/probe_needs_exposure/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2643254Z [mutant] P0ai/probe_not_priced: mutant fail, twin pass -> KILLED (0.524s + 0.523s) out/pins/runs/P0ai/probe_not_priced/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2645238Z [mutant] P0aj/awaits_guy_clause_removed: mutant fail, twin pass -> KILLED (0.474s + 0.423s) out/pins/runs/P0aj/awaits_guy_clause_removed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2647265Z [mutant] P0as/selfrun_step_skipped: mutant fail, twin pass -> KILLED (7.74s + 7.79s) out/pins/runs/P0as/selfrun_step_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2649119Z [mutant] P0as/exit_ignored: mutant fail, twin pass -> KILLED (7.691s + 7.69s) out/pins/runs/P0as/exit_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2651299Z [mutant] P0as/dry_run_not_appended: mutant fail, twin pass -> KILLED (7.741s + 7.74s) out/pins/runs/P0as/dry_run_not_appended/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2653192Z [mutant] P0at/dry_run_publishes: mutant fail, twin pass -> KILLED (5.236s + 4.882s) out/pins/runs/P0at/dry_run_publishes/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2655088Z [mutant] P0at/dry_run_writes_ledger: mutant fail, twin pass -> KILLED (4.883s + 4.883s) out/pins/runs/P0at/dry_run_writes_ledger/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2656958Z [mutant] P0at/dry_run_fetches: mutant fail, twin pass -> KILLED (4.884s + 4.934s) out/pins/runs/P0at/dry_run_fetches/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2658840Z [mutant] P0at/resolve_dry_run_appends: mutant fail, twin pass -> KILLED (4.934s + 4.884s) out/pins/runs/P0at/resolve_dry_run_appends/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2661156Z [mutant] P0au/dispatch_always_review: mutant fail, twin pass -> KILLED (0.422s + 0.472s) out/pins/runs/P0au/dispatch_always_review/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2663123Z [mutant] P0au/dispatch_pr_required: mutant fail, twin pass -> KILLED (0.423s + 0.422s) out/pins/runs/P0au/dispatch_pr_required/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2665061Z [mutant] P0au/audit_group_shared: mutant fail, twin pass -> KILLED (0.471s + 0.422s) out/pins/runs/P0au/audit_group_shared/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2667054Z [mutant] P0av/unlisted_trigger_admitted: mutant fail, twin pass -> KILLED (1.725s + 1.725s) out/pins/runs/P0av/unlisted_trigger_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2669083Z [mutant] P0av/ghost_row_admitted: mutant fail, twin pass -> KILLED (1.729s + 1.725s) out/pins/runs/P0av/ghost_row_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2671624Z [mutant] P0av/unpriced_row_admitted: mutant fail, twin pass -> KILLED (1.726s + 1.726s) out/pins/runs/P0av/unpriced_row_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2673705Z [mutant] P0ao/build_pull_request_restored: mutant fail, twin pass -> KILLED (0.423s + 0.422s) out/pins/runs/P0ao/build_pull_request_restored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2675823Z [mutant] P0ao/review_pull_request_restored: mutant fail, twin pass -> KILLED (0.422s + 0.423s) out/pins/runs/P0ao/review_pull_request_restored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2677794Z [mutant] P0ap/pr_hook_runs: mutant fail, twin pass -> KILLED (0.523s + 0.472s) out/pins/runs/P0ap/pr_hook_runs/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2679949Z [mutant] P0ap/review_restore_dropped: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ap/review_restore_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2681935Z [mutant] P0ap/grant_undeclared: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ap/grant_undeclared/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2683886Z [mutant] P0ap/review_grant_undeclared: mutant fail, twin pass -> KILLED (0.473s + 0.472s) out/pins/runs/P0ap/review_grant_undeclared/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2685997Z [mutant] P0ap/skip_permissions_admitted: mutant fail, twin pass -> KILLED (0.472s + 0.471s) out/pins/runs/P0ap/skip_permissions_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2688305Z [mutant] P0ak/undeclared_session_admitted: mutant fail, twin pass -> KILLED (0.473s + 0.474s) out/pins/runs/P0ak/undeclared_session_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2690897Z [mutant] P0ak/duration_misresolved: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0ak/duration_misresolved/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2692812Z [mutant] P0ak/cancelled_scored: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0ak/cancelled_scored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2694665Z [mutant] P0ak/over_bound_uncounted: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0ak/over_bound_uncounted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2696559Z [mutant] P0ak/limit_uncounted: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0ak/limit_uncounted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2698422Z [mutant] P0al/after_edit_as_drafted: mutant fail, twin pass -> KILLED (0.474s + 0.473s) out/pins/runs/P0al/after_edit_as_drafted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2700639Z [mutant] P0al/other_editor_counted: mutant fail, twin pass -> KILLED (0.473s + 0.474s) out/pins/runs/P0al/other_editor_counted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2702650Z [mutant] P0al/unreadable_edits_resolved: mutant fail, twin pass -> KILLED (0.476s + 0.472s) out/pins/runs/P0al/unreadable_edits_resolved/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2704646Z [mutant] P0al/detail_uncounted: mutant fail, twin pass -> KILLED (0.473s + 0.473s) out/pins/runs/P0al/detail_uncounted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2706615Z [mutant] P0am/draft_check_clause_removed: mutant fail, twin pass -> KILLED (0.423s + 0.422s) out/pins/runs/P0am/draft_check_clause_removed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2708676Z [mutant] P0an/pr_branch_forecast_admitted: mutant fail, twin pass -> KILLED (0.423s + 0.472s) out/pins/runs/P0an/pr_branch_forecast_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2710899Z [mutant] P0an/silent_stop_admitted: mutant fail, twin pass -> KILLED (0.474s + 0.422s) out/pins/runs/P0an/silent_stop_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2712847Z [mutant] P0aq/label_branch_removed: mutant fail, twin pass -> KILLED (0.423s + 0.423s) out/pins/runs/P0aq/label_branch_removed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:05:13.2714720Z [mutant] P0aq/round_cap_removed: mutant fail, twin pass -> KILLED (0.472s + 0.423s) out/pins/runs/P0aq/round_cap_removed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1117324Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.422s + 0.422s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1120002Z [mutant] P0ar/forecasts_shared: mutant fail, twin pass -> KILLED (0.577s + 0.573s) out/pins/runs/P0ar/forecasts_shared/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1122004Z [mutant] P0ar/status_shared: mutant fail, twin pass -> KILLED (0.574s + 0.574s) out/pins/runs/P0ar/status_shared/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1124030Z [mutant] P0ar/registry_frozen_only: mutant fail, twin pass -> KILLED (0.626s + 0.572s) out/pins/runs/P0ar/registry_frozen_only/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1126029Z [mutant] P0ar/status_by_date: mutant fail, twin pass -> KILLED (0.625s + 0.624s) out/pins/runs/P0ar/status_by_date/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1127902Z [mutant] P0ar/duplicate_overrides: mutant fail, twin pass -> KILLED (0.623s + 0.623s) out/pins/runs/P0ar/duplicate_overrides/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1130294Z [mutant] P0aw/checkout_without_contents: mutant fail, twin pass -> KILLED (0.474s + 0.423s) out/pins/runs/P0aw/checkout_without_contents/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1132070Z [mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (2.831s + 2.881s) out/pins/runs/P1/seed_reissued/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1133953Z [mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.981s + 2.88s) out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1135969Z [mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (2.779s + 3.033s) out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1138133Z [mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (2.63s + 2.881s) out/pins/runs/P1/training_undomained/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1140373Z [mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (6.264s + 1.904s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1142169Z [mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.857s + 1.955s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1143936Z [mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.951s + 1.849s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1145792Z [mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.908s + 1.847s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1147660Z [mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (38.415s + 38.527s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1149823Z [mutant] P3/played_at_end: mutant fail, twin pass -> KILLED (38.594s + 38.581s) out/pins/runs/P3/played_at_end/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1151600Z [mutant] P4/self_reported: mutant fail, twin pass -> KILLED (11.736s + 12.037s) out/pins/runs/P4/self_reported/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1153393Z [mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (11.937s + 11.891s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1155197Z [mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (11.942s + 11.993s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1157015Z [mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (12.092s + 11.953s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1158889Z [mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (9.277s + 7.778s) out/pins/runs/P5/next_sent_early/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1160985Z [mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (9.429s + 9.183s) out/pins/runs/P14/first_legal_action/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1162886Z [mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (9.179s + 9.147s) out/pins/runs/P14/floor_unsmoothed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1164686Z [mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (9.479s + 9.331s) out/pins/runs/P14/seen_not_reset/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1166688Z [mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (1.229s + 12.355s) out/pins/runs/P15/abs_difference/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1168476Z [mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (5.587s + 12.407s) out/pins/runs/P15/shift_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1170454Z [mutant] P15/one_arm: mutant fail, twin pass -> KILLED (4.284s + 12.252s) out/pins/runs/P15/one_arm/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1172180Z [mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (13.908s + 12.354s) out/pins/runs/P15/budget_one_arm/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1173939Z [mutant] P7/clipped: mutant fail, twin pass -> KILLED (17.817s + 17.663s) out/pins/runs/P7/clipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1175772Z [mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (18.017s + 17.744s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1177560Z [mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (17.677s + 17.732s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1179611Z [mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (3.231s + 3.18s) out/pins/runs/P13/infinite_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1181538Z [mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (3.182s + 3.231s) out/pins/runs/P13/realised_row_only/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1183727Z [mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (3.23s + 3.232s) out/pins/runs/P13/entropy_missing_imputed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1185679Z [mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (5.135s + 5.085s) out/pins/runs/P9/record_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1187488Z [mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (5.186s + 5.185s) out/pins/runs/P9/utility_altered/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1189726Z [mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (5.187s + 5.235s) out/pins/runs/P9/chain_update_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1191731Z [mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.48s + 5.24s) out/pins/runs/P9/opened_for_rewrite/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1193524Z [mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (5.287s + 5.286s) out/pins/runs/P9/genesis_empty/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1195360Z [mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (5.286s + 5.237s) out/pins/runs/P9/signature_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1197258Z [mutant] P9/independent_heads: mutant fail, twin pass -> KILLED (5.186s + 5.186s) out/pins/runs/P9/independent_heads/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1199202Z [mutant] P16/unattributed_admitted: mutant fail, twin pass -> KILLED (4.836s + 4.885s) out/pins/runs/P16/unattributed_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1201350Z [mutant] P16/any_credential: mutant fail, twin pass -> KILLED (4.886s + 4.836s) out/pins/runs/P16/any_credential/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1203276Z [mutant] P16/registration_taken_over: mutant fail, twin pass -> KILLED (4.834s + 4.733s) out/pins/runs/P16/registration_taken_over/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1205198Z [mutant] P17/fixed_proposer: mutant fail, twin pass -> KILLED (12.654s + 14.004s) out/pins/runs/P17/fixed_proposer/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1207102Z [mutant] P17/seeds_before_proposer: mutant fail, twin pass -> KILLED (13.948s + 13.293s) out/pins/runs/P17/seeds_before_proposer/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1209085Z [mutant] P17/idempotency_dropped: mutant fail, twin pass -> KILLED (15.707s + 13.393s) out/pins/runs/P17/idempotency_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1211504Z [mutant] P17/conflict_unchecked: mutant fail, twin pass -> KILLED (13.704s + 14.366s) out/pins/runs/P17/conflict_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1213344Z [mutant] P17/hash_partial: mutant fail, twin pass -> KILLED (12.792s + 12.543s) out/pins/runs/P17/hash_partial/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1215321Z [mutant] P18/cap_ignored: mutant fail, twin pass -> KILLED (1.528s + 1.176s) out/pins/runs/P18/cap_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1217104Z [mutant] P18/failures_dropped: mutant fail, twin pass -> KILLED (1.075s + 1.176s) out/pins/runs/P18/failures_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1219077Z [mutant] P18/throughput_from_episodes: mutant fail, twin pass -> KILLED (1.227s + 1.175s) out/pins/runs/P18/throughput_from_episodes/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1221336Z [mutant] P18/proposer_from_config: mutant fail, twin pass -> KILLED (1.477s + 1.226s) out/pins/runs/P18/proposer_from_config/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1223328Z [mutant] P18/mixed_proposers_admitted: mutant fail, twin pass -> KILLED (1.527s + 1.226s) out/pins/runs/P18/mixed_proposers_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1225343Z [mutant] P18/infinite_pooled_finite: mutant fail, twin pass -> KILLED (1.228s + 1.227s) out/pins/runs/P18/infinite_pooled_finite/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1227331Z [mutant] P18/short_request_admitted: mutant fail, twin pass -> KILLED (1.528s + 1.225s) out/pins/runs/P18/short_request_admitted/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1229283Z [mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (10.073s + 10.086s) out/pins/runs/P12/peak_differenced/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:19:40.1231844Z [mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (10.078s + 10.123s) out/pins/runs/P12/unmeasured_free/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5926040Z [mutant] P19/world_table_hardcoded: mutant fail, twin pass -> KILLED (1.329s + 1.326s) out/pins/runs/P19/world_table_hardcoded/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5927862Z [mutant] P20/crafter_price_fallback: mutant fail, twin pass -> KILLED (1.432s + 1.478s) out/pins/runs/P20/crafter_price_fallback/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5929851Z [mutant] P22/replay_unchecked: mutant fail, twin pass -> KILLED (0.624s + 0.624s) out/pins/runs/P22/replay_unchecked/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5931525Z [mutant] P23/partial_dropped: mutant fail, twin pass -> KILLED (10.149s + 10.353s) out/pins/runs/P23/partial_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5933151Z [mutant] P23/interrupted_unsealed: mutant fail, twin pass -> KILLED (11.108s + 10.354s) out/pins/runs/P23/interrupted_unsealed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5934851Z [mutant] P23/closing_unattributed: mutant fail, twin pass -> KILLED (10.153s + 10.102s) out/pins/runs/P23/closing_unattributed/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5936412Z [mutant] P24/isdigit_guard: mutant fail, twin pass -> KILLED (4.285s + 4.183s) out/pins/runs/P24/isdigit_guard/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5937911Z [mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (20.154s + 10.282s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5939695Z [mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.624s + 0.682s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5941404Z [mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (25.272s + 25.466s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5942833Z [mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (26.478s + 25.219s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5944216Z [mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (25.47s + 25.868s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5945640Z [mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (23.906s + 25.424s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5947185Z [mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (8.257s + 25.07s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5949162Z [mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (25.073s + 25.375s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5950580Z clean: 70/70 passed, 0/70 failed
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5951434Z mutants: 201/201 killed, 0/201 survived, 0/201 inconclusive, 0/201 stale, 0/201 non-causal, 0 leaked (clean and mutant)
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5952286Z twins: 201/201 passed
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5952799Z skipped: 0/70 pins, 0 mutants since 69f3157 (run 38560499027)
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5953391Z report: out/pins/pins.jsonl
+pins	UNKNOWN STEP	2026-10-14T15:26:13.5953862Z PINS PASSED
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6178124Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6178557Z with:
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6178760Z   name: pins-report
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6178989Z   path: out/pins
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6179205Z   if-no-files-found: error
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6179809Z   compression-level: 6
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6180036Z   overwrite: false
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6180279Z   include-hidden-files: false
+pins	UNKNOWN STEP	2026-10-14T15:26:13.6180523Z ##[endgroup]
+pins	UNKNOWN STEP	2026-10-14T15:26:13.8026431Z (node:61150) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+pins	UNKNOWN STEP	2026-10-14T15:26:13.8028183Z (Use `node --trace-deprecation ...` to show where the warning was created)
+pins	UNKNOWN STEP	2026-10-14T15:26:14.6732321Z With the provided path, there will be 1110 files uploaded
+pins	UNKNOWN STEP	2026-10-14T15:26:14.6732831Z Artifact name is valid!
+pins	UNKNOWN STEP	2026-10-14T15:26:14.6733076Z Root directory input is valid!
+pins	UNKNOWN STEP	2026-10-14T15:26:14.8000534Z Beginning upload of artifact content to blob storage
+pins	UNKNOWN STEP	2026-10-14T15:26:15.7273993Z (node:61150) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+pins	UNKNOWN STEP	2026-10-14T15:26:15.8014691Z Uploaded bytes 1013876
+pins	UNKNOWN STEP	2026-10-14T15:26:15.8187212Z Finished uploading artifact content to blob storage!
+pins	UNKNOWN STEP	2026-10-14T15:26:15.8188683Z SHA256 digest of uploaded artifact zip is 91e36f455c1749271c7a2df814b91ae87c85d3c292d7ea3794ebb251ec4705e1
+pins	UNKNOWN STEP	2026-10-14T15:26:15.8190324Z Finalizing artifact upload
+pins	UNKNOWN STEP	2026-10-14T15:26:16.0584865Z Artifact pins-report.zip successfully finalized. Artifact ID 11907855063
+pins	UNKNOWN STEP	2026-10-14T15:26:16.0586012Z Artifact pins-report has been successfully uploaded! Final size is 1013876 bytes. Artifact ID is 11907855063
+pins	UNKNOWN STEP	2026-10-14T15:26:16.0587381Z Artifact download URL: https://github.com/renavondata/assize/actions/runs/38583961089/artifacts/11907855063
+pins	UNKNOWN STEP	2026-10-14T15:26:16.0868775Z Post job cleanup.
+pins	UNKNOWN STEP	2026-10-14T15:26:16.1899094Z [command]/usr/bin/git version
+pins	UNKNOWN STEP	2026-10-14T15:26:16.1983796Z git version 2.55.0
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2063040Z Temporarily overriding HOME='/home/runner/work/_temp/a0af9814-9237-4267-8c50-f937f33c732e' before making global git config changes
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2094180Z Adding repository directory to the temporary git global config as a safe directory
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2095504Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/assize/assize
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2100821Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2156712Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2540095Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pins	UNKNOWN STEP	2026-10-14T15:26:16.2603728Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pins	UNKNOWN STEP	2026-10-14T15:26:16.3540885Z Cleaning up orphan processes
+pins	UNKNOWN STEP	2026-10-14T15:26:16.3832103Z Terminate orphan process: pid (2423) (catatonit)
+pins	UNKNOWN STEP	2026-10-14T15:26:16.3961160Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

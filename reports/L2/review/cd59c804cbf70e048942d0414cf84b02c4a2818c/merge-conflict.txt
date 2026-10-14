@@ -1,0 +1,103 @@
+# git merge-tree --write-tree origin/master(aaf939a) FETCH_HEAD(cd59c80); 2026-10-14T16:43:43Z
+4edb3e7276c8b3549257134db1893070e2f172ea
+100644 9a9f244d921cf2e27430fde65bf4ed03575666a9 1	.github/workflows/pins.yml
+100644 f3c85f441b1c4375cc7d83e5fea20d79c75eec04 2	.github/workflows/pins.yml
+100644 b5abe2c460d5c15a9ed913a9f7bc50b4c0ff4fea 3	.github/workflows/pins.yml
+100644 d61c2721227faef431c4414d892f1095e0c0eb57 1	harness/claims.py
+100644 6367bcb90b0be6c41649b910e88682cf624d2850 2	harness/claims.py
+100644 d8c7e6cfaa9ade20c0efdc59c241b728b95b081b 3	harness/claims.py
+
+Auto-merging .github/workflows/pins.yml
+CONFLICT (content): Merge conflict in .github/workflows/pins.yml
+Auto-merging harness/claims.py
+CONFLICT (content): Merge conflict in harness/claims.py
+Auto-merging harness/pins.py
+exit=1
+
+# gh pr view 185 mergeable/mergeStateStatus
+{"mergeStateStatus":"DIRTY","mergeable":"CONFLICTING"}
+
+# conflict hunks (merge-tree result tree 4edb3e7)
+--- .github/workflows/pins.yml
+27:<<<<<<< origin/master
+28-      # Instruction #176 item 2: no pin or mutant of master's registry is absent at the head unless an instruction
+29-      # signed by gfrmin and cited by a head commit names it as removed. pins-master.yml runs the same check.
+30-      - name: Pins are monotone
+31-        env:
+32-          GH_TOKEN: ${{ github.token }}
+33-          BASE_REF: ${{ github.base_ref }}
+34-        run: uv run --frozen python -m harness.claims pins-monotone "$(git merge-base "origin/$BASE_REF" HEAD)" HEAD
+35-=======
+36-      # Instruction #113 Part A: the head's session workflows (build.yml, review.yml) are run against the head's harness
+37-      # in dry-run mode before merge: every `python -m harness...` step is executed with `--dry-run`, so a flag the
+38-      # workflow passes and the harness does not accept fails `pins` here, not in a session after merge.
+39-      - name: Self-run the session workflows
+40-        run: uv run --frozen python -m harness.selfrun
+41->>>>>>> FETCH_HEAD
+42-      # Instruction #108 item 3: the base is the newest successful `pins` run whose head is an ancestor of HEAD and
+43-      # whose `pins-report` artifact records every pin ok and nothing skipped, so a run that itself skipped pins is never
+44-      # a base and a skip always cites a full run. With no such run, or on a pull request that records a layer verdict
+45-      # or opens a brief (CLAUDE.md A1.3), or when the API cannot be read, the step prints nothing and every pin runs.
+46-      # Then only the pins witnessing a path changed since the base run, and every pin on a change under harness/ or to
+47-      # Makefile, pyproject.toml or uv.lock; the rest are recorded skipped. `make pins` with no arguments, as the
+48-      # Reviewer and the measurement host run it, always runs everything.
+49-      - name: Choose the base
+50-        id: base
+51-        env:
+52-          GH_TOKEN: ${{ github.token }}
+53-          BASE_REF: ${{ github.base_ref }}
+54-        run: echo "since=$(uv run --frozen python -m harness base --master "origin/$BASE_REF")" >> "$GITHUB_OUTPUT"
+55-      - name: make pins
+56-        env:
+57-          GH_TOKEN: ${{ github.token }}
+58-          PINS_SINCE: ${{ steps.base.outputs.since }}
+59-        run: make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+60-      - name: Upload pins report
+61-        if: always()
+62-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+63-        with:
+64-          name: pins-report
+65-          path: out/pins
+66-          if-no-files-found: error
+--- harness/claims.py
+931:<<<<<<< origin/master
+932-    m = sub.add_parser("pins-monotone", help="refuse a head whose registry lacks a pin or mutant of the base's")
+933-    m.add_argument("base")
+934-    m.add_argument("head")
+935-    m.add_argument("--repo", type=Path, default=Path("."))
+936-    a = ap.parse_args(argv)
+937-    if a.cmd == "pins-monotone":
+938-        found = pins_monotone(a.repo, a.base, a.head)
+939-        for f in found:
+940-            print(f, file=sys.stderr)
+941-        print(f"pins-monotone {a.base}..{a.head}: {len(found)} findings", file=sys.stderr)
+942-=======
+943-    u = sub.add_parser("trusted-base", help="every trigger, command, secret and runner not listed in the table, and every "
+944-                                            "listed one with nothing behind it (instruction #113 Part C)")
+945-    u.add_argument("--repo", type=Path, default=Path("."))
+946-    u.add_argument("--table", default=TRUSTED_BASE)
+947-    a = ap.parse_args(argv)
+948-    if a.cmd == "trusted-base":
+949-        table = a.repo / a.table
+950-        if not table.is_file():
+951-            print(f"{a.table}: not found", file=sys.stderr)
+952-            return 1
+953-        found = trusted_findings(a.repo, table.read_text())
+954-        for f in found:
+955-            print(f)
+956-        print(f"trusted-base: {len(trusted_entries(a.repo))} entries present, {len(found)} findings")
+957->>>>>>> FETCH_HEAD
+958-        return 1 if found else 0
+959-    if a.cmd == "trailers":
+960-        found = trailer_findings(a.repo, a.revisions)
+961-        for f in found:
+962-            print(f, file=sys.stderr)
+963-        print(f"trailers {a.revisions}: {len(found)} findings", file=sys.stderr)
+964-        return 1 if found else 0
+965-    if a.cmd == "next":
+966-        chosen, skipped = next_item(a.items, load_open_prs(a.repo))
+967-        for item, n in skipped:
+968-            print(f"skipped: {item} held by PR #{n}")
+969-        print(f"next: {chosen or 'none'}")
+970-        return 0
+971-    issues = load_issues(a.repo, a.numbers)

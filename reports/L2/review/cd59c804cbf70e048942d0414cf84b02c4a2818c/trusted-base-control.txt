@@ -1,0 +1,4 @@
+# control: harness.claims trusted-base at plain head cd59c80; 2026-10-14T16:44:07Z
+git status --short: []; HEAD=cd59c80
+trusted-base: 38 entries present, 0 findings
+exit=0
