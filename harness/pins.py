@@ -3726,6 +3726,14 @@ def p4_measured_compute() -> bool:
             expect(used.get("peak_memory_bytes", -1) >= block,
                    f"{n}: peak memory {used.get('peak_memory_bytes')} bytes is at least the {block} filled")
             expect(used.get("unmeasured_s") == 0, f"{n}: nothing unmeasured ({used.get('unmeasured_s')} s)")
+        records = episodes.run(rt, image, _short_crafter(1), binding.manifest(), command=candidates.command("busy_child"))
+        say(f"  {rt.name} busy_child: {json.dumps(records)}")
+        used = records[0].get("compute", {}) if records else {}
+        expect([(r["termination"], r["steps"]) for r in records] == [("truncated", LOOP_STEPS)],
+               f"{rt.name} busy_child: one episode of {LOOP_STEPS} steps, ended by the World")
+        expect(known <= used.get("cpu_s", -1) < 2 * known,
+               f"{rt.name} busy_child: measured CPU {used.get('cpu_s')} s is at least the {known} s burned by children "
+               f"the init process never reaped (its own rusage holds none of it) and less than {2 * known} s")
         records = episodes.run(rt, image, _short_crafter(1), binding.manifest(),
                                command=candidates.command("busy_crash"))
         say(f"  {rt.name} busy_crash: {json.dumps(records)}")
@@ -5503,7 +5511,8 @@ PINS = [
         p4_measured_compute, (Mutant("self_reported", _edits("P4_self_reported")),
                               Mutant("client_rusage", _edits("P4_client_rusage")),
                               Mutant("not_differenced", _edits("P4_not_differenced")),
-                              Mutant("peak_from_current", _edits("P4_peak_from_current"))), JUDGE_SIDE),
+                              Mutant("peak_from_current", _edits("P4_peak_from_current")),
+                              Mutant("init_process_rusage", _edits("P4_init_process_rusage"))), JUDGE_SIDE),
     Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
         p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),), JUDGE_SIDE),
     Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",

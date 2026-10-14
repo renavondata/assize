@@ -1,0 +1,12 @@
+# P4's mutant `init_process_rusage` (L2a obligation 12, R 42d73311a233 F3): the judge measures the CPU time of the
+# container's init process, its own utime, stime and reaped children's, instead of the whole cgroup's.
+[[edit]]
+path = "judge/episodes.py"
+old = "        s = compute.sample(self.cgroup) if self.cgroup else None\n"
+new = """        s = compute.sample(self.cgroup) if self.cgroup else None
+        init = subprocess.run([self.rt.binary, "container", "inspect", "--format", "{{.State.Pid}}", self.name],
+                              capture_output=True, text=True).stdout.strip() if s else "0"
+        if init != "0":
+            ticks = open(f"/proc/{init}/stat").read().rsplit(")", 1)[1].split()[11:15]
+            s = compute.Sample(sum(map(int, ticks)) * 10**6 // os.sysconf("SC_CLK_TCK"), s.peak_bytes)
+"""

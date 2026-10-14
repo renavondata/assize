@@ -93,6 +93,15 @@ BEHAVIOUR = {
              "    while time.process_time() - t0 < BUSY_S: pass\n"
              "    sys.stderr.write('cpu_s 0\\n'); sys.stderr.flush()\n"
              "    reply(msg['id'], {'action': p['legal_actions'][0]})"),
+    # P4: at every step, forks a child that busy-loops BUSY_S seconds of its own CPU time and exits; the init process
+    # waits for it without reaping it, so the child's CPU is in the container's cgroup and in no rusage of the init.
+    "busy_child": ("pid = os.fork()\n"
+                   "    if pid == 0:\n"
+                   "        t0 = time.process_time()\n"
+                   "        while time.process_time() - t0 < BUSY_S: pass\n"
+                   "        os._exit(0)\n"
+                   "    os.waitid(os.P_PID, pid, os.WEXITED | os.WNOWAIT)\n"
+                   "    reply(msg['id'], {'action': p['legal_actions'][0]})"),
     # P4: busy-loops BUSY_S seconds of its own CPU time at its first step, then exits with status 3 unanswered.
     "busy_crash": ("t0 = time.process_time()\n"
                    "    while time.process_time() - t0 < BUSY_S: pass\n"
