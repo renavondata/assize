@@ -1,7 +1,8 @@
 """Fixture candidates for P3, P4, P5, P7, P10 and P12: each a Python program run as `python -I -c <source>` in the judge's
 candidate base image, speaking the judge's JSON-RPC over stdio. `BEHAVIOUR` says what each does at its first step; at
 begin_episode and end_episode every one acknowledges, keeping the manifest's `targets` from begin_episode, counting
-episodes from 0 in `episode` and starting an empty list `seen` of the episode's observations."""
+episodes from 0 in `episode` and starting an empty list `seen` of the episode's observations, unless `episode` equals
+`exit_at_begin`, which a behaviour may set: it then exits with status 3 unanswered."""
 
 from __future__ import annotations
 
@@ -18,11 +19,13 @@ def reply(rid, result):
     sys.stdout.write(json.dumps({{"jsonrpc": "2.0", "id": rid, "result": result}}) + "\\n")
     sys.stdout.flush()
 
-targets, seen, episode = [], [], -1
+targets, seen, episode, exit_at_begin = [], [], -1, None
 for line in sys.stdin:
     msg = json.loads(line)
     if msg["method"] == "begin_episode":
         targets, seen, episode = msg["params"]["manifest"]["targets"], [], episode + 1
+        if episode == exit_at_begin:
+            sys.exit(3)
     if msg["method"] != "step":
         reply(msg["id"], {{}})
         continue
@@ -111,6 +114,10 @@ BEHAVIOUR = {
                  "        block = b'\\x01' * (BUSY_MIB << 20)\n"
                  "        del block\n"
                  "    reply(msg['id'], {'action': p['legal_actions'][0]})"),
+    # P12: plays the first legal action at every step, and exits with status 3 unanswered at the begin_episode of the
+    # episode after the one it is playing, so a crash in a reused container is last read at the previous episode's end.
+    "crash_next": ("exit_at_begin = episode + 1\n"
+                   "    reply(msg['id'], {'action': p['legal_actions'][0]})"),
     # Ignores SIGTERM, starts a child that ignores it too, and never replies: only a forced kill ends it (P10).
     "stubborn": ("signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
                  "    if os.fork() == 0:\n"

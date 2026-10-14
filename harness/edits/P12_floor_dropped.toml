@@ -1,0 +1,7 @@
+# P12's mutant `floor_dropped` (review c6679c6 F4): the measured stretch `wall_s - unmeasured_s` is not floored at
+# zero, so a container that crashes before its first read in an episode it did not start in is charged a negative
+# memory term, and a candidate lowers its price by crashing in a reused container.
+[[edit]]
+path = "judge/price.py"
+old = '    measured = max(used["wall_s"] - unmeasured, 0.0)'
+new = '    measured = used["wall_s"] - unmeasured'
