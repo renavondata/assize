@@ -1,7 +1,7 @@
 # STATUS — L2 — 2026-10-14 — 24f516d — PR #183
 VERDICT: SESSION DONE: instruction #176 — review F1 (the sole BLOCK) answered: `pins-monotone` reads the registry from the syntax tree; P0ay gains a KILLED mutant with a passing twin
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
-pins: clean 66/66; mutants 186/186 KILLED; twins 186/186; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on 24f516d, podman only (reports/L2/builder/24f516d945bd68eb89d1324e13a35a09db494d7a/make-pins.txt); pins CI on this head not yet read
+pins: clean 66/66; mutants 186/186 KILLED; twins 186/186; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 — local `make pins` on 24f516d, podman only (reports/L2/builder/24f516d945bd68eb89d1324e13a35a09db494d7a/make-pins.txt); pins CI run 38554232509 on 24f516d: success (recorded in reports/L2/ci/; added in round 3 to answer review F2 of 0442a6c)
 changed: harness/{claims,pins}.py, harness/edits/P0ay_registry_read_as_text.toml, harness/proposer.d/instr-176-pins-master.toml, reports/L2/{builder/24f516d…/,status/instr-176-pins-master.md}
 did: review F1 (BLOCK, review-37d6ed5): `registry_names` used regexes over the text of harness/pins.py, so a commented-out mutant or a pin in a string still counted. It now parses with `ast` and reads `Pin(...)`/`Mutant(...)` calls inside the module-level `PINS` list; unparsable text registers nothing (an empty head registry is already refused).
 did: P0ay adds two cases (mutant commented out of pin B: refused `B/m3`; pin B parked in a string literal: refused `B`, `B/m3`) and the mutant `registry_read_as_text` (restores the text match), KILLED with its twin passing.
