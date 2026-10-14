@@ -1,0 +1,7 @@
+# P13's mutant `bin_product_rounded` (brief 2 A2, L2a obligation 14; review 7e18816c626e F2): the bin is
+# `int(q * bins)`, the rule before obligation 14, so the product is rounded before it meets an edge and 0.3*3 =
+# 0.8999999999999999 goes to bin 9, above the edge 0.9 it is below.
+[[edit]]
+path = "judge/scoring.py"
+old = "    return bisect.bisect_right([b / bins for b in range(1, bins)], q)\n"
+new = "    return min(int(q * bins), bins - 1)\n"
