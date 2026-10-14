@@ -2186,6 +2186,13 @@ def p0ay_pins_monotone() -> bool:
         expect(got == want, f"{what}: refused {sorted(got)}, want {sorted(want)}")
     got = {f.where for f in claims.monotone_findings(HEAD_REGISTRY, MASTER_REGISTRY, frozenset())}
     expect(not got, f"a head adding pin B is monotone ({sorted(got)})")
+    hidden = ('PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n'
+              '    Pin("B", "b", g, (),  # Mutant("m3", e)\n        W),\n]\n')
+    got = {f.where for f in claims.monotone_findings(MASTER_REGISTRY, hidden, frozenset())}
+    expect(got == {"B/m3"}, f"a mutant commented out of the registry is refused ({sorted(got)})")
+    parked = 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n]\nNOTE = """\n    Pin("B", "b", g, (Mutant("m3", e),), W),\n"""\n'
+    got = {f.where for f in claims.monotone_findings(MASTER_REGISTRY, parked, frozenset())}
+    expect(got == {"B", "B/m3"}, f"a pin kept in a string literal is refused ({sorted(got)})")
     got = {f.code for f in claims.monotone_findings(MASTER_REGISTRY, "PINS = []\n", frozenset({"A", "B"}))}
     expect(got == {"registry_unreadable"}, f"a head registering no pin is refused even if all are named ({sorted(got)})")
     return ok()
@@ -5138,7 +5145,8 @@ PINS = [
     Pin("P0ay", "a pin or mutant absent at the head is refused unless a signed instruction a head commit cites names it "
                 "removed",
         p0ay_pins_monotone, (Mutant("monotone_ignores_instruction", _edits("P0ay_monotone_ignores_instruction")),
-                             Mutant("removal_unsigned_admitted", _edits("P0ay_removal_unsigned_admitted"))), HARNESS),
+                             Mutant("removal_unsigned_admitted", _edits("P0ay_removal_unsigned_admitted")),
+                             Mutant("registry_read_as_text", _edits("P0ay_registry_read_as_text"))), HARNESS),
     Pin("P0az", "the workflow that runs a pull request's code under master's harness grants no write scope and no secret",
         p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
                                         Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),

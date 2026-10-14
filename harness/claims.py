@@ -5,6 +5,7 @@ list means accepted. Readers of git and of committed files are kept apart from t
 from __future__ import annotations
 
 import argparse
+import ast
 import fnmatch
 import functools
 import hashlib
@@ -723,17 +724,32 @@ def _edits_said(i: Issue) -> str:
 # head, unless a head commit cites `Instruction: #<n>` and issue <n>, which carries Guy's authority, has a line
 # `Removes: <name>, ...` naming it. A mutant's name is `<pin>/<mutant>`; naming a pin removes its mutants with it.
 REGISTRY_PATH = "harness/pins.py"
-PIN_HEAD = re.compile(r'^    Pin\("([^"]+)"', re.M)
-MUTANT_HEAD = re.compile(r'\bMutant\("([^"]+)"')
 REMOVES_LINE = re.compile(r"^Removes: (.*?)\s*$", re.M)
 
 
+def _call_name(node: ast.AST, callee: str) -> str | None:
+    """The literal first argument of `node` if it is a call `callee("<name>", ...)`, else None."""
+    if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callee and node.args
+            and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
+        return node.args[0].value
+    return None
+
+
 def registry_names(text: str) -> frozenset[str]:
-    """The pins and mutants a `harness/pins.py` registers: `<pin>` and `<pin>/<mutant>`, read from the text."""
-    heads = list(PIN_HEAD.finditer(text))
-    ends = [m.start() for m in heads[1:]] + [len(text)]
-    return frozenset(name for m, end in zip(heads, ends)
-                     for name in (m.group(1), *(f"{m.group(1)}/{x}" for x in MUTANT_HEAD.findall(text[m.start():end]))))
+    """The pins and mutants a `harness/pins.py` registers: `<pin>` and `<pin>/<mutant>`, read from the syntax tree of
+    the module-level `PINS` list, so a comment or a string that spells a call registers nothing. Unparsable text, or
+    no `PINS` list, registers nothing."""
+    try:
+        tree = ast.parse(text)
+    except (SyntaxError, ValueError):
+        return frozenset()
+    lists = [n.value for n in tree.body
+             if isinstance(n, (ast.Assign, ast.AnnAssign)) and n.value is not None
+             and any(isinstance(t, ast.Name) and t.id == "PINS"
+                     for t in (n.targets if isinstance(n, ast.Assign) else [n.target]))]
+    pins = [(p, pin) for lst in lists for pin in ast.walk(lst) if (p := _call_name(pin, "Pin")) is not None]
+    mutants = [f"{p}/{m}" for p, pin in pins for sub in ast.walk(pin) if (m := _call_name(sub, "Mutant")) is not None]
+    return frozenset([p for p, _ in pins] + mutants)
 
 
 def declared_removals(commits: Sequence[Commit], issues: Mapping[int, Issue]) -> frozenset[str]:

@@ -1,0 +1,16 @@
+# P0ay's mutant (review F1 of PR #183): the registry is read from the text of harness/pins.py, so a mutant commented out
+# of a pin, or a pin parked in a string, still counts as registered.
+[[edit]]
+path = "harness/claims.py"
+old = """    try:
+        tree = ast.parse(text)
+"""
+new = """    if True:
+        pin, names = "", set()
+        for m in re.finditer(r'(Pin|Mutant)\\("([^"]+)"', text):
+            pin = m.group(2) if m.group(1) == "Pin" else pin
+            names.add(pin if m.group(1) == "Pin" else f"{pin}/{m.group(2)}")
+        return frozenset(names)
+    try:
+        tree = ast.parse(text)
+"""
