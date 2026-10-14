@@ -1,0 +1,3 @@
+real file: []
+48 -> nonexistent pin: ['t:9: not_in_registry: obligation 48: pin P0zz or its mutant P0zz/nope is not in the registry']
+55 renumbered 43: ['t: missing: obligation 55 has no row', 't: duplicate: obligation 43 has 1 rows']
