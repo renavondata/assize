@@ -1,0 +1,40 @@
+Reviewer probes on PR #183 head 37d6ed5228f3470058cbf931e7531c7d53c7ed18, run 38541511292, session 42220a3d-3f0e-492a-8ba9-ddfe74905792.
+Scratch clone: /tmp/assize-review-183-mwDI/probe (removed at the end of the session; see cleanup.txt).
+
+## Probe 1 (F1): a mutant commented out, its text left in the file
+Edit on branch `probe` (one commit off 37d6ed5), harness/pins.py line 5144:
+-                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
++                                        ),  # Mutant("pins_master_secret", _edits("P0az_pins_master_secret")),
+
+$ uv run --frozen python -m harness.claims pins-monotone 37d6ed5228f3470058cbf931e7531c7d53c7ed18 HEAD
+pins-monotone 37d6ed5228f3470058cbf931e7531c7d53c7ed18..HEAD: 0 findings
+exit 0
+$ uv run --frozen python -c 'from harness.pins import PINS; print([m.name for p in PINS if p.name=="P0az" for m in p.mutants])'   # at the head
+['pins_master_privileged']
+$ (same, at 37d6ed5)
+['pins_master_privileged', 'pins_master_secret']
+
+## Probe 1 control: the same mutant deleted outright (branch `control`, one commit off 37d6ed5)
+-                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
++                                        ),
+$ uv run --frozen python -m harness.claims pins-monotone 37d6ed5228f3470058cbf931e7531c7d53c7ed18 HEAD
+P0az/pins_master_secret: pin_removed: registered at the base, absent at the head, and no signed instruction names it
+pins-monotone 37d6ed5228f3470058cbf931e7531c7d53c7ed18..HEAD: 1 findings
+exit 1
+
+So the check reads names from text (MUTANT_HEAD = r'\bMutant\("([^"]+)"', which also matches inside comments and strings),
+not from the registry: a mutant the registry no longer holds is reported present.
+
+## Probe 2 (F2): a head-root module shadows the stdlib inside master's harness
+At 37d6ed5, with the tree checked out at the `control` branch's parent, one untracked file at the repository root:
+json.py:
+  import sys
+  print("PROBE: the head's json.py runs inside master's harness", file=sys.stderr)
+  sys.exit(0)
+$ uv run --frozen python -m harness.claims pins-monotone 37d6ed5228f3470058cbf931e7531c7d53c7ed18 control
+PROBE: the head's json.py runs inside master's harness
+exit 0
+(`control` removes P0az/pins_master_secret; without json.py the same command exits 1, above.)
+`python -m` puts the working directory first on sys.path, and pins-master.yml restores only harness/, Makefile,
+pyproject.toml and uv.lock, so a head file such as json.py at the root still runs inside master's harness and can end
+it with exit 0. pins-master does exactly what instruction #176 item 1 lists; the gap is in the list.
