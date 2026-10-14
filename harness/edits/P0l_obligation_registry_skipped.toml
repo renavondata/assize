@@ -1,0 +1,6 @@
+# P0l's mutant (Wish #179, instruction #181): a discharged row's pin and mutant are no longer looked up in the registry,
+# so a row citing a nonexistent pin passes.
+[[edit]]
+path = "harness/claims.py"
+old = "[] if pin.group(1) in registry and mutant and mutant.group(1) in registry[pin.group(1)] else"
+new = "[] if True else"

@@ -1,0 +1,44 @@
+copy of /home/g/git/worktrees/assize/review-190-78be276
+  at /tmp/assize-scratch-boeomjxo/assize-copy-0mu0wb8f/repo
+twin: no edits applied
+pin:       P0l
+protects:  a verdict citing a pins run on another sha, or one not concluded success, is rejected
+role:      twin
+tree:      /tmp/assize-scratch-boeomjxo/assize-copy-0mu0wb8f/repo
+invoked:   /home/g/git/worktrees/assize/review-190-78be276
+scratch:   /tmp/assize-scratch-boeomjxo
+  [ok] STATUS cites a successful pins run on its own sha: findings [], want []
+  [ok] STATUS cites a run on an older sha: findings ['head_mismatch'], want ['head_mismatch']
+  [ok] STATUS cites a failed run: findings ['not_success'], want ['not_success']
+  [ok] STATUS STOPPED, cites a failed run on its own sha: findings [], want []
+  [ok] STATUS cites no run: findings ['uncited'], want ['uncited']
+  [ok] STATUS cites an unrecorded run: findings ['unrecorded'], want ['unrecorded']
+  [ok] STATUS cites a measure run: findings ['not_pins'], want ['not_pins']
+  [ok] STATUS cites a run under the wrong sha: findings ['citation_mismatch'], want ['citation_mismatch']
+  [ok] REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({('REPORT:3', 'head_mismatch'), ('REPORT:4', 'uncited'), ('REPORT:3', 'citation_mismatch')})
+  [ok] real STATUS files from L1: ['reports/L1/STATUS.md', 'reports/L2/STATUS.md', 'reports/L2/status/instr-135-per-pr-files.md', 'reports/L2/status/instr-139-models-price-2.md', 'reports/L2/status/instr-140-fable-build-election.md', 'reports/L2/status/instr-162-checkout-contents.md', 'reports/L2/status/instr-174-unavailable-model.md', 'reports/L2/status/instr-181-obligations-44-55-v2.md', 'reports/L2/status/l2-obligations-44-55-table.md', 'reports/L2/status/l2a-o3-replay-checked.md', 'reports/L2/status/l2a-o4-interrupted-recorded.md', 'reports/L2/status/l2a-o5-episode-guard.md']; 86 committed run records
+  [ok] reports/L1/STATUS.md: cites [('37840644452', '25f36e6')]; findings []
+  [ok] reports/L2/STATUS.md: cites [('38277028583', 'cb9b1c6')]; findings []
+  [ok] reports/L2/status/instr-135-per-pr-files.md: cites [('38296279268', 'd0c7a88')]; findings []
+  [ok] reports/L2/status/instr-139-models-price-2.md: cites [('38348646803', '9f59867')]; findings []
+  [ok] reports/L2/status/instr-140-fable-build-election.md: cites [('38345714403', '41682c2')]; findings []
+  [ok] reports/L2/status/instr-162-checkout-contents.md: cites [('38333955051', '961f77a')]; findings []
+  [ok] reports/L2/status/instr-174-unavailable-model.md: cites [('38399304584', '3ad1b58')]; findings []
+  [ok] reports/L2/status/instr-181-obligations-44-55-v2.md: cites [('38552599184', '004b442')]; findings []
+  [ok] reports/L2/status/l2-obligations-44-55-table.md: cites [('38560499027', '69f3157')]; findings []
+  [ok] reports/L2/status/l2a-o3-replay-checked.md: cites [('38336299013', 'eaed455')]; findings []
+  [ok] reports/L2/status/l2a-o4-interrupted-recorded.md: cites [('38359040477', '38aa0e3')]; findings []
+  [ok] reports/L2/status/l2a-o5-episode-guard.md: cites [('38399300458', '1da5f51')]; findings []
+  [ok] REPORT.md: 1 verdict lines from L1; findings []
+  [ok] obligations table every row carried: findings [], want []
+  [ok] obligations table one row discharged by a registry pin and mutant: findings [], want []
+  [ok] obligations table a number missing: findings ['missing'], want ['missing']
+  [ok] obligations table a number twice: findings ['duplicate'], want ['duplicate']
+  [ok] obligations table both dispositions: findings ['disposition'], want ['disposition']
+  [ok] obligations table neither disposition: findings ['disposition'], want ['disposition']
+  [ok] obligations table a nonexistent pin: findings ['not_in_registry'], want ['not_in_registry']
+  [ok] obligations table a nonexistent mutant: findings ['not_in_registry'], want ['not_in_registry']
+  [ok] obligations table no CI run cited: findings ['discharge_uncited'], want ['discharge_uncited']
+  [ok] reports/L2/obligations-44-55.md exists
+  [ok] reports/L2/obligations-44-55.md: findings []
+result:    PASS

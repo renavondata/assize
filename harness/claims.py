@@ -176,6 +176,42 @@ def report_findings(where: str, text: str, runs: Mapping[int, dict], from_layer:
     return [f for n, line in lines for f in findings(n, line)]
 
 
+OBLIGATION_ROW = re.compile(r"^(\d+)\. (.*)$")
+OBLIGATION_DISCHARGED = re.compile(r"\bdischarged by (P\w+)\b")
+OBLIGATION_CARRIED = "carried to the agent repository as a design input"
+OBLIGATION_MUTANT = re.compile(r"\bmutant (P\w+/\w+)\b")
+
+
+def obligation_findings(where: str, text: str, registry: Mapping[str, frozenset[str]], first: int, last: int
+                        ) -> list[Finding]:
+    """`reports/L2/obligations-44-55.md` (Wish #179, instruction #181): each obligation number first..last has exactly
+    one row `<n>. <disposition>: <reason>` with exactly one disposition, `carried to the agent repository as a design
+    input` or `discharged by <pin> ...; mutant <pin>/<mutant>; pins CI run <id> on <sha>`; a discharged row names a pin
+    and a mutant of it that `registry` (pin name to its `pin/mutant` labels) holds."""
+    rows = [(n, m) for n, line in enumerate(text.splitlines(), 1) if (m := OBLIGATION_ROW.match(line))]
+    seen = [int(m.group(1)) for _, m in rows]
+
+    def row(n: int, m: re.Match) -> list[Finding]:
+        at, body = f"{where}:{n}", m.group(2)
+        pin, mutant = OBLIGATION_DISCHARGED.search(body), OBLIGATION_MUTANT.search(body)
+        carried = OBLIGATION_CARRIED in body
+        if bool(pin) == carried:
+            return [Finding(at, "disposition", f"obligation {m.group(1)}: both or neither of discharged/carried")]
+        if carried:
+            return []
+        return ([] if mutant and CITATION.search(body) else
+                [Finding(at, "discharge_uncited", f"obligation {m.group(1)}: no `mutant <pin>/<mutant>` or no "
+                                                  f"`pins CI run <id> on <sha>`")]) + (
+            [] if pin.group(1) in registry and mutant and mutant.group(1) in registry[pin.group(1)] else
+            [Finding(at, "not_in_registry", f"obligation {m.group(1)}: pin {pin.group(1)} or its mutant "
+                                            f"{mutant and mutant.group(1)} is not in the registry")])
+
+    return ([Finding(where, "missing", f"obligation {i} has no row") for i in range(first, last + 1) if i not in seen]
+            + [Finding(where, "duplicate", f"obligation {i} has {seen.count(i)} rows")
+               for i in sorted(set(seen)) if seen.count(i) > 1 or not first <= i <= last]
+            + [f for n, m in rows for f in row(n, m)])
+
+
 def load_runs(root: Path) -> dict[int, dict]:
     """Committed run records, `reports/L<n>/ci/<run id>.json`, each a projection of the Actions API run object."""
     return {int(p.stem): json.loads(p.read_text()) for p in sorted(root.glob("reports/L*/ci/*.json"))}
