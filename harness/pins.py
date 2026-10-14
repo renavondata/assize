@@ -4101,6 +4101,78 @@ def p24_episode_guard() -> bool:
     return ok()
 
 
+# P25's entries (brief 2 A2, L2a obligation 6): what sits in a 0700 directory of judge-private storage. Each loose one
+# has a group or other bit that its directory's mode alone would hide; the clean ones are the judge's own and 0600.
+P25_LOOSE = (("file 0644", "x.jsonl", 0o644), ("file 0640", "x.jsonl", 0o640), ("file 0604", "x.jsonl", 0o604),
+             ("signing key 0644", "key", 0o644), ("file 0660 below a subdirectory", "sub/y.jsonl", 0o660))
+
+
+def p25_private_files() -> bool:
+    """Judge-private storage is refused when any file in it, not only its directory, has a group or other bit: the
+    credential registry and the seed store refuse with `not_private`, and `verify` reports it and nothing else; a
+    link inside is refused too; storage whose directory and files are 0700 and 0600 is accepted by all three (brief 2
+    A2, L2a obligation 6; review 02a71436d9ff F3)."""
+    from judge import ledger, registry, seeds
+
+    expect, ok = _expecter()
+    party = {"kind": "builder", "model": "m", "session": "s"}
+    sites = (("registry", lambda d: registry.credential(d, party), registry.Refused),
+             ("seed store", lambda d: seeds.store_path(d, "w"), seeds.SeedError))
+    work = Path(tempfile.mkdtemp(prefix="assize-p25-", dir=context.scratch))
+    try:
+        def storage(label: str, name: str, mode: int | None, link: bool = False) -> Path:
+            d = work / label.replace(" ", "-")
+            (d / name).parent.mkdir(parents=True, exist_ok=True)
+            d.chmod(0o700)
+            (d / name).parent.chmod(0o700)
+            if link:
+                (d / name).symlink_to("/dev/null")
+            else:
+                (d / name).write_bytes(b"x")
+                (d / name).chmod(mode)
+            return d
+
+        def verified(d: Path) -> list[str]:
+            return ledger.verify(d / "l.jsonl", d, "no-anchor")
+
+        for label, name, mode in P25_LOOSE:
+            for site, act, error in sites:
+                d = storage(f"{site} {label}", name, mode)
+                try:
+                    act(d)
+                    expect(False, f"{site}: {label} accepted")
+                except error as e:
+                    expect(e.code == "not_private" and name.split("/")[-1] in str(e),
+                           f"{site}: {label} refused not_private, naming the file ({e})")
+            d = storage(f"verify {label}", name, mode)
+            if name != ledger.KEY:
+                (d / ledger.KEY).write_bytes(b"k")
+                (d / ledger.KEY).chmod(0o600)
+            got = verified(d)
+            expect(len(got) >= 1 and all(f.startswith("private storage is not the judge's own") for f in got),
+                   f"verify: {label} is the only finding, as 'private storage is not the judge's own' ({got})")
+        for site, act, error in sites:
+            d = storage(f"{site} link", "l", None, link=True)
+            try:
+                act(d)
+                expect(False, f"{site}: a link accepted")
+            except error as e:
+                expect(e.code == "not_private" and "a link" in str(e), f"{site}: a link refused not_private ({e})")
+        for site, act, error in sites:
+            d = storage(f"{site} clean", "x.jsonl", 0o600)
+            try:
+                act(d)
+                expect(True, f"{site}: 0700 directory and 0600 file accepted")
+            except error as e:
+                expect(False, f"{site}: clean storage refused ({e})")
+        d = storage("verify clean", ledger.KEY, 0o600)
+        got = verified(d)
+        expect(not any("private storage" in f for f in got), f"verify: clean storage raises no storage finding ({got})")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5109,6 +5181,10 @@ PINS = [
     Pin("P24", "the judge's evaluate refuses an episode count that is not a positive ASCII integer, with the code "
                "bad_episodes and no traceback",
         p24_episode_guard, (Mutant("isdigit_guard", _edits("P24_isdigit_guard")),), JUDGE_SIDE),
+    Pin("P25", "judge-private storage is refused when any file in it, not only its directory, has a group or other "
+               "bit; the registry, the seed store and verify all refuse",
+        p25_private_files, (Mutant("entries_unchecked", _edits("P25_entries_unchecked")),
+                            Mutant("verify_unchecked", _edits("P25_verify_unchecked"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

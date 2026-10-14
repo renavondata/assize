@@ -1,0 +1,6 @@
+# P25's mutant `verify_unchecked` (brief 2 A2, L2a obligation 6; review 02a71436d9ff F3): `verify` reads the signing
+# key without examining the storage it lives in, so a key file with a group bit verifies a ledger.
+[[edit]]
+path = "judge/ledger.py"
+old = "    if loose := storage.findings(private):\n"
+new = "    if loose := []:\n"

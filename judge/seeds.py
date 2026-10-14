@@ -19,9 +19,10 @@ import hashlib
 import json
 import os
 import secrets
-import stat
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
+
+from judge import private as storage
 
 SEED_SPACE = 2**31 - 1  # Crafter's own default seed range, [0, 2**31 - 1)
 EVAL, TRAIN = 1, 0  # a key's domain is its parity
@@ -60,10 +61,9 @@ def training_seeds(world: str, key: Key, n: int) -> list[int]:
 
 def _private_dir(path: Path) -> Path:
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
-    st = path.stat()
-    if st.st_uid != os.getuid() or stat.S_IMODE(st.st_mode) & 0o077:
-        raise SeedError("not_private", f"{path} is mode {stat.S_IMODE(st.st_mode):o}, owner {st.st_uid}; "
-                                       f"judge-private storage is 0700 and the judge's own")
+    if found := storage.findings(path):
+        raise SeedError("not_private", f"{'; '.join(found)}; judge-private storage is 0700 and the judge's own, "
+                                       f"and so is every file in it")
     return path
 
 

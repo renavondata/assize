@@ -28,6 +28,8 @@ import secrets
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 
+from judge import private as storage
+
 KEY = "key"
 HEADS = "heads.jsonl"
 
@@ -186,6 +188,8 @@ def verify(ledger: Path, private: Path, anchor: str) -> list[str]:
     key_path = private / KEY
     if not key_path.exists():
         return [f"no signing key in {private}"]
+    if loose := storage.findings(private):
+        return [f"private storage is not the judge's own: {f}" for f in loose]
     key = key_path.read_bytes()
     heads = [h for h in _lines(private / HEADS) if h.get("ledger") == ledger.name]
     found = [f"head of {h.get('request_id')!r}: signature invalid" for h in heads
