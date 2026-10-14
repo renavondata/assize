@@ -1,0 +1,16 @@
+# STATUS — L2 — 2026-10-14 — 97416e4 — PR #200
+VERDICT: SESSION DONE: L2a obligation 13 delivered; pins green on 97416e4 (pins CI run 38652461832 on 97416e4: success, reports/L2/ci/38652461832.json)
+LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
+pins: clean 71/71; mutants 198/198 KILLED; twins 198/198; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (full run in CI 38652461832, skipped 0/71; local make pins not run, over 10 minutes; locally P12 clean True under rootless Podman 6.1.3, and in a scratch copy `floor_dropped` fails both new assertions)
+changed: harness/{pins.py,fixtures/candidates.py,edits/P12_floor_dropped.toml,proposer.d/l2a-o13-price-floor.toml}, reports/L2/{forecasts/74583521-….jsonl,ci/38652461832.json,status/l2a-o13-price-floor.md}
+did: `claims next #113 'L2a obligation 13'`: #113 is held by PR #185, skipped. No switchback seed exists, so I took the first open candidate, L2a obligation 13 (review c6679c6aa83a F4)
+did: fixture `crash_next` plays episode 0 to the World's end, then exits at begin_episode of episode 1 in the same container. That container was last read at episode 0's end, so locally unmeasured_s 1.08 s > wall_s 0.03 s. P12 prices it by the stated rule, and its memory term must be at least the unmeasured stretch's charge. Mutant `floor_dropped` is KILLED
+did: the finding's own fixture, a crash at episode 1's first step, cannot reach the floor: the reply to begin_episode is sampled, so the last read falls after the episode began. The crash had to move to begin_episode
+did: pins-master run 38652461949 failed on this head as on every PR (master's workflow, entrenched); not mine to change. No judge code changed: the floor was right and only lacked a pin
+decided (not asked): crash at begin_episode rather than the first step the finding names, since only that reaches `unmeasured_s > wall_s` — p(stands on review)=0.85
+decided (not asked): put the crash in the loop's begin_episode branch, as an `exit_at_begin` index a behaviour sets; every existing fixture leaves it None — p=0.85
+forecasts: made 4 (pins_green #200 p=0.75, review_accept #200 p=0.7, host_verdict L2 FIT p=0.35, session_minutes bound 50 p=0.55); resolved 0; see `ledger proposer builder`
+price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 1; runner-min 24 (pins CI of the green run)
+obligations added: none. L2: obligations 14+ remain
+NEEDS YOU (at most 1): none
+next: L2a obligation 14 (reliability bin edges: `int(q*bins)` disagrees with P13's float edges); #113 (PR #185) and obligation 9 (PR #196) are held
