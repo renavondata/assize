@@ -1,0 +1,6 @@
+# P25's mutant `heads_world_readable` (brief 2 A2, L2a obligation 6; review 02a71436d9ff F3): the judge creates the
+# signed heads in its private storage with the ledger's public mode, 0644.
+[[edit]]
+path = "judge/ledger.py"
+old = " + b\"\\n\", 0o600)\n"
+new = " + b\"\\n\", 0o644)\n"

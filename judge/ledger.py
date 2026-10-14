@@ -64,9 +64,10 @@ def _mac(key: bytes, head: Mapping) -> str:
     return hmac.new(key, canonical({k: v for k, v in head.items() if k != "mac"}), hashlib.sha256).hexdigest()
 
 
-def _append(path: Path, data: bytes) -> int:
-    """Append `data` with one descriptor opened O_APPEND, never seeking; return the file's length after it."""
-    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+def _append(path: Path, data: bytes, mode: int = 0o644) -> int:
+    """Append `data` with one descriptor opened O_APPEND, never seeking; return the file's length after it. A file it
+    creates has `mode`: the ledger is public, `heads.jsonl` is judge-private storage (L1 obligation 6)."""
+    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, mode)
     try:
         view = memoryview(data)
         while view:
@@ -99,7 +100,7 @@ def append(ledger: Path, private: Path, request_id: str, records: Iterable[Mappi
         size = _append(ledger, canonical(rec) + b"\n")
         chained.append(rec)
     head = {"ledger": ledger.name, "request_id": request_id, "records": len(chained), "head": prev, "bytes": size}
-    _append(private / HEADS, canonical(head | {"mac": _mac(key, head)}) + b"\n")
+    _append(private / HEADS, canonical(head | {"mac": _mac(key, head)}) + b"\n", 0o600)
     return chained
 
 

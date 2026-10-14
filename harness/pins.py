@@ -4113,6 +4113,7 @@ def p25_private_files() -> bool:
     link inside is refused too; storage whose directory and files are 0700 and 0600 is accepted by all three (brief 2
     A2, L2a obligation 6; review 02a71436d9ff F3)."""
     from judge import ledger, registry, seeds
+    from judge.private import findings as storage_findings
 
     expect, ok = _expecter()
     party = {"kind": "builder", "model": "m", "session": "s"}
@@ -4168,6 +4169,12 @@ def p25_private_files() -> bool:
         d = storage("verify clean", ledger.KEY, 0o600)
         got = verified(d)
         expect(not any("private storage" in f for f in got), f"verify: clean storage raises no storage finding ({got})")
+        d = work / "written"
+        d.mkdir(mode=0o700)
+        rec = {"episode": 0, "termination": "done", "detail": "", "steps": 1, "utility": 0.0}
+        ledger.append(work / "public.jsonl", d, "p25-request", [rec])
+        mode = (d / ledger.HEADS).stat().st_mode & 0o777
+        expect(mode == 0o600 and not storage_findings(d), f"the judge creates heads.jsonl 0600, not {oct(mode)}")
     finally:
         shutil.rmtree(work, ignore_errors=True)
     return ok()
@@ -4290,6 +4297,7 @@ def p9_ledger_tamper() -> bool:
             expect(code == 1, f"{name}: verification fails (exit {code})")
             led.write_bytes(snapshot[led.name])
             (private / "heads.jsonl").write_bytes(snapshot["heads.jsonl"])
+            (private / "heads.jsonl").chmod(0o600)  # recreated by the restore after a tamper that deleted it
 
         def lines(keep) -> bytes:
             return b"".join(line + b"\n" for i, line in enumerate(written.splitlines()) if keep(i))
@@ -5184,7 +5192,8 @@ PINS = [
     Pin("P25", "judge-private storage is refused when any file in it, not only its directory, has a group or other "
                "bit; the registry, the seed store and verify all refuse",
         p25_private_files, (Mutant("entries_unchecked", _edits("P25_entries_unchecked")),
-                            Mutant("verify_unchecked", _edits("P25_verify_unchecked"))), JUDGE_SIDE),
+                            Mutant("verify_unchecked", _edits("P25_verify_unchecked")),
+                            Mutant("heads_world_readable", _edits("P25_heads_world_readable"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
