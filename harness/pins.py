@@ -3203,7 +3203,10 @@ def p1_seed_issuance() -> bool:
     generates from, and never reissued: two requests from two store openings get disjoint evaluation-domain seeds, all
     recorded; the issuance check refuses a used seed, a training-domain seed, a reused request id and a non-private
     store, recording nothing; the public training stream is deterministic and entirely training-domain, hence
-    disjoint from every issued seed (brief 1 section 2)."""
+    disjoint from every issued seed (brief 1 section 2). The CSPRNG is witnessed, not assumed: every issued seed must be
+    one that `secrets.randbelow` returned during the request (review 9d8e7336a6b9 F1, L2a obligation 7)."""
+    import secrets
+
     from judge import seeds
     from worlds.crafter import binding
 
@@ -3222,16 +3225,30 @@ def p1_seed_issuance() -> bool:
         expect(got == code and (root / f"{world}.seeds.jsonl").read_bytes() == before,
                f"admit({ss}, {rid!r}) refused {code}, store unchanged (got {got})")
 
+    real, drawn = secrets.randbelow, []  # every CSPRNG draw, recorded as it is made (review 9d8e7336a6b9 F1)
+
+    def recorded(bound: int) -> int:
+        drawn.append((bound, real(bound)))
+        return drawn[-1][1]
+
+    secrets.randbelow = recorded
     issued: list[int] = []
-    for rid in ("request-a", "request-b"):  # each from the store as the files left it, no state carried over
-        try:
-            got = seeds.issue(root, world, key, n, rid)
-        except seeds.SeedError as e:
-            got = []
-            print(f"    issue({rid!r}) raised {e}")
-        print(f"    {rid}: {got}")
-        expect(len(got) == n, f"{rid}: {n} seeds issued")
-        issued += got
+    try:
+        for rid in ("request-a", "request-b"):  # each from the store as the files left it, no state carried over
+            try:
+                got = seeds.issue(root, world, key, n, rid)
+            except seeds.SeedError as e:
+                got = []
+                print(f"    issue({rid!r}) raised {e}")
+            print(f"    {rid}: {got}")
+            expect(len(got) == n, f"{rid}: {n} seeds issued")
+            issued += got
+    finally:
+        secrets.randbelow = real
+    from_csprng = {s for bound, s in drawn if bound == seeds.SEED_SPACE}
+    expect(bool(issued) and set(issued) <= from_csprng,
+           f"every issued seed is a draw of secrets.randbelow(SEED_SPACE) ({len(set(issued) - from_csprng)} of "
+           f"{len(issued)} are not; {len(drawn)} draws)")
     keys = [key(s) for s in issued]
     expect(len(set(keys)) == len(keys) == 2 * n, f"{len(keys)} issued seeds have {len(set(keys))} distinct World keys")
     expect(all(k % 2 == seeds.EVAL for k in keys), "every issued seed is keyed in the evaluation domain (odd)")
@@ -5222,7 +5239,8 @@ PINS = [
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
                            Mutant("domain_check_skipped", _edits("P1_domain_check_skipped")),
-                           Mutant("training_undomained", _edits("P1_training_undomained"))), JUDGE_SIDE),
+                           Mutant("training_undomained", _edits("P1_training_undomained")),
+                           Mutant("csprng_replaced", _edits("P1_csprng_replaced"))), JUDGE_SIDE),
     Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
         p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
