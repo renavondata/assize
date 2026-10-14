@@ -1,0 +1,71 @@
+registry harness: 63 pins, 179 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (3.082s) out/pins-headref/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.53s) out/pins-headref/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.076s) out/pins-headref/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (5.08s) out/pins-headref/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.524s) out/pins-headref/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.376s) out/pins-headref/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.774s) out/pins-headref/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.446s) out/pins-headref/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.427s) out/pins-headref/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (0.677s) out/pins-headref/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.381s) out/pins-headref/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.326s) out/pins-headref/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (0.577s) out/pins-headref/runs/P0m/clean/transcript.log
+[clean ] P0n: observed pass -> ok (0.625s) out/pins-headref/runs/P0n/clean/transcript.log
+[clean ] P0o: observed pass -> ok (0.527s) out/pins-headref/runs/P0o/clean/transcript.log
+[clean ] P0q: observed pass -> ok (0.375s) out/pins-headref/runs/P0q/clean/transcript.log
+[clean ] P0r: observed pass -> ok (1.177s) out/pins-headref/runs/P0r/clean/transcript.log
+[clean ] P0s: observed pass -> ok (0.381s) out/pins-headref/runs/P0s/clean/transcript.log
+[clean ] P0t: observed pass -> ok (0.383s) out/pins-headref/runs/P0t/clean/transcript.log
+[clean ] P0u: observed pass -> ok (4.132s) out/pins-headref/runs/P0u/clean/transcript.log
+[clean ] P0v: observed pass -> ok (0.325s) out/pins-headref/runs/P0v/clean/transcript.log
+[clean ] P0w: observed pass -> ok (8.886s) out/pins-headref/runs/P0w/clean/transcript.log
+[clean ] P0x: observed pass -> ok (18.803s) out/pins-headref/runs/P0x/clean/transcript.log
+[clean ] P0y: observed pass -> ok (1.173s) out/pins-headref/runs/P0y/clean/transcript.log
+[clean ] P0z: observed pass -> ok (0.332s) out/pins-headref/runs/P0z/clean/transcript.log
+[clean ] P0aa: observed pass -> ok (0.377s) out/pins-headref/runs/P0aa/clean/transcript.log
+[clean ] P0ab: observed pass -> ok (0.321s) out/pins-headref/runs/P0ab/clean/transcript.log
+[clean ] P0ac: observed pass -> ok (1.123s) out/pins-headref/runs/P0ac/clean/transcript.log
+[clean ] P0ad: observed pass -> ok (1.178s) out/pins-headref/runs/P0ad/clean/transcript.log
+[clean ] P0ae: observed pass -> ok (0.324s) out/pins-headref/runs/P0ae/clean/transcript.log
+[clean ] P0af: observed pass -> ok (0.372s) out/pins-headref/runs/P0af/clean/transcript.log
+[clean ] P0ag: observed pass -> ok (1.073s) out/pins-headref/runs/P0ag/clean/transcript.log
+[clean ] P0ah: observed pass -> ok (0.374s) out/pins-headref/runs/P0ah/clean/transcript.log
+[clean ] P0ai: observed pass -> ok (0.373s) out/pins-headref/runs/P0ai/clean/transcript.log
+[clean ] P0aj: observed pass -> ok (0.322s) out/pins-headref/runs/P0aj/clean/transcript.log
+[clean ] P0ak: observed pass -> ok (0.324s) out/pins-headref/runs/P0ak/clean/transcript.log
+[clean ] P0al: observed pass -> ok (0.323s) out/pins-headref/runs/P0al/clean/transcript.log
+[clean ] P0am: observed pass -> ok (0.325s) out/pins-headref/runs/P0am/clean/transcript.log
+[clean ] P0an: observed pass -> ok (0.325s) out/pins-headref/runs/P0an/clean/transcript.log
+[clean ] P0aq: observed pass -> ok (0.324s) out/pins-headref/runs/P0aq/clean/transcript.log
+[clean ] P0ar: observed pass -> ok (0.425s) out/pins-headref/runs/P0ar/clean/transcript.log
+[clean ] P0aw: observed pass -> ok (0.324s) out/pins-headref/runs/P0aw/clean/transcript.log
+[clean ] P1: observed pass -> ok (2.026s) out/pins-headref/runs/P1/clean/transcript.log
+[clean ] P2: observed pass -> ok (0.974s) out/pins-headref/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (21.762s) out/pins-headref/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (6.538s) out/pins-headref/runs/P4/clean/transcript.log
+[clean ] P5: observed pass -> ok (3.681s) out/pins-headref/runs/P5/clean/transcript.log
+[clean ] P14: observed pass -> ok (4.233s) out/pins-headref/runs/P14/clean/transcript.log
+[clean ] P15: observed pass -> ok (8.548s) out/pins-headref/runs/P15/clean/transcript.log
+[clean ] P7: observed pass -> ok (8.54s) out/pins-headref/runs/P7/clean/transcript.log
+[clean ] P13: observed pass -> ok (2.331s) out/pins-headref/runs/P13/clean/transcript.log
+[clean ] P9: observed pass -> ok (3.734s) out/pins-headref/runs/P9/clean/transcript.log
+[clean ] P16: observed pass -> ok (3.438s) out/pins-headref/runs/P16/clean/transcript.log
+[clean ] P17: observed pass -> ok (6.24s) out/pins-headref/runs/P17/clean/transcript.log
+[clean ] P18: observed pass -> ok (0.827s) out/pins-headref/runs/P18/clean/transcript.log
+[clean ] P12: observed pass -> ok (4.632s) out/pins-headref/runs/P12/clean/transcript.log
+[clean ] P19: observed pass -> ok (0.876s) out/pins-headref/runs/P19/clean/transcript.log
+[clean ] P20: observed pass -> ok (0.977s) out/pins-headref/runs/P20/clean/transcript.log
+[clean ] P22: observed pass -> ok (0.423s) out/pins-headref/runs/P22/clean/transcript.log
+[clean ] P23: observed pass -> ok (7.194s) out/pins-headref/runs/P23/clean/transcript.log
+[clean ] P10: observed pass -> ok (7.992s) out/pins-headref/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (0.475s) out/pins-headref/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (9.794s) out/pins-headref/runs/P11/clean/transcript.log
+clean: 63/63 passed, 0/63 failed
+mutants: 0/0 killed, 0/0 survived, 0/0 inconclusive, 0/0 stale, 0/0 non-causal, 0 leaked (clean and mutant)
+twins: 0/0 passed
+skipped: 0/63 pins, 0 mutants
+report: out/pins-headref/pins.jsonl
+PINS PASSED
+exit 0
