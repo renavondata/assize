@@ -1,0 +1,15 @@
+Reviewer probes on PR #183 head bce6a6d088f675671690ee114e64ad8fe52d834a, run 38571085941, session 5a706818-fa18-4a6e-939f-e3ae68be6bb9.
+Scratch clone: /tmp/review183-scratch (named branch review-183; probe branch probe-f1 one commit off bce6a6d). Probes run on the scratch clone only.
+
+## Probe 1 (F1 of review 37d6ed5): a mutant commented out, its text left in the file
+Edit on probe-f1, harness/pins.py line 5169:
+-                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
++                                        ),  # Mutant("pins_master_secret", _edits("P0az_pins_master_secret")),
+
+$ uv run --frozen python -m harness.claims pins-monotone bce6a6d088f675671690ee114e64ad8fe52d834a HEAD
+P0az/pins_master_secret: pin_removed: registered at the base, absent at the head, and no signed instruction names it
+pins-monotone bce6a6d088f675671690ee114e64ad8fe52d834a..HEAD: 1 findings
+exit=1
+
+Result: the commented-out mutant is refused. The check reads the loaded registry, not the text. F1 of review 37d6ed5 is closed at this head.
+The control in review 37d6ed5 (the same mutant deleted outright) gives the same finding, so this probe is not reproduced here; its result is the one shown.

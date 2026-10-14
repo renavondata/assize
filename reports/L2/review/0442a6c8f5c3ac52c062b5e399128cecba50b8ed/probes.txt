@@ -1,0 +1,62 @@
+# Probes of PR #183 at 0442a6c8f5c3ac52c062b5e399128cecba50b8ed (review run 38554268051, session 038c9e3e-956e-4553-b63e-11fd5441c695)
+# Scratch clone /tmp/rev183.BeWt/probe, branch `probe` off 0442a6c; each probe is one commit, edited with the Edit tool,
+# then `git reset --hard 0442a6c` before the next. Commands run from the clone root with `uv run --frozen`.
+
+## Probe A: slice the mutant tuple of P0az inside the PINS list (one token, `[:1]`)
+$ git diff 0442a6c HEAD -- harness/pins.py
+diff --git a/harness/pins.py b/harness/pins.py
+index aa4ef1f..74dbff3 100644
+--- a/harness/pins.py
++++ b/harness/pins.py
+@@ -5149,7 +5149,7 @@ PINS = [
+                              Mutant("registry_read_as_text", _edits("P0ay_registry_read_as_text"))), HARNESS),
+     Pin("P0az", "the workflow that runs a pull request's code under master's harness grants no write scope and no secret",
+         p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
+-                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
++                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret")))[:1],
+         HARNESS + (".github/workflows/pins-master.yml",)),
+     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
+$ python -c 'from harness import pins; print([m.name for p in pins.PINS if p.name=="P0az" for m in p.mutants])'
+['pins_master_privileged']
+$ python -m harness.claims pins-monotone 0442a6c HEAD
+pins-monotone 0442a6c..HEAD: 0 findings
+exit 0
+
+## Control for A: delete the same mutant outright
+$ git diff 0442a6c HEAD -- harness/pins.py
+diff --git a/harness/pins.py b/harness/pins.py
+index aa4ef1f..d5df351 100644
+--- a/harness/pins.py
++++ b/harness/pins.py
+@@ -5148,8 +5148,7 @@ PINS = [
+                              Mutant("removal_unsigned_admitted", _edits("P0ay_removal_unsigned_admitted")),
+                              Mutant("registry_read_as_text", _edits("P0ay_registry_read_as_text"))), HARNESS),
+     Pin("P0az", "the workflow that runs a pull request's code under master's harness grants no write scope and no secret",
+-        p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
+-                                        Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
++        p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),),
+         HARNESS + (".github/workflows/pins-master.yml",)),
+     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
+$ python -m harness.claims pins-monotone 0442a6c HEAD
+P0az/pins_master_secret: pin_removed: registered at the base, absent at the head, and no signed instruction names it
+pins-monotone 0442a6c..HEAD: 1 findings
+exit 1
+
+## Probe B: drop pin P0az by filtering PINS after the list
+$ git diff 0442a6c HEAD -- harness/pins.py
+diff --git a/harness/pins.py b/harness/pins.py
+index aa4ef1f..e8fa5ec 100644
+--- a/harness/pins.py
++++ b/harness/pins.py
+@@ -5241,3 +5241,4 @@ PINS = [
+                                   Mutant("chunks_replaced_after_worldgen", _edits("P11_chunks_replaced_after_worldgen")),
+                                   Mutant("golden_hash_altered", _edits("P11_golden_hash_altered"))), JUDGE_SIDE),
+ ]
++PINS = [p for p in PINS if p.name != "P0az"]
+$ python -c 'from harness import pins; print(any(p.name=="P0az" for p in pins.PINS), len(pins.PINS))'
+False 65
+$ python -m harness.claims pins-monotone 0442a6c HEAD
+pins-monotone 0442a6c..HEAD: 0 findings
+exit 0

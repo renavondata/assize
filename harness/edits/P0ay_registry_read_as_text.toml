@@ -1,0 +1,15 @@
+# P0ay's mutant (reviews F1 of PR #183): the registry is read from what the text of harness/pins.py spells, not from
+# what `PINS` holds once loaded, so a mutant sliced or filtered out of the value, commented out, or a pin parked in a
+# string, still counts as registered.
+[[edit]]
+path = "harness/claims.py"
+old = """    done = subprocess.run([sys.executable, "-I", "-c", REGISTRY_LOADER, str(root)], capture_output=True, text=True,
+"""
+new = """    if True:
+        pin, names = "", set()
+        for m in re.finditer(r'(Pin|Mutant)\\("([^"]+)"', (root / REGISTRY_PATH).read_text()):
+            pin = m.group(2) if m.group(1) == "Pin" else pin
+            names.add(pin if m.group(1) == "Pin" else f"{pin}/{m.group(2)}")
+        return frozenset(names)
+    done = subprocess.run([sys.executable, "-I", "-c", REGISTRY_LOADER, str(root)], capture_output=True, text=True,
+"""

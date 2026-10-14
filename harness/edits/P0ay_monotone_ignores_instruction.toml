@@ -1,0 +1,6 @@
+# P0ay's mutant (instruction #176 item 3b): no instruction's `Removes:` line is read, so a removal an instruction
+# names is refused like any other.
+[[edit]]
+path = "harness/claims.py"
+old = "for n in cited if authorises(issues.get(n))"
+new = "for n in cited if False and authorises(issues.get(n))"
