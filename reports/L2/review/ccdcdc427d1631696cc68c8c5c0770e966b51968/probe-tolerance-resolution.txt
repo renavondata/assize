@@ -1,0 +1,32 @@
+tree /home/g/git/worktrees/assize/review-197-ccdcdc4
+scratch parent /tmp
+
+variant            clean (n*eps): P27 PASS
+variant                1.5*n*eps: P27 PASS
+variant                (n+1)*eps: P27 PASS
+variant                  2*n*eps: P27 FAIL; 2 FAIL lines
+    [FAIL] support 10: a sum of 1 + 2·10·ε is invalid (None)
+    [FAIL] support 10: a sum of 1 - 2·10·ε is invalid (None)
+variant    0.5 (tolerance_loose): P27 FAIL; 2 FAIL lines
+    [FAIL] support 10: a sum of 1 + 2·10·ε is invalid (None)
+    [FAIL] support 10: a sum of 1 - 2·10·ε is invalid (None)
+variant       0 (tolerance_zero): P27 FAIL; 3 FAIL lines
+    [FAIL] support 10: a sum of 1 + 1·10·ε is valid (t: probabilities sum to 1.0000000000000022)
+    [FAIL] support 10: a sum of 1 - 1·10·ε is valid (t: probabilities sum to 0.9999999999999978)
+    [FAIL] support 10: the adversarial softmax, 2.0·ε from one, is valid (t: probabilities sum to 0.9999999999999996)
+
+n=  2 logit± 30.0: worst naive softmax deviation 1.0·ε (bound n·ε = 2·ε)
+n=  2 logit±300.0: worst naive softmax deviation 1.0·ε (bound n·ε = 2·ε)
+n=  3 logit± 30.0: worst naive softmax deviation 1.0·ε (bound n·ε = 3·ε)
+n=  3 logit±300.0: worst naive softmax deviation 1.0·ε (bound n·ε = 3·ε)
+n=  5 logit± 30.0: worst naive softmax deviation 2.0·ε (bound n·ε = 5·ε)
+n=  5 logit±300.0: worst naive softmax deviation 1.0·ε (bound n·ε = 5·ε)
+n= 10 logit± 30.0: worst naive softmax deviation 2.0·ε (bound n·ε = 10·ε)
+n= 10 logit±300.0: worst naive softmax deviation 1.0·ε (bound n·ε = 10·ε)
+n= 20 logit± 30.0: worst naive softmax deviation 3.0·ε (bound n·ε = 20·ε)
+n= 20 logit±300.0: worst naive softmax deviation 1.0·ε (bound n·ε = 20·ε)
+n= 50 logit± 30.0: worst naive softmax deviation 5.0·ε (bound n·ε = 50·ε)
+n= 50 logit±300.0: worst naive softmax deviation 1.5·ε (bound n·ε = 50·ε)
+n=100 logit± 30.0: worst naive softmax deviation 6.0·ε (bound n·ε = 100·ε)
+n=100 logit±300.0: worst naive softmax deviation 2.0·ε (bound n·ε = 100·ε)
+exit=0

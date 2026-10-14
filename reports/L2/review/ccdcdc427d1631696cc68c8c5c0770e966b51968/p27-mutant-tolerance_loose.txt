@@ -1,0 +1,17 @@
+copy of /home/g/git/worktrees/assize/review-197-ccdcdc4
+  at /tmp/assize-scratch-cyckkpso/assize-copy-qyjrl3dr/repo
+applied 1 edit(s) from harness/edits/P27_tolerance_loose.toml
+pin:       P27
+protects:  the probability-sum check sits at its derived bound for every declared support size: two bounds out is invalid, one bound in and an adversarially summed softmax are scored
+role:      mutant
+tree:      /tmp/assize-scratch-cyckkpso/assize-copy-qyjrl3dr/repo
+invoked:   /home/g/git/worktrees/assize/review-197-ccdcdc4
+scratch:   /tmp/assize-scratch-cyckkpso
+  [ok] the bound Worlds declare support sizes [10]
+  [FAIL] support 10: a sum of 1 + 2·10·ε is invalid (None)
+  [FAIL] support 10: a sum of 1 - 2·10·ε is invalid (None)
+  [ok] support 10: a sum of 1 + 1·10·ε is valid (None)
+  [ok] support 10: a sum of 1 - 1·10·ε is valid (None)
+  [ok] support 10: the adversarial softmax sums 2.0·ε from one, not exactly one
+  [ok] support 10: the adversarial softmax, 2.0·ε from one, is valid (None)
+result:    FAIL

@@ -1,0 +1,6 @@
+# P27's mutant `tolerance_loose` (brief 2 A2, L2a obligation 10; review c2a87f6478ad F3): the sum tolerance is 0.5, so
+# a prediction summing to 1 + 2·len(support)·ε is scored instead of ending the episode invalid_reply.
+[[edit]]
+path = "judge/scoring.py"
+old = "    return n * sys.float_info.epsilon\n"
+new = "    return 0.5\n"
