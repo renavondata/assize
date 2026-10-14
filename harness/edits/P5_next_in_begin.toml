@@ -1,0 +1,7 @@
+# P5's mutant `next_in_begin` (review 5f2be905f98c F1, L2a obligation 9): the judge sends with begin_episode, beside the
+# manifest, the observations the World would emit under the first legal action played at every step, from a copy of the
+# World. No step request carries more than the current observation.
+[[edit]]
+path = "judge/episodes.py"
+old = """        c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest}, t, deadline)"""
+new = """        c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest, "trajectory": (lambda w: [w.step(w.legal_actions[0]) for _ in range(manifest["episode_length"]) if not w.done])(__import__("copy").deepcopy(world))}, t, deadline)"""

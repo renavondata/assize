@@ -4618,8 +4618,9 @@ def p16_proposer_from_credential() -> bool:
 
 def p5_commitment_order() -> bool:
     """Under every usable runtime, a candidate commits its prediction before the observation it predicts exists for
-    it: a clairvoyant fixture, which puts all mass on any observation the step request carries beyond the current
-    one and otherwise predicts the floor, records exactly the floor's log-loss over one episode with the same actions,
+    it: a clairvoyant fixture, which puts all mass on any observation it is sent beyond the current one (in the step
+    request, under a non-target key of the current observation, or in begin_episode's params) and otherwise predicts
+    the floor, records exactly the floor's log-loss over one episode with the same actions,
     so it gains nothing; the floor's log-loss is finite and positive at every target. A judge that sent the next
     observation early would let it score zero (brief 1 section 2, P5)."""
     from harness.fixtures import candidates
@@ -5335,7 +5336,9 @@ PINS = [
                               Mutant("not_differenced", _edits("P4_not_differenced")),
                               Mutant("peak_from_current", _edits("P4_peak_from_current"))), JUDGE_SIDE),
     Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
-        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),), JUDGE_SIDE),
+        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),
+                              Mutant("next_in_observation", _edits("P5_next_in_observation")),
+                              Mutant("next_in_begin", _edits("P5_next_in_begin"))), JUDGE_SIDE),
     Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",
         p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
