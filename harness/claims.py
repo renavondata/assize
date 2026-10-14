@@ -5,7 +5,6 @@ list means accepted. Readers of git and of committed files are kept apart from t
 from __future__ import annotations
 
 import argparse
-import ast
 import fnmatch
 import functools
 import hashlib
@@ -15,6 +14,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
@@ -727,29 +727,42 @@ REGISTRY_PATH = "harness/pins.py"
 REMOVES_LINE = re.compile(r"^Removes: (.*?)\s*$", re.M)
 
 
-def _call_name(node: ast.AST, callee: str) -> str | None:
-    """The literal first argument of `node` if it is a call `callee("<name>", ...)`, else None."""
-    if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callee and node.args
-            and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
-        return node.args[0].value
-    return None
+REGISTRY_LOADER = (
+    "import json, sys\n"
+    "sys.path.insert(0, sys.argv[1])\n"
+    "from harness import pins\n"
+    "print(json.dumps([p.name for p in pins.PINS] + [f'{p.name}/{m.name}' for p in pins.PINS for m in p.mutants]))\n"
+)
+
+
+def registry_names_at(root: Path) -> frozenset[str]:
+    """The pins and mutants the registry of the tree at `root` holds once loaded: `<pin>` and `<pin>/<mutant>`, as
+    `harness.pins.PINS` evaluates in an isolated interpreter (`python -I`), so no expression that drops a call from the
+    value while keeping it in the text registers anything. A tree that does not load registers nothing."""
+    done = subprocess.run([sys.executable, "-I", "-c", REGISTRY_LOADER, str(root)], capture_output=True, text=True,
+                          timeout=120, check=False)
+    try:
+        return frozenset(json.loads(done.stdout)) if done.returncode == 0 else frozenset()
+    except ValueError:
+        return frozenset()
 
 
 def registry_names(text: str) -> frozenset[str]:
-    """The pins and mutants a `harness/pins.py` registers: `<pin>` and `<pin>/<mutant>`, read from the syntax tree of
-    the module-level `PINS` list, so a comment or a string that spells a call registers nothing. Unparsable text, or
-    no `PINS` list, registers nothing."""
-    try:
-        tree = ast.parse(text)
-    except (SyntaxError, ValueError):
-        return frozenset()
-    lists = [n.value for n in tree.body
-             if isinstance(n, (ast.Assign, ast.AnnAssign)) and n.value is not None
-             and any(isinstance(t, ast.Name) and t.id == "PINS"
-                     for t in (n.targets if isinstance(n, ast.Assign) else [n.target]))]
-    pins = [(p, pin) for lst in lists for pin in ast.walk(lst) if (p := _call_name(pin, "Pin")) is not None]
-    mutants = [f"{p}/{m}" for p, pin in pins for sub in ast.walk(pin) if (m := _call_name(sub, "Mutant")) is not None]
-    return frozenset([p for p, _ in pins] + mutants)
+    """`registry_names_at` for a `harness/pins.py` given as text: written to a scratch tree and loaded there."""
+    with tempfile.TemporaryDirectory(prefix="assize-registry-") as tmp:
+        (Path(tmp) / "harness").mkdir()
+        (Path(tmp) / "harness/__init__.py").write_text("")
+        (Path(tmp) / REGISTRY_PATH).write_text(text)
+        return registry_names_at(Path(tmp))
+
+
+def registry_names_of(repo: Path, rev: str) -> frozenset[str]:
+    """The registry of revision `rev`, loaded from a `git archive` of it."""
+    with tempfile.TemporaryDirectory(prefix="assize-registry-") as tmp:
+        archive = subprocess.run(["git", "-C", str(repo), "archive", rev], capture_output=True, check=True,
+                                 env=os.environ | GIT_ENV).stdout
+        subprocess.run(["tar", "-x", "-C", tmp], input=archive, check=True, capture_output=True)
+        return registry_names_at(Path(tmp))
 
 
 def declared_removals(commits: Sequence[Commit], issues: Mapping[int, Issue]) -> frozenset[str]:
@@ -759,26 +772,26 @@ def declared_removals(commits: Sequence[Commit], issues: Mapping[int, Issue]) ->
                      for line in REMOVES_LINE.findall(issues[n].body) for name in re.split(r"[,\s]+", line) if name)
 
 
-def monotone_findings(base_text: str, head_text: str, removed: frozenset[str]) -> list[Finding]:
-    """Findings for each name at the base absent at the head and not declared removed; an empty head registry is one."""
-    head = registry_names(head_text)
+def monotone_findings(base: frozenset[str], head: frozenset[str], removed: frozenset[str]) -> list[Finding]:
+    """Findings for each name of the base registry absent from the head's and not declared removed; an empty head
+    registry is one."""
     if not head:
         return [Finding(REGISTRY_PATH, "registry_unreadable", "no pin is registered at the head")]
     return [Finding(name, "pin_removed", "registered at the base, absent at the head, and no signed instruction names it")
-            for name in sorted(registry_names(base_text) - head)
+            for name in sorted(base - head)
             if name not in removed and name.split("/")[0] not in removed]
 
 
 def pins_monotone(repo: Path, base: str, head: str = "HEAD") -> list[Finding]:
-    """The monotone check between two revisions. Issues are read only when something is missing and a head commit cites
-    an instruction."""
-    base_text, head_text = (_git(repo, "show", f"{rev}:{REGISTRY_PATH}") for rev in (base, head))
-    found = monotone_findings(base_text, head_text, frozenset())
+    """The monotone check between two revisions, on the registries as each loads. Issues are read only when something
+    is missing and a head commit cites an instruction."""
+    base_names, head_names = registry_names_of(repo, base), registry_names_of(repo, head)
+    found = monotone_findings(base_names, head_names, frozenset())
     commits = branch_commits(repo, base, head) if found else []
     cited = sorted({n for c in commits for n in c.instructions})
     if not found or not cited:
         return found
-    return monotone_findings(base_text, head_text, declared_removals(commits, load_issues(repo, cited)))
+    return monotone_findings(base_names, head_names, declared_removals(commits, load_issues(repo, cited)))
 
 
 def main(argv: Sequence[str] | None = None) -> int:

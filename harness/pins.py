@@ -2085,9 +2085,15 @@ def p0aw_checkout_granted() -> bool:
 
 
 PINS_MASTER = ".github/workflows/pins-master.yml"
-MASTER_REGISTRY = ('PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n'
+REGISTRY_PRELUDE = ("class Mutant:\n    def __init__(self, name, edits):\n        self.name = name\n"
+                    "class Pin:\n    def __init__(self, name, protects, check, mutants, witnesses):\n"
+                    "        self.name, self.mutants = name, mutants\n"
+                    "f = g = e = W = None\n")
+MASTER_REGISTRY = (REGISTRY_PRELUDE + 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n'
                    '    Pin("B", "b", g, (Mutant("m3", e),), W),\n]\n')
-HEAD_REGISTRY = 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n]\n'
+HEAD_REGISTRY = REGISTRY_PRELUDE + 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n]\n'
+MASTER_NAMES = frozenset({"A", "A/m1", "A/m2", "B", "B/m3"})
+HEAD_NAMES = frozenset({"A", "A/m1", "A/m2"})
 
 
 def _step_run(text: str, name: str) -> str | None:
@@ -2142,14 +2148,13 @@ def p0ax_judge_from_master() -> bool:
     root = Path(tempfile.mkdtemp(prefix="assize-p0ax-", dir=context.scratch))
     work, base, head = _accused_repo(root)
     git = _git_fixture(work)
-    own = claims.registry_names((work / claims.REGISTRY_PATH).read_text())
+    own = claims.registry_names_at(work)
     expect("B" not in own, f"the accused passes its own registry: B absent from {sorted(own)}")
     if script is not None:
         done = subprocess.run(["bash", "-c", script], cwd=work, capture_output=True, text=True,
                               env=os.environ | claims.GIT_ENV | FIXTURE_GIT)
         expect(done.returncode == 0, f"the restore step runs ({done.returncode}: {done.stderr.strip()[-200:]})")
-        registry = work / claims.REGISTRY_PATH  # a restore that deleted the head's harness leaves none
-        judged = claims.registry_names(registry.read_text() if registry.is_file() else "")
+        judged = claims.registry_names_at(work)  # a restore that deleted the head's harness leaves none
         expect("B" in judged and "B/m3" in judged, f"the judge's registry is master's: {sorted(judged)}")
         judge = work / "harness/judge.py"
         expect(judge.is_file() and judge.read_text() == "master's judge\n", "master's harness file replaces the head's")
@@ -2182,18 +2187,30 @@ def p0ay_pins_monotone() -> bool:
     for what, cited, issues, want in cases:
         commits = [claims.Commit("c" * 40, ("guy",), (), instructions=cited)]
         removed = claims.declared_removals(commits, issues)
-        got = {f.where for f in claims.monotone_findings(MASTER_REGISTRY, HEAD_REGISTRY, removed)}
+        got = {f.where for f in claims.monotone_findings(MASTER_NAMES, HEAD_NAMES, removed)}
         expect(got == want, f"{what}: refused {sorted(got)}, want {sorted(want)}")
-    got = {f.where for f in claims.monotone_findings(HEAD_REGISTRY, MASTER_REGISTRY, frozenset())}
+    got = {f.where for f in claims.monotone_findings(HEAD_NAMES, MASTER_NAMES, frozenset())}
     expect(not got, f"a head adding pin B is monotone ({sorted(got)})")
-    hidden = ('PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n'
-              '    Pin("B", "b", g, (),  # Mutant("m3", e)\n        W),\n]\n')
-    got = {f.where for f in claims.monotone_findings(MASTER_REGISTRY, hidden, frozenset())}
-    expect(got == {"B/m3"}, f"a mutant commented out of the registry is refused ({sorted(got)})")
-    parked = 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n]\nNOTE = """\n    Pin("B", "b", g, (Mutant("m3", e),), W),\n"""\n'
-    got = {f.where for f in claims.monotone_findings(MASTER_REGISTRY, parked, frozenset())}
-    expect(got == {"B", "B/m3"}, f"a pin kept in a string literal is refused ({sorted(got)})")
-    got = {f.code for f in claims.monotone_findings(MASTER_REGISTRY, "PINS = []\n", frozenset({"A", "B"}))}
+    expect(claims.registry_names(MASTER_REGISTRY) == MASTER_NAMES, "the registry loads as the names it holds")
+    # Registries that spell the names and do not hold them: the check reads the registry as loaded (review F1 of PR #183).
+    master = REGISTRY_PRELUDE + 'PINS = [\n    Pin("A", "a", f, (Mutant("m1", e), Mutant("m2", e)), W),\n'
+    evasions = (
+        ("a mutant commented out", master + '    Pin("B", "b", g, (),  # Mutant("m3", e)\n        W),\n]\n', {"B/m3"}),
+        ("a pin parked in a string", master + ']\nNOTE = """\n    Pin("B", "b", g, (Mutant("m3", e),), W),\n"""\n',
+         {"B", "B/m3"}),
+        ("a mutant tuple sliced", master + '    Pin("B", "b", g, (Mutant("m3", e),)[:0], W),\n]\n', {"B/m3"}),
+        ("the list filtered after it is built",
+         master + '    Pin("B", "b", g, (Mutant("m3", e),), W),\n]\nPINS = [p for p in PINS if p.name != "B"]\n',
+         {"B", "B/m3"}),
+        ("a registry that does not load", master + '    Pin("B", "b", g, (Mutant("m3", e),), W),\n]\nraise SystemExit\n',
+         None),
+    )
+    for what, text, want in evasions:
+        head = claims.registry_names(text)
+        got = {f.where for f in claims.monotone_findings(MASTER_NAMES, head, frozenset())}
+        want = {claims.REGISTRY_PATH} if want is None else want
+        expect(got == want, f"{what}: refused {sorted(got)}, want {sorted(want)}")
+    got = {f.code for f in claims.monotone_findings(MASTER_NAMES, frozenset(), frozenset({"A", "B"}))}
     expect(got == {"registry_unreadable"}, f"a head registering no pin is refused even if all are named ({sorted(got)})")
     return ok()
 
