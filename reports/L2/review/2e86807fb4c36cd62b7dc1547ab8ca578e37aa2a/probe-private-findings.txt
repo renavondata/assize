@@ -1,0 +1,14 @@
+clean 0700/0600: no finding
+subdirectory 0750, no files: ['/tmp/review-191-probe-xxjau9kk/subdir-0750/sub is mode 750, owner 1000']
+link to a 0755 directory holding a 0644 file: ['/tmp/review-191-probe-xxjau9kk/linked-dir/ln is mode 777, owner 1000, a link']
+dangling link: ['/tmp/review-191-probe-xxjau9kk/dangling/gone is mode 777, owner 1000, a link']
+nested 0700/0700/0600: no finding
+judge's own files after credential+store_path+append: {'credentials.jsonl': '0o600', 'heads.jsonl': '0o600', 'key': '0o600'}
+judge-own storage: no finding
+second registry.credential on the judge's own storage: accepted
+verify on judge-own storage: ['the anchor no-anchor is the head of no signed request of pub.jsonl']
+legacy 0644 heads.jsonl: registry refused not_private: not_private: /tmp/review-191-probe-xxjau9kk/legacy-heads/heads.jsonl is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it
+legacy 0644 heads.jsonl: seed store refused not_private: not_private: /tmp/review-191-probe-xxjau9kk/legacy-heads/heads.jsonl is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it
+legacy 0644 heads.jsonl: verify -> ["private storage is not the judge's own: /tmp/review-191-probe-xxjau9kk/legacy-heads/heads.jsonl is mode 644, owner 1000"]
+Refused.code='not_private' args[0]="not_private: /tmp/review-191-probe-xxjau9kk/code/x is mode 644, owner 1000; judge-private storage is 0700 and the judge's own, and so is every file in it"
+removed /tmp/review-191-probe-xxjau9kk: True
