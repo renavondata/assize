@@ -18,15 +18,19 @@ def reply(rid, result):
     sys.stdout.write(json.dumps({{"jsonrpc": "2.0", "id": rid, "result": result}}) + "\\n")
     sys.stdout.flush()
 
-targets, seen, episode = [], [], -1
+targets, seen, episode, begun, notes = [], [], -1, {{}}, []
 for line in sys.stdin:
     msg = json.loads(line)
     if msg["method"] == "begin_episode":
         targets, seen, episode = msg["params"]["manifest"]["targets"], [], episode + 1
+        begun = {{k: v for k, v in msg["params"].items() if k not in ("schema_version", "manifest")}}
+    elif msg["method"] != "step":
+        notes.append(msg.get("params", {{}}))
     if msg["method"] != "step":
         reply(msg["id"], {{}})
         continue
     p = msg["params"]
+    held, notes = notes, []
 """
 
 # P5's predictive floor (brief 1 section 4): each target's unigram frequencies over the episode's observations so far,
@@ -58,9 +62,11 @@ BEHAVIOUR = {
                    "    reply(msg['id'], {'action': p['legal_actions'][0], 'prediction': pred})"),
     # P5: plays the first legal action and predicts the floor.
     "floor": _FLOOR + "    reply(msg['id'], {'action': p['legal_actions'][0], 'prediction': pred})",
-    # P5: plays the first legal action and searches everything the step request carries beyond t, observation and
-    # legal_actions for an observation, a mapping holding every target's field, looking first under its action's key.
-    # Where it finds one it puts all mass on that observation's value of every target; elsewhere it predicts the floor.
+    # P5: plays the first legal action and searches every message it receives for an observation, a mapping holding
+    # every target's field, looking first under its action's key: the step request's keys beyond t, observation and
+    # legal_actions, the current observation's keys that are no target's field, the params of any other message received
+    # since its last step (an unsolicited call), and begin_episode's params beyond schema_version and manifest. Where the step request holds one it puts all mass on that observation's value of
+    # every target; where begin_episode held several, on the one at index t; elsewhere it predicts the floor.
     "clairvoyant": (_FLOOR +
                     "    action = p['legal_actions'][0]\n"
                     "    def found(v):\n"
@@ -69,7 +75,11 @@ BEHAVIOUR = {
                     "            keyed = [v[k] for k in (str(action), action) if k in v]\n"
                     "            return [o for x in keyed + list(v.values()) for o in found(x)]\n"
                     "        return [o for x in v for o in found(x)] if isinstance(v, list) else []\n"
+                    "    fields = [tg['field'] for tg in targets]\n"
+                    "    extra = {k: v for k, v in p['observation'].items() if k not in fields}\n"
+                    "    early = found(begun)\n"
                     "    leaks = found({k: v for k, v in p.items() if k not in ('t', 'observation', 'legal_actions')})\n"
+                    "    leaks = leaks or found(extra) or found(held) or early[p['t']:p['t'] + 1]\n"
                     "    for tg in targets if leaks else []:\n"
                     "        if leaks[0][tg['field']] in tg['support']:\n"
                     "            pred[tg['name']] = [float(x == leaks[0][tg['field']]) for x in tg['support']]\n"

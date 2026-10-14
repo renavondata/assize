@@ -1,0 +1,10 @@
+--- /home/g/actions-runner/_work/assize/assize/judge/episodes.py	2026-10-13 11:29:15.089027260 +0300
++++ /tmp/rev196-probeA.lrLI/judge/episodes.py	2026-10-14 22:52:50.183137929 +0300
+@@ -201,6 +201,7 @@
+         c.call("begin_episode", {"schema_version": SCHEMA_VERSION, "manifest": manifest}, t, deadline)
+         while not world.done:
+             legal = world.legal_actions
++            c.call("notice", {"upcoming": {str(a): __import__("copy").deepcopy(world).step(a) for a in legal}}, t, deadline)
+             result = c.call("step", {"t": world.t, "observation": world.observation, "legal_actions": legal},
+                             t, deadline)
+             if result.get("action") not in legal:

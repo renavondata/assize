@@ -1,0 +1,17 @@
+2026-10-14T20:15:56Z
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman floor: one episode of 5 steps, ended by the World
+  [ok] podman clairvoyant: one episode of 5 steps, ended by the World
+  [ok] podman: non-vacuous: the floor scores every declared target finite and positive at every step
+  [ok] podman clairvoyant health: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant food: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant drink: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant energy: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant wood: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman clairvoyant stone: log-loss 6.215607598755275, floor 6.215607598755275: equal, so nothing gained
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+P5 RESULT True
+2026-10-14T20:15:59Z
