@@ -4417,6 +4417,69 @@ def p26_seed_key_version() -> bool:
     return ok()
 
 
+# P27's softmax search (brief 2 A2, L2a obligation 10): seeded logit vectors, each normalised by naive summation in
+# ascending and descending order; the pin keeps the one whose probabilities sum furthest from one.
+SOFTMAX_SEED, SOFTMAX_TRIALS, SOFTMAX_LOGIT = 10, 200, 30.0
+
+
+def _naive_softmax(n: int) -> list[float]:
+    """The softmax over `n` values whose naive-sum normalisation, in the worse of ascending and descending order, puts
+    the exact sum of its probabilities furthest from one, over `SOFTMAX_TRIALS` seeded logit vectors."""
+    import random
+
+    rng = random.Random(SOFTMAX_SEED)
+
+    def normalised(e: list[float], order: list[float]) -> list[float]:
+        s = 0.0
+        for v in order:
+            s += v
+        return [v / s for v in e]
+
+    def candidates():
+        for _ in range(SOFTMAX_TRIALS):
+            e = [math.exp(rng.uniform(-SOFTMAX_LOGIT, SOFTMAX_LOGIT)) for _ in range(n)]
+            yield normalised(e, sorted(e))
+            yield normalised(e, sorted(e, reverse=True))
+
+    return max(candidates(), key=lambda p: abs(math.fsum(p) - 1))
+
+
+def p27_sum_tolerance() -> bool:
+    """The probability-sum check sits at its derived bound, `len(support)` machine epsilons, for every support size a
+    bound World declares: a prediction summing to 1 ± 2·len(support)·ε is invalid, so the episode ends `invalid_reply`;
+    one summing to 1 ± len(support)·ε, and a softmax normalised by naive summation in adversarial order whose sum is not
+    exactly one, are valid and scored. Each prediction is passed through JSON first, as a reply is (brief 2 A2, L2a
+    obligation 10; review c2a87f6478ad F3)."""
+    import importlib
+
+    from judge import evaluate, scoring
+
+    expect, ok = _expecter()
+    eps = sys.float_info.epsilon
+    sizes = sorted({len(t["support"]) for w in evaluate.bound()
+                    for t in importlib.import_module(f"worlds.{w}.binding").manifest()["targets"]})
+    expect(bool(sizes), f"the bound Worlds declare support sizes {sizes}")
+
+    def verdict(n: int, p: list[float]) -> str | None:
+        return scoring.invalid({"t": json.loads(json.dumps(p))}, [{"name": "t", "support": list(range(n))}])
+
+    for n in sizes:
+        for k, valid in ((2, False), (1, True)):
+            for sign in (1, -1):
+                p = [1 + sign * k * n * eps] + [0.0] * (n - 1)
+                why = verdict(n, p)
+                expect((why is None) == valid,
+                       f"support {n}: a sum of 1 {'+' if sign > 0 else '-'} {k}·{n}·ε is "
+                       f"{'valid' if valid else 'invalid'} ({why})")
+        if n > 1:
+            p = _naive_softmax(n)
+            off = abs(math.fsum(p) - 1) / eps
+            expect(off > 0, f"support {n}: the adversarial softmax sums {off}·ε from one, not exactly one")
+            why = verdict(n, p)
+            expect(why is None, f"support {n}: the adversarial softmax, {off}·ε from one, is valid ({why})")
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5449,6 +5512,10 @@ PINS = [
     Pin("P26", "a seed record states the interpreter version that computed its key, and the issuance check refuses "
                "to compare keys across versions",
         p26_seed_key_version, (Mutant("key_version_ignored", _edits("P26_key_version_ignored")),), JUDGE_SIDE),
+    Pin("P27", "the probability-sum check sits at its derived bound for every declared support size: two bounds out is "
+               "invalid, one bound in and an adversarially summed softmax are scored",
+        p27_sum_tolerance, (Mutant("tolerance_loose", _edits("P27_tolerance_loose")),
+                            Mutant("tolerance_zero", _edits("P27_tolerance_zero"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
