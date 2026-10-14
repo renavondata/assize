@@ -1,0 +1,19 @@
+# reports/L0/forecasts/38614885877.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/38614885877.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/38614885877.jsonl: 50 open, 44 typed; resolved 3, unreadable 9
+resolved 0aabc8ae5ef3 True — reports/L2/review-2e86807fb4c36cd62b7dc1547ab8ca578e37aa2a.md at 0770d0743cf3: ACCEPT WITH OBLIGATIONS
+resolved 01fbaa718f77 True — pins run 38609729409 attempt 1 on 775f2c9c588f: success
+resolved 822f31c094dd False — run 38599332044: 109.6 minutes, bound 40
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404)
+)
+UNREAD 02d749e28bef: pins_green {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103: gh: Not Found (HTTP 404)
+)
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 191a63d44bf2: session_minutes {'run': 'local', 'bound': 25}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 2c9577e1a69c: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 3c074d68d679: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD b379e6a4b68b: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD e1ff2bd0a05c: session_minutes {'run': 'local', 'bound': 30}: not read (ValueError: invalid literal for int() with base 10: 'local')

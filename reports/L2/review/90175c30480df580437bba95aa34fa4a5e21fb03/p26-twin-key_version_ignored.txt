@@ -1,0 +1,14 @@
+copy of /home/g/git/worktrees/assize/review-195-90175c3
+  at /tmp/assize-scratch-javoui_r/assize-copy-1gix1ad9/repo
+twin: no edits applied
+pin:       P26
+protects:  a seed record states the interpreter version that computed its key, and the issuance check refuses to compare keys across versions
+role:      twin
+tree:      /tmp/assize-scratch-javoui_r/assize-copy-1gix1ad9/repo
+invoked:   /home/g/git/worktrees/assize/review-195-90175c3
+scratch:   /tmp/assize-scratch-javoui_r
+  [ok] each record states key_version 'cpython-3.11.11' (['cpython-3.11.11', 'cpython-3.11.11'])
+  [ok] a store of one version admits the next request (got [175221920])
+  [ok] a store with one record under another version refused key_version, store unchanged (got key_version)
+  [ok] a store with one record under no version refused key_version, store unchanged (got key_version)
+result:    PASS

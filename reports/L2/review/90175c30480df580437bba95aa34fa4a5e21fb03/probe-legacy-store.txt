@@ -1,0 +1,6 @@
+KEY_VERSION cpython-3.11.11 | sys.version 3.11.11
+legacy store: records 3 | any key_version False
+stored keys equal this interpreter's keys: True
+post-pr-request-1 -> SeedError key_version: key_version: the store holds keys computed under ['None'], not cpython-3.11.11; keys are not comparable across interpreter versions | store unchanged: True
+post-pr-request-2 -> SeedError key_version: key_version: the store holds keys computed under ['None'], not cpython-3.11.11; keys are not comparable across interpreter versions | store unchanged: True
+scratch removed: True
