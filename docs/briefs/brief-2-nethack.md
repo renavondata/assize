@@ -308,3 +308,33 @@ The entrants change, the P0aa case, and an `elect build` transcript.
 2. The unavailable round is itself a forecast of the elected model that resolves 0 (did not run), with proposer kind `mechanism`, under the same proper log score as every other typed forecast of that model. No new constant: the loss is the one the election already uses.
 3. Witnesses: a pin in `harness/pins.py` fails a mutant that drops an unavailable round unscored, and a pin fails a mutant that re-runs with the same draw. Both must be KILLED before the amendment is in force.
 4. Price quantity: re-runs per week and runner-minutes spent on unavailable rounds, reported on the STATUS price line (P0t). Expected direction: both fall to zero once the election has learned to avoid the unavailable model.
+
+## Wish #179 (appended; instruction #181)
+
+### Purpose
+L2 reaches the seal sooner. A2's criterion "Every OPEN obligation listed in `reports/L1/REPORT.md` is either discharged by a pin whose named mutant is KILLED with a passing twin, or is entrenched and listed as Guy's" is narrowed for obligations 44–55 (*Process, git and CI*) only. Obligations 1–43 stay under A2 as written.
+
+### Scope
+1. For each of L1 obligations 44–55, the Builder records one row in `reports/L2/obligations-44-55.md`: the obligation number, and exactly one disposition:
+   - `discharged by <pin> (<instruction or amendment that added it>)`, citing a mutant of that pin that is KILLED with a passing twin in a cited `pins` CI run on master, and one sentence saying why that mutant is the obligation's failure; or
+   - `carried to the agent repository as a design input`, with one sentence stating the input.
+2. A2's criterion counts an obligation of 44–55 as met by either disposition. Nothing in 1–43 changes, and no obligation of 44–55 needs a new pin under A2.
+3. Candidates the Builder checks first, not dispositions (the Builder decides each against item 1): 44 → P0m (real branch in CI, full clone); 45 → P0w and Wish #134's amendment; 49 → P0s (base rates per type); 50 → P0k and P0r; 52 → P0m (merge authors) and P0y; 53 → P0ab; 54 → P0v, P0aj, P0aw; 55 → A4 item 3. Where the cited pin covers only part of the obligation, the remainder is carried, not discharged.
+
+### Pre-stated criteria
+- Each of 44–55 has exactly one row; none is missing, none has both dispositions.
+- Every `discharged` row names a pin present in `harness/pins.py` at master, a mutant of it, and a `pins` CI run on master in which that mutant is KILLED with a passing twin.
+
+### Pins (each must demonstrate it can fail)
+- A check in `harness/claims.py`, run by an existing P0 pin's clean case, reads `reports/L2/obligations-44-55.md` and fails on a missing number, a row with both or neither disposition, or a `discharged` row naming a pin or mutant absent from the registry. Mutant, KILLED: the registry lookup skipped (a row citing a nonexistent pin passes).
+
+### Refusal list
+- No change to the disposition or criterion of obligations 1–43.
+- No edit to entrenched paths for this item.
+- No obligation is dropped: carrying it is a row, not an omission.
+
+### Stop-and-report boundaries
+- An obligation of 44–55 whose cited pin's mutant is not KILLED on master: carry it, and say so in STATUS.
+
+### Deliverables
+`reports/L2/obligations-44-55.md`, the check and its mutant, and the CI run cited.
