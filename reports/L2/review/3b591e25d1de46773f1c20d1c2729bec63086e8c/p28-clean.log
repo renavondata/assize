@@ -1,0 +1,17 @@
+pin:       P28
+protects:  missing predictions are priced in comparisons: a candidate predicting only its 0-loss steps does not beat the floor
+role:      clean
+tree:      /tmp/rv198
+invoked:   /tmp/rv198
+scratch:   /tmp/assize-scratch-c2ybtngf
+  [ok] non-vacuous: the floor scores all 40 steps finite, summing 45.53514973215133
+  [ok] non-vacuous: the selective candidate scores 20 steps at loss 0 and omits 20
+  [ok] non-vacuous: per scored step the selective candidate's log-loss is below the floor's
+  [ok] the selective candidate's log-loss per completed step is +inf (inf)
+  [ok] the selective candidate does not beat the floor
+  [ok] the floor beats the selective candidate
+  [ok] the candidate predicting the floor where it had omitted beats it: 0.5668919493215391 < 1.1383787433037833
+  [ok] two candidates with missing steps tie
+  [ok] a candidate does not beat itself
+  [ok] a target with no step compares with nothing
+result:    PASS

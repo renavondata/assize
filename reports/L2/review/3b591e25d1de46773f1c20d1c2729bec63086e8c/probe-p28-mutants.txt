@@ -1,0 +1,6 @@
+head (clean): P28 -> True  
+missing_free (missing at loss 0, denominator kept): P28 -> False  KILLED
+missing_uniform (missing at ln|support|): P28 -> False  KILLED
+infinite_ignored (scored inf not priced): P28 -> True  
+beats_le (non-strict): P28 -> False  KILLED
+beats_none_as_zero (empty row compares as 0): P28 -> False  KILLED

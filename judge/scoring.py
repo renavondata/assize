@@ -16,7 +16,14 @@ Each support value's row counts, per bin of predicted probability, the scored st
 on the value, how many of them realised it, and the sum of those probabilities. Every scored step enters every row once,
 an infinite-loss step included, so each row's counts sum to `scored`; a missing step enters nothing, and a target with
 no scored step has no mean entropy, never an imputed one. Tables, counts and sums add across episodes; nothing is
-pooled across targets."""
+pooled across targets.
+
+Two candidates' log-losses on a target are compared per step over every completed step, `scored + missing`, never
+over the scored steps alone (brief 2 A2, L2a obligation 11; review c2a87f6478ad F4). The record still holds a missing
+step as missing; the comparison prices it at +inf, the loss of a prediction putting nothing on the realised value. That
+price is derived, not chosen: it is the supremum of the log-loss, so omitting is never better than any prediction, and
+any finite price c would pay a candidate to omit wherever its expected loss exceeds c. One candidate beats another only
+if its per-step log-loss is strictly lower; two infinite ones tie, and a target with no step compares with nothing."""
 
 from __future__ import annotations
 
@@ -73,6 +80,21 @@ def summary(steps: Sequence[Mapping[str, float | None]], targets: Sequence[Mappi
                 "finite_sum": math.fsum(finite), "log_loss": INFINITE if infinite else math.fsum(finite)}
 
     return {t["name"]: one(t["name"]) for t in targets}
+
+
+def per_step(row: Mapping) -> float | None:
+    """The log-loss per completed step of a `summary` row, or of rows added across episodes: +inf if any step was
+    infinite or missing, else the finite sum over `scored + missing`; None if there was no step."""
+    steps = row["scored"] + row["missing"]
+    if not steps:
+        return None
+    return math.inf if row["infinite"] or row["missing"] else row["finite_sum"] / steps
+
+
+def beats(a: Mapping, b: Mapping) -> bool:
+    """Whether row `a`'s log-loss per completed step is strictly below row `b`'s, on the same target."""
+    pa, pb = per_step(a), per_step(b)
+    return pa is not None and pb is not None and pa < pb
 
 
 def step_predictions(prediction: Mapping[str, Sequence[float]], targets: Sequence[Mapping],
