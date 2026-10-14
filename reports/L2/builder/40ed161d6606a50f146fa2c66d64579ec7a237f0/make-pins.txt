@@ -220,3 +220,45 @@ MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
 [mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (5.713s + 5.697s) ../../../../../../../tmp/pins-out/runs/P9/utility_altered/mutant/transcript.log
 [mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (5.699s + 5.698s) ../../../../../../../tmp/pins-out/runs/P9/chain_update_skipped/mutant/transcript.log
 [mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.486s + 5.758s) ../../../../../../../tmp/pins-out/runs/P9/opened_for_rewrite/mutant/transcript.log
+[mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (5.748s + 5.753s) ../../../../../../../tmp/pins-out/runs/P9/genesis_empty/mutant/transcript.log
+[mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (5.697s + 5.648s) ../../../../../../../tmp/pins-out/runs/P9/signature_unchecked/mutant/transcript.log
+[mutant] P9/independent_heads: mutant fail, twin pass -> KILLED (5.758s + 6.155s) ../../../../../../../tmp/pins-out/runs/P9/independent_heads/mutant/transcript.log
+[mutant] P16/unattributed_admitted: mutant fail, twin pass -> KILLED (5.403s + 5.4s) ../../../../../../../tmp/pins-out/runs/P16/unattributed_admitted/mutant/transcript.log
+[mutant] P16/any_credential: mutant fail, twin pass -> KILLED (5.398s + 5.446s) ../../../../../../../tmp/pins-out/runs/P16/any_credential/mutant/transcript.log
+[mutant] P16/registration_taken_over: mutant fail, twin pass -> KILLED (5.299s + 5.347s) ../../../../../../../tmp/pins-out/runs/P16/registration_taken_over/mutant/transcript.log
+[mutant] P17/fixed_proposer: mutant fail, twin pass -> KILLED (8.869s + 8.257s) ../../../../../../../tmp/pins-out/runs/P17/fixed_proposer/mutant/transcript.log
+[mutant] P17/seeds_before_proposer: mutant fail, twin pass -> KILLED (9.969s + 9.177s) ../../../../../../../tmp/pins-out/runs/P17/seeds_before_proposer/mutant/transcript.log
+[mutant] P17/idempotency_dropped: mutant fail, twin pass -> KILLED (11.27s + 8.568s) ../../../../../../../tmp/pins-out/runs/P17/idempotency_dropped/mutant/transcript.log
+[mutant] P17/conflict_unchecked: mutant fail, twin pass -> KILLED (8.837s + 9.375s) ../../../../../../../tmp/pins-out/runs/P17/conflict_unchecked/mutant/transcript.log
+[mutant] P17/hash_partial: mutant fail, twin pass -> KILLED (9.482s + 8.909s) ../../../../../../../tmp/pins-out/runs/P17/hash_partial/mutant/transcript.log
+[mutant] P18/cap_ignored: mutant fail, twin pass -> KILLED (1.59s + 1.294s) ../../../../../../../tmp/pins-out/runs/P18/cap_ignored/mutant/transcript.log
+[mutant] P18/failures_dropped: mutant fail, twin pass -> KILLED (1.19s + 1.289s) ../../../../../../../tmp/pins-out/runs/P18/failures_dropped/mutant/transcript.log
+[mutant] P18/throughput_from_episodes: mutant fail, twin pass -> KILLED (1.289s + 1.288s) ../../../../../../../tmp/pins-out/runs/P18/throughput_from_episodes/mutant/transcript.log
+[mutant] P18/proposer_from_config: mutant fail, twin pass -> KILLED (1.539s + 1.289s) ../../../../../../../tmp/pins-out/runs/P18/proposer_from_config/mutant/transcript.log
+[mutant] P18/mixed_proposers_admitted: mutant fail, twin pass -> KILLED (1.591s + 1.29s) ../../../../../../../tmp/pins-out/runs/P18/mixed_proposers_admitted/mutant/transcript.log
+[mutant] P18/infinite_pooled_finite: mutant fail, twin pass -> KILLED (1.289s + 1.293s) ../../../../../../../tmp/pins-out/runs/P18/infinite_pooled_finite/mutant/transcript.log
+[mutant] P18/short_request_admitted: mutant fail, twin pass -> KILLED (1.697s + 1.406s) ../../../../../../../tmp/pins-out/runs/P18/short_request_admitted/mutant/transcript.log
+[mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (6.703s + 6.961s) ../../../../../../../tmp/pins-out/runs/P12/peak_differenced/mutant/transcript.log
+[mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (6.703s + 6.804s) ../../../../../../../tmp/pins-out/runs/P12/unmeasured_free/mutant/transcript.log
+[mutant] P19/world_table_hardcoded: mutant fail, twin pass -> KILLED (1.402s + 1.396s) ../../../../../../../tmp/pins-out/runs/P19/world_table_hardcoded/mutant/transcript.log
+[mutant] P20/crafter_price_fallback: mutant fail, twin pass -> KILLED (1.541s + 1.542s) ../../../../../../../tmp/pins-out/runs/P20/crafter_price_fallback/mutant/transcript.log
+[mutant] P22/replay_unchecked: mutant fail, twin pass -> KILLED (0.638s + 0.636s) ../../../../../../../tmp/pins-out/runs/P22/replay_unchecked/mutant/transcript.log
+[mutant] P23/partial_dropped: mutant fail, twin pass -> KILLED (10.81s + 10.66s) ../../../../../../../tmp/pins-out/runs/P23/partial_dropped/mutant/transcript.log
+[mutant] P23/interrupted_unsealed: mutant fail, twin pass -> KILLED (11.816s + 10.608s) ../../../../../../../tmp/pins-out/runs/P23/interrupted_unsealed/mutant/transcript.log
+[mutant] P23/closing_unattributed: mutant fail, twin pass -> KILLED (10.663s + 10.463s) ../../../../../../../tmp/pins-out/runs/P23/closing_unattributed/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (19.514s + 9.672s) ../../../../../../../tmp/pins-out/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (0.688s + 0.687s) ../../../../../../../tmp/pins-out/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (14.783s + 16.043s) ../../../../../../../tmp/pins-out/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (17.227s + 17.078s) ../../../../../../../tmp/pins-out/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (16.524s + 16.631s) ../../../../../../../tmp/pins-out/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (15.421s + 16.828s) ../../../../../../../tmp/pins-out/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (5.503s + 16.674s) ../../../../../../../tmp/pins-out/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (16.323s + 16.724s) ../../../../../../../tmp/pins-out/runs/P11/golden_hash_altered/mutant/transcript.log
+clean: 65/66 passed, 1/66 failed
+mutants: 185/186 killed, 0/186 survived, 0/186 inconclusive, 0/186 stale, 1/186 non-causal, 0 leaked (clean and mutant)
+twins: 185/186 passed
+skipped: 0/66 pins, 0 mutants
+report: ../../../../../../../tmp/pins-out/pins.jsonl
+PINS FAILED
+make: *** [Makefile:24: pins] Error 1
+exit 2
