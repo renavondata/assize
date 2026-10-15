@@ -1,7 +1,8 @@
-# STATUS — L2 — 2026-10-15 — a7fedfe — PR #202
-VERDICT: STOPPED: awaiting a green CI witness for review 1793d9a F1; pins CI run 38671415167 on a7fedfe: failure (reports/L2/ci/38671415167.json), the only failing pin P0l on the uncited STATUS this one replaces (P10 and every other pin green, 201/203 killed, 2 NON-CAUSAL both P0l); the next head cites a success run on this one's parent
+# STATUS — L2 — 2026-10-15 — cf44e37 — PR #202
+VERDICT: SESSION DONE: review 1793d9a F1 answered with a CI witness; pins CI run 38674917237 on cf44e37: success (reports/L2/ci/38674917237.json). The earlier run 38671415167 on a7fedfe failed only P0l on the uncited STATUS (reports/L2/ci/38671415167.json)
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
-pins: clean 71/71; mutants 203/203 KILLED; twins 203/203; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local `make pins` on 28ef714ac517, reports/L2/builder/28ef714ac5178fe8b5294f734a62f946f3d107a3/make-pins.txt; P10/leaked_not_recorded KILLED, twin passes)
+pins: clean 71/71; mutants 203/203 KILLED; twins 203/203; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (pins CI run 38674917237 on cf44e37; local `make pins` on 28ef714ac517 agrees, reports/L2/builder/28ef714ac5178fe8b5294f734a62f946f3d107a3/make-pins.txt)
+did: PR-branch session on a BLOCK (review 1793d9a F1): no code change; no forecast row appended (rule 2: the first-head rows cover the PR); session_minutes declared by PR comment
 changed: harness/pins.py, harness/edits/P10_leaked_not_recorded.toml, harness/proposer.d/l2a-o15-leaked-case.toml, reports/L2/{forecasts/d59a5e40-….jsonl,builder/28ef714…/,status/l2a-o15-leaked-case.md}
 did: `claims next '#113' 'L2a obligation 15'`: #113 held by PR #185; took obligation 15 (obligation 13 held by PR #200, by title). No switchback seed, so the first open candidate
 did: P10 makes the runtime's remove command a no-op in its own thread (thread-local, so the other runtime's thread is untouched) and plays a stubborn candidate (failed-episode site) and two polite Worlds (final-container site); asserts `leaked` only on the episode whose container stayed listed, every World a record, the container still listed as control; each case removes what it leaked
