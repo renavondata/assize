@@ -1,0 +1,7 @@
+# P13's mutant `bin_exact_rational` (brief 2 A2, L2a obligation 14; review 7e18816c626e F2): the bin is the floor of
+# the exact rational q·bins, so the edges are the reals b/bins, not the doubles `b / bins` the rule states, and a
+# prediction of 0.3, the double below 3/10, goes to bin 2.
+[[edit]]
+path = "judge/scoring.py"
+old = "    return bisect.bisect_right([b / bins for b in range(1, bins)], q)\n"
+new = "    import fractions\n    return min(math.floor(fractions.Fraction(q) * bins), bins - 1)\n"

@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o14-bin-edges (brief 2 A2, L2a obligation 14 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "bb94375a-b38f-4590-b644-99a653b6c0b7"
