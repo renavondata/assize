@@ -1,0 +1,10 @@
+registry harness: 1 pins, 2 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P10: observed pass -> ok (23.66s) out/pins/runs/P10/clean/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (33.688s + 23.423s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P10/leaked_not_recorded: mutant fail, twin pass -> KILLED (23.074s + 23.375s) out/pins/runs/P10/leaked_not_recorded/mutant/transcript.log
+clean: 1/1 passed, 0/1 failed
+mutants: 2/2 killed, 0/2 survived, 0/2 inconclusive, 0/2 stale, 0/2 non-causal, 0 leaked (clean and mutant)
+twins: 2/2 passed
+skipped: 0/1 pins, 0 mutants
+report: out/pins/pins.jsonl
+PINS PASSED
