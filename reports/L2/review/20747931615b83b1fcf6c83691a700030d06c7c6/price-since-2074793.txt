@@ -1,0 +1,10 @@
+# `uv run --frozen python -m harness.ledger price --since 2074793`, run by assize-reviewer session a0fc77db-b11f-4111-b6f9-738867c41544 on 2026-10-15 (run 38666858505)
+# price over [2026-10-15T09:39:31+08:00, 2026-10-15T01:44:25Z) since 2074793
+workflow .github/workflows/pins-master.yml runner-min 1
+workflow .github/workflows/pins.yml runner-min 0
+workflow .github/workflows/review.yml runner-min 0
+pins CI minutes 0
+model claude-haiku-5-5: sessions 1, runner-min 0, cost $0.00 over 0 sessions with a cost, cost unknown 1
+sessions with cost unknown 1 of 1
+wishes filed 0: merged 0, open 0
+price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 1; runner-min 1; models claude-haiku-5-5 s1/0m/$?; wish-latency median 0.0h max 0.0h open 0; sessions-over-bound 0/0; sessions-lost-to-limit 0

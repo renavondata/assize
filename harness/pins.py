@@ -3755,6 +3755,7 @@ def p10_container_teardown() -> bool:
     among them, is killed and removed: the runtime lists nothing of it afterwards, both when torn down directly and
     when its stalled step times out, which is then recorded step_timeout, not leaked (brief 1 A4 item 5)."""
     import dataclasses
+    import threading
     import time
 
     from harness.fixtures import candidates
@@ -3789,8 +3790,33 @@ def p10_container_teardown() -> bool:
                f"{rt.name}: the stalled episode is recorded step_timeout ({[r['termination'] for r in records]})")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: the runtime lists no candidate container afterwards ({strays})")
+        # The other clause (brief 1 A4 item 5; review 2402ed7d56a5 F3, L2a obligation 15): a container the runtime still
+        # lists after teardown is an episode recorded `leaked`, counted, never dropped. Removal is made to fail, in this
+        # thread only, by a remove command that does nothing; the cases then remove what they leaked.
+        for behaviour, worlds, want in (("stubborn", 1, ["leaked"]), ("polite", 2, [None, "leaked"])):
+            held.fail = True
+            try:
+                records = episodes.run(rt, image, _short_crafter(worlds), binding.manifest(),
+                                       command=candidates.command(behaviour), t=t)
+            finally:
+                held.fail = False
+            kept = sorted(_candidates(rt) - before)
+            say(f"  {rt.name} {behaviour}, removal failing: {json.dumps(records)}")
+            codes = [r["termination"] for r in records]
+            expect(len(records) == worlds, f"{rt.name}: {behaviour}: every World is a record, none dropped ({len(codes)} of {worlds})")
+            expect(all(code == "leaked" if w == "leaked" else code != "leaked" for code, w in zip(codes, want)),
+                   f"{rt.name}: {behaviour}: only the episode whose container stayed listed is `leaked` ({codes})")
+            expect(len(kept) == 1, f"{rt.name}: {behaviour}: control: the runtime still lists the one leaked container ({kept})")
+            _removing_strays(rt, before)
 
-    _each_runtime(usable, case, expect)
+    held = threading.local()
+    real_remove_argv = runtime.remove_argv
+    # A remove command that exits 0 and removes nothing, for the threads that set `held.fail`; every other call is real.
+    runtime.remove_argv = lambda rt, name: ["true"] if getattr(held, "fail", False) else real_remove_argv(rt, name)
+    try:
+        _each_runtime(usable, case, expect)
+    finally:
+        runtime.remove_argv = real_remove_argv
     return ok()
 
 
@@ -5641,8 +5667,10 @@ PINS = [
     Pin("P28", "missing predictions are priced in comparisons: a candidate predicting only its 0-loss steps does not "
                "beat the floor",
         p28_missing_priced, (Mutant("scored_only", _edits("P28_scored_only")),), JUDGE_SIDE),
-    Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
-        p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
+    Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing; a "
+               "container still listed after teardown, at either site, is a `leaked` episode, counted",
+        p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),
+                                 Mutant("leaked_not_recorded", _edits("P10_leaked_not_recorded"))), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",
         p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),), JUDGE_SIDE),
     Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",
