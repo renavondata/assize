@@ -1,0 +1,35 @@
+registry harness: 75 pins, 213 mutants; phase=clean; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (3.285s) ../out/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.629s) ../out/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (1.179s) ../out/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (5.238s) ../out/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (1.73s) ../out/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (1.483s) ../out/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (1.986s) ../out/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (12.597s) ../out/runs/P0h/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.579s) ../out/runs/P0i/clean/transcript.log
+  [ok] reports/L2/status/l2a-o16-teardown-on-exception.md: cites [('38683531457', 'ee0d36a'), ('38683531457', 'ee0d36a')]; findings []
+  [ok] reports/L2/status/l2a-o17-image-digest-stated.md: cites [('38697151649', '2a80456'), ('38697151649', '2a80456')]; findings []
+  [ok] reports/L2/status/l2a-o18-image-carries-verify.md: cites [('38729328788', 'b21ea47'), ('38729328788', 'b21ea47')]; findings []
+  [ok] reports/L2/status/l2a-o20-p6-native-vocabulary.md: cites [('38692587753', '8c1a58a'), ('38692587753', '8c1a58a')]; findings []
+  [FAIL] reports/L2/status/l2a-o22-declared-runtime.md: cites []; findings ['reports/L2/status/l2a-o22-declared-runtime.md: uncited: no `pins CI run <id> on <sha>` citation']
+  [ok] reports/L2/status/l2a-o3-replay-checked.md: cites [('38336299013', 'eaed455')]; findings []
+  [ok] reports/L2/status/l2a-o4-interrupted-recorded.md: cites [('38359040477', '38aa0e3')]; findings []
+  [ok] reports/L2/status/l2a-o5-episode-guard.md: cites [('38399300458', '1da5f51')]; findings []
+  [ok] reports/L2/status/l2a-o6-private-files.md: cites [('38580057645', '4766d1f')]; findings []
+  [ok] reports/L2/status/l2a-o7-csprng-witness.md: cites [('38598395181', 'cd68769')]; findings []
+  [ok] reports/L2/status/l2a-o8-seed-key-version.md: cites [('38609729409', '775f2c9')]; findings []
+  [ok] reports/L2/status/l2a-o9-clairvoyant-channels.md: cites [('38640847424', '5e60c95')]; findings []
+  [ok] REPORT.md: 1 verdict lines from L1; findings []
+  [ok] obligations table every row carried: findings [], want []
+  [ok] obligations table one row discharged by a registry pin and mutant: findings [], want []
+  [ok] obligations table a number missing: findings ['missing'], want ['missing']
+  [ok] obligations table a number twice: findings ['duplicate'], want ['duplicate']
+  [ok] obligations table both dispositions: findings ['disposition'], want ['disposition']
+  [ok] obligations table neither disposition: findings ['disposition'], want ['disposition']
+  [ok] obligations table a nonexistent pin: findings ['not_in_registry'], want ['not_in_registry']
+  [ok] obligations table a nonexistent mutant: findings ['not_in_registry'], want ['not_in_registry']
+  [ok] obligations table no CI run cited: findings ['discharge_uncited'], want ['discharge_uncited']
+  [ok] reports/L2/obligations-44-55.md exists
+  [ok] reports/L2/obligations-44-55.md: findings []
+result:    FAIL

@@ -1,0 +1,1 @@
+{"id": "cd0777da1aa4", "ts": "2026-10-15T16:10:35Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38760322282"}, "outcome": false, "witness": "pins run 38760312023 attempt 1 on 436088ee5b30: failure"}
