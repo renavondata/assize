@@ -1,0 +1,6 @@
+# P32's mutant `declaration_env_ignored` (L2a obligation 22): the declaration is never read from the environment, so a
+# context that sets it is held to nothing.
+[[edit]]
+path = "harness/pins.py"
+old = "    declared = os.environ.get(DECLARED_RUNTIME) or None if declared is None else declared\n"
+new = "    declared = None if declared is None else declared\n"

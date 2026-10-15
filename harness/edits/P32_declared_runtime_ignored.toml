@@ -1,0 +1,6 @@
+# P32's mutant `declared_runtime_ignored` (L2a obligation 22): the declaration check is skipped, so a runtime other than
+# the declared one being usable stands in for it, as P2 did.
+[[edit]]
+path = "judge/runtime.py"
+old = "    if declared not in usable:\n"
+new = "    if False:\n"

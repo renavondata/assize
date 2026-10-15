@@ -87,6 +87,20 @@ def engine(rt: Runtime) -> Engine:
     return {"docker": _docker, "podman": _podman}[rt.name](rt)
 
 
+def declared_unmet(declared: str | None, usable: Sequence[str]) -> str | None:
+    """Why the runtime a witnessing context declares it must witness is not witnessed, or None. A context that declares
+    nothing (None) is held to nothing here; one that declares a runtime is held to that one, so that the other being
+    usable cannot stand in for it (brief 2 A2, L2a obligation 22; review be10563c5496 F2)."""
+    known = [rt.name for rt in RUNTIMES]
+    if declared is None:
+        return None
+    if declared not in known:
+        return f"the declared runtime {declared!r} is none of {known}"
+    if declared not in usable:
+        return f"the declared runtime {declared!r} is not usable (usable: {list(usable)})"
+    return None
+
+
 def pull(rt: Runtime, image: str) -> None:
     """Make `image` present locally; containers then run with `--pull=never`."""
     if subprocess.run([rt.binary, "image", "inspect", image], capture_output=True).returncode:
