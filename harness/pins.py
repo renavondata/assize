@@ -3199,6 +3199,58 @@ PURITY_MANIFEST = {"world": "fx", "observation": [{"name": "semantic", "vocabula
                    "utility": {"components": []}}
 
 
+PATTERN_FIXTURE = (  # (label, schema, patterns wanted) -- review 1247b4d888dd F2: a regex can hide vocabulary
+    ("no pattern", {"type": "object"}, set()),
+    ("the identifier pattern", {"propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"}}, set()),
+    ("a pattern", {"propertyNames": {"pattern": "^(sem|inv)"}}, {"^(sem|inv)"}),
+    ("a patternProperties key", {"patternProperties": {"^inv": {}}}, {"^inv"}),
+)
+
+
+def schema_patterns(schema: object) -> set[str]:
+    """Every regex in a schema: each `pattern` value and each `patternProperties` key."""
+    if isinstance(schema, dict):
+        found = {schema["pattern"]} if isinstance(schema.get("pattern"), str) else set()
+        found |= set(schema.get("patternProperties", ()))
+        return found.union(*(schema_patterns(v) for v in schema.values()))
+    if isinstance(schema, list):
+        return set().union(*(schema_patterns(v) for v in schema))
+    return set()
+
+
+def native_entries(data: dict) -> list[str]:
+    """The top-level keys of a World's native data and the entries under each: a dict's keys, a list's strings."""
+    out = []
+    for key, value in data.items():
+        out.append(str(key))
+        out += [str(k) for k in value] if isinstance(value, (dict, list, tuple)) else []
+    return out
+
+
+def crafter_native() -> list[str]:
+    """Crafter's own names, read from the package: the top-level keys of data.yaml with their entries, and the keys of
+    `info` with the inventory and achievement names it carries (review 1247b4d888dd F2)."""
+    import crafter
+    import crafter.constants as constants
+
+    data = {k: getattr(constants, k) for k in ("achievements", "actions", "collect", "items", "make", "materials",
+                                               "place", "walkable")}
+    env = crafter.Env()
+    env.reset()
+    info = env.step(0)[3]
+    return native_entries(data) + native_entries(info) + [str(k) for v in info.values() if isinstance(v, dict) for k in v]
+
+
+def interface_words(manifest_schema: dict) -> frozenset[str]:
+    """Words the interface itself defines and a World's native data may share by accident: the keywords of JSON Schema
+    and the section names of the manifest."""
+    import jsonschema
+    from worlds.spec import purity
+
+    return frozenset().union(*(purity.tokens(k) for k in jsonschema.Draft202012Validator.VALIDATORS),
+                             *(purity.tokens(k) for k in manifest_schema["properties"]))
+
+
 def p1_seed_issuance() -> bool:
     """Evaluation seeds are issued from a CSPRNG into judge-private storage, keyed by the seed the World actually
     generates from, and never reissued: two requests from two store openings get disjoint evaluation-domain seeds, all
@@ -3350,6 +3402,20 @@ def p6_schema_purity() -> bool:
     found = purity.violations(schemas, vocab)
     expect(len(vocab) > 0 and not found,
            f"real schemas: {len(vocab)} vocabulary tokens from {sorted(manifests)}; found in schemas: {found}")
+
+    allowed = {schemas["manifest.schema.json"]["$defs"]["identifier"]["pattern"]}
+    for label, schema, want in PATTERN_FIXTURE:
+        got = schema_patterns(schema) - allowed
+        expect(got == want, f"fixture {label}: patterns {sorted(got)}, want {sorted(want)}")
+    patterns = {name: schema_patterns(s) - allowed for name, s in schemas.items()}
+    expect(not any(patterns.values()), f"real schemas carry no pattern but the identifier pattern: {patterns}")
+
+    native = frozenset().union(*map(purity.tokens, crafter_native())) - vocab - interface_words(
+        schemas["manifest.schema.json"])
+    expect({"inventory", "achievements", "discount", "reward", "pos", "diamond"} <= native | vocab,
+           f"Crafter's native names include info keys and data.yaml entries ({len(native)} not in the manifest)")
+    found = purity.violations(schemas, native)
+    expect(len(native) > 0 and not found, f"real schemas: {len(native)} native tokens; found in schemas: {found}")
     return ok()
 
 
@@ -5671,8 +5737,11 @@ PINS = [
                "container still listed after teardown, at either site, is a `leaked` episode, counted",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),
                                  Mutant("leaked_not_recorded", _edits("P10_leaked_not_recorded"))), JUDGE_SIDE),
-    Pin("P6", "no manifest vocabulary token appears in an interface schema file",
-        p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),), JUDGE_SIDE),
+    Pin("P6", "no manifest vocabulary or World-native name appears in an interface schema file, and no schema regex "
+              "but the identifier pattern",
+        p6_schema_purity, (Mutant("crafter_field_in_schema", _edits("P6_crafter_field_in_schema")),
+                           Mutant("native_key_in_schema", _edits("P6_native_key_in_schema")),
+                           Mutant("pattern_hides_vocabulary", _edits("P6_pattern_hides_vocabulary"))), JUDGE_SIDE),
     Pin("P11", "the same seed and actions give an identical Crafter trajectory hash; emitted observations conform",
         p11_crafter_determinism, (Mutant("set_order_restored", _edits("P11_set_order_restored")),
                                   Mutant("seed_ignored", _edits("P11_seed_ignored")),
