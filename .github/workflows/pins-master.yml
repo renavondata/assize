@@ -36,7 +36,7 @@ jobs:
       - name: Restore the judge from master
         run: |
           set -euo pipefail
-          git fetch --no-tags origin master
+          git rev-parse --verify origin/master
           git ls-files -z -- harness ':(exclude)harness/proposer.d' | xargs -0 -r rm -f
           git checkout origin/master -- harness Makefile pyproject.toml uv.lock
       - name: Sync environment
