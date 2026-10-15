@@ -12,7 +12,8 @@ Non-interactive and idempotent per `request_id`. In order:
    refused `interrupted`: its seeds are spent and never reissued, and a new `request_id` is needed. The next request
    of its World seals it into the ledger first, whoever asks it (`_seal`, below; reports/L1/REPORT.md obligation 4).
 3. The World must be one the judge binds, its manifest must commit a price, `n_episodes` must be a positive integer, the
-   runtime usable and the image present locally; otherwise the request is refused before any seed is issued. The judge
+   runtime usable and the image present locally under the ID it is asked by (`image_not_id` if it resolves to an image
+   whose ID is another, `_present`); otherwise the request is refused before any seed is issued. The judge
    binds every directory of `worlds/` holding both a `manifest.json` and a `binding.py`, under the directory's name; it
    keeps no table of Worlds, so a World is added by its directory alone (brief 2 A2, P19). A World's price is its
    manifest's `price` block, never another World's (P20).
@@ -22,8 +23,11 @@ Non-interactive and idempotent per `request_id`. In order:
    included, with its termination code, log-loss, calibration, measured compute and price.
 6. Each record is stamped with `schema_version`, `judge_sha256` (the hash of the judge's code and config, `judge_hash`),
    the candidate image digest, its `proposer`, the World, the runtime, the request's episode count and the episode's
-   achievement set, then chained and appended to the World's append-only ledger as its episode ends, and the request's
-   head signed after the last (`ledger.append`). Steps 4 to 6 hold the World's request lock, and begin by sealing
+   achievement set. The digest a record's `image` means is the image ID its `runtime` reports for the candidate, which
+   under Podman and Docker's classic image store is the SHA-256 of the image's config blob: not a registry manifest
+   digest, which names one encoding of the image in one registry, and not a name (brief 2 A2, L2a obligation 17;
+   review 6debf231b630 F5). Each record is then chained and appended to the World's append-only ledger as its
+   episode ends, and the request's head signed after the last (`ledger.append`). Steps 4 to 6 hold the World's request lock, and begin by sealing
    every interrupted request of the World (`ledger.seal_interrupted`): the episodes it played stay in the ledger, and
    one closing record states its seeds issued, the image and proposer they were issued to (recorded with them at
    issue) and its episodes recorded, all signed. So a request killed and asked again
@@ -119,8 +123,16 @@ def _usable(name: str) -> runtime.Runtime:
 
 
 def _present(rt: runtime.Runtime, image: str) -> None:
-    if subprocess.run([rt.binary, "image", "inspect", image], capture_output=True).returncode:
+    """`image` is present under `rt` and is the image ID `rt` reports for it (`image inspect`'s `.Id`), so the `image`
+    a record carries is that ID and nothing that merely resolves to an image: another ID, a name, a manifest digest."""
+    out = subprocess.run([rt.binary, "image", "inspect", "--format", "{{.Id}}", image], capture_output=True, text=True)
+    if out.returncode:
         raise Refused("image_absent", f"{image} is not present under {rt.name}; the judge never pulls a candidate")
+    iid = out.stdout.strip()
+    iid = iid if iid.startswith("sha256:") else f"sha256:{iid}"
+    if iid != image:
+        raise Refused("image_not_id", f"{image} resolves under {rt.name} to the image whose ID is {iid}; a record "
+                                      f"names a candidate by its image ID, so register and ask with that")
 
 
 def _played(binding, issued: Sequence[int], m: dict, achieved: list):
