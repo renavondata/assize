@@ -1,0 +1,4 @@
+# Actions API, read 2026-10-15T07:11:18Z
+# pins runs on 8c1a58a (first pins run of PR #205) and on 48b1eb5 (reviewed head)
+8c1a58a15a841026a187417e9d31d90d39303287 completed success 38692587753 attempt 1 2026-10-15T06:28:12Z..2026-10-15T07:00:57Z https://github.com/renavondata/assize/actions/runs/38692587753
+48b1eb5e291f700ce144d98e9b192b64c7845a43 in_progress null 38696281247 attempt 1 2026-10-15T07:03:58Z..2026-10-15T07:04:02Z https://github.com/renavondata/assize/actions/runs/38696281247

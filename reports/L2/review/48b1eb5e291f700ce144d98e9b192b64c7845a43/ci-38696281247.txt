@@ -1,0 +1,16 @@
+# gh run view 38696281247 --log, filtered; run on 48b1eb5e291f700ce144d98e9b192b64c7845a43, read 2026-10-15T07:37:56Z
+38696281247 pins 48b1eb5e291f700ce144d98e9b192b64c7845a43 completed failure attempt 1 2026-10-15T07:03:58Z..2026-10-15T07:36:15Z
+2026-10-15T07:04:05.3084348Z   clean: true
+2026-10-15T07:11:29.7596373Z registry harness: 72 pins, 208 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+2026-10-15T07:11:29.7606505Z [clean ] P0l: observed fail -> FAILED (0.33s) out/pins/runs/P0l/clean/transcript.log
+2026-10-15T07:11:29.7607177Z CLEAN FAILED: P0l (observed fail)
+2026-10-15T07:11:29.7658649Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.359s + 0.359s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+2026-10-15T07:15:45.1159420Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.357s + 0.357s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+2026-10-15T07:15:45.1160470Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+2026-10-15T07:15:45.1161481Z [mutant] P0l/obligation_registry_skipped: mutant fail, twin fail -> NON-CAUSAL (0.357s + 0.358s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+2026-10-15T07:15:45.1162805Z MUTANT NON-CAUSAL: P0l/obligation_registry_skipped
+2026-10-15T07:17:05.9452293Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.357s + 0.357s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+2026-10-15T07:36:10.1289772Z clean: 71/72 passed, 1/72 failed
+2026-10-15T07:36:10.1290716Z mutants: 206/208 killed, 0/208 survived, 0/208 inconclusive, 0/208 stale, 2/208 non-causal, 0 leaked (clean and mutant)
+2026-10-15T07:36:10.1291472Z twins: 206/208 passed
+2026-10-15T07:36:10.1292920Z PINS FAILED
