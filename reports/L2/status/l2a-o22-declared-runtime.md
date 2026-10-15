@@ -8,7 +8,7 @@ did: F2 and F3 are obligations, not worked here (A1.4). PR branch: no forecast r
 decided (not asked): STOPPED is the right verdict while P0x is red on every branch — p(stands on review)=0.8
 decided (not asked): keep harness/proposer.d/l2a-o22-declared-runtime.toml unchanged; this session wrote only reports/ — p=0.75
 forecasts: made 0 here (PR branch; declaration posted as a comment); earlier on this branch 4 (pins_green #213 p=0.5, review_accept #213 p=0.55, host_verdict L2 FIT p=0.35, session_minutes bound 90 p=0.6); see `ledger proposer builder`
-price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 2; runner-min 0
+price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 10; runner-min 480 (`ledger price --since` the merge base; 9286784 carried a value typed before the command returned, corrected here)
 obligations added: L3: none. L2a (from review 436088e): F2, a pin whose mutant deletes the `_expect_declared` call from `p2_peek` (with `ASSIZE_RUNTIME` set); F3, P0x red on every branch until #211/#212 carry a `Price:` line or P0x treats signed drafts otherwise
 NEEDS YOU (at most 1): none
 next: a master Builder takes signed instruction #211 (oldest open signed), then #212; then this PR rebuilds once P0x is green on master
