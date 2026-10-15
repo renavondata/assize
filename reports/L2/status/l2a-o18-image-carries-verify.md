@@ -1,6 +1,6 @@
 # reports/L2/status/l2a-o18-image-carries-verify.md
-# STATUS — L2 — 2026-10-15 — 9cc7af6 — PR #207
-VERDICT: SESSION DONE: L2a obligation 18 discharged by P31; local `make pins` green on 9cc7af6 (CI run to follow on the PR head)
+# STATUS — L2 — 2026-10-15 — b264ff0 — PR #207
+VERDICT: STOPPED: review round 1 BLOCK (F1: STATUS cited no `pins` run, so P0l failed and its mutants went NON-CAUSAL); pins CI run 38720970186 on b264ff0 failed on P0l alone; this reports-only commit cites it, and the next commit will cite the green run on this head. Code is unchanged since 9cc7af6; local `make pins` green there
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
 pins: clean 74/74; mutants 209/209 KILLED; twins 209/209; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local `make pins` on 9cc7af6, Podman only, Docker not usable here, reports/L2/builder/9cc7af6ba348ae731078848237479152a6de7442/make-pins.txt)
 changed: release/Containerfile, judge/{__main__.py,README.md}, harness/{pins.py,edits/P31_*.toml,proposer.d/l2a-o18-image-carries-verify.toml}, reports/L2/{forecasts/8d5ce540-….jsonl,builder/9cc7af6…/,status/l2a-o18-image-carries-verify.md}
