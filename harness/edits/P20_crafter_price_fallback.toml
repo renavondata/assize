@@ -1,6 +1,7 @@
 # P20's mutant `crafter_price_fallback` (brief 2 A2): a World whose manifest commits no price is charged Crafter's
-# rates, so it is evaluated at a price nobody derived for it.
+# rates, so it is evaluated at a price nobody derived for it. The fallback carries Crafter's delta too, so the
+# derivation check (P33) passes it and only P20's refusal stands between it and a scored run.
 [[edit]]
 path = "judge/price.py"
 old = '''    c = manifest.get("price")'''
-new = '''    c = manifest.get("price") or {"cpu_s": 0.0004166666666666667, "memory_gb_s": 0.00038805107275644935}'''
+new = '''    c = manifest.get("price") or {"cpu_s": 0.0004166666666666667, "memory_gb_s": 0.00038805107275644935, "delta": 0.5}'''

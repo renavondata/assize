@@ -58,11 +58,12 @@
       }
     },
     "price": {
-      "description": "The exchange rate of compute into the per-episode utility: utility per CPU-second and per gigabyte-second (1e9 bytes) of peak memory, committed with its derivation.",
+      "description": "The exchange rate of compute into the per-episode utility: utility per CPU-second and per gigabyte-second (1e9 bytes) of peak memory, committed with its derivation. `delta` is the smallest difference in per-episode utility the World's FIT criterion requires the court to detect; the rates are its derivation, an episode exhausting every allowance charged `delta`, half for each resource (judge/price.py).",
       "type": "object",
-      "required": ["cpu_s", "memory_gb_s", "rationale"],
+      "required": ["cpu_s", "memory_gb_s", "delta", "rationale"],
       "additionalProperties": false,
       "properties": {
+        "delta": {"type": "number", "exclusiveMinimum": 0},
         "cpu_s": {"type": "number", "exclusiveMinimum": 0},
         "memory_gb_s": {"type": "number", "exclusiveMinimum": 0},
         "rationale": {"type": "string", "minLength": 1}

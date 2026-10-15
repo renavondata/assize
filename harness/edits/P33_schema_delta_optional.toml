@@ -1,0 +1,6 @@
+# P33's mutant `schema_delta_optional` (L2a obligation 19): the manifest schema no longer requires a price's delta, so a
+# manifest may commit rates with no derivation the judge can check.
+[[edit]]
+path = "worlds/spec/manifest.schema.json"
+old = '''      "required": ["cpu_s", "memory_gb_s", "delta", "rationale"],'''
+new = '''      "required": ["cpu_s", "memory_gb_s", "rationale"],'''
