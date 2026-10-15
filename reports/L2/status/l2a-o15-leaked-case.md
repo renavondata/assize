@@ -1,5 +1,5 @@
-# STATUS — L2 — 2026-10-15 — 28ef714 — PR #202
-VERDICT: SESSION DONE: L2a obligation 15 delivered (review 2402ed7d56a5 F3); pins green locally on 28ef714 (CI run to follow on the PR head)
+# STATUS — L2 — 2026-10-15 — a7fedfe — PR #202
+VERDICT: STOPPED: awaiting a green CI witness for review 1793d9a F1; pins CI run 38671415167 on a7fedfe: failure (reports/L2/ci/38671415167.json), the only failing pin P0l on the uncited STATUS this one replaces (P10 and every other pin green, 201/203 killed, 2 NON-CAUSAL both P0l); the next head cites a success run on this one's parent
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
 pins: clean 71/71; mutants 203/203 KILLED; twins 203/203; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (local `make pins` on 28ef714ac517, reports/L2/builder/28ef714ac5178fe8b5294f734a62f946f3d107a3/make-pins.txt; P10/leaked_not_recorded KILLED, twin passes)
 changed: harness/pins.py, harness/edits/P10_leaked_not_recorded.toml, harness/proposer.d/l2a-o15-leaked-case.toml, reports/L2/{forecasts/d59a5e40-….jsonl,builder/28ef714…/,status/l2a-o15-leaked-case.md}
