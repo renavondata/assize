@@ -1,0 +1,16 @@
+# price over [2026-10-15T09:01:28+08:00, 2026-10-15T04:00:11Z) since 6850471
+item #200 latency 0.0h
+item #203 latency 0.0h
+workflow .github/workflows/build.yml runner-min 160
+workflow .github/workflows/failed.yml runner-min 2
+workflow .github/workflows/pins-master.yml runner-min 4
+workflow .github/workflows/pins.yml runner-min 193
+workflow .github/workflows/review.yml runner-min 63
+pins CI minutes 193
+model claude-fable-5-1: sessions 1, runner-min 0, cost $0.00 over 0 sessions with a cost, cost unknown 1
+model claude-haiku-5-5: sessions 2, runner-min 53, cost $0.37 over 2 sessions with a cost, cost unknown 0
+model claude-opus-5-5: sessions 3, runner-min 5, cost $1.57 over 2 sessions with a cost, cost unknown 1
+model claude-sonnet-5-5: sessions 5, runner-min 165, cost $2.46 over 5 sessions with a cost, cost unknown 0
+sessions with cost unknown 2 of 11
+wishes filed 0: merged 0, open 0
+price: guy-items 2; guy-latency median 0.0h max 0.0h; sessions 11; runner-min 422; models claude-fable-5-1 s1/0m/$?, claude-haiku-5-5 s2/53m/$0.37, claude-opus-5-5 s3/5m/$1.57+?, claude-sonnet-5-5 s5/165m/$2.46; wish-latency median 0.0h max 0.0h open 0; sessions-over-bound 0/1; sessions-lost-to-limit 0
