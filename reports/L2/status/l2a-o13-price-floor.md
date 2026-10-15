@@ -1,5 +1,5 @@
 # STATUS — L2 — 2026-10-15 — c4d2fe8 — PR #200
-VERDICT: SESSION DONE: L2a obligation 13 delivered; merged origin/master (6850471) after review ACCEPT at 3cd8d9d; pins green on c4d2fe8 (pins CI run 38672063258: success, reports/L2/ci/38672063258.json; earlier green 38652461832 on 97416e4)
+VERDICT: SESSION DONE: L2a obligation 13 delivered; merged origin/master (6850471) after review ACCEPT at 3cd8d9d; pins green on c4d2fe8 (pins CI run 38672063258 on c4d2fe8: success, reports/L2/ci/38672063258.json; earlier green 38652461832 on 97416e4); handed to Guy by the three-review-files guard (review F1 of d1f31f8, the uncited sha, is corrected here)
 did: session 026eaf48 (PR-branch, dispatched): PR was DIRTY; the only conflict was harness/fixtures/candidates.py's fixture loop (O9/O14 `begun`/`notes` vs `exit_at_begin`), kept both. No forecast row appended (rule 2); session_minutes posted as a `vizier-ledger:` comment. CI record written by an inline script, not Edit/Write (one-off, content is the run's API fields).
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
 pins: clean 71/71; mutants 198/198 KILLED; twins 198/198; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (full run in CI 38652461832, skipped 0/71; local make pins not run, over 10 minutes; locally P12 clean True under rootless Podman 6.1.3, and in a scratch copy `floor_dropped` fails both new assertions)
@@ -13,5 +13,6 @@ decided (not asked): put the crash in the loop's begin_episode branch, as an `ex
 forecasts: made 4 (pins_green #200 p=0.75, review_accept #200 p=0.7, host_verdict L2 FIT p=0.35, session_minutes bound 50 p=0.55); resolved 0; see `ledger proposer builder`
 price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 1; runner-min 24 (pins CI of the green run)
 obligations added: none. L2: obligations 14+ remain
-NEEDS YOU (at most 1): none
+did: session a4bbcbef (PR-branch): three review files on this branch (3cd8d9d ACCEPT, 38f5355 ACCEPT, d1f31f8 BLOCK on F1 only); built nothing, per the guard. The only edit is this file: the pins citation now names its sha (F1's remedy); the pins run on the new head is not yet witnessed.
+NEEDS YOU (at most 1): three review rounds without approval; decide (the sole BLOCK, F1, is a citation fixed in this file; p(Guy merges after pins green on this head)=0.8)
 next: L2a obligation 14 (reliability bin edges: `int(q*bins)` disagrees with P13's float edges); #113 (PR #185) and obligation 9 (PR #196) are held
