@@ -1,0 +1,15 @@
+pin:       P0r
+protects:  a forecast row a pull request adds after the head of its first pins run is late
+role:      clean
+tree:      /home/g/actions-runner/_work/assize/assize
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-vm53t4em
+  [ok] fixture: the branch adds one forecast row ({'reports/L2/forecasts.jsonl': ['{"id": "b12abb1e7f52", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "builder", "model": "m", "session": "s"}, "sha_before": "0000000000000000000000000000000000000000", "claim": "late", "p": 0.5, "resolves_by": "r"}']})
+  [ok] fixture: the first pull_request pins run is run 1 ({'id': 1, 'head_sha': '2466970a29f7b2ea110002185bc1968892fcbaf3', 'created_at': '2026-01-01T00:00:00Z', 'event': 'pull_request', 'path': '.github/workflows/pins.yml'})
+  [ok] fixture: a forecast first present in the second commit, after the first run's head, is late (['reports/L2/forecasts.jsonl: late_forecast: row \'{"id": "b12abb1e7f52", "ts": "2026-01-01T00:00:00Z", "proposer": {"kind": "build\'... is not in the tree at 2466970a29f7, the head of the first pins run'])
+  [ok] fixture: the same forecast present at the first run's head is not late ([])
+  [ok] real branch: base resolved (454d563acc0929a824ec8d62da0cfc391ab28cc6)
+    real branch adds 4 forecast rows in ['reports/L2/forecasts/e2d7e94f-8f74-49fc-b972-2625f0572a05.jsonl']
+  [ok] real branch: name resolved ('instr-212-pins-master-origin'; GITHUB_HEAD_REF in CI, else the checked-out branch)
+  [FAIL] real branch instr-212-pins-master-origin: first pins run 38781223150 on 983a5c861ab4 of 4; findings ['reports/L2/forecasts/e2d7e94f-8f74-49fc-b972-2625f0572a05.jsonl: late_forecast: row \'{"id": "c0146418e50c", "ts": "2026-10-15T20:28:27Z", "proposer": {"kind": "build\'... is not in the tree at 983a5c861ab4, the head of the first pins run', 'reports/L2/forecasts/e2d7e94f-8f74-49fc-b972-2625f0572a05.jsonl: late_forecast: row \'{"id": "9bb665d97354", "ts": "2026-10-15T20:28:27Z", "proposer": {"kind": "build\'... is not in the tree at 983a5c861ab4, the head of the first pins run', 'reports/L2/forecasts/e2d7e94f-8f74-49fc-b972-2625f0572a05.jsonl: late_forecast: row \'{"id": "d23ea5ec248f", "ts": "2026-10-15T20:28:27Z", "proposer": {"kind": "build\'... is not in the tree at 983a5c861ab4, the head of the first pins run', 'reports/L2/forecasts/e2d7e94f-8f74-49fc-b972-2625f0572a05.jsonl: late_forecast: row \'{"id": "cf425a519880", "ts": "2026-10-15T20:28:27Z", "proposer": {"kind": "build\'... is not in the tree at 983a5c861ab4, the head of the first pins run']
+result:    FAIL

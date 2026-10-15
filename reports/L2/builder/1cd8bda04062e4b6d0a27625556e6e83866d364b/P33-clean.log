@@ -1,0 +1,16 @@
+pin:       P33
+protects:  a World's price is the derivation from its own committed delta; evaluate() refuses underived rates, another World's among them, and a price without a delta
+role:      clean
+tree:      /home/g/actions-runner/_work/assize/assize
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-aocq4j5_
+  fixture Worlds in a copy of the tree: {"bound": ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unpriced", "bare": "unknown_world", "borrowed": "underived", "rederived": "unknown_runtime", "undelta": "underived"}, "fx_binding": "fx", "seed_stores": []}
+  [ok] evaluate('borrowed') refused underived (underived)
+  [ok] evaluate('undelta') refused underived (underived)
+  [ok] evaluate('rederived') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  crafter/manifest.json: delta 0.5, committed {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}, derived {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}
+  [ok] crafter/manifest.json commits the rates derived from its own delta
+  [ok] manifest.schema.json rejects crafter/manifest.json's price without its delta
+result:    PASS
