@@ -3572,7 +3572,23 @@ m = binding.manifest()
 def play(seed, rec):
     rng = random.Random(seed)
     actions = [rng.randrange(len(m["actions"])) for _ in range(int(sys.argv[2]))]
-    rec.update(violations=[], chunk_departures=[], chunk_departure_count=0)
+    rec.update(violations=[], chunk_departures=[], chunk_departure_count=0, multi_despawns=0)
+
+    def count_despawns(env):
+        balance, world = env._balance_object, env._world
+
+        def counted(chunk, objs, cls, *rest):
+            candidates = sum(isinstance(o, cls) for o in objs)
+            removed = []
+            remove = world.remove
+            world.remove = lambda obj: (removed.append(obj), remove(obj))[1]
+            try:
+                balance(chunk, objs, cls, *rest)
+            finally:
+                del world.remove
+            rec["multi_despawns"] += bool(removed) and candidates >= 2
+
+        env._balance_object = counted
 
     def check(ep):
         rec["violations"] = sorted(set(rec["violations"]) | set(binding.violations(ep.observation, m["observation"])))
@@ -3581,6 +3597,7 @@ def play(seed, rec):
         rec["chunk_departure_count"] += len(found)
 
     ep = binding.Episode(seed, m)
+    count_despawns(ep._env)
     check(ep)
     for a in actions:
         if ep.done:
@@ -3649,6 +3666,9 @@ def p11_crafter_determinism() -> bool:
         ach = a[seed]["achievements"]
         expect(a[seed]["utility"] == len(ach) and set(ach) <= set(components),
                f"seed {seed}: utility {a[seed]['utility']} = |{ach}|, each a declared component")
+    despawns = {s: a[str(s)].get("multi_despawns", 0) for s in TRAJECTORY_SEEDS}
+    expect(sum(despawns.values()) > 0, f"the streams reach a balance-step despawn that chooses among two or more "
+                                       f"creatures of one class in a chunk, per seed: {despawns}")
     golden = a[str(TRAJECTORY_SEEDS[0])].get("hashes", [""])[0]
     expect(golden == TRAJECTORY_GOLDEN, f"seed {TRAJECTORY_SEEDS[0]}: trajectory hash {golden[:16]} is the committed "
                                         f"golden {TRAJECTORY_GOLDEN[:16]}")
@@ -6285,5 +6305,6 @@ PINS = [
                                   Mutant("hash_constant", _edits("P11_hash_constant")),
                                   Mutant("field_dropped", _edits("P11_field_dropped")),
                                   Mutant("chunks_replaced_after_worldgen", _edits("P11_chunks_replaced_after_worldgen")),
-                                  Mutant("golden_hash_altered", _edits("P11_golden_hash_altered"))), JUDGE_SIDE),
+                                  Mutant("golden_hash_altered", _edits("P11_golden_hash_altered")),
+                                  Mutant("stream_truncated", _edits("P11_stream_truncated"))), JUDGE_SIDE),
 ]

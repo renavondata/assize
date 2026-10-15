@@ -1,0 +1,7 @@
+# P11's mutant `stream_truncated` (brief 2 A2, L2a obligation 21; review 4d34943d5037 F3): the committed streams are
+# cut to 5 steps, so no despawn among two or more creatures is reached and P11 would have lost its power against
+# `set_order_restored` silently.
+[[edit]]
+path = "harness/pins.py"
+old = "TRAJECTORY_STEPS = 400"
+new = "TRAJECTORY_STEPS = 5"
