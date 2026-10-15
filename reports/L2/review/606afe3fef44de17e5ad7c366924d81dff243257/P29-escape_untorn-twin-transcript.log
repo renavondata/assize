@@ -1,0 +1,22 @@
+copy of /tmp/rv204
+  at /tmp/assize-scratch-39genxuh/assize-copy-zfcabsrw/repo
+twin: no edits applied
+pin:       P29
+protects:  a candidate container is torn down however the episode loop is left: an exception escaping it or the caller closing it
+role:      twin
+tree:      /tmp/assize-scratch-39genxuh/assize-copy-zfcabsrw/repo
+invoked:   /tmp/rv204
+scratch:   /tmp/assize-scratch-39genxuh
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman raised: raised P29Escaped('World raised at t=2'); running at the raise [{'assize-candidate-ec1a4695f78545da'}]; listed after []
+  [ok] podman raised: control: one candidate container was running when the World raised ([{'assize-candidate-ec1a4695f78545da'}])
+  [ok] podman raised: the World's exception propagates (raised P29Escaped('World raised at t=2'))
+  [ok] podman raised: no candidate container listed after the exception ([])
+  podman closed: first record episode 0 truncated; serving ['assize-candidate-7f9e10b2c0574932']; listed after []
+  [ok] podman closed: control: the first episode was played and one container serves the second (truncated; ['assize-candidate-7f9e10b2c0574932'])
+  [ok] podman closed: no candidate container listed after the generator is closed ([])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+  [ok] podman: every assertion above held (0 failed)
+result:    PASS

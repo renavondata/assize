@@ -2,5 +2,5 @@
 # played, so a judge that dies mid-request has written none of the episodes it played.
 [[edit]]
 path = "judge/episodes.py"
-old = "        yield from records[final:]\n        final = len(records)\n"
+old = "            yield from records[final:]\n            final = len(records)\n"
 new = ""
