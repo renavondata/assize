@@ -4594,6 +4594,73 @@ def p28_missing_priced() -> bool:
     return ok()
 
 
+class P29Escaped(Exception):
+    """The exception P29's World raises mid-episode: no Failure, so the loop's own handling never sees it."""
+
+
+P29_RAISE_AT = 2  # P29's World raises at its third step, so the container is mid-episode when the exception escapes
+
+
+def p29_teardown_on_exit() -> bool:
+    """Under every usable runtime, a container is torn down however `episodes.played` is left (brief 2 A2, L2a
+    obligation 16; S c8fdf97). A World that raises an exception that is no Failure at step P29_RAISE_AT, a candidate
+    container then running, propagates that exception out of `episodes.run`, and the runtime lists nothing of the
+    container afterwards. A caller that takes the first of two episodes' records, the container then serving the
+    second, and closes the generator leaves nothing listed either. Each case checks first that a container was running
+    at that moment, so neither passes for want of one."""
+    from harness.fixtures import candidates
+    from judge import episodes
+    from worlds.crafter import binding
+
+    expect, ok = _expecter()
+    usable, image = _usable_runtimes(expect)
+    def case(rt, expect, say):
+        before = _candidates(rt)
+        alive: list[set] = []
+
+        def raising():
+            for w in _short_crafter(1):
+                step = w.step
+
+                def failing(action, w=w, step=step):
+                    if w.t == P29_RAISE_AT:
+                        alive.append(_candidates(rt) - before)
+                        raise P29Escaped(f"World raised at t={w.t}")
+                    return step(action)
+                w.step = failing
+                yield w
+
+        try:
+            records = episodes.run(rt, image, raising(), binding.manifest(), command=candidates.command("polite"))
+            escaped = f"returned {json.dumps(records)}"
+        except P29Escaped as e:
+            escaped = f"raised {e!r}"
+        left = sorted(_candidates(rt) - before)
+        say(f"  {rt.name} raised: {escaped}; running at the raise {alive}; listed after {left}")
+        expect(len(alive) == 1 and len(alive[0]) == 1,
+               f"{rt.name} raised: control: one candidate container was running when the World raised ({alive})")
+        expect(escaped.startswith("raised P29Escaped"), f"{rt.name} raised: the World's exception propagates ({escaped})")
+        expect(not left, f"{rt.name} raised: no candidate container listed after the exception ({left})")
+        _removing_strays(rt, before)
+
+        gen = episodes.played(rt, image, _short_crafter(2), binding.manifest(), command=candidates.command("polite"))
+        first = next(gen)
+        serving = sorted(_candidates(rt) - before)
+        gen.close()
+        left = sorted(_candidates(rt) - before)
+        say(f"  {rt.name} closed: first record episode {first.get('episode')} {first.get('termination')}; serving "
+            f"{serving}; listed after {left}")
+        expect(first.get("termination") == "truncated" and len(serving) == 1,
+               f"{rt.name} closed: control: the first episode was played and one container serves the second "
+               f"({first.get('termination')}; {serving})")
+        expect(not left, f"{rt.name} closed: no candidate container listed after the generator is closed ({left})")
+        strays = _removing_strays(rt, before)
+        expect(not strays, f"{rt.name}: the runtime lists no candidate container afterwards ({strays})")
+
+    _each_runtime(usable, case, expect)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5641,6 +5708,10 @@ PINS = [
     Pin("P28", "missing predictions are priced in comparisons: a candidate predicting only its 0-loss steps does not "
                "beat the floor",
         p28_missing_priced, (Mutant("scored_only", _edits("P28_scored_only")),), JUDGE_SIDE),
+    Pin("P29", "a candidate container is torn down however the episode loop is left: an exception escaping it or the "
+               "caller closing it",
+        p29_teardown_on_exit, (Mutant("escape_untorn", _edits("P29_escape_untorn")),
+                               Mutant("close_untorn", _edits("P29_close_untorn"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary token appears in an interface schema file",

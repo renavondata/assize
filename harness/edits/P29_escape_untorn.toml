@@ -1,0 +1,6 @@
+# P29's mutant `escape_untorn` (L2a obligation 16, S c8fdf97): the loop as it stood, an exception escaping
+# `episodes.played` or the caller closing it leaves the open container running, torn down by nobody.
+[[edit]]
+path = "judge/episodes.py"
+old = '        if c is not None and not c.teardown(t):'
+new = '        if False:'

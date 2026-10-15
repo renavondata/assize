@@ -1,0 +1,6 @@
+# P29's mutant `close_untorn` (L2a obligation 16): the guard catches `Exception` only, so an exception raised in the
+# loop tears the container down but the caller closing the generator (GeneratorExit, a BaseException) does not.
+[[edit]]
+path = "judge/episodes.py"
+old = '    except BaseException as e:'
+new = '    except Exception as e:'

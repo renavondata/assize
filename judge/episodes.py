@@ -227,33 +227,41 @@ def played(rt: runtime.Runtime, image: str, worlds: Iterable, manifest: Mapping,
            lim: runtime.Limits | None = None, t: Timeouts | None = None) -> Iterator[dict]:
     """Play every World of `worlds` with the candidate `image`, one record per World, in order, each yielded once it
     is final: when the next World is drawn, or after the last container's teardown. A container serves episodes until
-    one fails; it is then torn down, and the next episode starts in a fresh container."""
+    one fails; it is then torn down, and the next episode starts in a fresh container. Any other exit, an exception
+    escaping the World, the scoring or the draw of the next World, or the caller closing this generator, tears the open
+    container down too before it propagates, and a container still listed then is noted on the exception (brief 2 A2,
+    L2a obligation 16)."""
     lim, t = lim or runtime.limits(), t or timeouts()
     rate, bins = price.of(manifest), calibration_bins()
     records: list[dict] = []
     final = 0
     c: Container | None = None
-    for i, world in enumerate(worlds):
-        yield from records[final:]
-        final = len(records)
-        c = c or Container(rt, image, lim, command)
-        losses: list[dict] = []
-        predicted: list[dict] = []
-        start, began = c.usage, time.monotonic()
-        code, detail = _play(c, world, manifest, t, losses, predicted)
-        ended = c.measure()
-        used = {"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6, "wall_s": ended - began,
-                "peak_memory_bytes": c.usage.peak_bytes, "peak_memory_scope": price.PEAK_SCOPE,
-                "unmeasured_s": ended - c.measured_at}
-        charged = price.charge(used, lim, rate)
-        if code not in WORLD_ENDINGS:
-            if not c.teardown(t):
-                code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
-            c = None
-        records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
-                        "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"]),
-                        "calibration": scoring.calibration(predicted, manifest["targets"], bins),
-                        "compute": used, "price": charged})
+    try:
+        for i, world in enumerate(worlds):
+            yield from records[final:]
+            final = len(records)
+            c = c or Container(rt, image, lim, command)
+            losses: list[dict] = []
+            predicted: list[dict] = []
+            start, began = c.usage, time.monotonic()
+            code, detail = _play(c, world, manifest, t, losses, predicted)
+            ended = c.measure()
+            used = {"cpu_s": (c.usage.cpu_usec - start.cpu_usec) / 1e6, "wall_s": ended - began,
+                    "peak_memory_bytes": c.usage.peak_bytes, "peak_memory_scope": price.PEAK_SCOPE,
+                    "unmeasured_s": ended - c.measured_at}
+            charged = price.charge(used, lim, rate)
+            if code not in WORLD_ENDINGS:
+                if not c.teardown(t):
+                    code, detail = "leaked", f"container {c.name} listed after teardown ({detail})"
+                c = None
+            records.append({"episode": i, "termination": code, "detail": detail, "steps": world.t,
+                            "utility": world.utility, "prediction": scoring.summary(losses, manifest["targets"]),
+                            "calibration": scoring.calibration(predicted, manifest["targets"], bins),
+                            "compute": used, "price": charged})
+    except BaseException as e:
+        if c is not None and not c.teardown(t):
+            e.add_note(f"leaked: container {c.name} listed after teardown")
+        raise
     if c is not None and not c.teardown(t):
         records[-1] |= {"termination": "leaked", "detail": f"container {c.name} listed after teardown"}
     yield from records[final:]
