@@ -1,0 +1,11 @@
+# P10's mutant `leaked_not_recorded` (brief 2 A2, L2a obligation 15; review 2402ed7d56a5 F3): both teardown sites, after a
+# failed episode and after the last World, keep the episode's own termination when the container is still listed.
+[[edit]]
+path = "judge/episodes.py"
+old = "                code, detail = \"leaked\", f\"container {c.name} listed after teardown ({detail})\"\n"
+new = "                pass\n"
+
+[[edit]]
+path = "judge/episodes.py"
+old = "        records[-1] |= {\"termination\": \"leaked\", \"detail\": f\"container {c.name} listed after teardown\"}\n"
+new = "        pass\n"
