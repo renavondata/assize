@@ -1,0 +1,19 @@
+pins	make pins	2026-10-15T10:39:51.1659030Z CLEAN FAILED: P0l (observed fail)
+pins	make pins	2026-10-15T10:39:51.1769684Z [clean ] P11: observed pass -> ok (25.435s) out/pins/runs/P11/clean/transcript.log
+pins	make pins	2026-10-15T10:39:51.1775299Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.476s + 0.476s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	make pins	2026-10-15T10:44:51.3719278Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.474s + 0.475s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T10:44:51.3720830Z MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+pins	make pins	2026-10-15T10:44:51.3722911Z [mutant] P0l/obligation_registry_skipped: mutant fail, twin fail -> NON-CAUSAL (0.475s + 0.476s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T10:44:51.3724579Z MUTANT NON-CAUSAL: P0l/obligation_registry_skipped
+pins	make pins	2026-10-15T10:46:24.7941784Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.423s + 0.424s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2456971Z [mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (25.126s + 25.721s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2458625Z [mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (26.872s + 25.215s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2460298Z [mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (25.567s + 25.117s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2461946Z [mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (24.16s + 25.06s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2463731Z [mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (8.259s + 25.774s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2465919Z [mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (25.415s + 25.864s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2467622Z [mutant] P11/stream_truncated: mutant fail, twin pass -> KILLED (20.649s + 25.064s) out/pins/runs/P11/stream_truncated/mutant/transcript.log
+pins	make pins	2026-10-15T11:13:13.2468827Z clean: 72/73 passed, 1/73 failed
+pins	make pins	2026-10-15T11:13:13.2469837Z mutants: 208/210 killed, 0/210 survived, 0/210 inconclusive, 0/210 stale, 2/210 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-15T11:13:13.2470907Z twins: 208/210 passed
+pins	make pins	2026-10-15T11:13:13.2473347Z PINS FAILED

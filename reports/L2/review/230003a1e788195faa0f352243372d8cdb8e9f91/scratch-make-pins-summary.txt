@@ -1,0 +1,25 @@
+[clean ] P0l: observed fail -> FAILED (0.528s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0r: observed fail -> FAILED (0.573s) out/pins/runs/P0r/clean/transcript.log
+[clean ] P0x: observed fail -> FAILED (0.618s) out/pins/runs/P0x/clean/transcript.log
+[clean ] P0ac: observed fail -> FAILED (0.589s) out/pins/runs/P0ac/clean/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.547s + 0.538s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+MUTANT NON-CAUSAL: P0l/sha_comparison_skipped
+[mutant] P0l/obligation_registry_skipped: mutant fail, twin fail -> NON-CAUSAL (0.539s + 0.487s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+MUTANT NON-CAUSAL: P0l/obligation_registry_skipped
+[mutant] P0r/late_forecast_admitted: mutant fail, twin fail -> NON-CAUSAL (0.641s + 0.596s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+MUTANT NON-CAUSAL: P0r/late_forecast_admitted
+[mutant] P0x/price_line_dropped: mutant fail, twin fail -> NON-CAUSAL (0.658s + 0.643s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+MUTANT NON-CAUSAL: P0x/price_line_dropped
+[mutant] P0x/none_on_workflow_admitted: mutant fail, twin fail -> NON-CAUSAL (0.653s + 0.66s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+MUTANT NON-CAUSAL: P0x/none_on_workflow_admitted
+[mutant] P0x/scoped_by_number: mutant fail, twin fail -> NON-CAUSAL (0.655s + 0.668s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+MUTANT NON-CAUSAL: P0x/scoped_by_number
+[mutant] P0ac/instruction_without_because_admitted: mutant fail, twin fail -> NON-CAUSAL (0.608s + 0.613s) out/pins/runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+MUTANT NON-CAUSAL: P0ac/instruction_without_because_admitted
+[mutant] P0ac/both_forms_admitted: mutant fail, twin fail -> NON-CAUSAL (0.614s + 0.588s) out/pins/runs/P0ac/both_forms_admitted/mutant/transcript.log
+MUTANT NON-CAUSAL: P0ac/both_forms_admitted
+[mutant] P11/stream_truncated: mutant fail, twin pass -> KILLED (14.13s + 16.377s) out/pins/runs/P11/stream_truncated/mutant/transcript.log
+clean: 69/73 passed, 4/73 failed
+mutants: 202/210 killed, 0/210 survived, 0/210 inconclusive, 0/210 stale, 8/210 non-causal, 0 leaked (clean and mutant)
+twins: 202/210 passed
+EXIT 2
