@@ -4687,6 +4687,108 @@ def p29_teardown_on_exit() -> bool:
     return ok()
 
 
+P30_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p30-registering-party"}
+# The reference P30's shim runtime resolves to the incumbent, as a runtime resolving more than IDs would: a well-formed
+# image digest that is not the incumbent's ID.
+P30_ALIAS = "sha256:" + "d" * 64
+P30_SMALL = 1 << 20  # archive members up to this size are kept while `save` streams; an image's config is far smaller
+P30_SHIM = """#!/bin/sh
+# P30's runtime: {real}, except that `image inspect` resolves {alias} to the image {target}.
+if [ "$1" = image ] && [ "$2" = inspect ]; then
+  for a; do shift; if [ "$a" = "{alias}" ]; then set -- "$@" "{target}"; else set -- "$@" "$a"; fi; done
+fi
+exec {real} "$@"
+"""
+
+
+def _config_digest(rt, image: str) -> str:
+    """The SHA-256 of `image`'s config blob, by definition: `rt save` streams the image's archive, whose
+    `manifest.json` names the config member, and the digest is of that member's bytes. Nothing the runtime reports
+    about the image's ID enters it."""
+    import hashlib
+    import tarfile
+
+    proc = subprocess.Popen([rt.binary, "save", image], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    with tarfile.open(fileobj=proc.stdout, mode="r|") as tar:
+        small = {m.name: tar.extractfile(m).read() for m in tar if m.isfile() and m.size <= P30_SMALL}
+    proc.stdout.close()
+    if proc.wait() or "manifest.json" not in small:
+        return f"no config: `{rt.name} save {image}` exited {proc.returncode}, members {sorted(small)[:8]}"
+    config = json.loads(small["manifest.json"])[0]["Config"]
+    return "sha256:" + hashlib.sha256(small[config]).hexdigest() if config in small else f"no config member {config}"
+
+
+def p30_image_digest_stated() -> bool:
+    """The digest a record's `image` means is stated and held (brief 2 A2, L2a obligation 17; review 6debf231b630
+    F5): under every usable runtime, the random incumbent, registered and asked by its image ID, is evaluated on one
+    fresh Crafter seed, and its record's `image` is the SHA-256 of the image's config blob read from the runtime's
+    `save` archive. Then, through a runtime that resolves P30_ALIAS, an image digest that is not the incumbent's ID, to
+    the incumbent, the alias registered and asked is refused `image_not_id` with the seed store and ledger unchanged;
+    a control checks that the shim does resolve it, so the refusal is not for want of an image."""
+    from judge import evaluate, registry, runtime, seeds
+
+    expect, ok = _expecter()
+    usable, _ = _usable_runtimes(expect)
+    work = Path(tempfile.mkdtemp(prefix="assize-p30-", dir=context.scratch))
+    built: dict[str, str] = {}
+    try:
+        def case(rt, expect, say):
+            before = _candidates(rt)
+            private, ledgers = work / rt.name / "private", work / rt.name / "ledgers"
+            image = built[rt.name] = _digest(_build(rt, INCUMBENT))
+            registry.register(private, image, registry.credential(private, P30_PARTY))
+            got = evaluate.evaluate(image, "crafter", 1, "p30-a", private=private, ledgers=ledgers,
+                                    runtime_name=rt.name)
+            config = _config_digest(rt, image)
+            say(f"  {rt.name} incumbent image {image}; config blob digest {config}; record image "
+                f"{[r.get('image') for r in got]}")
+            expect(config == image, f"{rt.name}: the image ID is the SHA-256 of the image's config blob ({config})")
+            expect([r.get("image") for r in got] == [config],
+                   f"{rt.name}: the one record's image is the config blob's digest ({[r.get('image') for r in got]})")
+            strays = _removing_strays(rt, before)
+            expect(not strays, f"{rt.name}: no candidate container listed after the evaluation ({strays})")
+
+        _each_runtime(usable, case, expect)
+        real_usable = evaluate._usable
+        for rt in usable:
+            if rt.name not in built:
+                continue
+            before = _candidates(rt)
+            shim = work / f"{rt.name}-shim"
+            shim.write_text(P30_SHIM.format(real=shutil.which(rt.binary), alias=P30_ALIAS, target=built[rt.name]))
+            shim.chmod(0o700)
+            shimmed = runtime.Runtime(rt.name, str(shim))
+            private, ledgers = work / rt.name / "private", work / rt.name / "ledgers"
+            resolved = subprocess.run([str(shim), "image", "inspect", "--format", "{{.Id}}", P30_ALIAS],
+                                      capture_output=True, text=True)
+            expect(resolved.returncode == 0 and _digest(resolved.stdout.strip()) == built[rt.name],
+                   f"{rt.name} shim: control: it resolves {P30_ALIAS[:15]}… to the incumbent "
+                   f"({resolved.returncode}: {resolved.stdout.strip() or resolved.stderr.strip()})")
+            registry.register(private, P30_ALIAS, registry.credential(private, P30_PARTY))
+            store, led = private / "crafter.seeds.jsonl", evaluate.ledger_path(ledgers, "crafter")
+            was = tuple(p.read_bytes() for p in (store, led))
+            evaluate._usable = lambda name, shimmed=shimmed: shimmed
+            try:
+                evaluate.evaluate(P30_ALIAS, "crafter", 1, "p30-alias", private=private, ledgers=ledgers,
+                                  runtime_name=rt.name)
+                code = "evaluated"
+            except (registry.Refused, seeds.SeedError) as e:
+                code = e.code
+            finally:
+                evaluate._usable = real_usable
+            expect(code == "image_not_id" and tuple(p.read_bytes() for p in (store, led)) == was,
+                   f"{rt.name} shim: the alias, registered and asked, is refused image_not_id (got {code}), seed "
+                   f"store and ledger unchanged")
+            strays = _removing_strays(rt, before)
+            expect(not strays, f"{rt.name} shim: no candidate container listed afterwards ({strays})")
+    finally:
+        for rt in usable:
+            if rt.name in built:
+                subprocess.run([rt.binary, "rmi", "-f", built[rt.name]], capture_output=True)
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5738,6 +5840,9 @@ PINS = [
                "caller closing it",
         p29_teardown_on_exit, (Mutant("escape_untorn", _edits("P29_escape_untorn")),
                                Mutant("close_untorn", _edits("P29_close_untorn"))), JUDGE_SIDE),
+    Pin("P30", "a record's image is the candidate's image ID, the SHA-256 of its config blob; an image asked by a "
+               "reference resolving to another ID is refused image_not_id",
+        p30_image_digest_stated, (Mutant("image_id_unchecked", _edits("P30_image_id_unchecked")),), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing; a "
                "container still listed after teardown, at either site, is a `leaked` episode, counted",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),

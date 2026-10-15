@@ -1,0 +1,6 @@
+# P30's mutant `image_id_unchecked` (L2a obligation 17, review 6debf231b630 F5): the presence check as it stood, so an
+# image asked by anything its runtime resolves to some image is evaluated, and its records name that reference.
+[[edit]]
+path = "judge/evaluate.py"
+old = "    if iid != image:"
+new = "    if False:"
