@@ -1,0 +1,21 @@
+# cleanup, review run 38700714200, 2026-10-15T08:41:30Z
+$ rm -rf /tmp/rev205r2.cmha
+$ ls -d /tmp/rev205r2.* 2>&1
+ls: cannot access '/tmp/rev205r2.*': No such file or directory
+$ ls -ld /tmp/assize-scratch-*
+drwx------ 4 g g  80 2026-10-13T08:35:59 /tmp/assize-scratch-4ozlcqwx
+drwx------ 4 g g  80 2026-10-13T15:04:39 /tmp/assize-scratch-ko6qc54f
+drwx------ 4 g g  80 2026-10-14T13:36:50 /tmp/assize-scratch-ktjyog3u
+drwx------ 5 g g 100 2026-10-13T11:40:11 /tmp/assize-scratch-l3utlmju
+$ pgrep -af 'harness run|make pins|assize-candidate'
+$ podman ps -a --format '{{.Names}} {{.CreatedAt}}' | grep assize   (the host's unrelated containers omitted)
+assize-candidate-acfbfaa8000641e5 2026-10-10 22:12:06.867784943 +0300 IDT
+assize-candidate-b7d7caf3d86d44b8 2026-10-13 03:29:39.308431047 +0300 IDT
+assize-candidate-d3f9d95755994413 2026-10-13 08:36:07.15663141 +0300 IDT
+assize-candidate-c39a761a88ea4a62 2026-10-14 13:36:51.26715602 +0300 IDT
+$ grep -c '"scratch_removed": true' pins.jsonl; grep -c scratch_removed pins.jsonl
+483
+483
+# Every scratch root and container above predates this session (started 2026-10-15T07:44:31Z) and is the set
+# review 48b1eb5 listed; left as found (L1 obligation 25). The empty forecast files the resolver created under
+# reports/L0/forecasts/ and reports/L1/forecasts/ were deleted uncommitted.

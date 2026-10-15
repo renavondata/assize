@@ -1,0 +1,8 @@
+=== mutant native_key_in_schema (harness/edits/P6_native_key_in_schema.toml applied to worlds/spec/rpc.schema.json)
+  [FAIL] rpc.schema.json accepts step
+  [FAIL] real schemas: 8 native tokens; found in schemas: [('rpc.schema.json', 'inventory')]
+result: False
+=== mutant pattern_hides_vocabulary (harness/edits/P6_pattern_hides_vocabulary.toml applied to worlds/spec/rpc.schema.json)
+  [FAIL] rpc.schema.json accepts step
+  [FAIL] real schemas carry no pattern but the identifier pattern: {'manifest.schema.json': set(), 'rpc.schema.json': {'^(sem|inv)'}}
+result: False

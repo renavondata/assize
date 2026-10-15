@@ -1,0 +1,6 @@
+# P6's mutant `pattern_hides_vocabulary` (brief 2 A2, L2a obligation 20; review 1247b4d888dd F2): the step observation's
+# key pattern becomes a regex that spells World vocabulary instead of the generic identifier pattern.
+[[edit]]
+path = "worlds/spec/rpc.schema.json"
+old = "              \"type\": \"object\",\n              \"propertyNames\": {\"pattern\": \"^[a-z][a-z0-9_]*$\"},"
+new = "              \"type\": \"object\",\n              \"propertyNames\": {\"pattern\": \"^(sem|inv)\"},"

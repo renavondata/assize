@@ -1,0 +1,6 @@
+# P6's mutant `native_key_in_schema` (brief 2 A2, L2a obligation 20; review 1247b4d888dd F2): the step schema names a
+# Crafter-native key that the manifest does not declare (the `info` dict's `inventory`).
+[[edit]]
+path = "worlds/spec/rpc.schema.json"
+old = "\"description\": \"Maps each manifest observation field to its value.\","
+new = "\"description\": \"Maps each manifest observation field to its value.\",\n              \"required\": [\"inventory\"],"

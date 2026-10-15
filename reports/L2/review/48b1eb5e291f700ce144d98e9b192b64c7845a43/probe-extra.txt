@@ -1,0 +1,9 @@
+=== probe c: native name hidden in a description only (step fixture unaffected)
+  [FAIL] real schemas: 8 native tokens; found in schemas: [('rpc.schema.json', 'inventory')]
+result: False
+=== probe d: identifier pattern widened by alternation (still accepts every identifier, so the step fixture passes)
+  [FAIL] real schemas carry no pattern but the identifier pattern: {'manifest.schema.json': set(), 'rpc.schema.json': {'^[a-z][a-z0-9_]*$|^(sem|inv)'}}
+result: False
+=== probe e: native check deleted from pins.py, then mutant native_key_in_schema applied: does P6 still fail (on the step fixture alone)?
+  [FAIL] rpc.schema.json accepts step
+P6 without the new assertions, under native_key_in_schema: False

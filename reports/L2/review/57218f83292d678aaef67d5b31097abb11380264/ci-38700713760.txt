@@ -1,0 +1,12 @@
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-15T07:43:53.2462578Z   clean: true
+pins	make pins	2026-10-15T07:44:18.2492774Z   PINS_SINCE: --since 8c1a58a15a841026a187417e9d31d90d39303287 --since-run 38692587753
+pins	make pins	2026-10-15T07:51:36.6063546Z [clean ] P0l: observed pass -> ok (0.331s) out/pins/runs/P0l/clean/transcript.log
+pins	make pins	2026-10-15T07:51:36.6132443Z [clean ] P6: observed pass -> ok (1.582s) out/pins/runs/P6/clean/transcript.log
+pins	make pins	2026-10-15T07:51:36.6138142Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.358s + 0.358s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	make pins	2026-10-15T07:57:45.0183204Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.359s + 0.357s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+pins	make pins	2026-10-15T08:18:12.4512425Z [mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (1.613s + 1.663s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+pins	make pins	2026-10-15T08:18:12.4514057Z [mutant] P6/native_key_in_schema: mutant fail, twin pass -> KILLED (1.714s + 1.663s) out/pins/runs/P6/native_key_in_schema/mutant/transcript.log
+pins	make pins	2026-10-15T08:18:12.4515414Z [mutant] P6/pattern_hides_vocabulary: mutant fail, twin pass -> KILLED (1.663s + 1.715s) out/pins/runs/P6/pattern_hides_vocabulary/mutant/transcript.log
+pins	make pins	2026-10-15T08:18:12.4540001Z clean: 72/72 passed, 0/72 failed
+pins	make pins	2026-10-15T08:18:12.4540670Z mutants: 208/208 killed, 0/208 survived, 0/208 inconclusive, 0/208 stale, 0/208 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-15T08:18:12.4542981Z PINS PASSED

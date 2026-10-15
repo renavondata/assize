@@ -1,0 +1,20 @@
+# cleanup, 2026-10-15T07:40:41Z
+## empty resolver files
+reports/L0/forecasts/38696285896.jsonl
+reports/L1/forecasts/38696285896.jsonl
+after: 0 untracked under L0/L1
+## scratch_removed in my pins.jsonl
+{'True'}
+## scratch roots of this run still present
+/tmp/assize-scratch-4ozlcqwx 2026-10-13 08:35:59
+/tmp/assize-scratch-ko6qc54f 2026-10-13 15:04:39
+/tmp/assize-scratch-ktjyog3u 2026-10-14 13:36:50
+/tmp/assize-scratch-l3utlmju 2026-10-13 11:40:11
+## removing /tmp/rev205.6lEq
+none left
+## processes
+no harness/make process
+assize-candidate-acfbfaa8000641e5 2026-10-10 22:12:06.867784943 +0300 IDT
+assize-candidate-b7d7caf3d86d44b8 2026-10-13 03:29:39.308431047 +0300 IDT
+assize-candidate-d3f9d95755994413 2026-10-13 08:36:07.15663141 +0300 IDT
+assize-candidate-c39a761a88ea4a62 2026-10-14 13:36:51.26715602 +0300 IDT
