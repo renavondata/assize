@@ -1,0 +1,9 @@
+# pins-master run 38801855180 on 878f419 (pull_request_target: master's copy of the workflow, before this fix), job log
+# lines from `gh run view 38801855180 --log`. The checkout step's own fetch (fetch-depth: 0) already creates origin/master;
+# the step this PR removes then fetches again without credentials and dies. So `git rev-parse --verify origin/master`
+# finds a ref that exists, and `git checkout origin/master -- ...` reads it.
+pins-master	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-15T20:25:53.1767611Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+pins-master	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-15T20:25:53.9158694Z  * [new branch]      master                  -> origin/master
+pins-master	Restore the judge from master	2026-10-15T20:25:57.5633645Z git fetch --no-tags origin master
+pins-master	Restore the judge from master	2026-10-15T20:25:57.6443374Z fatal: could not read Username for 'https://github.com': No such device or address
+pins-master	Restore the judge from master	2026-10-15T20:25:57.6476290Z ##[error]Process completed with exit code 128.
