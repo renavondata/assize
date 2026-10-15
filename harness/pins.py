@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+from fractions import Fraction
 from pathlib import Path
 
 from harness import claims, config, context, edits, proc, runner, scan, tree
@@ -3837,23 +3838,31 @@ def _forecaster_calibration(targets, bins: int) -> dict:
     count to the bin whose edges enclose the probability it put on that value (the last bin closed at 1), a hit if that
     value was realised, and that probability; and the entropy in nats of its distribution. The last target is missing."""
     obs = _forecaster_observations()
-    edges = [b / bins for b in range(1, bins)]
 
     def one(i: int, tg: dict) -> dict:
         s, f = tg["support"], tg["field"]
         steps = [] if i == len(targets) - 1 else [(_forecaster_predicted(i, s, a[f]), b[f]) for a, b in zip(obs, obs[1:])]
-        cells = {(v, b): [] for v in range(len(s)) for b in range(bins)}
-        for p, realised in steps:
-            for v, x in enumerate(s):
-                cells[(v, sum(e <= p[v] for e in edges))].append((p[v], x == realised))
-        h = [-math.fsum(q * math.log(q) for q in p if q > 0) for p, _ in steps]
-        table = {k: [[g(cells[(v, b)]) for b in range(bins)] for v in range(len(s))]
-                 for k, g in (("n", len), ("hits", lambda c: sum(1 for _, r in c if r)),
-                              ("p_sum", lambda c: math.fsum(q for q, _ in c)))}
-        return {"entropy_sum": math.fsum(h), "mean_entropy": math.fsum(h) / len(h) if h else None,
-                "reliability": {"bins": bins} | table}
+        return _calibration_by_definition(steps, s, bins)
 
     return {tg["name"]: one(i, tg) for i, tg in enumerate(targets)}
+
+
+def _calibration_by_definition(steps: list, support: list, bins: int) -> dict:
+    """One target's calibration over `steps`, pairs of a predicted distribution and the realised support value, by
+    definition: every step adds, for every support value, one count to the bin whose edges, the doubles `b / bins`,
+    enclose the probability it put on that value (the last bin closed at 1), a hit if that value was realised, and that
+    probability; and the entropy in nats of its distribution. The one statement of the bin rule the judge must meet."""
+    edges = [b / bins for b in range(1, bins)]
+    cells = {(v, b): [] for v in range(len(support)) for b in range(bins)}
+    for p, realised in steps:
+        for v, x in enumerate(support):
+            cells[(v, sum(e <= p[v] for e in edges))].append((p[v], x == realised))
+    h = [-math.fsum(q * math.log(q) for q in p if q > 0) for p, _ in steps]
+    table = {k: [[g(cells[(v, b)]) for b in range(bins)] for v in range(len(support))]
+             for k, g in (("n", len), ("hits", lambda c: sum(1 for _, r in c if r)),
+                          ("p_sum", lambda c: math.fsum(q for q, _ in c)))}
+    return {"entropy_sum": math.fsum(h), "mean_entropy": math.fsum(h) / len(h) if h else None,
+            "reliability": {"bins": bins} | table}
 
 
 def p13_calibration() -> bool:
@@ -3862,7 +3871,9 @@ def p13_calibration() -> bool:
     entropies' sum and mean, none where the target is missing, and a reliability table over the declared support in
     the committed bins, in which every scored step, an infinite-loss step included, enters every support value's row
     once, so each row's counts sum to `scored`. P7 checks the record of the same episode, played through the judge's
-    loop under every usable runtime, against the same derivation."""
+    loop under every usable runtime, against the same derivation. A two-valued target fed the doubles below, at and
+    above every bin edge, and 0.3*3, is binned as the derivation's one rule says, which neither int(q*bins) nor the
+    exact rational q*bins meets (brief 2 A2, L2a obligation 14; review 7e18816c626e F2)."""
     from judge import episodes, scoring
     from worlds.crafter import binding
 
@@ -3892,6 +3903,22 @@ def p13_calibration() -> bool:
         hits = g.get("reliability", {}).get("hits", [])
         expect(sum(map(sum, hits)) == summary[name]["scored"],
                f"{name}: each scored step realises one value: {sum(map(sum, hits))} hits")
+    # The bin edges (brief 2 A2, L2a obligation 14; review 7e18816c626e F2): a two-valued target fed q and 1 - q for q
+    # the double below, at and above every edge, and 0.3*3, the double below 0.9 that int(q*bins) rounds up to 9.
+    edge = {"name": "edge", "field": "edge", "support": [0, 1]}
+    qs = [0.3 * 3] + [x for b in range(1, bins) for x in (math.nextafter(b / bins, 0), b / bins,
+                                                             math.nextafter(b / bins, 1))]
+    edge_steps = [([q, 1 - q], i % 2) for i, q in enumerate(qs)]
+    edges, xs = [b / bins for b in range(1, bins)], [x for q in qs for x in (q, 1 - q)]
+    for rival, rule in (("int(q*bins)", lambda x: min(int(x * bins), bins - 1)),
+                        ("floor of the exact rational q*bins", lambda x: min(math.floor(Fraction(x) * bins), bins - 1))):
+        split = [x for x in xs if rule(x) != sum(e <= x for e in edges)]
+        expect(bool(split), f"non-vacuous: the rule {rival} bins some of these probabilities elsewhere: {split[:3]}")
+    got = scoring.calibration([{"edge": (p, r)} for p, r in edge_steps], [edge], bins)["edge"]
+    want = _calibration_by_definition(edge_steps, edge["support"], bins)
+    print(f"  edge: {len(qs)} probabilities at the {bins - 1} edges; recorded n {json.dumps(got['reliability']['n'])}")
+    expect(got == want, "edge: calibration at every bin edge equals its derivation"
+           + ("" if got == want else f" {json.dumps(want['reliability']['n'])}"))
     return ok()
 
 
@@ -4812,8 +4839,9 @@ def p16_proposer_from_credential() -> bool:
 
 def p5_commitment_order() -> bool:
     """Under every usable runtime, a candidate commits its prediction before the observation it predicts exists for
-    it: a clairvoyant fixture, which puts all mass on any observation the step request carries beyond the current
-    one and otherwise predicts the floor, records exactly the floor's log-loss over one episode with the same actions,
+    it: a clairvoyant fixture, which puts all mass on any observation it is sent beyond the current one (in the step
+    request, under a non-target key of the current observation, or in begin_episode's params) and otherwise predicts
+    the floor, records exactly the floor's log-loss over one episode with the same actions,
     so it gains nothing; the floor's log-loss is finite and positive at every target. A judge that sent the next
     observation early would let it score zero (brief 1 section 2, P5)."""
     from harness.fixtures import candidates
@@ -5530,7 +5558,10 @@ PINS = [
                               Mutant("peak_from_current", _edits("P4_peak_from_current")),
                               Mutant("init_process_rusage", _edits("P4_init_process_rusage"))), JUDGE_SIDE),
     Pin("P5", "a clairvoyant candidate gains nothing over the predictive floor: no observation is sent early",
-        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),), JUDGE_SIDE),
+        p5_commitment_order, (Mutant("next_sent_early", _edits("P5_next_sent_early")),
+                              Mutant("next_in_observation", _edits("P5_next_in_observation")),
+                              Mutant("next_in_begin", _edits("P5_next_in_begin")),
+                              Mutant("next_in_notice", _edits("P5_next_in_notice"))), JUDGE_SIDE),
     Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",
         p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
@@ -5547,7 +5578,9 @@ PINS = [
     Pin("P13", "every scored step, +inf included, enters each support value's reliability row; entropy is never imputed",
         p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
                           Mutant("realised_row_only", _edits("P13_realised_row_only")),
-                          Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed"))), JUDGE_SIDE),
+                          Mutant("entropy_missing_imputed", _edits("P13_entropy_missing_imputed")),
+                          Mutant("bin_product_rounded", _edits("P13_bin_product_rounded")),
+                          Mutant("bin_exact_rational", _edits("P13_bin_exact_rational"))), JUDGE_SIDE),
     Pin("P9", "a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's "
               "verification",
         p9_ledger_tamper, (Mutant("record_dropped", _edits("P9_record_dropped")),

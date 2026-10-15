@@ -27,6 +27,7 @@ if its per-step log-loss is strictly lower; two infinite ones tie, and a target 
 
 from __future__ import annotations
 
+import bisect
 import math
 import sys
 from collections.abc import Mapping, Sequence
@@ -113,8 +114,9 @@ def entropy(p: Sequence[float]) -> float:
 
 def bin_of(q: float, bins: int) -> int:
     """The bin of probability `q` among `bins` equal bins of [0, 1]: bin b covers [b/bins, (b+1)/bins), the last
-    includes 1."""
-    return min(int(q * bins), bins - 1)
+    includes 1, each edge the double `b / bins`. So `q` is compared with the edges themselves, never rounded first:
+    `int(q * bins)` puts 0.3*3 = 0.8999999999999999 at 9 (brief 2 A2, L2a obligation 14; review 7e18816c626e F2)."""
+    return bisect.bisect_right([b / bins for b in range(1, bins)], q)
 
 
 def calibration(steps: Sequence[Mapping[str, tuple[Sequence[float], int] | None]], targets: Sequence[Mapping],
