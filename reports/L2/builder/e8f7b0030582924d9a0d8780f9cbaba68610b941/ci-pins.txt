@@ -1,0 +1,16 @@
+# pins CI run 38766897404 on e8f7b00 (https://github.com/renavondata/assize/actions/runs/38766897404), conclusion failure.
+# Excerpt of `gh run view 38766897404 --log`, lines matching CLEAN FAILED, NON-CAUSAL and the summary, prefix "pins\tmake pins\t" removed.
+2026-10-15T16:20:16.0902661Z [clean ] P0l: observed fail -> FAILED (0.435s) out/pins/runs/P0l/clean/transcript.log
+2026-10-15T16:20:16.0903109Z CLEAN FAILED: P0l (observed fail)
+2026-10-15T16:20:16.0908469Z [clean ] P0x: observed fail -> FAILED (13.318s) out/pins/runs/P0x/clean/transcript.log
+2026-10-15T16:20:16.0908893Z CLEAN FAILED: P0x (observed fail)
+2026-10-15T16:25:00.8046432Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL (0.475s + 0.477s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+2026-10-15T16:25:00.8054049Z [mutant] P0l/obligation_registry_skipped: mutant fail, twin fail -> NON-CAUSAL (0.476s + 0.475s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+2026-10-15T16:25:00.8150108Z MUTANT NON-CAUSAL: P0x/price_line_dropped
+2026-10-15T16:25:00.8153410Z MUTANT NON-CAUSAL: P0x/none_on_workflow_admitted
+2026-10-15T16:25:00.8156258Z MUTANT NON-CAUSAL: P0x/scoped_by_number
+2026-10-15T16:52:05.5264203Z clean: 73/75 passed, 2/75 failed
+2026-10-15T16:52:05.5265250Z mutants: 208/213 killed, 0/213 survived, 0/213 inconclusive, 0/213 stale, 5/213 non-causal, 0 leaked (clean and mutant)
+2026-10-15T16:52:05.5266632Z twins: 208/213 passed
+2026-10-15T16:52:05.5267310Z skipped: 0/75 pins, 0 mutants since 9176d18 (run 38738968750)
+2026-10-15T16:52:05.5268698Z PINS FAILED
