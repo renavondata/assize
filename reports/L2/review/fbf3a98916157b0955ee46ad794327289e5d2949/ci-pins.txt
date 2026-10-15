@@ -1,0 +1,20 @@
+CI witness for PR #207 head fbf3a98916157b0955ee46ad794327289e5d2949 (read through the Actions API, not gh pr checks)
+
+$ gh api "repos/renavondata/assize/actions/runs?head_sha=fbf3a98916157b0955ee46ad794327289e5d2949&event=pull_request" -q '.workflow_runs[] | select(.name=="pins") | "\(.status) \(.conclusion) \(.id) \(.html_url)"'
+completed failure 38715895851 https://github.com/renavondata/assize/actions/runs/38715895851
+
+pins-report artifact 11963614658 (pins.jsonl, 498 rows), summary row:
+{"kind": "summary", "phase": "all", "clean_ok": 73, "clean_failed": 1, "clean_total": 74, "killed": 209, "mutants_total": 211, "non_causal": 2, "inconclusive": 0, "leaked": 0, "exit_code": 1}
+
+Rows whose observed result differs from the expected one (kind "run"):
+  P0l clean          expected pass, observed fail, exit 1
+  P0l/sha_comparison_skipped twin       expected pass, observed fail, exit 1
+  P0l/obligation_registry_skipped twin  expected pass, observed fail, exit 1
+
+P0l clean transcript (runs/P0l/clean/transcript.log), the failing check:
+  [FAIL] reports/L2/status/l2a-o18-image-carries-verify.md: cites []; findings ['... uncited: no `pins CI run <id> on <sha>` citation']
+
+P31 rows (CI): clean ok; verify_omitted and eager_imports mutants KILLED; twins pass.
+  transcript: "runtime docker: USABLE ... 28.0.4" and "runtime podman: USABLE ... 4.9.3 rootless=true"; both runtimes pass verify in the image (exit 0), an unsigned anchor fails (exit 1), and an altered record fails (exit 1).
+
+Local reproduction: reports/L2/review/fbf3a98916157b0955ee46ad794327289e5d2949/make-pins.txt (scratch clone at fbf3a98, stopped by the reviewer at 10:29 UTC to hold its declared bound; exit 143). It reproduces the CI failure: P0l clean FAILED, and P0l/sha_comparison_skipped and P0l/obligation_registry_skipped NON-CAUSAL. It also shows P0r, P0x and P0ac clean FAILED, which the CI run does not show: their transcripts read "gh api ... none of the git remotes configured ... point to a known GitHub host" and "real issues/drafts not read", so they are artefacts of the scratch clone, not of the PR.

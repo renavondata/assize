@@ -1,0 +1,6 @@
+# P31's mutant `eager_imports` (L2a obligation 18): `judge/__main__.py` imports `evaluate` at the top again, as it stood,
+# so the release image, which holds none of the Worlds' dependencies, fails at import before `verify` is reached.
+[[edit]]
+path = "judge/__main__.py"
+old = "from judge import ledger, registry, seeds\n"
+new = "from judge import evaluate, ledger, registry, seeds\n"

@@ -4855,6 +4855,84 @@ def p30_image_digest_stated() -> bool:
     return ok()
 
 
+RELEASE = ROOT / "release"
+
+
+def _release_context(into: Path) -> Path:
+    """The release image's build context (`release/Containerfile`): that file and `judge/` without bytecode caches."""
+    shutil.copytree(ROOT / "judge", into / "judge", ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copy(RELEASE / "Containerfile", into / "Containerfile")
+    return into
+
+
+def _verify_in_image(rt, image: str, data: Path, anchor: str) -> tuple[int, str]:
+    """`verify` as the released image runs it: no network, a read-only root, the ledger and the judge's private
+    storage mounted from `data`, the container's user the host user (private storage is the caller's own, judge/private.py;
+    Podman maps the host user into the container with keep-id, Docker takes the numeric ids)."""
+    user = ["--userns=keep-id", "--user", f"{os.getuid()}:{os.getgid()}"] if rt.name == "podman" else \
+        ["--user", f"{os.getuid()}:{os.getgid()}"]
+    r = subprocess.run([rt.binary, "run", "--rm", "--network=none", "--read-only", "--cap-drop=ALL", *user,
+                        "-v", f"{data}:/data:z", image, "verify", "/data/ledger.jsonl", "/data/private", anchor],
+                       capture_output=True, text=True, timeout=300)
+    return r.returncode, (r.stdout + r.stderr).strip()
+
+
+def p31_image_carries_verify() -> bool:
+    """The judge's release image carries `verify` (brief 2 A2, L2a obligation 18; S 2817eb7): `release/Containerfile`
+    builds, under every usable runtime offline from the judge's pinned base image (its one FROM is that base) and a
+    context of `judge/` alone, an image whose entrypoint is `python -m judge`, so no Worlds' dependency is imported to
+    verify. Run with no network and a read-only root over P9's fixture ledger, `verify` exits 0 and prints what the
+    host's `python -m judge verify` prints; it exits 1 and says FAILED on the same ledger with a record altered, and on
+    an anchor that is not a signed head."""
+    from judge import ledger, runtime
+
+    expect, ok = _expecter()
+    base = runtime.candidate_config()["base_image"]
+    froms = [ln.split()[1] for ln in (RELEASE / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
+    expect(froms == [base], f"the release image's one FROM is the judge's pinned base image ({froms}, {base})")
+    usable, _ = _usable_runtimes(expect)
+    work = Path(tempfile.mkdtemp(prefix="assize-p31-", dir=context.scratch))
+    built: list[tuple] = []
+    try:
+        data = work / "data"
+        data.mkdir()
+        led, private = data / "ledger.jsonl", data / "private"
+        held = [ledger.append(led, private, rid, rows) for rid, rows in P9_REQUESTS]
+        anchor = held[-1][-1]["sha256"]
+        host = _verify_cli(led, private, anchor)
+        expect(host[0] == 0, f"control: the host's verify passes the fixture ledger ({host})")
+
+        def case(rt, expect, say):
+            try:
+                image = _digest(_build(rt, _release_context(work / f"ctx-{rt.name}")))
+            except subprocess.CalledProcessError as e:
+                expect(False, f"{rt.name}: the release image builds offline ({e.stderr.decode(errors='replace')[-400:]})")
+                return
+            built.append((rt, image))
+            code, out = _verify_in_image(rt, image, data, anchor)
+            say(f"  {rt.name} image {image}: verify -> {code}: {out}")
+            expect(code == 0 and (code, out) == host, f"{rt.name}: verify in the image passes the fixture ledger and "
+                                                      f"prints what the host's prints (exit {code})")
+            code, out = _verify_in_image(rt, image, data, "0" * 64)
+            expect(code == 1 and "FAILED" in out, f"{rt.name}: an anchor that is no signed head fails (exit {code})")
+            good = led.read_bytes()
+            try:
+                led.write_bytes(good.replace(b'"utility": 3', b'"utility": 9', 1).replace(b'"utility":3', b'"utility":9', 1))
+                altered = led.read_bytes() != good
+                code, out = _verify_in_image(rt, image, data, anchor)
+                expect(altered and code == 1 and "FAILED" in out,
+                       f"{rt.name}: a record altered fails (altered {altered}, exit {code})")
+            finally:
+                led.write_bytes(good)
+
+        _each_runtime(usable, case, expect)
+    finally:
+        for rt, image in built:
+            subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -5909,6 +5987,11 @@ PINS = [
     Pin("P30", "a record's image is the candidate's image ID, the SHA-256 of its config blob; an image asked by a "
                "reference resolving to another ID is refused image_not_id",
         p30_image_digest_stated, (Mutant("image_id_unchecked", _edits("P30_image_id_unchecked")),), JUDGE_SIDE),
+    Pin("P31", "the judge's release image, built offline from release/Containerfile, runs verify: it passes the fixture "
+               "ledger, and fails an altered record and an anchor that is no signed head",
+        p31_image_carries_verify, (Mutant("verify_omitted", _edits("P31_verify_omitted")),
+                                   Mutant("eager_imports", _edits("P31_eager_imports"))),
+        JUDGE_SIDE + ("release/**",)),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing; a "
                "container still listed after teardown, at either site, is a `leaked` episode, counted",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),
