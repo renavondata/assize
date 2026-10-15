@@ -4100,9 +4100,7 @@ def p12_compute_price() -> bool:
     expect, ok = _expecter()
     cfg = tomllib.loads((ROOT / "judge" / "config.toml").read_text())
     rate = {k: binding.manifest()["price"][k] for k in ("cpu_s", "memory_gb_s")}
-    lim, t = cfg["candidate"], cfg["timeouts"]
-    derived = {"cpu_s": FIT_DELTA / 2 / (lim["cpus"] * t["episode_s"]),
-               "memory_gb_s": FIT_DELTA / 2 / (lim["memory_mib"] * 2 ** 20 / 1e9 * t["episode_s"])}
+    lim, derived = cfg["candidate"], _derived_rates(FIT_DELTA)
     print(f"  committed price {rate}; derived {derived}")
     expect(_same(rate, derived), "the committed price equals its derivation from FIT's delta and the allowances")
     block = candidates.BUSY_MIB << 20
@@ -4197,16 +4195,36 @@ out["seed_stores"] = sorted(p.name for p in private.glob("*.seeds.jsonl"))
 print(json.dumps(out))
 """
 FIXTURE_PARTY = {"kind": "builder", "model": "claude-opus-5-5", "session": "p19-fixture-party"}
-FIXTURE_ASKED = ("crafter", "fx", "unpriced", "bare")
+FIXTURE_ASKED = ("crafter", "fx", "unpriced", "bare", "borrowed", "rederived", "undelta")
+# P33's fixture Worlds (L2a obligation 19) commit a delta other than Crafter's: `borrowed` keeps Crafter's rates beside
+# it, `rederived` carries the rates derived from it here, `undelta` keeps Crafter's rates and commits no delta.
+FIXTURE_DELTA = 2.0
+
+
+def _derived_rates(delta: float) -> dict:
+    """The rates at which an episode exhausting every allowance of `judge/config.toml` is charged `delta`, half for each
+    resource, derived here independently of `judge/price.py` (brief 1 A4 item 4)."""
+    import tomllib
+
+    cfg = tomllib.loads((ROOT / "judge" / "config.toml").read_text())
+    lim, t = cfg["candidate"], cfg["timeouts"]
+    return {"cpu_s": delta / 2 / (lim["cpus"] * t["episode_s"]),
+            "memory_gb_s": delta / 2 / (lim["memory_mib"] * 2 ** 20 / 1e9 * t["episode_s"])}
 
 
 def _fixture_worlds() -> dict:
     """FIXTURE_WORLDS_RUN in a copy of the running tree with the fixture Worlds' directories added; its findings."""
     with tree.disposable_copy() as copy:
         m = json.loads((copy / "worlds" / "crafter" / "manifest.json").read_text())
+        p = m["price"]
         for name, manifest in (("fx", m | {"world": "fx"}),
                                ("unpriced", {k: v for k, v in m.items() if k != "price"} | {"world": "unpriced"}),
-                               ("bare", None)):
+                               ("bare", None),
+                               ("borrowed", m | {"world": "borrowed", "price": p | {"delta": FIXTURE_DELTA}}),
+                               ("rederived", m | {"world": "rederived",
+                                                  "price": p | {"delta": FIXTURE_DELTA} | _derived_rates(FIXTURE_DELTA)}),
+                               ("undelta", m | {"world": "undelta",
+                                                "price": {k: v for k, v in p.items() if k != "delta"}})):
             d = copy / "worlds" / name
             d.mkdir()
             (d / "binding.py").write_text(FIXTURE_WORLD_BINDING)
@@ -4230,7 +4248,7 @@ def p19_world_discovery() -> bool:
     refused `unknown_world`. Crafter stays bound. No seed is issued to any fixture request (brief 2 A2)."""
     expect, ok = _expecter()
     got = _fixture_worlds()
-    expect(got["bound"] == ["crafter", "fx", "unpriced"],
+    expect(got["bound"] == ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"],
            f"bound: every directory with a manifest and a binding, and only those ({got['bound']})")
     expect(got["fx_binding"] == "fx", f"fx's own binding is imported ({got['fx_binding']})")
     for w, want in (("fx", "unknown_runtime"), ("crafter", "unknown_runtime"), ("bare", "unknown_world")):
@@ -4260,6 +4278,37 @@ def p20_world_price() -> bool:
         expect("price" in m and v.is_valid(m), f"{name} commits a price and conforms to manifest.schema.json")
         unpriced = {k: x for k, x in m.items() if k != "price"}
         expect(not v.is_valid(unpriced), f"manifest.schema.json rejects {name} without its price")
+    return ok()
+
+
+def p33_price_derived() -> bool:
+    """A World is priced in its own utility (brief 2 A2, L2a obligation 19): `evaluate()` refuses `underived`, before any
+    seed is issued, a World whose committed rates are not the derivation from its own committed delta (Crafter's rates
+    beside a delta of 2) and one that commits no delta, and takes a World whose rates are derived from its delta of 2
+    past the price check. Every manifest in the tree, not Crafter's alone, commits a delta and the rates derived from
+    it, and the manifest schema requires the delta."""
+    import jsonschema
+    import referencing
+    from worlds.spec import purity
+
+    expect, ok = _expecter()
+    got = _fixture_worlds()
+    for w, want in (("borrowed", "underived"), ("undelta", "underived"), ("rederived", "unknown_runtime"),
+                    ("fx", "unknown_runtime")):
+        expect(got["refused"][w] == want, f"evaluate({w!r}) refused {want} ({got['refused'][w]})")
+    expect(not got["seed_stores"], f"no seed issued to a refused request ({got['seed_stores']})")
+    schemas, manifests = purity.load(purity.schema_files()), purity.load(purity.manifest_files())
+    registry = referencing.Registry().with_resources(
+        (s["$id"], referencing.Resource.from_contents(s)) for s in schemas.values())
+    v = jsonschema.Draft202012Validator(schemas["manifest.schema.json"], registry=registry)
+    for name, m in manifests.items():
+        p = m.get("price", {})
+        rate = {k: p.get(k) for k in ("cpu_s", "memory_gb_s")}
+        derived = _derived_rates(p["delta"]) if isinstance(p.get("delta"), (int, float)) else None
+        print(f"  {name}: delta {p.get('delta')}, committed {rate}, derived {derived}")
+        expect(derived is not None and _same(rate, derived), f"{name} commits the rates derived from its own delta")
+        undelta = m | {"price": {k: x for k, x in p.items() if k != "delta"}}
+        expect(not v.is_valid(undelta), f"manifest.schema.json rejects {name}'s price without its delta")
     return ok()
 
 
@@ -5955,6 +6004,10 @@ PINS = [
         p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),), JUDGE_SIDE),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
         p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),), JUDGE_SIDE),
+    Pin("P33", "a World's price is the derivation from its own committed delta; evaluate() refuses underived rates, "
+               "another World's among them, and a price without a delta",
+        p33_price_derived, (Mutant("rates_underived", _edits("P33_rates_underived")),
+                            Mutant("schema_delta_optional", _edits("P33_schema_delta_optional"))), JUDGE_SIDE),
     Pin("P22", "replay returns a request's records only if they match its signed head, else refuses ledger_unverified",
         p22_replay_verified, (Mutant("replay_unchecked", _edits("P22_replay_unchecked")),), JUDGE_SIDE),
     Pin("P23", "an interrupted request's played episodes and spent seeds are sealed into the ledger by the next "

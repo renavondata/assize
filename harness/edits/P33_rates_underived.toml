@@ -1,0 +1,7 @@
+# P33's mutant `rates_underived` (L2a obligation 19): the judge reads a World's committed rates without comparing them
+# with the derivation from its own delta, so a World carrying another World's rates is evaluated at a price nobody
+# derived for its utility.
+[[edit]]
+path = "judge/price.py"
+old = '''    if not (_same(committed.cpu_s, want.cpu_s) and _same(committed.memory_gb_s, want.memory_gb_s)):'''
+new = '''    if False:'''
