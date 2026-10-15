@@ -3997,7 +3997,8 @@ def p12_compute_price() -> bool:
     record as the container's since its start, and the price follows that scope: a fixture filling a block in its first
     episode only is charged that block's high-water mark in its second episode too. What the judge could not measure,
     the stretch after a crashed container's last read, is charged at the configured CPUs and memory (brief 1 A4 item 4;
-    review 42d7331 F4)."""
+    review 42d7331 F4). A container reused for a second episode and crashing at its begin_episode was last read before
+    that episode began: its measured stretch is empty, never negative (review c6679c6 F4)."""
     import tomllib
 
     from harness.fixtures import candidates
@@ -4024,6 +4025,11 @@ def p12_compute_price() -> bool:
                                command=candidates.command("busy_crash"))
         say(f"  {rt.name} busy_crash: {json.dumps(crashed)}")
         expect([r["termination"] for r in crashed] == ["crash"], f"{rt.name} busy_crash: recorded crash")
+        reused = episodes.run(rt, image, _short_crafter(2), binding.manifest(),
+                              command=candidates.command("crash_next"))
+        say(f"  {rt.name} crash_next: {json.dumps(reused)}")
+        expect([(r["termination"], r["steps"]) for r in reused] == [("truncated", LOOP_STEPS), ("crash", 0)],
+               f"{rt.name} crash_next: episode 0 ended by the World, episode 1 a crash at begin_episode")
         for r in records:
             used, n = r.get("compute", {}), f"{rt.name} hog_once episode {r['episode']}"
             expect(used.get("peak_memory_scope") == "container_since_start",
@@ -4032,13 +4038,23 @@ def p12_compute_price() -> bool:
                    f"{n}: peak memory {used.get('peak_memory_bytes')} bytes is at least the {block} filled in episode 0")
             expect(used.get("wall_s", -1) > used.get("unmeasured_s", 0) == 0,
                    f"{n}: measured throughout ({used.get('wall_s')} s wall, {used.get('unmeasured_s')} s unmeasured)")
-        for r in records + crashed:
+        for r in records + crashed + reused:
             want = _priced(r["compute"], cfg, rate) if "peak_memory_bytes" in r.get("compute", {}) else {}
             expect(_same(r.get("price"), want),
                    f"{rt.name} {r['termination']} episode {r['episode']}: price {r.get('price')}, derived {want}")
         used = crashed[0].get("compute", {}) if crashed else {}
         expect(used.get("unmeasured_s", 0) > 0,
                f"{rt.name} busy_crash: non-vacuous: {used.get('unmeasured_s')} s unmeasured after the container's last read")
+        # Review c6679c6 F4: the reused container was last read at episode 0's end, before episode 1 began, so its
+        # unmeasured stretch exceeds episode 1's wall-clock; the measured stretch is then empty, and its memory term,
+        # peak memory over that stretch, adds nothing to the unmeasured stretch's charge at the configured memory.
+        used = reused[-1].get("compute", {}) if reused else {}
+        expect(used.get("unmeasured_s", -1) > used.get("wall_s", 0) > 0,
+               f"{rt.name} crash_next: non-vacuous: {used.get('unmeasured_s')} s unmeasured over {used.get('wall_s')} s wall")
+        floor = rate["memory_gb_s"] * lim["memory_mib"] * 2 ** 20 * used.get("unmeasured_s", 0) / 1e9
+        memory = reused[-1].get("price", {}).get("memory", -1) if reused else -1
+        expect(memory >= floor * (1 - 8 * sys.float_info.epsilon),
+               f"{rt.name} crash_next: memory {memory} is at least the unmeasured stretch's {floor}")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
 
@@ -5594,7 +5610,8 @@ PINS = [
                     Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
-                            Mutant("unmeasured_free", _edits("P12_unmeasured_free"))), JUDGE_SIDE),
+                            Mutant("unmeasured_free", _edits("P12_unmeasured_free")),
+                            Mutant("floor_dropped", _edits("P12_floor_dropped"))), JUDGE_SIDE),
     Pin("P19", "a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding",
         p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),), JUDGE_SIDE),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
