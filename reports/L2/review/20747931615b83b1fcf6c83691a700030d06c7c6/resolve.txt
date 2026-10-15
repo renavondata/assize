@@ -1,0 +1,16 @@
+# `uv run --frozen python -m harness.ledger resolve --session 38666858505`, run by assize-reviewer session a0fc77db-b11f-4111-b6f9-738867c41544 (run 38666858505), output condensed to its lines; appended rows are in reports/L2/forecasts/38666858505.jsonl
+# reports/L0/forecasts/38666858505.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/38666858505.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/38666858505.jsonl: 58 open, 52 typed; resolved 2, unreadable 10
+resolved 46f3e0be7879 True — reports/L2/review-1707436fee5d1c8cf3bf7d492cdd0fb19ad70585.md at 0e09b33ece2a: ACCEPT WITH OBLIGATIONS
+resolved b7d50d3cf0e1 True — run 38663343981: 38.5 minutes, bound 90
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404)
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404)
+UNREAD 02d749e28bef: pins_green {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103: gh: Not Found (HTTP 404)
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103/commits?per_page=100: gh: Not Found (HTTP 404)
+UNREAD 191a63d44bf2: session_minutes {'run': 'local', 'bound': 25}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 2c9577e1a69c: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 3c074d68d679: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD b379e6a4b68b: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD e1ff2bd0a05c: session_minutes {'run': 'local', 'bound': 30}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 49b9c525ee57: session_minutes {'run': 'local', 'bound': 40}: not read (ValueError: invalid literal for int() with base 10: 'local')
