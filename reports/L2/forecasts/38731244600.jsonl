@@ -1,0 +1,2 @@
+{"id": "bdf5c5ab72d4", "ts": "2026-10-15T12:39:04Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38731244600"}, "outcome": false, "witness": "pins run 38726061952 attempt 1 on ecf21efd116a: failure"}
+{"id": "e4063be7a4d8", "ts": "2026-10-15T12:39:04Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38731244600"}, "outcome": false, "witness": "reports/L2/review-230003a1e788195faa0f352243372d8cdb8e9f91.md at ecf21efd116a: BLOCK"}
