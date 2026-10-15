@@ -1,0 +1,16 @@
+Head d1f31f8d07700a846ee389264bb1e66cf3b38436 (38f5355 plus this reviewer's review commit; no code differs from 38f5355).
+== Actions API: pins run 38675558819 on d1f31f8: completed failure (job `pins`, step `make pins`, 03:18:18Z-03:21:36Z) ==
+[clean ] P0l: observed fail -> FAILED (0.435s) out/pins/runs/P0l/clean/transcript.log
+CLEAN FAILED: P0l (observed fail)
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin fail -> NON-CAUSAL
+[mutant] P0l/obligation_registry_skipped: mutant fail, twin fail -> NON-CAUSAL
+clean: 10/11 passed, 1/11 failed
+mutants: 33/35 killed, 0/35 survived, 0/35 inconclusive, 0/35 stale, 2/35 non-causal, 0 leaked (clean and mutant)
+skipped: 60/71 pins, 168 mutants since c4d2fe8 (run 38672063258)
+PINS FAILED
+== reproduction: scratch copy of d1f31f8 (git archive), `uv run --frozen python -c 'import harness.pins as p; print(p.p0l_ci_claims())'` ==
+  [FAIL] reports/L2/status/l2a-o13-price-floor.md: cites []; findings ['reports/L2/status/l2a-o13-price-floor.md: uncited: no `pins CI run <id> on <sha>` citation']
+RESULT False
+== cause ==
+reports/L2/status/l2a-o13-price-floor.md line 2 reads "pins green on c4d2fe8 (pins CI run 38672063258: success, ...)": the run id is not followed by `on <sha>`, the form `claims.CITATION` reads. Run 38672063258 (reports/L2/ci/38672063258.json) is a pins run on c4d2fe8, the sha in the STATUS header, so the fact is true; its form is the defect.
+Scratch copy removed after the run.
