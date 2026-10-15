@@ -1,0 +1,25 @@
+Scratch copies of 38f5355c10eed0e89d70b278c119d6e5aa64c40e (git archive), uv run --frozen, rootless podman 6.1.2 (Docker not usable: 'not a Docker engine'); harness.pins.p12_compute_price(); assertion lines only, per-case JSON dumps omitted.
+== clean ==
+  [ok] the committed price equals its derivation from FIT's delta and the allowances
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman hog_once: two episodes of 5 steps in one container, ended by the World
+  [ok] podman busy_crash: recorded crash
+  [ok] podman crash_next: episode 0 ended by the World, episode 1 a crash at begin_episode
+  [ok] podman hog_once episode 0/1: scope, peak memory, measured throughout (6 assertions)
+  [ok] podman truncated/crash episodes: price equals derived price (5 assertions, incl. crash episode 1 on crash_next's neighbour)
+  [ok] podman busy_crash: non-vacuous: 0.2747920729452744 s unmeasured after the container's last read
+  [ok] podman crash_next: non-vacuous: 0.7405005709733814 s unmeasured over 0.030614319955930114 s wall
+  [ok] podman crash_next: memory 0.0003085419045722422 is at least the unmeasured stretch's 0.0003085419045722422
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+RESULT True
+== floor_dropped (harness/edits/P12_floor_dropped.toml applied to judge/price.py in a second scratch copy) ==
+  [FAIL] podman crash episode 1: price {'cpu': 0.00031810912371535476, 'memory': 0.0003154521023137276, 'total': 0.0006335612260290823}, derived {'cpu': 0.00031810912371535476, 'memory': 0.0003181091237153547, 'total': 0.0006362182474307094}
+  [ok] podman crash_next: non-vacuous: 0.7634618969168514 s unmeasured over 0.028992070932872593 s wall
+  [FAIL] podman crash_next: memory 0.0003154521023137276 is at least the unmeasured stretch's 0.0003181091237153547
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (2 failed)
+RESULT False
+(all other assertions in the mutant run: ok, as in the clean run)

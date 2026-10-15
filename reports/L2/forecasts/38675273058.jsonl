@@ -1,0 +1,2 @@
+{"id": "1885fab22c4c", "ts": "2026-10-15T03:16:41Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38675273058"}, "outcome": true, "witness": "reports/L2/review-3cd8d9d1a57ca5b362d085303ce8ef4eb76b1483.md at 030a56581145: ACCEPT"}
+{"id": "46f3e0be7879", "ts": "2026-10-15T03:16:41Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "38675273058"}, "outcome": true, "witness": "reports/L2/review-1707436fee5d1c8cf3bf7d492cdd0fb19ad70585.md at 0e09b33ece2a: ACCEPT WITH OBLIGATIONS"}
