@@ -1,0 +1,52 @@
+Scratch copy of 3cd8d9d (git archive into /tmp/rev200.RabI), `uv run --frozen`, rootless Podman 6.1.2 (Docker not usable: 'not a Docker engine'). Excerpts of the two runs of harness.pins.p12_compute_price(); the per-case JSON record dumps are omitted, every assertion line is kept.
+
+== clean ==
+  committed price {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}; derived {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}
+  [ok] the committed price equals its derivation from FIT's delta and the allowances
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] podman hog_once: two episodes of 5 steps in one container, ended by the World
+  [ok] podman busy_crash: recorded crash
+  [ok] podman crash_next: episode 0 ended by the World, episode 1 a crash at begin_episode
+  [ok] podman hog_once episode 0: peak memory's scope stated as container_since_start (container_since_start)
+  [ok] podman hog_once episode 0: peak memory 277032960 bytes is at least the 268435456 filled in episode 0
+  [ok] podman hog_once episode 0: measured throughout (0.3306938780006021 s wall, 0.0 s unmeasured)
+  [ok] podman hog_once episode 1: peak memory's scope stated as container_since_start (container_since_start)
+  [ok] podman hog_once episode 1: peak memory 277032960 bytes is at least the 268435456 filled in episode 0
+  [ok] podman hog_once episode 1: measured throughout (0.009726735996082425 s wall, 0.0 s unmeasured)
+  [ok] podman truncated episode 0: price {'cpu': 7.720041666666667e-05, 'memory': 3.55505632377795e-05, 'total': 0.00011275097990444616}, derived {'cpu': 7.720041666666667e-05, 'memory': 3.55505632377795e-05, 'total': 0.00011275097990444616}
+  [ok] podman truncated episode 1: price {'cpu': 4.6666666666666666e-07, 'memory': 1.0456526900848305e-06, 'total': 1.5123193567514972e-06}, derived {'cpu': 4.6666666666666666e-07, 'memory': 1.0456526900848305e-06, 'total': 1.5123193567514972e-06}
+  [ok] podman crash episode 0: price {'cpu': 0.00013245548541843892, 'memory': 0.00011267964629877076, 'total': 0.0002451351317172097}, derived {'cpu': 0.00013245548541843892, 'memory': 0.00011267964629877076, 'total': 0.0002451351317172097}
+  [ok] podman truncated episode 0: price {'cpu': 1.9500416666666667e-05, 'memory': 7.232110271576663e-07, 'total': 2.0223627693824333e-05}, derived {'cpu': 1.9500416666666667e-05, 'memory': 7.232110271576663e-07, 'total': 2.0223627693824333e-05}
+  [ok] podman crash episode 1: price {'cpu': 0.0003086140062562966, 'memory': 0.0003086140062562966, 'total': 0.0006172280125125932}, derived {'cpu': 0.0003086140062562966, 'memory': 0.0003086140062562966, 'total': 0.0006172280125125932}
+  [ok] podman busy_crash: non-vacuous: 0.2691931650042534 s unmeasured after the container's last read
+  [ok] podman crash_next: non-vacuous: 0.7406736150151119 s unmeasured over 0.011812819982878864 s wall
+  [ok] podman crash_next: memory 0.0003086140062562966 is at least the unmeasured stretch's 0.0003086140062562966
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+P12 clean: True
+
+== mutant floor_dropped (harness/edits/P12_floor_dropped.toml applied to judge/price.py by harness.edits.apply; judge/price.py:61 then reads `measured = used["wall_s"] - unmeasured`) ==
+  [ok] podman hog_once: two episodes of 5 steps in one container, ended by the World
+  [ok] podman busy_crash: recorded crash
+  [ok] podman crash_next: episode 0 ended by the World, episode 1 a crash at begin_episode
+  [ok] podman hog_once episode 0: peak memory's scope stated as container_since_start (container_since_start)
+  [ok] podman hog_once episode 0: peak memory 277360640 bytes is at least the 268435456 filled in episode 0
+  [ok] podman hog_once episode 0: measured throughout (0.3343556380132213 s wall, 0.0 s unmeasured)
+  [ok] podman hog_once episode 1: peak memory's scope stated as container_since_start (container_since_start)
+  [ok] podman hog_once episode 1: peak memory 277360640 bytes is at least the 268435456 filled in episode 0
+  [ok] podman hog_once episode 1: measured throughout (0.010039871092885733 s wall, 0.0 s unmeasured)
+  [ok] podman truncated episode 0: price {'cpu': 7.896833333333334e-05, 'memory': 3.598672871282145e-05, 'total': 0.0001149550620461548}, derived {'cpu': 7.896833333333334e-05, 'memory': 3.598672871282145e-05, 'total': 0.0001149550620461548}
+  [ok] podman truncated episode 1: price {'cpu': 5.383333333333334e-07, 'memory': 1.0805922683950382e-06, 'total': 1.6189256017283716e-06}, derived {'cpu': 5.383333333333334e-07, 'memory': 1.0805922683950382e-06, 'total': 1.6189256017283716e-06}
+  [ok] podman crash episode 0: price {'cpu': 0.00012979639043464946, 'memory': 0.00011109246576643803, 'total': 0.0002408888562010875}, derived {'cpu': 0.00012979639043464946, 'memory': 0.00011109246576643803, 'total': 0.0002408888562010875}
+  [ok] podman truncated episode 0: price {'cpu': 1.9653333333333334e-05, 'memory': 6.446613897161575e-07, 'total': 2.029799472304949e-05}, derived {'cpu': 1.9653333333333334e-05, 'memory': 6.446613897161575e-07, 'total': 2.029799472304949e-05}
+  [FAIL] podman crash episode 1: price {'cpu': 0.00030592122251012677, 'memory': 0.00030349177430880595, 'total': 0.0006094129968189327}, derived {'cpu': 0.00030592122251012677, 'memory': 0.0003059212225101267, 'total': 0.0006118424450202535}
+  [ok] podman busy_crash: non-vacuous: 0.2655363370431587 s unmeasured after the container's last read
+  [ok] podman crash_next: non-vacuous: 0.7342109340243042 s unmeasured over 0.01220968400593847 s wall
+  [FAIL] podman crash_next: memory 0.00030349177430880595 is at least the unmeasured stretch's 0.0003059212225101267
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (2 failed)
+P12 mutant: False
+
+Cleanup: /tmp/rev200.RabI removed (`ls -d /tmp/rev200.*`: no such file); `podman ps -a` lists 19 containers before and after these runs; the one running `assize-candidate-c39a761a88ea4a62` was created 2026-10-14 13:36:51 IDT, about 14 h before this session, and is not of these runs; no harness process remains (`pgrep -fa harness`: 0).
