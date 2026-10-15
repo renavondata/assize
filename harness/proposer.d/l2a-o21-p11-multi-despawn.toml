@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o21-p11-multi-despawn (brief 2 A2, L2a obligation 21 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "4beef27c-8532-47cb-b9d9-35b0d0b4ef05"
