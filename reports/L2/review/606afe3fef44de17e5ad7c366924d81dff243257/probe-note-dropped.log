@@ -1,0 +1,20 @@
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 54ms
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  podman raised: raised P29Escaped('World raised at t=2'); running at the raise [{'assize-candidate-cf6d09dda18748f0'}]; listed after []
+  [ok] podman raised: control: one candidate container was running when the World raised ([{'assize-candidate-cf6d09dda18748f0'}])
+  [ok] podman raised: the World's exception propagates (raised P29Escaped('World raised at t=2'))
+  [ok] podman raised: no candidate container listed after the exception ([])
+  podman closed: first record episode 0 truncated; serving ['assize-candidate-1e73bf8363004ec4']; listed after []
+  [ok] podman closed: control: the first episode was played and one container serves the second (truncated; ['assize-candidate-1e73bf8363004ec4'])
+  [ok] podman closed: no candidate container listed after the generator is closed ([])
+  [ok] podman: the runtime lists no candidate container afterwards ([])
+  [ok] podman: every assertion above held (0 failed)
+P29 on note-dropped copy: True
+exit 0

@@ -1,0 +1,13 @@
+registry harness: 2 pins, 4 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P3: observed pass -> ok (21.653s) out/p29/runs/P3/clean/transcript.log
+[clean ] P29: observed pass -> ok (4.777s) out/p29/runs/P29/clean/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (22.575s + 22.527s) out/p29/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P3/played_at_end: mutant fail, twin pass -> KILLED (22.277s + 21.173s) out/p29/runs/P3/played_at_end/mutant/transcript.log
+[mutant] P29/escape_untorn: mutant fail, twin pass -> KILLED (4.496s + 4.748s) out/p29/runs/P29/escape_untorn/mutant/transcript.log
+[mutant] P29/close_untorn: mutant fail, twin pass -> KILLED (4.7s + 4.797s) out/p29/runs/P29/close_untorn/mutant/transcript.log
+clean: 2/2 passed, 0/2 failed
+mutants: 4/4 killed, 0/4 survived, 0/4 inconclusive, 0/4 stale, 0/4 non-causal, 0 leaked (clean and mutant)
+twins: 4/4 passed
+skipped: 0/2 pins, 0 mutants
+report: out/p29/pins.jsonl
+PINS PASSED
