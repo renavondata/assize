@@ -3,6 +3,8 @@
 # parse (`python -m harness.claims trailers`). Installed by `git config core.hooksPath harness/hooks` in build.yml and
 # review.yml. It reads the branch's unpushed commits: from its upstream, or from origin/master for a branch not yet
 # pushed. A refused push is answered by amending the session's own unpushed commit, never by an exemption entry.
+# Instruction #211 item 3: it also refuses a push whose commits add or change a STATUS file P0l would reject
+# (`python -m harness.claims status-check`).
 here=$(cd "$(dirname "$0")/../.." && pwd) || exit 1
 base=$(git rev-parse -q --verify '@{u}' 2>/dev/null || git rev-parse -q --verify origin/master) || {
   echo "pre-push: refused: neither an upstream nor origin/master to read the unpushed commits from" >&2
@@ -10,5 +12,13 @@ base=$(git rev-parse -q --verify '@{u}' 2>/dev/null || git rev-parse -q --verify
 }
 PYTHONPATH="$here" python3 -B -m harness.claims trailers "$base..HEAD" --repo . || {
   echo "pre-push: refused: amend your own unpushed commit so that git parses its trailers (instruction #110)" >&2
+  exit 1
+}
+statuses=$(git diff --name-only --diff-filter=AM "$base...HEAD" -- 'reports/L*/status/*.md') || {
+  echo "pre-push: refused: cannot read the STATUS files the unpushed commits add or change" >&2
+  exit 1
+}
+[ -z "$statuses" ] || PYTHONPATH="$here" python3 -B -m harness.claims status-check $statuses --repo . || {
+  echo "pre-push: refused: take the header sha and the citation from python -m harness.ledger cite --head <sha>" >&2
   exit 1
 }

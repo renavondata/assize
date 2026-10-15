@@ -1,0 +1,8 @@
+# P0ba's mutant (instruction #211 item 5): the pre-push hook does not run `claims status-check`, so a STATUS P0l would
+# reject leaves the session.
+[[edit]]
+path = "harness/hooks/pre-push"
+old = """[ -z "$statuses" ] || PYTHONPATH="$here" python3 -B -m harness.claims status-check $statuses --repo . || {
+"""
+new = """[ -z "$statuses" ] || true || {
+"""

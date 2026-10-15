@@ -1710,6 +1710,109 @@ def p0y_trailers_parse() -> bool:
     return ok()
 
 
+def _cite_run(n: int, sha: str, created: str, **over: object) -> dict:
+    """A `pins` run as the Actions API projects it into a record (`ledger.RUN_RECORD`)."""
+    return {"conclusion": "success", "created_at": created, "event": "pull_request", "head_branch": "b",
+            "head_sha": sha, "html_url": f"https://x/{n}", "id": n, "name": "pins", "path": claims.PINS_WORKFLOW,
+            "run_attempt": 1, "status": "completed", "updated_at": created} | over
+
+
+def p0ba_cite_from_harness() -> bool:
+    """`python -m harness.ledger cite` finds the `pins` run on a sha with no network (the observer substitution of
+    P0s), records it as `reports/L<n>/ci/<id>.json`, and prints the STATUS header sha and the citation, both from the
+    run's own head_sha; a STATUS built from those two lines passes `claims status-check`, and `harness/hooks/pre-push`
+    refuses a push whose STATUS cites without `on <sha>` or names another sha in its header (instruction #211)."""
+    from harness import ledger
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0ba-", dir=context.scratch))
+    repo = work / "repo"
+    git = _git_fixture(repo)
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    (repo / "REPORT.md").write_text("- L0 — x\n- L1 — y\n")
+    _commit_as(git, repo, 0, PARSED)
+    code = _commit_as(git, repo, 1, PARSED, path="code")  # the code head the run is on
+    _commit_as(git, repo, 2, PARSED, path="notes")  # the local HEAD has moved on: a reports/ commit, say
+    local = git("rev-parse", "HEAD")
+    failed, pending = "c" * 40, "d" * 40
+    runs = [_cite_run(70, code, "2026-01-01T00:00:00Z", conclusion="failure"),  # superseded by the later run 71
+            _cite_run(71, code, "2026-01-01T01:00:00Z"),
+            _cite_run(72, code, "2026-01-01T02:00:00Z", path=".github/workflows/measure.yml"),
+            _cite_run(73, failed, "2026-01-01T00:00:00Z", conclusion="failure"),
+            _cite_run(74, pending, "2026-01-01T00:00:00Z", conclusion=None, status="in_progress")]
+
+    def observe(kind: str, *key: object) -> object:
+        if kind == "pins_on":
+            return [r for r in runs if r["head_sha"] == key[0]]
+        raise ledger.Unreadable(f"no query {kind}")
+
+    layer = ledger.current_layer((repo / "REPORT.md").read_text())
+    expect(layer == 2, f"the current layer is the one after REPORT.md's last verdict line ({layer})")
+    slept: list[float] = []
+    got = ledger.cite(repo, code, layer, observe, 0, slept.append)
+    want = (f"header-sha: {code[:7]}", f"pins CI run 71 on {code[:7]}: success (reports/L2/ci/71.json)")
+    print(f"    cite on the code head with HEAD at {local[:7]}: {got}")
+    expect(got.code == 0 and got.lines == want, f"cite prints the latest pins run's header sha and citation, from the "
+                                                f"run's head_sha, not the local HEAD ({got.lines} vs {want})")
+    record = repo / "reports/L2/ci/71.json"
+    expect(record.exists() and json.loads(record.read_text()) == runs[1],
+           "cite records the run in the projection the committed records use")
+    got_failed = ledger.cite(repo, failed, layer, observe, 0, slept.append)
+    expect(got_failed.code == 1 and (repo / "reports/L2/ci/73.json").exists(),
+           f"a run concluded failure exits 1 and is still recorded ({got_failed})")
+    got_none = ledger.cite(repo, "e" * 40, layer, observe, 0, slept.append)
+    expect(got_none.code == 2 and not slept, f"no pins run on the sha exits 2, with no wait asked none spent ({got_none})")
+    got_pending = ledger.cite(repo, pending, layer, observe, 90, slept.append)
+    expect(got_pending.code == 3 and got_pending.lines == (f"pending: run 74 on {pending}",) and slept == [30] * 3,
+           f"a run still in progress after the wait exits 3, polled every 30 s ({got_pending}, slept {slept})")
+    slept.clear()
+    ledger.cite(repo, pending, layer, observe, 100_000, slept.append)
+    expect(sum(slept) == ledger.CITE_WAIT_MAX_S, f"the wait is capped at {ledger.CITE_WAIT_MAX_S} s ({sum(slept)})")
+
+    def status(header: str, citation: str) -> str:
+        return (f"# STATUS — L2 — 2026-01-01 — {header} — PR #1\nVERDICT: SESSION DONE\n"
+                f"pins: clean 1/1; {citation}\n")
+
+    def check(path: Path) -> subprocess.CompletedProcess:
+        return subprocess.run([sys.executable, "-B", "-m", "harness.claims", "status-check", str(path), "--repo",
+                               str(repo)], cwd=ROOT, capture_output=True, text=True)
+
+    built = status(got.lines[0].removeprefix("header-sha: "), got.lines[1])
+    (repo / "reports/L2/status").mkdir(parents=True)
+    path = repo / "reports/L2/status/b.md"
+    path.write_text(built)
+    said = check(path)
+    expect(said.returncode == 0, f"a STATUS built from cite's two lines passes status-check ({said.stderr.strip()})")
+
+    # The hook, from this tree, on three branches off master, each adding one STATUS with the run records committed.
+    git("init", "-q", "--bare", str(work / "remote.git"))
+    git("remote", "add", "origin", str(work / "remote.git"))
+    path.unlink()
+    git("add", "-A")
+    git("commit", "-q", "-m", f"records\n\nbody\n\n{PARSED}")
+    git("push", "-q", "origin", "master")
+    git("config", "core.hooksPath", str(ROOT / "harness" / "hooks"))
+    citation = got.lines[1]
+    branches = (("built from cite", status(code[:7], citation), 0),
+                ("citing without on <sha>", status(code[:7], citation.replace(f" on {code[:7]}", "")), 1),
+                ("a header naming the local HEAD", status(local[:7], citation), 1))
+    for n, (what, text, refused) in enumerate(branches, 3):
+        git("checkout", "-q", "-b", f"s{n}", "master")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+        git("add", "-A")
+        git("commit", "-q", "-m", f"case {n}\n\nbody\n\n{PARSED}")
+        pushed = subprocess.run(["git", "-C", str(repo), "push", "-q", "-u", "origin", f"s{n}"], capture_output=True,
+                                text=True, env=os.environ | claims.GIT_ENV | FIXTURE_GIT)
+        print(f"    push of a STATUS {what}: {pushed.returncode} {pushed.stderr.strip()[-200:]!r}")
+        expect((pushed.returncode != 0) == bool(refused)
+               and (not refused or "take the header sha and the citation from python -m harness.ledger cite"
+                    in pushed.stderr),
+               f"the hook {'refuses' if refused else 'accepts'} the push of a STATUS {what}")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 FAILED_EVENTS = (  # (what, workflow, conclusion, selects the report job) -- instruction #110 Part C
     ("a pins run concluded failure", "pins", "failure", True),
     ("a build run concluded failure", "build", "failure", True),
@@ -5876,6 +5979,11 @@ PINS = [
         p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
                                         Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
         HARNESS + (".github/workflows/pins-master.yml",)),
+    Pin("P0ba", "a STATUS's header sha and pins citation are printed by the harness from the run's own head_sha, and a "
+                "push of a STATUS P0l would reject is refused",
+        p0ba_cite_from_harness, (Mutant("cite_drops_sha", _edits("P0ba_cite_drops_sha")),
+                                 Mutant("cite_header_from_local", _edits("P0ba_cite_header_from_local")),
+                                 Mutant("hook_skips_status", _edits("P0ba_hook_skips_status"))), HARNESS),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),
