@@ -1,0 +1,6 @@
+# P0bb's mutant `pause_not_prestarted` (L2a obligation 23): the harness no longer starts the runtime's infrastructure
+# before arming its subreaper, as when only the Makefile did.
+[[edit]]
+path = "harness/runner.py"
+old = "    proc.start_runtime_infrastructure()\n    proc.set_subreaper()\n"
+new = "    proc.set_subreaper()\n"

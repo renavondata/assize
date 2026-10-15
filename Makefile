@@ -17,10 +17,6 @@ SMOKE_EPISODES ?= 10
 .PHONY: pins smoke measure
 
 pins:
-	@# Rootless Podman keeps one pause process per user to hold its user namespace, as Docker keeps dockerd. Start it
-	@# here, outside the harness, whose sweep would otherwise count it as leaked by the first check to use Podman.
-	@# `podman unshare true` is a no-op when the process already exists (P2; witness reports/L1/p2/ci-leak.txt).
-	@if command -v podman >/dev/null 2>&1; then podman unshare true || true; fi
 	$(PY) -m harness run --registry harness --phase all --out $(PINS_OUT) $(PINS_SINCE)
 
 smoke:

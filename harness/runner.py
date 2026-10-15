@@ -352,6 +352,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
         since: str | None = None, since_run: int | None = None, repo: Path = ROOT) -> int:
     """With `since`, run only the pins `select` picks from the paths changed in `repo` since that sha, and record each
     other pin as skipped, citing `since` and its pins run `since_run`; without it, every pin."""
+    proc.start_runtime_infrastructure()
     proc.set_subreaper()
     cfg = config_mod.load(config_path)
     out.mkdir(parents=True, exist_ok=True)
