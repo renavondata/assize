@@ -1,0 +1,6 @@
+# P31's mutant `verify_omitted` (L2a obligation 18): the release image is built without the judge's entrypoint module, so
+# it carries nothing that verifies.
+[[edit]]
+path = "release/Containerfile"
+old = "COPY judge /release/judge"
+new = "COPY judge/__init__.py /release/judge/__init__.py"

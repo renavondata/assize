@@ -1,0 +1,11 @@
+# The judge's release image (brief 2 A2, L2a obligation 18; the L2c seal builds and pins it). The build context is a
+# directory holding this file and a copy of `judge/` without bytecode caches. The base is the judge's candidate base
+# image, pinned by the same digest as `judge/config.toml` [candidate] base_image (P31 checks they are equal). Nothing
+# is installed, so the image builds with no network, and `python -m judge verify` needs the standard library only
+# (`judge/__main__.py` imports `evaluate`, which needs the Worlds' dependencies, only when `evaluate` is asked for).
+FROM docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+ENV PYTHONDONTWRITEBYTECODE=1
+WORKDIR /release
+COPY judge /release/judge
+ENTRYPOINT ["python", "-B", "-m", "judge"]
+CMD []

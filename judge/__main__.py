@@ -15,7 +15,7 @@ import json
 import sys
 from pathlib import Path
 
-from judge import evaluate, ledger, registry, seeds
+from judge import ledger, registry, seeds
 
 USAGE = ("usage: python -m judge verify LEDGER PRIVATE ANCHOR | credential PRIVATE KIND MODEL SESSION | "
          "register PRIVATE IMAGE (token on stdin) | evaluate PRIVATE LEDGERS RUNTIME IMAGE WORLD N REQUEST_ID")
@@ -48,6 +48,8 @@ def _episodes(n: str) -> int:
 
 
 def _evaluate(private: str, ledgers: str, rt: str, image: str, world: str, n: str, request_id: str) -> int:
+    from judge import evaluate  # the Worlds' dependencies are needed here only: the release image's `verify` has none
+
     for r in evaluate.evaluate(image, world, _episodes(n), request_id, private=Path(private), ledgers=Path(ledgers),
                                runtime_name=rt):
         print(json.dumps(r, sort_keys=True))
