@@ -1,0 +1,18 @@
+CLEAN FAILED: P0x (observed fail)
+[clean ] P0l: observed pass -> ok (0.276s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0x: observed fail -> FAILED (16.274s) out/pins/runs/P0x/clean/transcript.log
+[clean ] P32: observed pass -> ok (0.278s) out/pins/runs/P32/clean/transcript.log
+MUTANT NON-CAUSAL: P0x/none_on_workflow_admitted
+MUTANT NON-CAUSAL: P0x/price_line_dropped
+MUTANT NON-CAUSAL: P0x/scoped_by_number
+[mutant] P0ar/registry_frozen_only: mutant fail, twin pass -> KILLED (0.453s + 0.453s) out/pins/runs/P0ar/registry_frozen_only/mutant/transcript.log
+[mutant] P0ay/registry_read_as_text: mutant fail, twin pass -> KILLED (0.353s + 0.404s) out/pins/runs/P0ay/registry_read_as_text/mutant/transcript.log
+[mutant] P0l/obligation_registry_skipped: mutant fail, twin pass -> KILLED (0.354s + 0.354s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.354s + 0.354s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0x/none_on_workflow_admitted: mutant fail, twin fail -> NON-CAUSAL (16.233s + 13.978s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+[mutant] P0x/price_line_dropped: mutant fail, twin fail -> NON-CAUSAL (14.277s + 14.272s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+[mutant] P0x/scoped_by_number: mutant fail, twin fail -> NON-CAUSAL (13.582s + 13.78s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+[mutant] P32/declaration_env_ignored: mutant fail, twin pass -> KILLED (0.3s + 0.3s) out/pins/runs/P32/declaration_env_ignored/mutant/transcript.log
+[mutant] P32/declared_runtime_ignored: mutant fail, twin pass -> KILLED (0.3s + 0.299s) out/pins/runs/P32/declared_runtime_ignored/mutant/transcript.log
+registry harness: 75 pins, 213 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since 9176d188127ec8006032fa78cb62cf866dd67e69 --since-run 38738968750
