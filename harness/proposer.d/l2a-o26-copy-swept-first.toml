@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o26-copy-swept-first (brief 2 A2, L2a obligation 26 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "a5e4b006-1c10-40cf-9776-28c3c13ba51e"
