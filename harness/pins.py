@@ -236,6 +236,44 @@ def p0h_daemon() -> bool:
     return d.ok
 
 
+def p0bb_runtime_infrastructure_prestarted() -> bool:
+    """Run without `make`, on a host whose rootless Podman has no pause process (a fresh XDG_RUNTIME_DIR), the harness
+    entry point starts that process itself before arming its subreaper: a clean check that uses Podman reports 0
+    leaked processes and the suite passes (L2a obligation 23; review be10563c5496 F3)."""
+    import tempfile as tf
+
+    expect, ok = _expecter()
+    expect(shutil.which("podman") is not None, "podman is installed: this pin cannot be witnessed without it")
+    runtime_dir = Path(tf.mkdtemp(prefix="assize-xdg-", dir=context.scratch))
+    runtime_dir.chmod(0o700)
+    pause_pid = runtime_dir / "libpod" / "tmp" / "pause.pid"
+    before = os.environ.get("XDG_RUNTIME_DIR")
+    os.environ["XDG_RUNTIME_DIR"] = str(runtime_dir)
+    try:
+        expect(not pause_pid.exists(), "control: the fresh runtime directory holds no pause process")
+        n = run_nested("podman_pause", "fixture.podman_pause", "clean", config=escapee.FAST)
+        row = n.run("fixture/podman_pause")
+        started = pause_pid.is_file()
+        expect(started, "the nested run left Podman's pause process for this runtime directory")
+        expect(row.get("observed") == "pass", f"the check itself returned True ({row.get('observed')})")
+        expect(row.get("leaked_processes") == 0, f"leaked_processes = 0 ({row.get('leaked_processes')})")
+        expect(row.get("verdict") == "ok", f"verdict ok ({row.get('verdict')})")
+        expect(n.summary.get("leaked") == 0, f"summary leaked = 0 ({n.summary.get('leaked')})")
+        expect(n.ok, "the nested run's own expectations hold")
+        if started:
+            try:
+                os.kill(int(pause_pid.read_text()), signal.SIGKILL)
+            except (ValueError, ProcessLookupError):
+                pass
+    finally:
+        if before is None:
+            del os.environ["XDG_RUNTIME_DIR"]
+        else:
+            os.environ["XDG_RUNTIME_DIR"] = before
+        shutil.rmtree(runtime_dir, ignore_errors=True)
+    return ok()
+
+
 STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
@@ -5866,6 +5904,10 @@ PINS = [
                                      Mutant("leaked_not_counted", _edits("P0h_leaked_not_counted")),
                                      Mutant("subreaper_not_set", _edits("P0h_subreaper_not_set")),
                                      Mutant("sweep_skipped", _edits("P0h_sweep_skipped"))), HARNESS),
+    Pin("P0bb", "the harness entry point, run without make, starts rootless Podman's pause process before arming its "
+                "subreaper, so a check using Podman is not reported as leaking it",
+        p0bb_runtime_infrastructure_prestarted, (Mutant("pause_not_prestarted", _edits("P0bb_pause_not_prestarted")),),
+        HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),

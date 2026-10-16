@@ -16,7 +16,9 @@ from __future__ import annotations
 
 import ctypes
 import os
+import shutil
 import signal
+import subprocess
 import sys
 import tempfile
 import time
@@ -44,6 +46,15 @@ def child_env(scratch: Path | None = None) -> dict[str, str]:
     prefix = tempfile.mkdtemp(prefix="pycache-", dir=under)
     inherited = {k: v for k, v in os.environ.items() if k != "PYTHONPYCACHEPREFIX"}
     return inherited | {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONPYCACHEPREFIX": prefix}
+
+
+def start_runtime_infrastructure() -> None:
+    """Rootless Podman keeps one pause process per user to hold its user namespace, as Docker keeps dockerd. Start it
+    before the subreaper is armed, so it is reparented past this process and the sweep never counts it as leaked by
+    the first check to use Podman (L2a obligation 23; witness reports/L1/p2/ci-leak.txt). `podman unshare true` is a
+    no-op when the process already exists."""
+    if shutil.which("podman") is not None:
+        subprocess.run(["podman", "unshare", "true"], capture_output=True, timeout=120)
 
 
 def set_subreaper() -> None:
