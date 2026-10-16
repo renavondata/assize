@@ -3575,6 +3575,57 @@ print(json.dumps({
 PATH_DENIALS = frozenset({"ENOENT", "EACCES", "EPERM"})
 
 
+# The environment variable by which a witnessing context declares the runtime it must witness (`docker` on `pins`,
+# `podman` on `measure`); unset, the context declares none.
+DECLARED_RUNTIME = "ASSIZE_RUNTIME"
+
+
+def _expect_declared(expect, usable: list[str], declared: str | None = None) -> None:
+    """Assert that the context's declared runtime, `declared` or the one the environment names, is usable."""
+    from judge import runtime
+
+    declared = os.environ.get(DECLARED_RUNTIME) or None if declared is None else declared
+    why = runtime.declared_unmet(declared, usable)
+    expect(why is None, f"the declared runtime ({declared or 'none declared'}) is witnessed" + (f": {why}" if why else ""))
+
+
+def p32_declared_runtime() -> bool:
+    """A context that declares the runtime it must witness fails when that runtime is not usable, whatever else is
+    (brief 2 A2, L2a obligation 22; review be10563c5496 F2). Over fixture lists of usable runtimes: declaring docker
+    where only podman is usable, a runtime that is none of the known two, and the declaration read from the
+    environment each fail; declaring podman where podman is usable, both usable, and declaring nothing each pass."""
+    expect, ok = _expecter()
+
+    def held(usable: list[str], declared: str | None = None, env: str | None = None) -> bool:
+        saved = os.environ.pop(DECLARED_RUNTIME, None)
+        if env is not None:
+            os.environ[DECLARED_RUNTIME] = env
+        seen: list[bool] = []
+        try:
+            _expect_declared(lambda cond, what: seen.append(cond), usable, declared)
+        finally:
+            os.environ.pop(DECLARED_RUNTIME, None)
+            if saved is not None:
+                os.environ[DECLARED_RUNTIME] = saved
+        return seen == [True]
+
+    cases = (
+        ("podman declared, podman usable", dict(usable=["podman"], declared="podman"), True),
+        ("docker declared, both usable", dict(usable=["docker", "podman"], declared="docker"), True),
+        ("nothing declared, one usable", dict(usable=["podman"]), True),
+        ("nothing declared, none usable", dict(usable=[]), True),
+        ("docker declared, only podman usable", dict(usable=["podman"], declared="docker"), False),
+        ("podman declared, none usable", dict(usable=[], declared="podman"), False),
+        ("an unknown runtime declared", dict(usable=["docker", "podman"], declared="rkt"), False),
+        (f"{DECLARED_RUNTIME}=docker, only podman usable", dict(usable=["podman"], env="docker"), False),
+        (f"{DECLARED_RUNTIME}=podman, podman usable", dict(usable=["podman"], env="podman"), True),
+    )
+    for name, kw, want in cases:
+        got = held(**kw)
+        expect(got is want, f"{name}: the declaration is {'held' if want else 'refused'} (got {'held' if got else 'refused'})")
+    return ok()
+
+
 def p2_peek() -> bool:
     """Under every genuine OCI runtime present (Docker, or rootless Podman with the cpu, memory and pids controllers
     delegated), a candidate container cannot read the judge's paths, has no network interface but loopback and cannot
@@ -3593,6 +3644,7 @@ def p2_peek() -> bool:
         print(f"  runtime {e.runtime.name}: {'USABLE' if e.usable else 'not usable'}: {e.identity}")
     usable = [e for e in engines if e.usable]
     expect(bool(usable), f"at least one runtime witnessed ({[e.runtime.name for e in usable]})")
+    _expect_declared(expect, [e.runtime.name for e in usable])
     want_cgroup = {"cpu.max": f"{round(lim.cpus * 100000)} 100000", "memory.max": str(lim.memory_mib * 2**20),
                    "memory.swap.max": "0", "pids.max": str(lim.pids)}
     for e in usable:
@@ -3653,6 +3705,7 @@ def _usable_runtimes(expect):
         print(f"  runtime {e.runtime.name}: {'USABLE' if e.usable else 'not usable'}: {e.identity}")
     usable = [e.runtime for e in engines if e.usable]
     expect(bool(usable), f"at least one runtime witnessed ({[rt.name for rt in usable]})")
+    _expect_declared(expect, [rt.name for rt in usable])
     image = runtime.candidate_config()["base_image"]
     for rt in usable:
         runtime.pull(rt, image)
@@ -5992,6 +6045,10 @@ PINS = [
         p31_image_carries_verify, (Mutant("verify_omitted", _edits("P31_verify_omitted")),
                                    Mutant("eager_imports", _edits("P31_eager_imports"))),
         JUDGE_SIDE + ("release/**",)),
+    Pin("P32", "a context's declared runtime must be usable: docker declared where only podman is, an unknown runtime, "
+               "and the environment's declaration each fail; a held or absent declaration passes",
+        p32_declared_runtime, (Mutant("declared_runtime_ignored", _edits("P32_declared_runtime_ignored")),
+                               Mutant("declaration_env_ignored", _edits("P32_declaration_env_ignored"))), JUDGE_SIDE),
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing; a "
                "container still listed after teardown, at either site, is a `leaked` episode, counted",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),

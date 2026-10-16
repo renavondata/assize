@@ -1,0 +1,35 @@
+== clean
+  [ok] podman declared, podman usable: the declaration is held (got held)
+  [ok] docker declared, both usable: the declaration is held (got held)
+  [ok] nothing declared, one usable: the declaration is held (got held)
+  [ok] nothing declared, none usable: the declaration is held (got held)
+  [ok] docker declared, only podman usable: the declaration is refused (got refused)
+  [ok] podman declared, none usable: the declaration is refused (got refused)
+  [ok] an unknown runtime declared: the declaration is refused (got refused)
+  [ok] ASSIZE_RUNTIME=docker, only podman usable: the declaration is refused (got refused)
+  [ok] ASSIZE_RUNTIME=podman, podman usable: the declaration is held (got held)
+exit 0
+== mutant declared_runtime_ignored
+applied
+  [ok] podman declared, podman usable: the declaration is held (got held)
+  [ok] docker declared, both usable: the declaration is held (got held)
+  [ok] nothing declared, one usable: the declaration is held (got held)
+  [ok] nothing declared, none usable: the declaration is held (got held)
+  [FAIL] docker declared, only podman usable: the declaration is refused (got held)
+  [FAIL] podman declared, none usable: the declaration is refused (got held)
+  [ok] an unknown runtime declared: the declaration is refused (got refused)
+  [FAIL] ASSIZE_RUNTIME=docker, only podman usable: the declaration is refused (got held)
+  [ok] ASSIZE_RUNTIME=podman, podman usable: the declaration is held (got held)
+exit 1
+== mutant declaration_env_ignored
+applied
+  [ok] podman declared, podman usable: the declaration is held (got held)
+  [ok] docker declared, both usable: the declaration is held (got held)
+  [ok] nothing declared, one usable: the declaration is held (got held)
+  [ok] nothing declared, none usable: the declaration is held (got held)
+  [ok] docker declared, only podman usable: the declaration is refused (got refused)
+  [ok] podman declared, none usable: the declaration is refused (got refused)
+  [ok] an unknown runtime declared: the declaration is refused (got refused)
+  [FAIL] ASSIZE_RUNTIME=docker, only podman usable: the declaration is refused (got held)
+  [ok] ASSIZE_RUNTIME=podman, podman usable: the declaration is held (got held)
+exit 1
