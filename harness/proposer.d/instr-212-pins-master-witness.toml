@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-212-pins-master-witness (instruction #212 item 2): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "80f20ac2-a706-4010-86a4-3343b0043f7b"
