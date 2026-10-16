@@ -1,0 +1,30 @@
+pin:       P0x
+protects:  an instruction signed after instruction #70 merged declares the price quantity it moves, or that it only records
+role:      clean
+tree:      /tmp/review-218-rCtX/copy
+invoked:   /tmp/review-218-rCtX/copy
+scratch:   /tmp/assize-scratch-j2xwjqc4
+  [ok] issue #201 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #202 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #203 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_line'], want ['price_line']
+  [ok] issue #204 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_line'], want ['price_line']
+  [ok] issue #205 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_none_on_workflow'], want ['price_none_on_workflow']
+  [ok] issue #206 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #207 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #208 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_form'], want ['price_form']
+  [ok] issue #209 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_form'], want ['price_form']
+  [ok] issue #210 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_form'], want ['price_form']
+  [ok] issue #211 (signed 2000-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #212 (signed None, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #213 (signed 2999-01-01T00:00:00Z, rule merged None): findings [], want []
+  [ok] issue #67 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_line'], want ['price_line']
+  [ok] issue #900 (signed 2000-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #214 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings [], want []
+  [ok] issue #215 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_line'], want ['price_line']
+  [ok] issue #216 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_none_on_workflow'], want ['price_none_on_workflow']
+  [ok] issue #217 (signed 2999-01-01T00:00:00Z, rule merged 2026-10-11T00:00:00Z): findings ['price_line'], want ['price_line']
+  [ok] rule merged at {'before': None, 'merge': '2030-01-01T00:00:00Z'}: none before the merge; after it the merge's committer time 2030-01-01T00:00:00Z, not the branch commit's 2026-10-16T05:04:55+03:00
+  [ok] master's merge base with HEAD read (454d563acc0929a824ec8d62da0cfc391ab28cc6)
+    real: rule merged 2026-10-11T23:45:02+08:00; 20 instruction issues updated since: [68, 70, 102, 108, 110, 111, 112, 113, 126, 132, 135, 136, 139, 140, 162, 174, 176, 181, 211, 212]
+  [FAIL] real instruction issues: findings ['issue #211: price_line: `Price:` lines the instruction: 0, want 1', 'issue #212: price_line: `Price:` lines the instruction: 0, want 1']
+result:    FAIL
