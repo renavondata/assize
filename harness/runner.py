@@ -29,7 +29,7 @@ from pathlib import Path
 from harness import config as config_mod
 from harness import context, edits, proc, registries
 from harness.pin import ROOT, Mutant, Pin, RegistryError
-from harness.tree import disposable_copy
+from harness.tree import copy_tree, disposable_copy
 
 EXIT_PASS, EXIT_FAIL, EXIT_ERROR = 0, 1, 2
 EXIT_REFUSED = 4
@@ -151,14 +151,16 @@ def _run_clean(registry: str, pin: Pin, out: Path, cfg, scratch_root: Path | Non
 
 def _run_in_copy(registry: str, pin: Pin, mutant: Mutant, role: str, out: Path, cfg,
                  scratch_root: Path | None) -> dict:
-    """role 'mutant': copy plus the mutant's edits. role 'twin': identical fresh copy, no edits."""
+    """role 'mutant': copy plus the mutant's edits. role 'twin': identical fresh copy, no edits. The copy lies under
+    the run's scratch root and is deleted with it, after the sweep: a leaked descendant still writing in the copy is
+    dead before anything is removed (L2a obligation 26)."""
     run_dir = _fresh_dir(out / "runs" / _slug(pin.name) / mutant.name / role)
     row = _row(registry, pin, mutant, role, run_dir) | {"edits": mutant.edits}
     mutant_edits = edits.load(mutant.edits)
     row["edits_sha256"] = hashlib.sha256((ROOT / mutant.edits).read_bytes()).hexdigest()
     t0 = time.monotonic()
-    with ((run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch,
-          disposable_copy(ROOT, under=scratch) as copy):
+    with (run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch:
+        copy = copy_tree(ROOT, under=scratch)
         row["tree"] = str(copy)
         log.write(f"copy of {ROOT}\n  at {copy}\n")
         if role == "mutant":

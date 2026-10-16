@@ -19,20 +19,25 @@ TOP_LEVEL_EXCLUDE = frozenset({".git", ".venv", "out", "reports",
 EVERY_DEPTH_EXCLUDE = frozenset({"__pycache__"})
 
 
-@contextmanager
-def disposable_copy(root: Path = ROOT, under: Path | None = None) -> Iterator[Path]:
-    """Copy `root` (the tree of the running code, so edits compose) into a temporary directory; delete it on exit.
-    The directory is created under `under`, else under the scratch root the parent passed to this child,
-    else under the system temporary directory."""
-    tmp = Path(tempfile.mkdtemp(prefix="assize-copy-", dir=under or context.scratch))
-    copy = tmp / "repo"
+def copy_tree(root: Path = ROOT, under: Path | None = None) -> Path:
+    """Copy `root` (the tree of the running code, so edits compose) into a new temporary directory and return the
+    copy, which the caller deletes. The directory is created under `under`, else under the scratch root the parent
+    passed to this child, else under the system temporary directory."""
+    copy = Path(tempfile.mkdtemp(prefix="assize-copy-", dir=under or context.scratch)) / "repo"
     shutil.copytree(root, copy, symlinks=True,
                     ignore=lambda d, names: set(names) & (TOP_LEVEL_EXCLUDE | EVERY_DEPTH_EXCLUDE if Path(d) == root
                                                           else EVERY_DEPTH_EXCLUDE))
+    return copy
+
+
+@contextmanager
+def disposable_copy(root: Path = ROOT, under: Path | None = None) -> Iterator[Path]:
+    """`copy_tree`, deleted on exit."""
+    copy = copy_tree(root, under)
     try:
         yield copy
     finally:
-        shutil.rmtree(tmp)
+        shutil.rmtree(copy.parent)
 
 
 def digest(root: Path, sub: str = "harness") -> str:
