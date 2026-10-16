@@ -1,0 +1,21 @@
+pin:       P2
+protects:  a candidate container cannot read judge paths or reach the network; root read-only; config limits
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-fccfv4bl
+Traceback (most recent call last):
+  File "/home/runner/work/assize/assize/harness/runner.py", line 59, in check
+    ok = bool(pin.check())
+              ^^^^^^^^^^^
+  File "/home/runner/work/assize/assize/harness/pins.py", line 3788, in p2_peek
+    _expect_declared(expect, [e.runtime.name for e in usable])
+  File "/home/runner/work/assize/assize/harness/pins.py", line 3729, in _expect_declared
+    why = runtime.declared_unmet(declared, usable)
+          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'judge.runtime' has no attribute 'declared_unmet'
+  [ok] every probed judge path exists on the judge's side: ['/home/runner/work/assize/assize', '/home/runner/work/assize/assize/judge', '/home/runner/work/assize/assize/judge/config.toml', '/home/runner/work/assize/assize/judge/runtime.py', '/tmp/assize-scratch-fccfv4bl']
+  runtime docker: USABLE: docker server 28.0.4 cgroup v2
+  runtime podman: USABLE: podman 4.9.3 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['docker', 'podman'])
+result:    ERROR (check raised)
