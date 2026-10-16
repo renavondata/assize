@@ -16,7 +16,8 @@ Non-interactive and idempotent per `request_id`. In order:
    whose ID is another, `_present`); otherwise the request is refused before any seed is issued. The judge
    binds every directory of `worlds/` holding both a `manifest.json` and a `binding.py`, under the directory's name; it
    keeps no table of Worlds, so a World is added by its directory alone (brief 2 A2, P19). A World's price is its
-   manifest's `price` block, never another World's (P20).
+   manifest's `price` block, never another World's (P20), and its rates are the derivation from the block's own
+   `delta`, or it is refused `underived` (`price.of`; L2a obligation 19, P33).
 4. `n_episodes` fresh evaluation seeds are issued from the CSPRNG into judge-private storage (`seeds.issue`) and each
    World is built from one. No seed leaves the judge: no record carries one.
 5. The candidate plays every episode through the judge's loop (`episodes.run`): one record per episode, failures
@@ -103,10 +104,13 @@ def _binding(world: str):
 
 
 def _priced(binding) -> dict:
-    """The World's manifest, refused `unpriced` if it commits no price."""
+    """The World's manifest, refused `unpriced` if it commits no price and `underived` if its rates are not the
+    derivation from its own delta."""
     m = binding.manifest()
     try:
         price.of(m)
+    except price.Underived as e:
+        raise Refused("underived", str(e)) from e
     except price.Unpriced as e:
         raise Refused("unpriced", str(e)) from e
     return m

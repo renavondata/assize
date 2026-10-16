@@ -3,7 +3,11 @@
 An episode's measured compute (`compute.py`, `episodes.py`) is converted into units of the World's per-episode utility
 at the rates the World's manifest commits in its `price` block, with their derivation in its `rationale`, by one rule.
 A World whose manifest commits no price has none: the judge refuses to evaluate it (`Unpriced`), never borrowing
-another World's rates (brief 2 A2, P20):
+another World's rates (brief 2 A2, P20). The block commits `delta`, the smallest difference in per-episode utility its
+World's FIT criterion requires the court to detect (brief 1: 0.5 achievements; brief 2: δ = 2 for NetHack), and its
+rates must be that delta's derivation: an episode exhausting every allowance of `config.toml` is charged `delta`, half
+for each resource. Rates that are not, another World's among them, are refused (`Underived`), so a World is priced in
+its own utility before any scored run (brief 2 A2, L2a obligation 19, P33):
 
 - CPU: the episode's measured `cpu_s`, plus its `unmeasured_s` at the configured CPUs. What the judge could not
   measure (a crashed container takes its cgroup with it) is charged at the most the candidate could have used, so that
@@ -19,8 +23,12 @@ the episode's own peak, which no cgroup file reports, is never claimed."""
 
 from __future__ import annotations
 
+import math
+import sys
+import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 
 from judge import runtime
 
@@ -41,12 +49,38 @@ class Unpriced(ValueError):
     """A World whose manifest commits no price."""
 
 
+class Underived(Unpriced):
+    """A World whose committed rates are not the derivation from its own committed `delta`."""
+
+
+def derived(delta: float, lim: runtime.Limits, episode_s: float) -> Price:
+    """The rates at which an episode exhausting every allowance, `lim` for `episode_s` seconds, is charged `delta`, half
+    for each resource."""
+    return Price(delta / 2 / (lim.cpus * episode_s), delta / 2 / ((lim.memory_mib << 20) / GB * episode_s))
+
+
+def _episode_s(path: Path = runtime.CONFIG) -> float:
+    return float(tomllib.loads(path.read_text())["timeouts"]["episode_s"])
+
+
+def _same(a: float, b: float) -> bool:
+    """`a` equals `b` up to the rounding of a few double-precision operations (a derived bound)."""
+    return math.isclose(a, b, rel_tol=8 * sys.float_info.epsilon, abs_tol=0.0)
+
+
 def of(manifest: Mapping) -> Price:
-    """The rates `manifest` commits for its World."""
+    """The rates `manifest` commits for its World, refused unless they are the derivation from its own `delta`."""
     c = manifest.get("price")
     if c is None:
         raise Unpriced(f"{manifest['world']!r} commits no price in its manifest")
-    return Price(float(c["cpu_s"]), float(c["memory_gb_s"]))
+    if c.get("delta") is None:
+        raise Underived(f"{manifest['world']!r} commits no delta from which its price is derived")
+    committed, want = Price(float(c["cpu_s"]), float(c["memory_gb_s"])), derived(float(c["delta"]), runtime.limits(),
+                                                                                     _episode_s())
+    if not (_same(committed.cpu_s, want.cpu_s) and _same(committed.memory_gb_s, want.memory_gb_s)):
+        raise Underived(f"{manifest['world']!r} commits {committed}, not the derivation {want} from its delta "
+                        f"{c['delta']}")
+    return committed
 
 
 def charge(used: Mapping, lim: runtime.Limits, p: Price) -> dict[str, float]:

@@ -1,0 +1,14 @@
+# Reviewer session 5d42043e-ecf9-4ab5-a886-aaf5017295ea, run 38958222279. Scratch copy /tmp/rev223.irig of head 5e5f814.
+# cd /tmp/rev223.irig && uv run --frozen python -c "
+# from judge import price
+# from harness import pins
+# d=pins._derived_rates(-0.5)
+# for name,p in [('negative',{'delta':-0.5,**d}),('zero',{'delta':0,'cpu_s':0.0,'memory_gb_s':0.0}),('string',{'delta':'2',**pins._derived_rates(2.0)})]:
+#     try: print(name,'ACCEPTED',price.of({'world':name,'price':p}))
+#     except Exception as e: print(name,'REFUSED',type(e).__name__)"
+negative ACCEPTED Price(cpu_s=-0.0004166666666666667, memory_gb_s=-0.00038805107275644935)
+zero ACCEPTED Price(cpu_s=0.0, memory_gb_s=0.0)
+string ACCEPTED Price(cpu_s=0.0016666666666666668, memory_gb_s=0.0015522042910257974)
+# judge/evaluate.py does not validate a manifest against worlds/spec/manifest.schema.json (grep "validate\|schema": only
+# schema_version stamps); the schema's "exclusiveMinimum": 0 on delta, cpu_s and memory_gb_s is enforced only by pins
+# over committed manifests (P20, P33).

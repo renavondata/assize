@@ -1,0 +1,61 @@
+# Reviewer session 5d42043e-ecf9-4ab5-a886-aaf5017295ea, run 38958222279, 2026-10-16.
+# Scratch copies of PR #223 head 5e5f814 (git archive HEAD): /tmp/rev223.irig (clean), /tmp/rev223mutA (P33_rates_underived
+# applied by hand with the Edit tool to judge/price.py line 80), /tmp/rev223mutB (P33_schema_delta_optional applied by hand to
+# worlds/spec/manifest.schema.json line 63). In each: cd <copy> && uv run --frozen python -c "import sys,pathlib; from harness
+# import context, pins; context.scratch=pathlib.Path('/tmp/rev223scr'); r=pins.<pin>(); print('RESULT', r)" 2>&1 | tail -14
+=== /tmp/rev223.irig
+--- p33_price_derived
+  fixture Worlds in a copy of the tree: {"bound": ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unpriced", "bare": "unknown_world", "borrowed": "underived", "rederived": "unknown_runtime", "undelta": "underived"}, "fx_binding": "fx", "seed_stores": []}
+  [ok] evaluate('borrowed') refused underived (underived)
+  [ok] evaluate('undelta') refused underived (underived)
+  [ok] evaluate('rederived') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  crafter/manifest.json: delta 0.5, committed {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}, derived {'cpu_s': 0.0004166666666666667, 'memory_gb_s': 0.00038805107275644935}
+  [ok] crafter/manifest.json commits the rates derived from its own delta
+  [ok] manifest.schema.json rejects crafter/manifest.json's price without its delta
+RESULT True
+--- p20_world_price
+  [ok] evaluate('unpriced') refused unpriced (unpriced)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  [ok] crafter/manifest.json commits a price and conforms to manifest.schema.json
+  [ok] manifest.schema.json rejects crafter/manifest.json without its price
+RESULT True
+--- p19_world_discovery
+  [ok] bound: every directory with a manifest and a binding, and only those (['borrowed', 'crafter', 'fx', 'rederived', 'undelta', 'unpriced'])
+  [ok] fx's own binding is imported (fx)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('crafter') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('bare') refused unknown_world (unknown_world)
+  [ok] no seed issued to a refused request ([])
+RESULT True
+=== /tmp/rev223mutA  (mutant rates_underived)
+--- p33_price_derived
+  fixture Worlds in a copy of the tree: {"bound": ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unpriced", "bare": "unknown_world", "borrowed": "unknown_runtime", "rederived": "unknown_runtime", "undelta": "underived"}, "fx_binding": "fx", "seed_stores": []}
+  [FAIL] evaluate('borrowed') refused underived (unknown_runtime)
+  [ok] evaluate('undelta') refused underived (underived)
+  [ok] evaluate('rederived') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  [ok] crafter/manifest.json commits the rates derived from its own delta
+  [ok] manifest.schema.json rejects crafter/manifest.json's price without its delta
+RESULT False
+--- p20_world_price
+RESULT True
+--- p19_world_discovery
+RESULT True
+=== /tmp/rev223mutB  (mutant schema_delta_optional)
+--- p33_price_derived
+  [ok] evaluate('borrowed') refused underived (underived)
+  [ok] evaluate('undelta') refused underived (underived)
+  [ok] evaluate('rederived') refused unknown_runtime (unknown_runtime)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  [ok] crafter/manifest.json commits the rates derived from its own delta
+  [FAIL] manifest.schema.json rejects crafter/manifest.json's price without its delta
+RESULT False
+--- p20_world_price
+RESULT True
+--- p19_world_discovery
+RESULT True
