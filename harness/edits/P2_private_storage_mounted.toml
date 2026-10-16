@@ -1,0 +1,6 @@
+# P2's mutant `private_storage_mounted` (L2a obligation 24): the directory that holds judge-private storage and the
+# ledger (the pin's scratch lives under the system temp directory) is mounted read-only into the candidate container.
+[[edit]]
+path = "judge/runtime.py"
+old = "        \"--read-only\",\n"
+new = "        \"--read-only\",\n        f\"--volume={__import__('tempfile').gettempdir()}:{__import__('tempfile').gettempdir()}:ro\",\n"

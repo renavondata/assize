@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o24-p2-derived-paths (brief 2 A2, L2a obligation 24 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "c92860b8-b527-41e4-be04-9a6d0dc6bd21"

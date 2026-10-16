@@ -3767,6 +3767,19 @@ def p32_declared_runtime() -> bool:
     return ok()
 
 
+def _judge_state_paths(root: Path) -> list[str]:
+    """The judge's private storage and its ledger directory, populated by the judge's own writers (a credential, a
+    signed request), and every path in them: derived from what the judge writes, not from a list (L2a obligation 24).
+    The signing key, the credential store, the signed heads and the ledger are all there to be probed."""
+    from judge import ledger, registry
+
+    private, ledgers = root / "judge-private", root / "judge-ledgers"
+    ledgers.mkdir()
+    registry.credential(private, {"kind": "builder", "model": "p2", "session": "p2"})
+    ledger.append(ledgers / "p2.ledger.jsonl", private, "p2-request", [{"kind": "p2"}])
+    return [str(p) for d in (private, ledgers) for p in (d, *sorted(d.rglob("*")))]
+
+
 def p2_peek() -> bool:
     """Under every genuine OCI runtime present (Docker, or rootless Podman with the cpu, memory and pids controllers
     delegated), a candidate container cannot read the judge's paths, has no network interface but loopback and cannot
@@ -3778,8 +3791,12 @@ def p2_peek() -> bool:
     expect, ok = _expecter()
     lim = runtime.limits()
     image = runtime.candidate_config()["base_image"]
-    paths = [str(p) for p in (ROOT, runtime.CONFIG.parent, runtime.CONFIG, Path(runtime.__file__), context.scratch)]
+    state = _judge_state_paths(Path(tempfile.mkdtemp(prefix="p2-state-", dir=context.scratch)))
+    paths = [str(p) for p in (ROOT, runtime.CONFIG.parent, runtime.CONFIG, Path(runtime.__file__), context.scratch)] + state
     expect(all(Path(p).exists() for p in paths), f"every probed judge path exists on the judge's side: {paths}")
+    expect(any(p.endswith("/key") for p in state) and any(p.endswith("heads.jsonl") for p in state)
+           and any(p.endswith("p2.ledger.jsonl") for p in state),
+           "judge-private storage holds the signing key and the signed heads, and the ledger is written")
     engines = [runtime.engine(rt) for rt in runtime.RUNTIMES]
     for e in engines:
         print(f"  runtime {e.runtime.name}: {'USABLE' if e.usable else 'not usable'}: {e.identity}")
@@ -6088,6 +6105,7 @@ PINS = [
     Pin("P2", "a candidate container cannot read judge paths or reach the network; root read-only; config limits",
         p2_peek, (Mutant("network_enabled", _edits("P2_network_enabled")),
                   Mutant("judge_mounted", _edits("P2_judge_mounted")),
+                  Mutant("private_storage_mounted", _edits("P2_private_storage_mounted")),
                   Mutant("rootfs_writable", _edits("P2_rootfs_writable")),
                   Mutant("memory_limit_dropped", _edits("P2_memory_limit_dropped"))), JUDGE_SIDE),
     Pin("P3", "every requested episode is recorded with its termination code, failures included",
