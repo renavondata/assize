@@ -3851,7 +3851,7 @@ def _short_crafter(n: int):
 def _candidates(rt) -> set[str]:
     from judge import episodes
 
-    return set(episodes.listed_prefix(rt, "assize-candidate-"))
+    return set(episodes.own_candidates(rt))
 
 
 def _usable_runtimes(expect):
@@ -4034,6 +4034,7 @@ def p10_container_teardown() -> bool:
     import dataclasses
     import threading
     import time
+    import uuid
 
     from harness.fixtures import candidates
     from judge import episodes, runtime
@@ -4045,6 +4046,18 @@ def p10_container_teardown() -> bool:
     usable, image = _usable_runtimes(expect)
     def case(rt, expect, say):
         before = _candidates(rt)
+        # L2a obligation 25: a candidate container another judge process started, listed throughout this case, is not
+        # this case's stray and must not be removed by its sweep.
+        foreign_name = f"assize-candidate-foreign{uuid.uuid4().hex[:8]}-{uuid.uuid4().hex[:8]}"
+        foreign = subprocess.Popen(runtime.run_argv(rt, image, runtime.limits(), foreign_name,
+                                                    candidates.command("stubborn")),
+                                   stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for _ in range(100):
+            if episodes.listed(rt, foreign_name, running=True):
+                break
+            time.sleep(0.1)
+        expect(episodes.listed(rt, foreign_name, running=True) == [foreign_name],
+               f"{rt.name}: control: the foreign container is running before the case")
         c = episodes.Container(rt, image, runtime.limits(), candidates.command("stubborn"))
         try:
             c.call("begin_episode", {"schema_version": episodes.SCHEMA_VERSION, "manifest": binding.manifest()}, t,
@@ -4067,6 +4080,11 @@ def p10_container_teardown() -> bool:
                f"{rt.name}: the stalled episode is recorded step_timeout ({[r['termination'] for r in records]})")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: the runtime lists no candidate container afterwards ({strays})")
+        expect(episodes.listed(rt, foreign_name, running=True) == [foreign_name],
+               f"{rt.name}: a container this process did not start is neither swept as a stray nor removed")
+        subprocess.run(runtime.remove_argv(rt, foreign_name), capture_output=True)
+        foreign.kill()
+        foreign.wait()
         # The other clause (brief 1 A4 item 5; review 2402ed7d56a5 F3, L2a obligation 15): a container the runtime still
         # lists after teardown is an episode recorded `leaked`, counted, never dropped. Removal is made to fail, in this
         # thread only, by a remove command that does nothing; the cases then remove what they leaked.
@@ -6273,6 +6291,7 @@ PINS = [
     Pin("P10", "a candidate container ignoring SIGTERM is killed and removed on timeout; the runtime lists nothing; a "
                "container still listed after teardown, at either site, is a `leaked` episode, counted",
         p10_container_teardown, (Mutant("removal_skipped", _edits("P10_removal_skipped")),
+                                 Mutant("stray_scope_global", _edits("P10_stray_scope_global")),
                                  Mutant("leaked_not_recorded", _edits("P10_leaked_not_recorded"))), JUDGE_SIDE),
     Pin("P6", "no manifest vocabulary or World-native name appears in an interface schema file, and no schema regex "
               "but the identifier pattern",

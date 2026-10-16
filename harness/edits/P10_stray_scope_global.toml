@@ -1,0 +1,6 @@
+# P10's mutant `stray_scope_global` (L2a obligation 25): what a process calls its own candidate containers is every
+# `assize-candidate-` container the runtime lists, whoever started it.
+[[edit]]
+path = "judge/episodes.py"
+old = "    return listed_prefix(rt, CANDIDATE_PREFIX)\n"
+new = "    return listed_prefix(rt, \"assize-candidate-\")\n"
