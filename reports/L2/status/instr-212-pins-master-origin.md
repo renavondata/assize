@@ -1,0 +1,17 @@
+# STATUS — L2 — 2026-10-15 — 983a5c8 — PR #215
+VERDICT: STOPPED: instruction #212 item 1 done (one workflow line) but pins is red on P0x, which only Guy's edit of the issue bodies can clear (review F1 answered: a failed cited run carries a STOPPED verdict); pins CI run 38781223150 on 983a5c8: failure (reports/L2/ci/38781223150.json), on P0x alone, because the signed instruction issues #211 and #212 carry no `Price:` line. This diff does not cause it, and PR #214 fails on the same pin (run 38780224173)
+LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
+pins: clean 73/74; mutants 208/211 KILLED; twins 208/211; leaked 0; stale 0; inconclusive 0; non-causal 3 (P0x's, its clean failing); exit 2 (pins CI run 38781223150 on 983a5c8: failure, record reports/L2/ci/38781223150.json, log reports/L2/builder/983a5c8…/ci-pins.txt). Local `make pins` on 983a5c8: clean 72/74 (P0x and P0r), 207/211, 4 non-causal, exit 2, reports/L2/builder/983a5c861ab42a6d4c10858d0529e6094460bc81/make-pins.txt
+changed: .github/workflows/pins-master.yml (1 line), harness/proposer.d/instr-212-pins-master-origin.toml, reports/L2/{forecasts/6c913b5d-….jsonl,ci/38781223150.json,builder/983a5c8…/,status/instr-212-pins-master-origin.md}
+did: `claims next '#211' '#212'`: #211 is held by PR #214 (skipped), so I took #212, signed per `claims signed`. The awaits-guy PR #213 touches no path of this item
+did: item 1: `git fetch --no-tags origin master` → `git rev-parse --verify origin/master`. `persist-credentials: false` is kept; nothing else in the workflow changed
+did: item 2: this PR cannot witness its own fix. pins-master run 38781223328 on 983a5c8 ran master's copy and failed at "Restore the judge from master" with `fatal: could not read Username for 'https://github.com': No such device or address`, which is #194 as stated. The first master Builder after merge records the first pins-master run on a PR
+did: P0x clean (reports/L2/builder/983a5c8…/P0x-clean.log): `issue #211: price_line: ... 0, want 1`, `issue #212: ... 0, want 1`. Local P0r failed only because the runner's env carries GITHUB_HEAD_REF=l2a-o22-declared-runtime from this session's dispatch, so it judged PR #213's branch (P0r-clean.log). P0r passes in CI
+did: no tool call was denied. Forecasts were appended before the first pins run (new branch)
+decided (not asked): leave #211/#212 bodies unedited. Under rule 5, a non-gfrmin edit after the signature voids it, and the instruction says "Nothing else" — p(stands on review)=0.9
+decided (not asked): the local P0r failure is environmental, not a finding; the CI run is the record — p=0.85
+forecasts: made 4 (pins_green #215 p=0.85, review_accept #215 p=0.75, host_verdict L2 FIT p=0.35, session_minutes run 38781003806 bound 40 p=0.6); resolved 0
+price: guy-items 2; guy-latency median 0.4h max 0.6h; sessions 12; runner-min 859
+obligations added: L3: P0r reads GITHUB_HEAD_REF even in a session whose event is not that branch's own pull request; it should read the checked-out branch outside a pins run
+NEEDS YOU (at most 1): add a `Price:` line to #212's body (and #211's), e.g. `Price: guy-items; down; 1`; a workflow-touching instruction may not use `none (recording-only)`. Your edit keeps the signature (rule 5). Then re-run pins on #215 and approve and merge it (entrenched: .github/)
+next: after #215 merges, record the first pins-master run on a pull request (id, conclusion); if it fails at the restore step, file an issue to gfrmin quoting the log (instruction #212 item 2)

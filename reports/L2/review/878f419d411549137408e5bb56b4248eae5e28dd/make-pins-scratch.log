@@ -1,0 +1,34 @@
+# Reviewer scratch reproduction (review run 38801830337): `env -u GITHUB_HEAD_REF -u GITHUB_BASE_REF make pins` on a
+# detached git worktree of 878f419d411549137408e5bb56b4248eae5e28dd. P0r fails here only because a detached worktree with
+# GITHUB_HEAD_REF unset has no branch name (transcript: "[FAIL] real branch: name resolved ('')"); CI passes it.
+# Lines 6-296 (per-pin rows) are omitted below except the failures; every omitted clean row is "observed pass -> ok" and
+# every omitted mutant row is "mutant fail, twin pass -> KILLED". Counts are in the summary lines, verbatim.
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 74 pins, 211 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0l: observed pass -> ok (0.632s) out/pins/runs/P0l/clean/transcript.log
+[clean ] P0r: observed fail -> FAILED (1.477s) out/pins/runs/P0r/clean/transcript.log
+CLEAN FAILED: P0r (observed fail)
+[clean ] P0x: observed fail -> FAILED (23.728s) out/pins/runs/P0x/clean/transcript.log
+CLEAN FAILED: P0x (observed fail)
+[mutant] P0r/late_forecast_admitted: mutant fail, twin fail -> NON-CAUSAL (1.663s + 1.654s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+MUTANT NON-CAUSAL: P0r/late_forecast_admitted
+[mutant] P0x/price_line_dropped: mutant fail, twin fail -> NON-CAUSAL (24.015s + 24.011s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+MUTANT NON-CAUSAL: P0x/price_line_dropped
+[mutant] P0x/none_on_workflow_admitted: mutant fail, twin fail -> NON-CAUSAL (23.65s + 25.002s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+MUTANT NON-CAUSAL: P0x/none_on_workflow_admitted
+[mutant] P0x/scoped_by_number: mutant fail, twin fail -> NON-CAUSAL (23.151s + 24.45s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+MUTANT NON-CAUSAL: P0x/scoped_by_number
+clean: 72/74 passed, 2/74 failed
+mutants: 207/211 killed, 0/211 survived, 0/211 inconclusive, 0/211 stale, 4/211 non-causal, 0 leaked (clean and mutant)
+twins: 207/211 passed
+skipped: 0/74 pins, 0 mutants
+report: out/pins/pins.jsonl
+PINS FAILED
+make: *** [Makefile:24: pins] Error 1
+exit 2
+
+# P0r clean transcript, the failing lines:
+  [ok] real branch: base resolved (454d563acc0929a824ec8d62da0cfc391ab28cc6)
+    real branch adds 4 forecast rows in ['reports/L2/forecasts/6c913b5d-3314-433a-bdd0-168882d6c731.jsonl']
+  [FAIL] real branch: name resolved (''; GITHUB_HEAD_REF in CI, else the checked-out branch)
+result:    FAIL

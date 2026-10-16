@@ -1,0 +1,306 @@
+pins	make pins	﻿2026-10-15T17:55:04.5402564Z ##[group]Run make pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"
+pins	make pins	2026-10-15T17:55:04.5403052Z ^[[36;1mmake pins PINS_OUT=out/pins PINS_SINCE="$PINS_SINCE"^[[0m
+pins	make pins	2026-10-15T17:55:04.5440396Z shell: /usr/bin/bash -e {0}
+pins	make pins	2026-10-15T17:55:04.5440778Z env:
+pins	make pins	2026-10-15T17:55:04.5443099Z   GH_TOKEN: ***
+pins	make pins	2026-10-15T17:55:04.5443502Z   PINS_SINCE: --since 9176d188127ec8006032fa78cb62cf866dd67e69 --since-run 38738968750
+pins	make pins	2026-10-15T17:55:04.5443895Z ##[endgroup]
+pins	make pins	2026-10-15T17:55:07.1048920Z uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since 9176d188127ec8006032fa78cb62cf866dd67e69 --since-run 38738968750
+pins	make pins	2026-10-15T18:01:49.5995459Z registry harness: 74 pins, 211 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+pins	make pins	2026-10-15T18:01:49.5996571Z [clean ] P0: observed pass -> ok (2.732s) out/pins/runs/P0/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.5997240Z [clean ] P0b: observed pass -> ok (0.427s) out/pins/runs/P0b/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.5997846Z [clean ] P0c: observed pass -> ok (0.978s) out/pins/runs/P0c/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6013333Z [clean ] P0d: observed pass -> ok (4.788s) out/pins/runs/P0d/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6014200Z [clean ] P0e: observed pass -> ok (1.579s) out/pins/runs/P0e/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6015122Z [clean ] P0f: observed pass -> ok (1.227s) out/pins/runs/P0f/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6015757Z [clean ] P0g: observed pass -> ok (1.528s) out/pins/runs/P0g/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6016585Z [clean ] P0h: observed pass -> ok (12.208s) out/pins/runs/P0h/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6018497Z [clean ] P0i: observed pass -> ok (0.325s) out/pins/runs/P0i/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6019162Z [clean ] P0j: observed pass -> ok (0.526s) out/pins/runs/P0j/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6019877Z [clean ] P0k: observed pass -> ok (0.325s) out/pins/runs/P0k/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6020535Z [clean ] P0l: observed pass -> ok (0.325s) out/pins/runs/P0l/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6021133Z [clean ] P0m: observed pass -> ok (0.576s) out/pins/runs/P0m/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6021789Z [clean ] P0n: observed pass -> ok (0.626s) out/pins/runs/P0n/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6022413Z [clean ] P0o: observed pass -> ok (0.579s) out/pins/runs/P0o/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6023051Z [clean ] P0q: observed pass -> ok (0.376s) out/pins/runs/P0q/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6023682Z [clean ] P0r: observed pass -> ok (0.977s) out/pins/runs/P0r/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6024383Z [clean ] P0s: observed pass -> ok (0.326s) out/pins/runs/P0s/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6025148Z [clean ] P0t: observed pass -> ok (0.325s) out/pins/runs/P0t/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6025662Z [clean ] P0u: observed pass -> ok (4.183s) out/pins/runs/P0u/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6026170Z [clean ] P0v: observed pass -> ok (0.325s) out/pins/runs/P0v/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6026666Z [clean ] P0w: observed pass -> ok (7.592s) out/pins/runs/P0w/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6027301Z [clean ] P0x: observed fail -> FAILED (15.728s) out/pins/runs/P0x/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6027818Z CLEAN FAILED: P0x (observed fail)
+pins	make pins	2026-10-15T18:01:49.6036211Z [clean ] P0y: observed pass -> ok (1.278s) out/pins/runs/P0y/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6037023Z [clean ] P0z: observed pass -> ok (0.325s) out/pins/runs/P0z/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6037716Z [clean ] P0aa: observed pass -> ok (0.376s) out/pins/runs/P0aa/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6038368Z [clean ] P0ab: observed pass -> ok (0.325s) out/pins/runs/P0ab/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6039094Z [clean ] P0ac: observed pass -> ok (0.878s) out/pins/runs/P0ac/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6039764Z [clean ] P0ad: observed pass -> ok (1.478s) out/pins/runs/P0ad/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6040443Z [clean ] P0ae: observed pass -> ok (0.325s) out/pins/runs/P0ae/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6041289Z [clean ] P0af: observed pass -> ok (0.325s) out/pins/runs/P0af/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6041900Z [clean ] P0ag: observed pass -> ok (1.227s) out/pins/runs/P0ag/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6042582Z [clean ] P0ah: observed pass -> ok (0.324s) out/pins/runs/P0ah/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6043215Z [clean ] P0ai: observed pass -> ok (0.325s) out/pins/runs/P0ai/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6043911Z [clean ] P0aj: observed pass -> ok (0.325s) out/pins/runs/P0aj/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6044562Z [clean ] P0ak: observed pass -> ok (0.325s) out/pins/runs/P0ak/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6045360Z [clean ] P0al: observed pass -> ok (0.325s) out/pins/runs/P0al/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6046013Z [clean ] P0am: observed pass -> ok (0.325s) out/pins/runs/P0am/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6046677Z [clean ] P0an: observed pass -> ok (0.325s) out/pins/runs/P0an/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6047363Z [clean ] P0aq: observed pass -> ok (0.325s) out/pins/runs/P0aq/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6047970Z [clean ] P0ar: observed pass -> ok (0.375s) out/pins/runs/P0ar/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6048605Z [clean ] P0aw: observed pass -> ok (0.325s) out/pins/runs/P0aw/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6049259Z [clean ] P0ax: observed pass -> ok (0.479s) out/pins/runs/P0ax/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6049895Z [clean ] P0ay: observed pass -> ok (0.375s) out/pins/runs/P0ay/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6050695Z [clean ] P0az: observed pass -> ok (0.325s) out/pins/runs/P0az/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6051340Z [clean ] P1: observed pass -> ok (1.93s) out/pins/runs/P1/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6051988Z [clean ] P2: observed pass -> ok (12.458s) out/pins/runs/P2/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6052720Z [clean ] P3: observed pass -> ok (26.847s) out/pins/runs/P3/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6053351Z [clean ] P4: observed pass -> ok (11.437s) out/pins/runs/P4/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6054046Z [clean ] P5: observed pass -> ok (5.192s) out/pins/runs/P5/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6054867Z [clean ] P14: observed pass -> ok (6.201s) out/pins/runs/P14/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6055509Z [clean ] P15: observed pass -> ok (8.849s) out/pins/runs/P15/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6056121Z [clean ] P7: observed pass -> ok (11.216s) out/pins/runs/P7/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6056760Z [clean ] P13: observed pass -> ok (2.081s) out/pins/runs/P13/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6057446Z [clean ] P9: observed pass -> ok (1.529s) out/pins/runs/P9/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6058112Z [clean ] P16: observed pass -> ok (1.428s) out/pins/runs/P16/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6058724Z [clean ] P17: observed pass -> ok (8.605s) out/pins/runs/P17/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6059312Z [clean ] P18: observed pass -> ok (0.878s) out/pins/runs/P18/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6059931Z [clean ] P12: observed pass -> ok (9.405s) out/pins/runs/P12/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6060586Z [clean ] P19: observed pass -> ok (0.927s) out/pins/runs/P19/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6061230Z [clean ] P20: observed pass -> ok (1.027s) out/pins/runs/P20/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6061862Z [clean ] P22: observed pass -> ok (0.425s) out/pins/runs/P22/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6062493Z [clean ] P23: observed pass -> ok (6.588s) out/pins/runs/P23/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6063122Z [clean ] P24: observed pass -> ok (2.931s) out/pins/runs/P24/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6063773Z [clean ] P25: observed pass -> ok (0.325s) out/pins/runs/P25/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6064393Z [clean ] P26: observed pass -> ok (1.029s) out/pins/runs/P26/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6065380Z [clean ] P27: observed pass -> ok (0.676s) out/pins/runs/P27/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6066023Z [clean ] P28: observed pass -> ok (0.274s) out/pins/runs/P28/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6066625Z [clean ] P29: observed pass -> ok (6.141s) out/pins/runs/P29/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6067277Z [clean ] P30: observed pass -> ok (6.649s) out/pins/runs/P30/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6067903Z [clean ] P31: observed pass -> ok (6.692s) out/pins/runs/P31/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6068547Z [clean ] P10: observed pass -> ok (24.888s) out/pins/runs/P10/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6069238Z [clean ] P6: observed pass -> ok (1.478s) out/pins/runs/P6/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6069851Z [clean ] P11: observed pass -> ok (14.617s) out/pins/runs/P11/clean/transcript.log
+pins	make pins	2026-10-15T18:01:49.6070884Z [mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (2.646s + 2.645s) out/pins/runs/P0/survivors_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6071863Z [mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.339s + 0.339s) out/pins/runs/P0b/env_switch/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6072851Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6073981Z [mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (0.993s + 0.993s) out/pins/runs/P0c/clean_failures_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6075294Z [mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (4.751s + 4.751s) out/pins/runs/P0d/inconclusive_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6076867Z [mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (5.254s + 1.492s) out/pins/runs/P0e/validation_off/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6077820Z [mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (1.242s + 1.242s) out/pins/runs/P0f/twin_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6078837Z [mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (1.943s + 1.491s) out/pins/runs/P0g/stale_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6079853Z [mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (14.175s + 12.07s) out/pins/runs/P0h/death_signal_reverted/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6080848Z [mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (12.07s + 12.074s) out/pins/runs/P0h/scratch_kept/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6081860Z [mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (12.072s + 12.072s) out/pins/runs/P0h/leaked_not_counted/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6082935Z [mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (9.915s + 12.069s) out/pins/runs/P0h/subreaper_not_set/mutant/transcript.log
+pins	make pins	2026-10-15T18:01:49.6084000Z [mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (9.915s + 12.07s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3083138Z [mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.339s + 0.338s) out/pins/runs/P0i/pycache_top_level_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3085040Z [mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.343s + 0.338s) out/pins/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3086200Z [mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (0.439s + 0.439s) out/pins/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3087447Z [mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.339s + 0.339s) out/pins/runs/P0k/proposer_check_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3088586Z [mutant] P0k/self_resolution_admitted: mutant fail, twin pass -> KILLED (0.339s + 0.339s) out/pins/runs/P0k/self_resolution_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3089705Z [mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.339s + 0.289s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3091241Z [mutant] P0l/obligation_registry_skipped: mutant fail, twin pass -> KILLED (0.339s + 0.288s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3092452Z [mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (0.541s + 0.542s) out/pins/runs/P0m/trailer_check_disabled/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3093591Z [mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (0.539s + 0.539s) out/pins/runs/P0m/first_proposer_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3094843Z [mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (0.539s + 0.539s) out/pins/runs/P0m/exemption_unkeyed/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3096059Z [mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (0.54s + 0.539s) out/pins/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3097287Z [mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (0.539s + 0.539s) out/pins/runs/P0m/unknown_merge_author/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3098472Z [mutant] P0m/instruction_author_unchecked: mutant fail, twin pass -> KILLED (0.539s + 0.589s) out/pins/runs/P0m/instruction_author_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3099720Z [mutant] P0m/instruction_label_unchecked: mutant fail, twin pass -> KILLED (0.591s + 0.591s) out/pins/runs/P0m/instruction_label_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3101052Z [mutant] P0m/instruction_labeler_unchecked: mutant fail, twin pass -> KILLED (0.592s + 0.646s) out/pins/runs/P0m/instruction_labeler_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3102369Z [mutant] P0m/body_edit_unchecked: mutant fail, twin pass -> KILLED (0.643s + 0.593s) out/pins/runs/P0m/body_edit_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3103554Z [mutant] P0m/inert_exemption_admitted: mutant fail, twin pass -> KILLED (0.592s + 0.641s) out/pins/runs/P0m/inert_exemption_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3104805Z [mutant] P0n/ranking_reversed: mutant fail, twin pass -> KILLED (0.641s + 0.742s) out/pins/runs/P0n/ranking_reversed/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3106088Z [mutant] P0o/overturned_scored_success: mutant fail, twin pass -> KILLED (0.543s + 0.592s) out/pins/runs/P0o/overturned_scored_success/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3107311Z [mutant] P0q/ledger_rewrite_admitted: mutant fail, twin pass -> KILLED (0.39s + 0.389s) out/pins/runs/P0q/ledger_rewrite_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3108461Z [mutant] P0q/draws_not_append_only: mutant fail, twin pass -> KILLED (0.391s + 0.391s) out/pins/runs/P0q/draws_not_append_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3109596Z [mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (0.942s + 0.892s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3110670Z [mutant] P0s/outcome_inverted: mutant fail, twin pass -> KILLED (0.343s + 0.34s) out/pins/runs/P0s/outcome_inverted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3111878Z [mutant] P0s/free_resolved_by_mechanism: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0s/free_resolved_by_mechanism/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3113017Z [mutant] P0s/branch_most_recent_pr: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0s/branch_most_recent_pr/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3114107Z [mutant] P0t/latency_dropped: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0t/latency_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3115315Z [mutant] P0t/guy_items_undercounted: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0t/guy_items_undercounted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3116221Z [mutant] P0t/wish_from_instruction: mutant fail, twin pass -> KILLED (0.34s + 0.341s) out/pins/runs/P0t/wish_from_instruction/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3117258Z [mutant] P0t/first_entrant_only: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0t/first_entrant_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3118314Z [mutant] P0t/costless_session_dropped: mutant fail, twin pass -> KILLED (0.341s + 0.343s) out/pins/runs/P0t/costless_session_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3119385Z [mutant] P0t/cost_pooled: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0t/cost_pooled/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3120525Z [mutant] P0t/first_result_charged: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0t/first_result_charged/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3121673Z [mutant] P0t/result_per_session: mutant fail, twin pass -> KILLED (0.34s + 0.341s) out/pins/runs/P0t/result_per_session/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3122812Z [mutant] P0u/argmin_election: mutant fail, twin pass -> KILLED (3.898s + 4.249s) out/pins/runs/P0u/argmin_election/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3123835Z [mutant] P0u/hedge_election: mutant fail, twin pass -> KILLED (4.2s + 4.048s) out/pins/runs/P0u/hedge_election/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3137266Z [mutant] P0u/unweighted_estimate: mutant fail, twin pass -> KILLED (3.947s + 4.147s) out/pins/runs/P0u/unweighted_estimate/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3138609Z [mutant] P0u/draw_not_published: mutant fail, twin pass -> KILLED (4.2s + 4.248s) out/pins/runs/P0u/draw_not_published/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3139677Z [mutant] P0u/draw_push_forced: mutant fail, twin pass -> KILLED (4.049s + 4.15s) out/pins/runs/P0u/draw_push_forced/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3140972Z [mutant] P0u/entrants_from_head: mutant fail, twin pass -> KILLED (4.1s + 4.248s) out/pins/runs/P0u/entrants_from_head/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3142144Z [mutant] P0u/entrants_beyond_second_ignored: mutant fail, twin pass -> KILLED (4.098s + 4.198s) out/pins/runs/P0u/entrants_beyond_second_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3143337Z [mutant] P0v/reviewer_label_excluded: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P0v/reviewer_label_excluded/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3144477Z [mutant] P0w/witness_ignored: mutant fail, twin pass -> KILLED (6.957s + 7.658s) out/pins/runs/P0w/witness_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3145754Z [mutant] P0w/harness_change_skips: mutant fail, twin pass -> KILLED (6.258s + 7.708s) out/pins/runs/P0w/harness_change_skips/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3146824Z [mutant] P0w/skip_counted_ok: mutant fail, twin pass -> KILLED (7.609s + 7.659s) out/pins/runs/P0w/skip_counted_ok/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3147865Z [mutant] P0w/non_ancestor_base: mutant fail, twin pass -> KILLED (7.659s + 7.658s) out/pins/runs/P0w/non_ancestor_base/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3149001Z [mutant] P0x/price_line_dropped: mutant fail, twin fail -> NON-CAUSAL (15.242s + 14.387s) out/pins/runs/P0x/price_line_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3149831Z MUTANT NON-CAUSAL: P0x/price_line_dropped
+pins	make pins	2026-10-15T18:05:57.3150701Z [mutant] P0x/none_on_workflow_admitted: mutant fail, twin fail -> NON-CAUSAL (14.641s + 14.943s) out/pins/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3151586Z MUTANT NON-CAUSAL: P0x/none_on_workflow_admitted
+pins	make pins	2026-10-15T18:05:57.3152380Z [mutant] P0x/scoped_by_number: mutant fail, twin fail -> NON-CAUSAL (15.442s + 14.335s) out/pins/runs/P0x/scoped_by_number/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3153198Z MUTANT NON-CAUSAL: P0x/scoped_by_number
+pins	make pins	2026-10-15T18:05:57.3154100Z [mutant] P0y/split_trailer_block_admitted: mutant fail, twin pass -> KILLED (1.393s + 1.291s) out/pins/runs/P0y/split_trailer_block_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3155346Z [mutant] P0y/hook_unconditioned: mutant fail, twin pass -> KILLED (1.291s + 1.342s) out/pins/runs/P0y/hook_unconditioned/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3156443Z [mutant] P0z/pins_failure_unrouted: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0z/pins_failure_unrouted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3157676Z [mutant] P0aa/held_item_retaken: mutant fail, twin pass -> KILLED (0.391s + 0.39s) out/pins/runs/P0aa/held_item_retaken/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3158792Z [mutant] P0ab/shell_edit_admitted: mutant fail, twin pass -> KILLED (0.343s + 0.34s) out/pins/runs/P0ab/shell_edit_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3159960Z [mutant] P0ab/silent_master_stop_admitted: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0ab/silent_master_stop_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:05:57.3161272Z [mutant] P0ac/instruction_without_because_admitted: mutant fail, twin pass -> KILLED (1.042s + 0.992s) out/pins/runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2666394Z [mutant] P0ac/both_forms_admitted: mutant fail, twin pass -> KILLED (0.943s + 0.941s) out/pins/runs/P0ac/both_forms_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2668075Z [mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (1.445s + 1.446s) out/pins/runs/P0ad/seal_after_act/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2669286Z [mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (1.494s + 1.494s) out/pins/runs/P0ad/seal_same_commit_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2670540Z [mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (1.444s + 1.442s) out/pins/runs/P0ad/candidate_omitted_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2671702Z [mutant] P0ad/deleted_status_read: mutant fail, twin pass -> KILLED (0.842s + 1.492s) out/pins/runs/P0ad/deleted_status_read/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2673705Z [mutant] P0ae/exposure_inferred: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0ae/exposure_inferred/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2675171Z [mutant] P0ae/void_scored: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0ae/void_scored/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2676317Z [mutant] P0ae/void_not_counted: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0ae/void_not_counted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2677547Z [mutant] P0ae/later_label_ignored: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0ae/later_label_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2678711Z [mutant] P0ae/label_by_anyone: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0ae/label_by_anyone/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2679787Z [mutant] P0af/alpha_zero: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0af/alpha_zero/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2680984Z [mutant] P0af/fixed_order_dropped: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0af/fixed_order_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2682220Z [mutant] P0af/fixed_order_not_required: mutant fail, twin pass -> KILLED (0.339s + 0.341s) out/pins/runs/P0af/fixed_order_not_required/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2683436Z [mutant] P0af/silence_is_an_act: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0af/silence_is_an_act/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2684756Z [mutant] P0ag/regime_after_seed: mutant fail, twin pass -> KILLED (1.293s + 1.292s) out/pins/runs/P0ag/regime_after_seed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2685951Z [mutant] P0ag/seed_after_act_admitted: mutant fail, twin pass -> KILLED (1.242s + 1.243s) out/pins/runs/P0ag/seed_after_act_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2686867Z [mutant] P0ah/kept_not_filed: mutant fail, twin pass -> KILLED (0.339s + 0.339s) out/pins/runs/P0ah/kept_not_filed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2687740Z [mutant] P0ah/merged_not_filed: mutant fail, twin pass -> KILLED (0.39s + 0.39s) out/pins/runs/P0ah/merged_not_filed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2688670Z [mutant] P0ah/kept_without_exposure: mutant fail, twin pass -> KILLED (0.39s + 0.339s) out/pins/runs/P0ah/kept_without_exposure/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2690038Z [mutant] P0ah/item_always_pr: mutant fail, twin pass -> KILLED (0.339s + 0.339s) out/pins/runs/P0ah/item_always_pr/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2691184Z [mutant] P0ai/probe_from_unkept: mutant fail, twin pass -> KILLED (0.39s + 0.34s) out/pins/runs/P0ai/probe_from_unkept/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2692350Z [mutant] P0ai/probe_unseeded: mutant fail, twin pass -> KILLED (0.391s + 0.339s) out/pins/runs/P0ai/probe_unseeded/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2693632Z [mutant] P0ai/probe_needs_exposure: mutant fail, twin pass -> KILLED (0.391s + 0.39s) out/pins/runs/P0ai/probe_needs_exposure/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2695129Z [mutant] P0ai/probe_not_priced: mutant fail, twin pass -> KILLED (0.391s + 0.39s) out/pins/runs/P0ai/probe_not_priced/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2696446Z [mutant] P0aj/awaits_guy_clause_removed: mutant fail, twin pass -> KILLED (0.342s + 0.342s) out/pins/runs/P0aj/awaits_guy_clause_removed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2697766Z [mutant] P0ak/undeclared_session_admitted: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0ak/undeclared_session_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2699032Z [mutant] P0ak/duration_misresolved: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0ak/duration_misresolved/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2700179Z [mutant] P0ak/cancelled_scored: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0ak/cancelled_scored/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2701548Z [mutant] P0ak/over_bound_uncounted: mutant fail, twin pass -> KILLED (0.34s + 0.339s) out/pins/runs/P0ak/over_bound_uncounted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2702839Z [mutant] P0ak/limit_uncounted: mutant fail, twin pass -> KILLED (0.339s + 0.339s) out/pins/runs/P0ak/limit_uncounted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2704054Z [mutant] P0al/after_edit_as_drafted: mutant fail, twin pass -> KILLED (0.34s + 0.34s) out/pins/runs/P0al/after_edit_as_drafted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2705491Z [mutant] P0al/other_editor_counted: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P0al/other_editor_counted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2706786Z [mutant] P0al/unreadable_edits_resolved: mutant fail, twin pass -> KILLED (0.341s + 0.344s) out/pins/runs/P0al/unreadable_edits_resolved/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2708116Z [mutant] P0al/detail_uncounted: mutant fail, twin pass -> KILLED (0.343s + 0.342s) out/pins/runs/P0al/detail_uncounted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2709365Z [mutant] P0am/draft_check_clause_removed: mutant fail, twin pass -> KILLED (0.343s + 0.341s) out/pins/runs/P0am/draft_check_clause_removed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2710718Z [mutant] P0an/pr_branch_forecast_admitted: mutant fail, twin pass -> KILLED (0.342s + 0.342s) out/pins/runs/P0an/pr_branch_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2711992Z [mutant] P0an/silent_stop_admitted: mutant fail, twin pass -> KILLED (0.342s + 0.34s) out/pins/runs/P0an/silent_stop_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2713250Z [mutant] P0aq/label_branch_removed: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0aq/label_branch_removed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2714477Z [mutant] P0aq/round_cap_removed: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P0aq/round_cap_removed/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2715842Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.342s + 0.34s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2717043Z [mutant] P0ar/forecasts_shared: mutant fail, twin pass -> KILLED (0.442s + 0.441s) out/pins/runs/P0ar/forecasts_shared/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2718189Z [mutant] P0ar/status_shared: mutant fail, twin pass -> KILLED (0.441s + 0.441s) out/pins/runs/P0ar/status_shared/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2719403Z [mutant] P0ar/registry_frozen_only: mutant fail, twin pass -> KILLED (0.441s + 0.441s) out/pins/runs/P0ar/registry_frozen_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2720738Z [mutant] P0ar/status_by_date: mutant fail, twin pass -> KILLED (0.442s + 0.441s) out/pins/runs/P0ar/status_by_date/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2721943Z [mutant] P0ar/duplicate_overrides: mutant fail, twin pass -> KILLED (0.441s + 0.441s) out/pins/runs/P0ar/duplicate_overrides/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2723245Z [mutant] P0aw/checkout_without_contents: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0aw/checkout_without_contents/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2724561Z [mutant] P0ax/accused_judges_itself: mutant fail, twin pass -> KILLED (0.495s + 0.495s) out/pins/runs/P0ax/accused_judges_itself/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2725963Z [mutant] P0ax/head_files_kept: mutant fail, twin pass -> KILLED (0.495s + 0.494s) out/pins/runs/P0ax/head_files_kept/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2727190Z [mutant] P0ay/monotone_ignores_instruction: mutant fail, twin pass -> KILLED (0.441s + 0.441s) out/pins/runs/P0ay/monotone_ignores_instruction/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2728484Z [mutant] P0ay/removal_unsigned_admitted: mutant fail, twin pass -> KILLED (0.441s + 0.44s) out/pins/runs/P0ay/removal_unsigned_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2729709Z [mutant] P0ay/registry_read_as_text: mutant fail, twin pass -> KILLED (0.34s + 0.44s) out/pins/runs/P0ay/registry_read_as_text/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2730924Z [mutant] P0az/pins_master_privileged: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P0az/pins_master_privileged/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2732293Z [mutant] P0az/pins_master_secret: mutant fail, twin pass -> KILLED (0.341s + 0.34s) out/pins/runs/P0az/pins_master_secret/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2733443Z [mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (1.645s + 2.045s) out/pins/runs/P1/seed_reissued/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2734572Z [mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (1.895s + 1.944s) out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2736225Z [mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (1.895s + 2.096s) out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:07:06.2737413Z [mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (1.797s + 1.744s) out/pins/runs/P1/training_undomained/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0218587Z [mutant] P1/csprng_replaced: mutant fail, twin pass -> KILLED (1.894s + 1.895s) out/pins/runs/P1/csprng_replaced/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0219945Z [mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (5.743s + 1.575s) out/pins/runs/P2/network_enabled/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0221473Z [mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.645s + 1.669s) out/pins/runs/P2/judge_mounted/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0222622Z [mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.679s + 1.628s) out/pins/runs/P2/rootfs_writable/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0223808Z [mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.633s + 1.575s) out/pins/runs/P2/memory_limit_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0225062Z [mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (27.132s + 27.485s) out/pins/runs/P3/failures_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0226231Z [mutant] P3/played_at_end: mutant fail, twin pass -> KILLED (27.732s + 27.663s) out/pins/runs/P3/played_at_end/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0227405Z [mutant] P4/self_reported: mutant fail, twin pass -> KILLED (11.771s + 11.923s) out/pins/runs/P4/self_reported/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0228600Z [mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (11.706s + 11.818s) out/pins/runs/P4/client_rusage/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0229773Z [mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (11.574s + 11.671s) out/pins/runs/P4/not_differenced/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0231152Z [mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (11.724s + 11.879s) out/pins/runs/P4/peak_from_current/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0232293Z [mutant] P4/init_process_rusage: mutant fail, twin pass -> KILLED (12.275s + 11.52s) out/pins/runs/P4/init_process_rusage/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0233511Z [mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (6.445s + 5.286s) out/pins/runs/P5/next_sent_early/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0234866Z [mutant] P5/next_in_observation: mutant fail, twin pass -> KILLED (6.39s + 5.345s) out/pins/runs/P5/next_in_observation/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0236184Z [mutant] P5/next_in_begin: mutant fail, twin pass -> KILLED (5.444s + 5.291s) out/pins/runs/P5/next_in_begin/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0237282Z [mutant] P5/next_in_notice: mutant fail, twin pass -> KILLED (6.457s + 5.497s) out/pins/runs/P5/next_in_notice/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0238436Z [mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (6.347s + 6.394s) out/pins/runs/P14/first_legal_action/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0239686Z [mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (6.45s + 6.503s) out/pins/runs/P14/floor_unsmoothed/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0240881Z [mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (6.555s + 6.293s) out/pins/runs/P14/seen_not_reset/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0242201Z [mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (0.893s + 9.015s) out/pins/runs/P15/abs_difference/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0243334Z [mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (4.103s + 8.814s) out/pins/runs/P15/shift_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0244391Z [mutant] P15/one_arm: mutant fail, twin pass -> KILLED (3.048s + 8.813s) out/pins/runs/P15/one_arm/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0245754Z [mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (9.918s + 8.613s) out/pins/runs/P15/budget_one_arm/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0246877Z [mutant] P7/clipped: mutant fail, twin pass -> KILLED (11.879s + 11.631s) out/pins/runs/P7/clipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0248029Z [mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (11.938s + 11.666s) out/pins/runs/P7/missing_imputed/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0249138Z [mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (11.77s + 11.943s) out/pins/runs/P7/sum_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0250318Z [mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (2.25s + 2.25s) out/pins/runs/P13/infinite_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0251498Z [mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (2.246s + 2.298s) out/pins/runs/P13/realised_row_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0252762Z [mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (2.349s + 2.296s) out/pins/runs/P13/entropy_missing_imputed/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0254048Z [mutant] P13/bin_product_rounded: mutant fail, twin pass -> KILLED (2.297s + 2.296s) out/pins/runs/P13/bin_product_rounded/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0255629Z [mutant] P13/bin_exact_rational: mutant fail, twin pass -> KILLED (2.245s + 2.247s) out/pins/runs/P13/bin_exact_rational/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0256864Z [mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (1.594s + 1.544s) out/pins/runs/P9/record_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0258038Z [mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (1.595s + 1.645s) out/pins/runs/P9/utility_altered/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0259192Z [mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (1.646s + 1.595s) out/pins/runs/P9/chain_update_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0260539Z [mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.342s + 1.594s) out/pins/runs/P9/opened_for_rewrite/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0261696Z [mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (1.596s + 1.595s) out/pins/runs/P9/genesis_empty/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0262843Z [mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (1.646s + 1.595s) out/pins/runs/P9/signature_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0264085Z [mutant] P9/independent_heads: mutant fail, twin pass -> KILLED (1.595s + 1.645s) out/pins/runs/P9/independent_heads/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0265444Z [mutant] P16/unattributed_admitted: mutant fail, twin pass -> KILLED (1.495s + 1.546s) out/pins/runs/P16/unattributed_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0266775Z [mutant] P16/any_credential: mutant fail, twin pass -> KILLED (1.548s + 1.499s) out/pins/runs/P16/any_credential/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0268011Z [mutant] P16/registration_taken_over: mutant fail, twin pass -> KILLED (1.496s + 1.495s) out/pins/runs/P16/registration_taken_over/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0269234Z [mutant] P17/fixed_proposer: mutant fail, twin pass -> KILLED (9.008s + 8.722s) out/pins/runs/P17/fixed_proposer/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0270481Z [mutant] P17/seeds_before_proposer: mutant fail, twin pass -> KILLED (10.968s + 9.426s) out/pins/runs/P17/seeds_before_proposer/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0271816Z [mutant] P17/idempotency_dropped: mutant fail, twin pass -> KILLED (12.23s + 8.954s) out/pins/runs/P17/idempotency_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0273106Z [mutant] P17/conflict_unchecked: mutant fail, twin pass -> KILLED (9.261s + 8.962s) out/pins/runs/P17/conflict_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0274254Z [mutant] P17/hash_partial: mutant fail, twin pass -> KILLED (9.857s + 9.159s) out/pins/runs/P17/hash_partial/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0275606Z [mutant] P18/cap_ignored: mutant fail, twin pass -> KILLED (1.144s + 0.944s) out/pins/runs/P18/cap_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0276705Z [mutant] P18/failures_dropped: mutant fail, twin pass -> KILLED (0.895s + 0.944s) out/pins/runs/P18/failures_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0277934Z [mutant] P18/throughput_from_episodes: mutant fail, twin pass -> KILLED (0.945s + 0.943s) out/pins/runs/P18/throughput_from_episodes/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0279306Z [mutant] P18/proposer_from_config: mutant fail, twin pass -> KILLED (1.147s + 0.944s) out/pins/runs/P18/proposer_from_config/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0280540Z [mutant] P18/mixed_proposers_admitted: mutant fail, twin pass -> KILLED (1.145s + 0.893s) out/pins/runs/P18/mixed_proposers_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0281893Z [mutant] P18/infinite_pooled_finite: mutant fail, twin pass -> KILLED (0.944s + 0.943s) out/pins/runs/P18/infinite_pooled_finite/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0283161Z [mutant] P18/short_request_admitted: mutant fail, twin pass -> KILLED (1.097s + 0.893s) out/pins/runs/P18/short_request_admitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0284414Z [mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (9.863s + 9.81s) out/pins/runs/P12/peak_differenced/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0285823Z [mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (10.256s + 10.107s) out/pins/runs/P12/unmeasured_free/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0286950Z [mutant] P12/floor_dropped: mutant fail, twin pass -> KILLED (9.767s + 10.057s) out/pins/runs/P12/floor_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0288217Z [mutant] P19/world_table_hardcoded: mutant fail, twin pass -> KILLED (0.994s + 0.995s) out/pins/runs/P19/world_table_hardcoded/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0289458Z [mutant] P20/crafter_price_fallback: mutant fail, twin pass -> KILLED (1.095s + 1.099s) out/pins/runs/P20/crafter_price_fallback/mutant/transcript.log
+pins	make pins	2026-10-15T18:18:43.0290860Z [mutant] P22/replay_unchecked: mutant fail, twin pass -> KILLED (0.494s + 0.442s) out/pins/runs/P22/replay_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2840020Z [mutant] P23/partial_dropped: mutant fail, twin pass -> KILLED (7.158s + 7.359s) out/pins/runs/P23/partial_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2841868Z [mutant] P23/interrupted_unsealed: mutant fail, twin pass -> KILLED (7.66s + 7.108s) out/pins/runs/P23/interrupted_unsealed/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2843396Z [mutant] P23/closing_unattributed: mutant fail, twin pass -> KILLED (7.058s + 7.107s) out/pins/runs/P23/closing_unattributed/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2844780Z [mutant] P24/isdigit_guard: mutant fail, twin pass -> KILLED (3.198s + 3.148s) out/pins/runs/P24/isdigit_guard/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2846009Z [mutant] P25/entries_unchecked: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P25/entries_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2847231Z [mutant] P25/verify_unchecked: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P25/verify_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2848480Z [mutant] P25/heads_world_readable: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P25/heads_world_readable/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2849762Z [mutant] P26/key_version_ignored: mutant fail, twin pass -> KILLED (1.246s + 1.297s) out/pins/runs/P26/key_version_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2851288Z [mutant] P27/tolerance_loose: mutant fail, twin pass -> KILLED (0.795s + 0.793s) out/pins/runs/P27/tolerance_loose/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2852553Z [mutant] P27/tolerance_zero: mutant fail, twin pass -> KILLED (0.742s + 0.741s) out/pins/runs/P27/tolerance_zero/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2853787Z [mutant] P28/scored_only: mutant fail, twin pass -> KILLED (0.341s + 0.341s) out/pins/runs/P28/scored_only/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2854907Z [mutant] P29/escape_untorn: mutant fail, twin pass -> KILLED (6.798s + 6.747s) out/pins/runs/P29/escape_untorn/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2855878Z [mutant] P29/close_untorn: mutant fail, twin pass -> KILLED (6.781s + 6.837s) out/pins/runs/P29/close_untorn/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2856867Z [mutant] P30/image_id_unchecked: mutant fail, twin pass -> KILLED (7.847s + 6.377s) out/pins/runs/P30/image_id_unchecked/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2857810Z [mutant] P31/verify_omitted: mutant fail, twin pass -> KILLED (6.548s + 6.316s) out/pins/runs/P31/verify_omitted/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2858773Z [mutant] P31/eager_imports: mutant fail, twin pass -> KILLED (6.517s + 6.154s) out/pins/runs/P31/eager_imports/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2859754Z [mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (35.711s + 25.745s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2860703Z [mutant] P10/leaked_not_recorded: mutant fail, twin pass -> KILLED (25.253s + 25.796s) out/pins/runs/P10/leaked_not_recorded/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2861748Z [mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (1.545s + 1.545s) out/pins/runs/P6/crafter_field_in_schema/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2862788Z [mutant] P6/native_key_in_schema: mutant fail, twin pass -> KILLED (1.596s + 1.595s) out/pins/runs/P6/native_key_in_schema/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2863800Z [mutant] P6/pattern_hides_vocabulary: mutant fail, twin pass -> KILLED (1.647s + 1.596s) out/pins/runs/P6/pattern_hides_vocabulary/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2865095Z [mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (15.639s + 15.636s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2866017Z [mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (16.444s + 15.686s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2867141Z [mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (16.043s + 15.889s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2868014Z [mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (13.878s + 14.883s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2868979Z [mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (5.009s + 15.335s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2870083Z [mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (15.789s + 15.436s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+pins	make pins	2026-10-15T18:25:31.2870790Z clean: 73/74 passed, 1/74 failed
+pins	make pins	2026-10-15T18:25:31.2871421Z mutants: 208/211 killed, 0/211 survived, 0/211 inconclusive, 0/211 stale, 3/211 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-15T18:25:31.2872101Z twins: 208/211 passed
+pins	make pins	2026-10-15T18:25:31.2872586Z skipped: 0/74 pins, 0 mutants since 9176d18 (run 38738968750)
+pins	make pins	2026-10-15T18:25:31.2873090Z report: out/pins/pins.jsonl
+pins	make pins	2026-10-15T18:25:31.2873488Z PINS FAILED
+pins	make pins	2026-10-15T18:25:31.3005163Z make: *** [Makefile:24: pins] Error 1
+pins	make pins	2026-10-15T18:25:31.3021840Z ##[error]Process completed with exit code 2.

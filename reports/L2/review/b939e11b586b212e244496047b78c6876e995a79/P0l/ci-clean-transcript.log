@@ -1,0 +1,57 @@
+pin:       P0l
+protects:  a verdict citing a pins run on another sha, or one not concluded success, is rejected
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-0ifg0wpv
+  [ok] STATUS cites a successful pins run on its own sha: findings [], want []
+  [ok] STATUS cites a run on an older sha: findings ['head_mismatch'], want ['head_mismatch']
+  [ok] STATUS cites a failed run: findings ['not_success'], want ['not_success']
+  [ok] STATUS STOPPED, cites a failed run on its own sha: findings [], want []
+  [ok] STATUS cites no run: findings ['uncited'], want ['uncited']
+  [ok] STATUS cites an unrecorded run: findings ['unrecorded'], want ['unrecorded']
+  [ok] STATUS cites a measure run: findings ['not_pins'], want ['not_pins']
+  [ok] STATUS cites a run under the wrong sha: findings ['citation_mismatch'], want ['citation_mismatch']
+  [ok] REPORT: L0 line out of scope, good L1 line accepted, mismatched and uncited L1 lines rejected ({('REPORT:3', 'head_mismatch'), ('REPORT:4', 'uncited'), ('REPORT:3', 'citation_mismatch')})
+  [ok] real STATUS files from L1: ['reports/L1/STATUS.md', 'reports/L2/STATUS.md', 'reports/L2/status/instr-135-per-pr-files.md', 'reports/L2/status/instr-139-models-price-2.md', 'reports/L2/status/instr-140-fable-build-election.md', 'reports/L2/status/instr-162-checkout-contents.md', 'reports/L2/status/instr-174-unavailable-model.md', 'reports/L2/status/instr-176-pins-master.md', 'reports/L2/status/instr-181-obligations-44-55-v2.md', 'reports/L2/status/instr-212-pins-master-origin.md', 'reports/L2/status/l2-obligations-44-55-table.md', 'reports/L2/status/l2a-o10-sum-tolerance.md', 'reports/L2/status/l2a-o11-missing-priced.md', 'reports/L2/status/l2a-o12-init-rusage.md', 'reports/L2/status/l2a-o13-price-floor.md', 'reports/L2/status/l2a-o14-bin-edges.md', 'reports/L2/status/l2a-o15-leaked-case.md', 'reports/L2/status/l2a-o16-teardown-on-exception.md', 'reports/L2/status/l2a-o17-image-digest-stated.md', 'reports/L2/status/l2a-o18-image-carries-verify.md', 'reports/L2/status/l2a-o20-p6-native-vocabulary.md', 'reports/L2/status/l2a-o3-replay-checked.md', 'reports/L2/status/l2a-o4-interrupted-recorded.md', 'reports/L2/status/l2a-o5-episode-guard.md', 'reports/L2/status/l2a-o6-private-files.md', 'reports/L2/status/l2a-o7-csprng-witness.md', 'reports/L2/status/l2a-o8-seed-key-version.md', 'reports/L2/status/l2a-o9-clairvoyant-channels.md']; 108 committed run records
+  [ok] reports/L1/STATUS.md: cites [('37840644452', '25f36e6')]; findings []
+  [ok] reports/L2/STATUS.md: cites [('38277028583', 'cb9b1c6')]; findings []
+  [ok] reports/L2/status/instr-135-per-pr-files.md: cites [('38296279268', 'd0c7a88')]; findings []
+  [ok] reports/L2/status/instr-139-models-price-2.md: cites [('38348646803', '9f59867')]; findings []
+  [ok] reports/L2/status/instr-140-fable-build-election.md: cites [('38345714403', '41682c2')]; findings []
+  [ok] reports/L2/status/instr-162-checkout-contents.md: cites [('38333955051', '961f77a')]; findings []
+  [ok] reports/L2/status/instr-174-unavailable-model.md: cites [('38399304584', '3ad1b58')]; findings []
+  [ok] reports/L2/status/instr-176-pins-master.md: cites [('38566249843', '735b07f')]; findings []
+  [ok] reports/L2/status/instr-181-obligations-44-55-v2.md: cites [('38552599184', '004b442')]; findings []
+  [FAIL] reports/L2/status/instr-212-pins-master-origin.md: cites [('38781223150', '983a5c8'), ('38781223150', '983a5c8')]; findings ["reports/L2/status/instr-212-pins-master-origin.md: not_success: run 38781223150 concluded 'failure'", "reports/L2/status/instr-212-pins-master-origin.md: not_success: run 38781223150 concluded 'failure'"]
+  [ok] reports/L2/status/l2-obligations-44-55-table.md: cites [('38560499027', '69f3157')]; findings []
+  [ok] reports/L2/status/l2a-o10-sum-tolerance.md: cites [('38627704902', 'e25a666')]; findings []
+  [ok] reports/L2/status/l2a-o11-missing-priced.md: cites [('38638803840', '308bee6')]; findings []
+  [ok] reports/L2/status/l2a-o12-init-rusage.md: cites [('38647379593', 'd3ef92d')]; findings []
+  [ok] reports/L2/status/l2a-o13-price-floor.md: cites [('38672063258', 'c4d2fe8')]; findings []
+  [ok] reports/L2/status/l2a-o14-bin-edges.md: cites [('38655748759', '55a153a')]; findings []
+  [ok] reports/L2/status/l2a-o15-leaked-case.md: cites [('38674917237', 'cf44e37'), ('38674917237', 'cf44e37')]; findings []
+  [ok] reports/L2/status/l2a-o16-teardown-on-exception.md: cites [('38683531457', 'ee0d36a'), ('38683531457', 'ee0d36a')]; findings []
+  [ok] reports/L2/status/l2a-o17-image-digest-stated.md: cites [('38697151649', '2a80456'), ('38697151649', '2a80456')]; findings []
+  [ok] reports/L2/status/l2a-o18-image-carries-verify.md: cites [('38729328788', 'b21ea47'), ('38729328788', 'b21ea47')]; findings []
+  [ok] reports/L2/status/l2a-o20-p6-native-vocabulary.md: cites [('38692587753', '8c1a58a'), ('38692587753', '8c1a58a')]; findings []
+  [ok] reports/L2/status/l2a-o3-replay-checked.md: cites [('38336299013', 'eaed455')]; findings []
+  [ok] reports/L2/status/l2a-o4-interrupted-recorded.md: cites [('38359040477', '38aa0e3')]; findings []
+  [ok] reports/L2/status/l2a-o5-episode-guard.md: cites [('38399300458', '1da5f51')]; findings []
+  [ok] reports/L2/status/l2a-o6-private-files.md: cites [('38580057645', '4766d1f')]; findings []
+  [ok] reports/L2/status/l2a-o7-csprng-witness.md: cites [('38598395181', 'cd68769')]; findings []
+  [ok] reports/L2/status/l2a-o8-seed-key-version.md: cites [('38609729409', '775f2c9')]; findings []
+  [ok] reports/L2/status/l2a-o9-clairvoyant-channels.md: cites [('38640847424', '5e60c95')]; findings []
+  [ok] REPORT.md: 1 verdict lines from L1; findings []
+  [ok] obligations table every row carried: findings [], want []
+  [ok] obligations table one row discharged by a registry pin and mutant: findings [], want []
+  [ok] obligations table a number missing: findings ['missing'], want ['missing']
+  [ok] obligations table a number twice: findings ['duplicate'], want ['duplicate']
+  [ok] obligations table both dispositions: findings ['disposition'], want ['disposition']
+  [ok] obligations table neither disposition: findings ['disposition'], want ['disposition']
+  [ok] obligations table a nonexistent pin: findings ['not_in_registry'], want ['not_in_registry']
+  [ok] obligations table a nonexistent mutant: findings ['not_in_registry'], want ['not_in_registry']
+  [ok] obligations table no CI run cited: findings ['discharge_uncited'], want ['discharge_uncited']
+  [ok] reports/L2/obligations-44-55.md exists
+  [ok] reports/L2/obligations-44-55.md: findings []
+result:    FAIL
