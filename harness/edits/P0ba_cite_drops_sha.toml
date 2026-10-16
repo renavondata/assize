@@ -1,0 +1,8 @@
+# P0ba's mutant (instruction #211 item 5): the printed citation omits `on <sha>`, so a STATUS copying it cites no run
+# P0l can bind to a head.
+[[edit]]
+path = "harness/ledger.py"
+old = """                 (f"header-sha: {head}", f"pins CI run {run['id']} on {head}: {run.get('conclusion')} ({path})"))
+"""
+new = """                 (f"header-sha: {head}", f"pins CI run {run['id']}: {run.get('conclusion')} ({path})"))
+"""

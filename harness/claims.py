@@ -218,6 +218,13 @@ def load_runs(root: Path) -> dict[int, dict]:
     return {int(p.stem): json.loads(p.read_text()) for p in sorted(root.glob("reports/L*/ci/*.json"))}
 
 
+def status_check(root: Path, paths: Sequence[Path]) -> list[Finding]:
+    """`status_findings` on each STATUS file against the run records committed under `root` (instruction #211 item
+    2): what P0l would say of them, said before they are pushed."""
+    runs = load_runs(root)
+    return [f for p in paths for f in status_findings(str(p), p.read_text(), runs)]
+
+
 # ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
 
 PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor|vizier) \S+ \S+)$")
@@ -833,7 +840,8 @@ def pins_monotone(repo: Path, base: str, head: str = "HEAD") -> list[Finding]:
 def main(argv: Sequence[str] | None = None) -> int:
     """`python -m harness.claims signed <n>...`: whether each issue carries Guy's authority (Amendment 3). The Builder
     acts only on an issue printed `signed`. `trailers <revisions>`: exits non-zero if a commit's trailers do not parse
-    (instruction #110 Part C). `next <item>...`: the first item no open pull request holds (Part A item 2)."""
+    (instruction #110 Part C). `next <item>...`: the first item no open pull request holds (Part A item 2).
+    `status-check <path>...`: exits non-zero if P0l would reject a STATUS file (instruction #211 item 2)."""
     ap = argparse.ArgumentParser(prog="python -m harness.claims")
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("signed", help="whether each issue is an instruction Guy signed")
@@ -849,7 +857,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     m.add_argument("base")
     m.add_argument("head")
     m.add_argument("--repo", type=Path, default=Path("."))
+    c = sub.add_parser("status-check", help="refuse a STATUS whose header or citation P0l would reject")
+    c.add_argument("paths", type=Path, nargs="+")
+    c.add_argument("--repo", type=Path, default=Path("."), help="the tree whose reports/L*/ci/*.json records are read")
     a = ap.parse_args(argv)
+    if a.cmd == "status-check":
+        found = status_check(a.repo, a.paths)
+        for f in found:
+            print(f, file=sys.stderr)
+        print(f"status-check {len(a.paths)} files: {len(found)} findings", file=sys.stderr)
+        return 1 if found else 0
     if a.cmd == "pins-monotone":
         found = pins_monotone(a.repo, a.base, a.head)
         for f in found:

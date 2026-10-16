@@ -1,0 +1,9 @@
+# P0ba's mutant (instruction #211 item 5): the header sha is read from `git rev-parse HEAD`, not from the run's
+# head_sha, so a session whose HEAD has moved past the cited head names a sha the run did not run on.
+[[edit]]
+path = "harness/ledger.py"
+old = """                 (f"header-sha: {head}", f"pins CI run {run['id']} on {head}: {run.get('conclusion')} ({path})"))
+"""
+new = """                 (f"header-sha: {_git(repo, 'rev-parse', 'HEAD').strip()[:7]}",
+                  f"pins CI run {run['id']} on {head}: {run.get('conclusion')} ({path})"))
+"""

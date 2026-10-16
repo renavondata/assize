@@ -17,7 +17,10 @@ what reached Guy and how long he took, sessions run and runner-minutes.
 `python -m harness.ledger elect <procedure> --seed <run id>`: rule 7 of the ground (instruction #54 item 7), a model
 drawn by EXP3 over the entrants of `harness/entrants.toml` (instruction #64): bandit feedback, only the drawn entrant is
 scored, and its probability is the one recorded in `reports/draws.jsonl` when it was drawn; with `--publish <remote>`
-that ledger is the one on the remote's `ledger/draws` branch, onto which the draw is committed."""
+that ledger is the one on the remote's `ledger/draws` branch, onto which the draw is committed.
+
+`python -m harness.ledger cite --head <sha> [--wait <seconds>]`: instruction #211 item 1, the `pins` run on <sha>
+recorded as `reports/L<n>/ci/<id>.json` and cited by the two lines a STATUS copies: its header sha and its citation."""
 
 from __future__ import annotations
 
@@ -31,6 +34,7 @@ import re
 import statistics
 import subprocess
 import sys
+import time
 import tomllib
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
@@ -649,6 +653,9 @@ def github_observer(repo: Path, price_of: Callable[[int], Mapping | None]) -> Ob
             return _gh_lines(repo, f"repos/{{owner}}/{{repo}}/actions/workflows/pins.yml/runs?event=pull_request"
                                    f"&branch={pr_branch(int(key[0]))}&per_page=100",
                              ".workflow_runs[] | {id, created_at, head_sha, path, event}")
+        if kind == "pins_on":
+            return _gh_lines(repo, f"repos/{{owner}}/{{repo}}/actions/workflows/pins.yml/runs?head_sha={key[0]}"
+                                   "&per_page=100", ".workflow_runs[] | {" + ", ".join(RUN_RECORD) + "}")
         if kind == "run_attempt":
             return json.loads(_gh(repo, f"repos/{{owner}}/{{repo}}/actions/runs/{key[0]}/attempts/1", "--jq",
                                   "{status, conclusion}"))
@@ -690,6 +697,50 @@ def github_observer(repo: Path, price_of: Callable[[int], Mapping | None]) -> Ob
         raise Unreadable(f"no query {kind}")
 
     return observe
+
+
+# --------------------------------------------- STATUS citations emitted, not typed (instruction #211 item 1)
+
+# The projection of an Actions API run that the committed records `reports/L<n>/ci/<id>.json` carry (claims.load_runs)
+RUN_RECORD = ("conclusion", "created_at", "event", "head_branch", "head_sha", "html_url", "id", "name", "path",
+              "run_attempt", "status", "updated_at")
+CITE_POLL_S, CITE_WAIT_MAX_S = 30, 540
+
+
+@dataclass(frozen=True)
+class Cited:
+    code: int  # 0 concluded success; 1 concluded otherwise; 2 no pins run on the sha; 3 not concluded within the wait
+    lines: tuple[str, ...]
+
+
+def current_layer(report: str) -> int:
+    """The layer after the last verdict line of the root REPORT.md."""
+    return max((int(m.group(1)) for m in claims.VERDICT_LINE.finditer(report)), default=-1) + 1
+
+
+def cite(repo: Path, sha: str, layer: int, observe: Observe, wait: int, sleep: Callable[[float], object]) -> Cited:
+    """The `pins` run on `sha`, the latest created if several, polled every CITE_POLL_S seconds for at most `wait`
+    (capped at CITE_WAIT_MAX_S) until it concludes. A concluded run is recorded at `reports/L<layer>/ci/<id>.json`
+    under `repo`, whatever its conclusion, and cited by two lines whose sha is the run's own head_sha: the STATUS
+    header's and the `pins:` line's."""
+    limit, waited = min(max(wait, 0), CITE_WAIT_MAX_S), 0
+    while True:
+        runs = [r for r in observe("pins_on", sha) if r.get("path") == PINS_WORKFLOW]
+        run = max(runs, key=lambda r: (_t(r["created_at"]), int(r["id"])), default=None)
+        if (run is not None and run.get("status") == "completed") or waited + CITE_POLL_S > limit:
+            break
+        sleep(CITE_POLL_S)
+        waited += CITE_POLL_S
+    if run is None:
+        return Cited(2, (f"no pins run on {sha}",))
+    if run.get("status") != "completed":
+        return Cited(3, (f"pending: run {run['id']} on {sha}",))
+    path = f"reports/L{layer}/ci/{run['id']}.json"
+    (repo / path).parent.mkdir(parents=True, exist_ok=True)
+    (repo / path).write_text(json.dumps({k: run.get(k) for k in RUN_RECORD}, separators=(",", ":")) + "\n")
+    head = str(run["head_sha"])[:7]
+    return Cited(0 if run.get("conclusion") == "success" else 1,
+                 (f"header-sha: {head}", f"pins CI run {run['id']} on {head}: {run.get('conclusion')} ({path})"))
 
 
 def ledger_paths(repo: Path) -> list[Path]:
@@ -1185,7 +1236,21 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--model", required=True)
     b.add_argument("--head", default="HEAD")
     b.add_argument("--repo", type=Path, default=Path("."))
+    c = sub.add_parser("cite", help="record the pins run on <sha>; print the STATUS header sha and its citation")
+    c.add_argument("--head", required=True, help="the code head whose pins run is cited")
+    c.add_argument("--wait", type=int, default=0, help=f"seconds to poll for it to conclude, at most {CITE_WAIT_MAX_S}")
+    c.add_argument("--repo", type=Path, default=Path("."))
     a = ap.parse_args(argv)
+    if a.cmd == "cite":
+        sha = _git(a.repo, "rev-parse", f"{a.head}^{{commit}}").strip()
+        try:
+            got = cite(a.repo, sha, current_layer((a.repo / "REPORT.md").read_text()),
+                       github_observer(a.repo, lambda _: None), a.wait, time.sleep)
+        except Unreadable as e:
+            print(f"unreadable: {e}", file=sys.stderr)
+            return 4
+        print("\n".join(got.lines))
+        return got.code
     if a.cmd == "probe":
         try:
             k = probe_k(a.brief.read_text())
