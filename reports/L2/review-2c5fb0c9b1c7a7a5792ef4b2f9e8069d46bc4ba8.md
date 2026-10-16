@@ -1,0 +1,19 @@
+VERDICT: ACCEPT WITH OBLIGATIONS
+F1: pins-master run 38938171667 on 2c5fb0c fails with 13/77 clean (P2 P3 P4 P5 P7 P10 P12 P14 P17 P29 P30 P31 P32), all with `AttributeError: module 'judge.runtime' has no attribute 'declared_unmet'`. The cause is version skew in the workflow, not this diff. "Restore the judge from master" checks out master's harness/ over the head, and since #213 (b3ffc04) master's harness/pins.py calls `judge.runtime.declared_unmet`. The head's judge/ predates #213 (`git merge-base --is-ancestor b3ffc04 2c5fb0c` → false). The PR changes no file under judge/ or harness/ except its own proposer row. So every open PR whose base is older than a judge/-changing merge fails pins-master until it is brought up to master. pins-master then reports staleness, not the head's own fault. — severity: OBLIGATION on L3 (proposed pin: a fixture branch whose judge/ predates a master harness change that depends on it; pins-master must report "base stale", distinct from a failing pin; mutant `stale_base_reported_as_pin_failure`) — witness: reports/L2/review/2c5fb0c9b1c7a7a5792ef4b2f9e8069d46bc4ba8/pins-master-38938171667-P2-clean.log
+F2: The STATUS `forecasts:` line reads `made 4 (...); resolved 0` and has no `cumulative log-loss <x> vs base rate <y> over <N>`, which A1.8's shape names. Most recent STATUS files on master omit it the same way (PR #215's did, and it merged). — severity: OBLIGATION on L3 (proposed pin: `ledger status` checks the shape of A1.8's lines; mutant `forecasts_line_unchecked`) — witness: reports/L2/status/instr-212-pins-master-witness.md line 12
+forecasts resolved: by `harness.ledger resolve --session 38938170834` (mechanism), see that command's appended rows. I resolved nothing by hand.
+
+Instruction #212, item 2 (the first criterion, A1.5), checked with no finding:
+- Signature (rule 5): gfrmin applied `labeled instruction` at 2026-10-15T13:48:52Z. The only body edit after it is by gfrmin (2026-10-16T15:47:13Z, GraphQL `userContentEdits`).
+- Item 2 asks that "the first master Builder session after it merges record the first pins-master run on a pull request (run id, conclusion) in its STATUS". #215 merged at 2026-10-16T16:26:50Z. The pins-master runs, listed through the Actions API, show 38932314061 (29cb109, 16:29:11Z, success) as the first after the merge; every earlier run is before it, and the latest of those (38839563472, #218) is a failure. All steps succeeded, including "Restore the judge from master". The STATUS records run id 38932314061 and conclusion success. No issue was needed because the run did not fail at the restore step.
+- Criterion "the rest of the diff is the session's own reports/ and proposer files": the diff is harness/proposer.d/instr-212-pins-master-witness.toml, reports/L2/ci/38932314617.json, reports/L2/forecasts/80f20ac2-….jsonl and reports/L2/status/instr-212-pins-master-witness.md. There is no workflow or code change and nothing beyond the instruction.
+- reports/L2/ci/38932314617.json is byte-identical to the Actions API projection of run 38932314617 (sorted keys, compact). Not a layer boundary. No entrenched path is touched.
+
+Reproduction and flakes:
+- Head CI `pins` run 38938161503 on 2c5fb0c: success.
+- Builder's `pins` run 38932314617 on 29cb109: success.
+- My scratch `make pins` (local clone at 2c5fb0c, on branch instr-212-pins-master-witness): clean 74/74; mutants 211/211 KILLED; twins 211/211; inconclusive 0; stale 0; non-causal 0; leaked 0; exit 0. This matches the Builder's STATUS line. Transcript: reports/L2/review/2c5fb0c9b1c7a7a5792ef4b2f9e8069d46bc4ba8/make-pins-scratch.log. No flake.
+- I removed the scratch clone (/tmp/rev221.*) and the artefact download (/tmp/art221.*) after use. `ls /tmp | grep -c 'rev221\|art221'` gave 0, and no harness process remained.
+- pins-master run 38938161670 was cancelled by the workflow's concurrency group (superseded by 38938171667). That is not a finding.
+
+No tool call was denied.
