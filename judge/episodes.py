@@ -50,6 +50,10 @@ from judge import compute, price, runtime, scoring
 SPEC = Path(__file__).resolve().parent.parent / "worlds" / "spec"
 SCHEMA_VERSION = "1.0.0"
 WORLD_ENDINGS = frozenset({"terminal", "truncated"})
+# One token per judge process: every candidate container this process starts is named under it, so that what a
+# process may call its own stray is a fact of the name, not of the runtime's whole listing (L2a obligation 25).
+RUN = uuid.uuid4().hex[:12]
+CANDIDATE_PREFIX = f"assize-candidate-{RUN}-"
 
 
 @dataclass(frozen=True)
@@ -99,7 +103,7 @@ class Container:
 
     def __init__(self, rt: runtime.Runtime, image: str, lim: runtime.Limits, command: Sequence[str] = ()):
         self.rt = rt
-        self.name = f"assize-candidate-{uuid.uuid4().hex[:16]}"
+        self.name = f"{CANDIDATE_PREFIX}{uuid.uuid4().hex[:16]}"
         self.proc = subprocess.Popen(runtime.run_argv(rt, image, lim, self.name, command), stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0)
         self._buffer = b""
@@ -191,6 +195,11 @@ def listed(rt: runtime.Runtime, name: str, running: bool = False) -> list[str]:
 def listed_prefix(rt: runtime.Runtime, prefix: str) -> list[str]:
     """Every container, in any state, whose name starts with `prefix`."""
     return [n for n in _names(rt, f"name=^{prefix}") if n.startswith(prefix)]
+
+
+def own_candidates(rt: runtime.Runtime) -> list[str]:
+    """Every container, in any state, that this process started: the runtime may list others' under the same engine."""
+    return listed_prefix(rt, CANDIDATE_PREFIX)
 
 
 def _play(c: Container, world, manifest: Mapping, t: Timeouts, losses: list, predicted: list) -> tuple[str, str]:
