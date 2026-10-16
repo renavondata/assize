@@ -1,0 +1,18 @@
+pin:       P0bb
+protects:  the harness entry point, run without make, starts rootless Podman's pause process before arming its subreaper, so a check using Podman is not reported as leaking it
+role:      clean
+tree:      /home/g/Downloads/actions-runner/_work/assize/assize
+invoked:   /home/g/Downloads/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-x37sxekh
+  [ok] podman is installed: this pin cannot be witnessed without it
+  [ok] control: the fresh runtime directory holds no pause process
+nested podman_pause: registry=fixture.podman_pause phase=clean edits=(none) exit=0 rows=/home/g/Downloads/actions-runner/_work/assize/assize/out/pins/runs/P0bb/clean/nested/podman_pause/pins.jsonl
+  [ok] podman_pause: seeded edits applied (anchors unique)
+  [ok] podman_pause: summary row exit_code equals process exit code
+  [ok] the nested run left Podman's pause process for this runtime directory
+  [ok] the check itself returned True (pass)
+  [ok] leaked_processes = 0 (0)
+  [ok] verdict ok (ok)
+  [ok] summary leaked = 0 (0)
+  [ok] the nested run's own expectations hold
+result:    PASS
