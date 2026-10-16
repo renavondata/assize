@@ -243,7 +243,9 @@ def p0h_copy_swept_first() -> bool:
     obligation 26; review 4649b6b2b4e0 F4)."""
     w = run_nested("litter", "fixture.litter", "mutants", config=escapee.FAST)
     row = w.run("fixture/toy", "fixture/toy/litters_copy", "mutant")
-    pid = _pid(Path(row.get("run_dir", "/nonexistent")) / litter.PID_FILE)
+    # Read from the run directory's known path, not the row: a run that ends in an exception writes no row, and its
+    # writer must still be found and killed.
+    pid = _pid(w.out / "runs" / "fixture__toy" / "litters_copy" / "mutant" / litter.PID_FILE)
     w.expect(pid is not None, f"writer PID recorded after its first write ({pid})")
     w.expect(pid is not None and not proc.alive(pid, litter.MARKER), "writer dead when the nested run returns")
     w.expect(row.get("observed") == "fail" and row.get("twin_observed") == "pass", "mutant failed, its twin passed")
