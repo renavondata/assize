@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o32-stale-exemption (brief 2 A2, L2a obligation 32 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "afb09511-436a-4efe-91a1-e7c130432604"
