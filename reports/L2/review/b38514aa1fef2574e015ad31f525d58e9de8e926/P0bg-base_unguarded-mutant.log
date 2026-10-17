@@ -1,0 +1,13 @@
+copy of /tmp/rv231-fwPe/repo
+  at /tmp/assize-scratch-bees73sh/assize-copy-jirqhhj9/repo
+applied 1 edit(s) from harness/edits/P0bg_base_unguarded.toml
+pin:       P0bg
+protects:  P0m's real-branch check on a tree with no .git fails naming the missing repository instead of raising
+role:      mutant
+tree:      /tmp/assize-scratch-bees73sh/assize-copy-jirqhhj9/repo
+invoked:   /tmp/rv231-fwPe/repo
+scratch:   /tmp/assize-scratch-bees73sh
+  [ok] control: /tmp/assize-scratch-bees73sh/assize-nogit-d3hjt3eo holds no .git
+  [FAIL] the real-branch check on a tree with no .git does not raise (TypeError: expected str, bytes or os.PathLike object, not NoneType)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/assize-scratch-bees73sh/assize-nogit-d3hjt3eo (base None)'])
+result:    FAIL

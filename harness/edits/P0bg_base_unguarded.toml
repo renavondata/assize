@@ -1,0 +1,6 @@
+# P0bg's mutant (L2a obligation 31): the real-branch check no longer guards on the missing base, so a tree with no
+# .git raises where a finding belongs.
+[[edit]]
+path = "harness/pins.py"
+old = "    inert = claims.inert_exemptions(root, base) if base is not None else []\n"
+new = "    inert = claims.inert_exemptions(root, base)\n"

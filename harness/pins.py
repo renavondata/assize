@@ -366,6 +366,31 @@ def p0bf_sigterm_leaves_nothing() -> bool:
     return ok()
 
 
+def p0bg_p0m_without_git() -> bool:
+    """P0m's real-branch check on a tree with no `.git` fails with a finding that names the missing repository; it does
+    not raise (L2a obligation 31; review bb7b3875f8f6 F3)."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-nogit-", dir=context.scratch))
+    expect(not (work / ".git").exists(), f"control: {work} holds no .git")
+    seen: list[tuple[bool, str]] = []
+
+    def probe(cond: bool, what: str) -> None:
+        seen.append((cond, what))
+
+    patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
+    try:
+        _p0m_real_branch(probe, work, patterns)
+        raised = None
+    except Exception as e:  # the defect: a traceback where a finding belongs
+        raised = f"{type(e).__name__}: {e}"
+    expect(raised is None, f"the real-branch check on a tree with no .git does not raise ({raised})")
+    failed = [what for cond, what in seen if not cond]
+    expect(len(failed) == 1 and "no git repository" in failed[0] and str(work) in failed[0],
+           f"it fails once, naming the missing repository and the tree ({failed})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
@@ -816,6 +841,24 @@ def _branch_base(root: Path) -> str | None:
     return None
 
 
+def _p0m_real_branch(expect, root: Path, patterns) -> None:
+    """P0m on the invocation tree's own branch. A tree with no `.git` is a stated failure, never a raise."""
+    base = _branch_base(root)
+    expect(base is not None, f"real branch: no git repository, or no master to compare, at {root} (base {base})")
+    inert = claims.inert_exemptions(root, base) if base is not None else []
+    expect(not inert, f"real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from {base and base[:12]} "
+                      f"({[str(f) for f in inert]})")
+    real = claims.branch_commits(root, base) if base is not None else []
+    # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
+    # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
+    issues = claims.load_issues(root, [n for c in real if claims.needs_guy(c, patterns) for n in c.instructions])
+    found = [f for c in real for f in claims.commit_findings(c, patterns, issues)]
+    for c in real:
+        print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
+    expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
+                      f"{[str(f) for f in found]}")
+
+
 def p0m_commit_proposers() -> bool:
     """Every commit on the branch carries well-formed `Proposer:` trailers; one touching an entrenched path
     (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
@@ -860,21 +903,7 @@ def p0m_commit_proposers() -> bool:
         expect(got == want and at == want_at, f"timeline, {label}: `instruction` label applied by {got!r} at {at}, "
                                                f"want {want!r} at {want_at}")
 
-    root = _real_root()
-    base = _branch_base(root)
-    expect(base is not None, f"real branch: base resolved ({base})")
-    inert = claims.inert_exemptions(root, base) if base else []
-    expect(not inert, f"real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from {base and base[:12]} "
-                      f"({[str(f) for f in inert]})")
-    real = claims.branch_commits(root, base) if base else []
-    # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
-    # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
-    issues = claims.load_issues(root, [n for c in real if claims.needs_guy(c, patterns) for n in c.instructions])
-    found = [f for c in real for f in claims.commit_findings(c, patterns, issues)]
-    for c in real:
-        print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
-    expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
-                      f"{[str(f) for f in found]}")
+    _p0m_real_branch(expect, _real_root(), patterns)
     return ok()
 
 
@@ -6144,6 +6173,8 @@ PINS = [
         p0bd_overlap_refused, (Mutant("overlap_unchecked", _edits("P0bd_overlap_unchecked")),), HARNESS),
     Pin("P0bf", "SIGTERM to the orchestrator mid-run leaves no scratch root, no copy and no descendant behind",
         p0bf_sigterm_leaves_nothing, (Mutant("sigterm_unhandled", _edits("P0bf_sigterm_unhandled")),), HARNESS),
+    Pin("P0bg", "P0m's real-branch check on a tree with no .git fails naming the missing repository instead of raising",
+        p0bg_p0m_without_git, (Mutant("base_unguarded", _edits("P0bg_base_unguarded")),), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),

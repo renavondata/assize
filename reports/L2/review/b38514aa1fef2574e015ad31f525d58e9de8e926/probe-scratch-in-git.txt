@@ -1,0 +1,5 @@
+# probe: P0bg with context.scratch inside a git work tree (/tmp/rv231-probe-QI4i, one commit on master); reviewer 544f83b0, head b38514a
+  [ok] control: /tmp/rv231-probe-QI4i/scr/assize-nogit-7oys67gy holds no .git
+  [ok] the real-branch check on a tree with no .git does not raise (None)
+  [FAIL] it fails once, naming the missing repository and the tree ([])
+P0bg result: False
