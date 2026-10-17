@@ -1,0 +1,6 @@
+# P0be's mutant `spawn_env_inherited` (L2a obligation 29): `runner._spawn` hands the check the orchestrator's own
+# environment instead of `proc.child_env(scratch)`, so the check shares its parent's bytecode cache prefix.
+[[edit]]
+path = "harness/runner.py"
+old = "                             env=proc.child_env(scratch))\n"
+new = "                             env=dict(os.environ))\n"

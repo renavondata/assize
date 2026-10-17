@@ -1,0 +1,6 @@
+# P0be's mutant `under_edits_env_inherited` (L2a obligation 29): `run_under_edits` starts the inner run with its own
+# environment instead of `proc.child_env(copy.parent)`, so the inner orchestrator reuses the outer cache prefix.
+[[edit]]
+path = "harness/runner.py"
+old = "                               env=proc.child_env(copy.parent)).returncode\n"
+new = "                               env=dict(os.environ)).returncode\n"
