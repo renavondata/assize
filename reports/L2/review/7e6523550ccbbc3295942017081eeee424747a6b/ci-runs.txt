@@ -4,3 +4,16 @@ build pull_request completed skipped 39053364090 https://github.com/renavondata/
 review pull_request in_progress null 39053364034 https://github.com/renavondata/assize/actions/runs/39053364034
 pins-master pull_request_target completed cancelled 39053358414 https://github.com/renavondata/assize/actions/runs/39053358414
 pins pull_request completed success 39053358425 https://github.com/renavondata/assize/actions/runs/39053358425
+
+# runs on e03535c22a57da920ab9bec602e0859d94a60d85 (my first review commit; F1)
+pins-master pull_request_target completed failure 39056669502 https://github.com/renavondata/assize/actions/runs/39056669502
+pins pull_request completed failure 39056670601 https://github.com/renavondata/assize/actions/runs/39056670601
+# from `gh run view 39056670601 --log`:
+# [clean ] P0m: observed fail -> FAILED (0.786s) out/pins/runs/P0m/clean/transcript.log
+# CLEAN FAILED: P0m (observed fail)
+# [mutant] P0m/trailer_check_disabled: mutant fail, twin fail -> NON-CAUSAL (and every other P0m mutant likewise)
+# scratch merge of e03535c with origin/master, pins.p0m_commit_proposers():
+#   [FAIL] real branch 7acea85c7794..HEAD: 4 commits; findings ["commit e03535c22a57: bad_party: 'mechanism harness.ledger 39053364034' is not `guy` or `<kind> <model> <session>`"]
+# `python -m harness.claims trailers 7e65235..HEAD` on the same commit: trailers 7e65235..HEAD: 0 findings
+# `git push --force-with-lease=l2a-o33-exact-uniform:e03535c...` of a replacement commit:
+#   ! [remote rejected] l2a-o33-exact-uniform -> l2a-o33-exact-uniform (push declined due to repository rule violations)
