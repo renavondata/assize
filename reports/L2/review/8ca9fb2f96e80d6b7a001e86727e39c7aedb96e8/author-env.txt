@@ -1,0 +1,12 @@
+review run 38991795163 environment and first push, recorded 2026-10-17T02:18:49Z
+GIT_AUTHOR_EMAIL=assize-builder@users.noreply.github.com
+GIT_AUTHOR_NAME=assize-builder
+GIT_COMMITTER_EMAIL=assize-builder@users.noreply.github.com
+GIT_COMMITTER_NAME=assize-builder
+GITHUB_ACTOR=assize-builder
+GITHUB_ACTOR_ID=339109611
+GITHUB_TRIGGERING_ACTOR=assize-builder
+--- first push d49d435 as GitHub reads it:
+author login: assize-builder / committer login: assize-builder / git author: assize-builder <assize-builder@users.noreply.github.com> / git committer: assize-builder <assize-builder@users.noreply.github.com>
+--- the previous review commit 7db1b2b for comparison:
+author login: assize-reviewer / git author: assize-reviewer <assize-reviewer@users.noreply.github.com>
