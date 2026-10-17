@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o21-p11-multi-despawn-rebuilt (L2a obligation 21, rebuilt from master by cherry-picking 1d1e02e of closed PR #210): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "9e3c7209-49cb-4048-917b-5242befa57a6"
