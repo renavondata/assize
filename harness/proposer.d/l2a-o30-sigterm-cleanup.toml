@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o30-sigterm-cleanup (brief 2 A2, L2a obligation 30 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "cef6f382-7cd3-42d2-bd85-f8b3dc01cd8d"

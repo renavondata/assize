@@ -1,0 +1,6 @@
+# P0bf's mutant (L2a obligation 30): the orchestrator's SIGTERM handler is removed, so a terminated run dies at once
+# and its open scratch root is never swept or deleted.
+[[edit]]
+path = "harness/runner.py"
+old = "    proc.exit_on_sigterm()  # a terminated run still sweeps and deletes its open scratch root\n"
+new = ""
