@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o28-overlap-pinned (brief 2 A2, L2a obligation 28 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "a467d028-bcb3-4c35-80a5-78ebad243a41"

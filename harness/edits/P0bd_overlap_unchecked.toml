@@ -1,0 +1,6 @@
+# P0bd's mutant (L2a obligation 28): the orchestrator spawns a child without asserting that no descendant of an
+# earlier one is still alive.
+[[edit]]
+path = "harness/runner.py"
+old = "    if any(state not in \"ZX\" for state in live.values()):\n        raise Overlap("
+new = "    if False and any(state not in \"ZX\" for state in live.values()):\n        raise Overlap("
