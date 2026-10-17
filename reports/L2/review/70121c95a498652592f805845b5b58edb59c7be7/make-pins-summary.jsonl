@@ -1,0 +1,1 @@
+{"clean_failed": 0, "clean_ok": 83, "clean_total": 83, "exit_code": 0, "inconclusive": 0, "killed": 234, "kind": "summary", "leaked": 0, "mutants_total": 234, "non_causal": 0, "phase": "all", "registry": "harness", "since": null, "since_run": null, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 234, "twins_total": 234}

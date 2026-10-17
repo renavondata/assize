@@ -1,0 +1,8 @@
+PR #236: instructions=() headers=('# STATUS — L2 — 2026-10-17 — 86a0edb — PR #236',)
+PR #234: instructions=() headers=('# STATUS — L2 — 2026-10-17 — 98bea19 — PR #234',)
+holder('33') -> None
+holder('34') -> 234
+holder('35') -> None
+holder('L2a obligation 33') -> None
+holder('l2a-o33-exact-uniform') -> None
+next_item([33,34,35]) -> ('33', ())
