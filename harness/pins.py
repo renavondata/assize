@@ -1902,6 +1902,51 @@ def p0bc_outer_sweeps_killed_inner() -> bool:
     return ok()
 
 
+def p0be_spawn_sites_use_child_env() -> bool:
+    """Every site that starts a harness child hands it `proc.child_env`'s environment, not its own: the check's
+    `PYTHONDONTWRITEBYTECODE=1` and a fresh `PYTHONPYCACHEPREFIX` beneath its `--scratch` root (`runner._spawn`), and
+    the orchestrator's, fresh and beneath the caller's scratch (`nested.run_nested`, `runner.run_under_edits`).
+    P0i pins the function's output; this reads the environment each spawn site actually produced (L2a obligation 29;
+    review 8e8b676bf197 F1)."""
+    expect, ok = _expecter()
+    own = os.environ.get("PYTHONPYCACHEPREFIX")
+    cfg = ROOT / "harness" / "fixtures" / "fast.toml"
+
+    def beneath(path: str | None, root: str | Path) -> bool:
+        return path is not None and Path(path).parent == Path(root)
+
+    def sound(label: str, rec: dict, who: str, root: str | Path, forbidden: set[str | None]) -> None:
+        env = rec[who]
+        expect(env["PYTHONDONTWRITEBYTECODE"] == "1", f"{label}: {who} carries PYTHONDONTWRITEBYTECODE=1")
+        expect(beneath(env["PYTHONPYCACHEPREFIX"], root), f"{label}: {who} prefix {env['PYTHONPYCACHEPREFIX']} is "
+               f"directly beneath {root}")
+        expect(env["PYTHONPYCACHEPREFIX"] not in forbidden, f"{label}: {who} prefix is fresh, not inherited")
+
+    n = run_nested("envprobe", "fixture.envprobe", "clean", config=cfg)
+    path = n.out / "runs" / "fixture__envprobe" / "clean" / "env.json"
+    rec = json.loads(path.read_text()) if path.is_file() else None
+    expect(rec is not None, f"the probe check ran and recorded {path}")
+    if rec is not None:
+        sound("nested", rec, "own", rec["scratch"], {own, rec["parent"]["PYTHONPYCACHEPREFIX"]})
+        sound("nested", rec, "parent", str(context.scratch), {own})
+
+    out = context.run_dir / "nested" / "envprobe-under-edits"
+    shutil.rmtree(out, ignore_errors=True)
+    out.mkdir(parents=True)
+    cmd = proc.python("-m", "harness", "run", "--under-edits", "harness/fixtures/edits/toy_off_by_one.toml",
+                      "--registry", "fixture.envprobe", "--phase", "clean", "--out", str(out), "--config", str(cfg))
+    with (out / "stdout.log").open("w") as log:
+        code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False),
+                              env=proc.child_env()).returncode
+    print(f"under-edits run: exit {code}; transcript {out / 'stdout.log'}")
+    path = out / "runs" / "fixture__envprobe" / "clean" / "env.json"
+    rec = json.loads(path.read_text()) if path.is_file() else None
+    expect(rec is not None, f"the under-edits probe check ran and recorded {path}")
+    if rec is not None:
+        sound("under-edits", rec, "parent", rec["root_parent"], {own})
+    return ok()
+
+
 def _cite_run(n: int, sha: str, created: str, **over: object) -> dict:
     """A `pins` run as the Actions API projects it into a record (`ledger.RUN_RECORD`)."""
     return {"conclusion": "success", "created_at": created, "event": "pull_request", "head_branch": "b",
@@ -6350,6 +6395,13 @@ PINS = [
                 "an inner run killed with SIGKILL is killed, counted in under-edits.json and fails the invocation",
         p0bc_outer_sweeps_killed_inner, (Mutant("outer_sweep_removed", _edits("P0bc_outer_sweep_removed")),
                                          Mutant("outer_subreaper_not_set", _edits("P0bc_outer_subreaper_not_set"))),
+        HARNESS),
+    Pin("P0be", "every site that starts a harness child hands it `proc.child_env`'s environment: the check's and the "
+                "orchestrator's carry PYTHONDONTWRITEBYTECODE=1 and a fresh PYTHONPYCACHEPREFIX beneath the right "
+                "scratch root",
+        p0be_spawn_sites_use_child_env, (Mutant("spawn_env_inherited", _edits("P0be_spawn_env_inherited")),
+                                         Mutant("nested_env_inherited", _edits("P0be_nested_env_inherited")),
+                                         Mutant("under_edits_env_inherited", _edits("P0be_under_edits_env_inherited"))),
         HARNESS),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),

@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o29-spawn-env (brief 2 A2, L2a obligation 29 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "99b0dfd0-9eda-45b2-b791-8e27a5692a9f"

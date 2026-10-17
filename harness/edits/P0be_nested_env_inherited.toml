@@ -1,0 +1,6 @@
+# P0be's mutant `nested_env_inherited` (L2a obligation 29): `nested.run_nested` starts a nested `harness run` with the
+# calling check's own environment instead of `proc.child_env()`, so the orchestrator reuses the caller's cache prefix.
+[[edit]]
+path = "harness/nested.py"
+old = "                                  env=proc.child_env()).returncode\n        else:\n"
+new = "                                  env=dict(__import__('os').environ)).returncode\n        else:\n"
