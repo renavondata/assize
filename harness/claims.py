@@ -251,12 +251,11 @@ def parties(trailer_values: str) -> tuple[str, ...]:
 # party the commit does not state. Each entry cites the review that found it.
 PROPOSER_EXEMPTIONS: Mapping[str, str] = {
     # Instruction #54 item 5: an entry reachable from master is inert (P0m reads base..HEAD only) and was removed:
-    # bb7b387 (review aa993f4 F1), b7eafee and 0a4f2b8 (make pins at 0a4f2b8). The one left is not on master.
-    # P0m clean on instr-49-vizier (stacked on PR #48): the same blank line, in the review commit of PR #48; pushed,
-    # and the head of a pull request awaiting Guy, so it is exempted rather than reworded.
-    "e37357ed2d398cc3c1e16d65576d688e57c040c2": "reviewer claude-sonnet-5-5 a5caecbb-729c-4885-b5bf-40f1f55e76cc",
+    # bb7b387 (review aa993f4 F1), b7eafee and 0a4f2b8 (make pins at 0a4f2b8).
     # Instruction #110 Part C item 4: 29dabe2 (PR #114 round 2) was inert once #114 merged and is removed. No entry is
     # added: a pushed commit must parse (`python -m harness.claims trailers`, the pre-push hook in harness/hooks/).
+    # L2a obligation 32: e37357e (review commit of PR #48) lies on no branch this table is read against, so it is
+    # removed; P0m now fails an entry outside base..HEAD, and the table is empty.
 }
 
 
@@ -448,6 +447,15 @@ def inert_exemptions(repo: Path, base: str,
 
     return [Finding(f"exemption {sha[:12]}", "inert_exemption", f"reachable from {base[:12]}; P0m never reads it")
             for sha in exemptions if reachable(sha)]
+
+
+def stale_exemptions(repo: Path, base: str, exemptions: Mapping[str, str] = PROPOSER_EXEMPTIONS) -> list[Finding]:
+    """An exemption whose commit is not in `base..HEAD` is dead config: P0m reads only that range, so the entry can
+    never apply to the branch being checked (L2a obligation 32; review 576fe9632eab F2). A sha this clone does not
+    hold is not in the range."""
+    in_range = set(_git(repo, "rev-list", f"{base}..HEAD").split())
+    return [Finding(f"exemption {sha[:12]}", "stale_exemption", f"not in {base[:12]}..HEAD; P0m never applies it")
+            for sha in exemptions if sha not in in_range]
 
 
 # Instruction #110 Part C: sessions cannot push what the court cannot read. A non-merge commit must carry a `Proposer:`

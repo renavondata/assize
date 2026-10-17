@@ -2,5 +2,5 @@
 # .git raises where a finding belongs.
 [[edit]]
 path = "harness/pins.py"
-old = "    inert = claims.inert_exemptions(root, base) if base is not None else []\n"
-new = "    inert = claims.inert_exemptions(root, base)\n"
+old = "    inert = claims.inert_exemptions(root, base, exemptions) if base is not None else []\n"
+new = "    inert = claims.inert_exemptions(root, base, exemptions)\n"
