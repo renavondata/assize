@@ -4,7 +4,8 @@
 episode is recorded or the wall-clock cap passes, whichever binds first. The cap is checked before each request; an
 episode under way when it passes is finished and recorded, never cut. Reaching the cap first, a request refused, or a
 request returning other than the episodes it asked for, stops the pilot: a stop-and-report boundary, never a smaller
-pilot, so a stopped report carries no verdict.
+pilot, so a stopped report carries no verdict. A pilot whose wall-clock passed the cap during its last request is
+stopped the same way by `report`: every episode is recorded, but not within the cap.
 
 `report` reads everything off the judge's records, every recorded episode included whatever its termination, and states
 each denominator:
@@ -140,8 +141,10 @@ def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Seq
     several = [k for k, v in one.items() if len(v) != 1]
     throughput = n / played.wall_s if played.wall_s > 0 else None
     ttl = cfg["time_to_learn"]
-    stopped = played.stopped or (f"records carry {', '.join(f'{len(one[k])} {k}' for k in several)}"
-                                 if several else None)
+    cap = cfg["pilot"]["cap_s"]
+    overrun = f"cap: {cap} s passed during the last request, at {played.wall_s:.1f} s" if played.wall_s > cap else None
+    stopped = played.stopped or overrun or (f"records carry {', '.join(f'{len(one[k])} {k}' for k in several)}"
+                                            if several else None)
     rows = timetolearn.table(utilities, throughput, ttl) if stopped is None else []
     preds = {t: prediction(rs, t) for t in targets}
     return {

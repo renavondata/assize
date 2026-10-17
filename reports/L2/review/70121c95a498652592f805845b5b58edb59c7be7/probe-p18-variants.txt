@@ -1,0 +1,37 @@
+Using CPython 3.11.17
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 46ms
+== clean (head as is): P18 passes -> variant SURVIVES
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict STOPPED: cap: 1000.0 s passed during the last request, at 1250.0 s
+== named mutant cap_overrun_admitted: check dropped: P18 FAILS -> variant KILLED
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict FIT
+   [FAIL] a cap passing during the final request leaves every record but no verdict (FIT, 1250.0 s, 3 requests)
+== boundary: >= instead of >: P18 passes -> variant SURVIVES
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict STOPPED: cap: 1000.0 s passed during the last request, at 1250.0 s
+== loose threshold: > 1.2 * cap: P18 passes -> variant SURVIVES
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict STOPPED: cap: 1000.0 s passed during the last request, at 1250.0 s
+== loose threshold: > 1.3 * cap: P18 FAILS -> variant KILLED
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict FIT
+   [FAIL] a cap passing during the final request leaves every record but no verdict (FIT, 1250.0 s, 3 requests)
+== wrong quantity: sum of per-request wall_s: P18 FAILS -> variant KILLED
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict FIT
+   [FAIL] a cap passing during the final request leaves every record but no verdict (FIT, 1250.0 s, 3 requests)
+== wrong quantity: last request's wall_s: P18 FAILS -> variant KILLED
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict FIT
+   [FAIL] a cap passing during the final request leaves every record but no verdict (FIT, 1250.0 s, 3 requests)
+== message without the cap: prefix: P18 FAILS -> variant KILLED
+   overrun pilot: requests [('pilot-p18-0', 10), ('pilot-p18-1', 10), ('pilot-p18-2', 5)]; wall_s 1250.0; verdict STOPPED: wall-clock 1000.0 s passed during the last request, at 1250.0 s
+   [FAIL] a cap passing during the final request leaves every record but no verdict (STOPPED: wall-clock 1000.0 s passed during the last request, at 1250.0 s, 1250.0 s, 3 requests)
+
+summary:
+  SURVIVES  clean (head as is)
+  KILLED    named mutant cap_overrun_admitted: check dropped
+  SURVIVES  boundary: >= instead of >
+  SURVIVES  loose threshold: > 1.2 * cap
+  KILLED    loose threshold: > 1.3 * cap
+  KILLED    wrong quantity: sum of per-request wall_s
+  KILLED    wrong quantity: last request's wall_s
+  KILLED    message without the cap: prefix

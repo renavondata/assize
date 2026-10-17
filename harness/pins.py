@@ -6115,7 +6115,7 @@ def p18_pilot() -> bool:
     pilot's wall-clock, not over its episodes' compute; the proposer is the one the records carry, not the config's,
     and records of two proposers are no pilot; a target with an infinite step has log-loss +inf; reliability tables add.
     The cap passing before the episodes complete, a refused request, or a request returning fewer records than asked,
-    each stops the pilot with the records it has and no verdict."""
+    each stops the pilot with the records it has and no verdict; so does a cap passing during the final request."""
     from judge import registry
     from pilot import run
     from worlds.crafter import binding
@@ -6174,6 +6174,15 @@ def p18_pilot() -> bool:
            and rep["time_to_learn"]["rows"] == [],
            f"the cap passing after one request stops the pilot with its 10 records and no verdict "
            f"({rep['verdict']}, {rep['episodes']['recorded']})")
+    # The clock is read once at the start and three times per request, so at cap/8 per reading the last check before a
+    # request reads 7/8 of the cap and the pilot ends at 10/8 of it: the cap passes during the final request.
+    played, rep = pilot(clock=_p18_clock(P18_CFG["pilot"]["cap_s"] / 8))
+    print(f"  overrun pilot: requests {asked}; wall_s {played.wall_s}; verdict {rep['verdict']}")
+    expect(len(asked) == 3 and played.stopped is None and played.wall_s > P18_CFG["pilot"]["cap_s"]
+           and rep["verdict"].startswith("STOPPED: cap") and rep["episodes"]["recorded"] == 25
+           and rep["time_to_learn"]["rows"] == [],
+           f"a cap passing during the final request leaves every record but no verdict "
+           f"({rep['verdict']}, {played.wall_s} s, {len(asked)} requests)")
     played, rep = pilot(refuse_at=1)
     expect(rep["verdict"].startswith("STOPPED: refused") and rep["episodes"]["recorded"] == 10,
            f"a refused request stops the pilot with the records it has ({rep['verdict']})")
@@ -6481,6 +6490,7 @@ PINS = [
                        Mutant("hash_partial", _edits("P17_hash_partial"))), JUDGE_SIDE),
     Pin("P18", "the pilot records every episode, stops at the cap, and reports the records' proposer and throughput",
         p18_pilot, (Mutant("cap_ignored", _edits("P18_cap_ignored")),
+                    Mutant("cap_overrun_admitted", _edits("P18_cap_overrun_admitted")),
                     Mutant("failures_dropped", _edits("P18_failures_dropped")),
                     Mutant("throughput_from_episodes", _edits("P18_throughput_from_episodes")),
                     Mutant("proposer_from_config", _edits("P18_proposer_from_config")),
