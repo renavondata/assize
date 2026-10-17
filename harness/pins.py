@@ -327,6 +327,45 @@ def p0bd_overlap_refused() -> bool:
     return ok()
 
 
+def p0bf_sigterm_leaves_nothing() -> bool:
+    """SIGTERM to the orchestrator mid-run, while a mutant check and its non-cooperating grandchild hang in a copy under
+    the run's scratch root: the orchestrator exits through its handler (128 + SIGTERM), and afterwards no
+    `assize-scratch-*`, no `assize-copy-*` and no descendant remain (L2a obligation 30; review 7498b94a505b F2)."""
+    expect, ok = _expecter()
+    cfg = config.load()
+    work = Path(tempfile.mkdtemp(prefix="assize-sigterm-", dir=context.scratch))
+    roots, out = work / "roots", work / "out"
+    roots.mkdir()
+    out.mkdir()
+    pid_file = out / "runs" / "fixture__escapee" / escapee.PINS[0].mutants[0].name / "mutant" / escapee.PID_FILE
+    cmd = proc.python("-m", "harness", "run", "--registry", "fixture.escapee", "--phase", "mutants",
+                      "--out", str(out), "--scratch-root", str(roots))
+    with (work / "stdout.log").open("w") as log:
+        orchestrator = subprocess.Popen(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
+                                        preexec_fn=proc.setup(False), env=proc.child_env())
+        started = proc.wait_until(lambda: pid_file.is_file() and pid_file.read_text().strip() != "",
+                                  cfg.child_timeout_s, cfg.poll_step_s)
+        pid = _pid(pid_file) if started else None
+        expect(pid is not None and proc.alive(pid, escapee.MARKER), f"control: the hanging grandchild is live ({pid})")
+        expect(len(list(roots.glob("assize-scratch-*"))) == 1 and len(list(roots.glob("*/assize-copy-*"))) == 1,
+               "control: the run holds one scratch root and one copy under it when the signal is sent")
+        orchestrator.send_signal(signal.SIGTERM)
+        try:
+            code = orchestrator.wait(timeout=cfg.child_timeout_s)
+        except subprocess.TimeoutExpired:
+            orchestrator.kill()
+            code = orchestrator.wait()
+    print(f"terminated run: exit {code}; transcript {work / 'stdout.log'}")
+    expect(code == 128 + signal.SIGTERM, f"the orchestrator exits through its SIGTERM handler ({code})")
+    expect(not list(roots.glob("assize-scratch-*")), "no assize-scratch-* remains")
+    expect(not list(roots.rglob("assize-copy-*")), "no assize-copy-* remains")
+    expect(pid is not None and not proc.alive(pid, escapee.MARKER), f"the grandchild {pid} is dead")
+    expect(not [p for p, state in proc.descendants().items() if state not in "ZX"], "no descendant of this check lives")
+    _kill(pid, escapee.MARKER)
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
@@ -6103,6 +6142,8 @@ PINS = [
     Pin("P0bd", "the orchestrator refuses to spawn a child, raising Overlap, while a descendant of an earlier child is "
                 "still alive, and spawns it once none is",
         p0bd_overlap_refused, (Mutant("overlap_unchecked", _edits("P0bd_overlap_unchecked")),), HARNESS),
+    Pin("P0bf", "SIGTERM to the orchestrator mid-run leaves no scratch root, no copy and no descendant behind",
+        p0bf_sigterm_leaves_nothing, (Mutant("sigterm_unhandled", _edits("P0bf_sigterm_unhandled")),), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),

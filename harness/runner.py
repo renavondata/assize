@@ -356,6 +356,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
     other pin as skipped, citing `since` and its pins run `since_run`; without it, every pin."""
     proc.start_runtime_infrastructure()
     proc.set_subreaper()
+    proc.exit_on_sigterm()  # a terminated run still sweeps and deletes its open scratch root
     cfg = config_mod.load(config_path)
     out.mkdir(parents=True, exist_ok=True)
     rows_path = out / "pins.jsonl"

@@ -63,6 +63,17 @@ def set_subreaper() -> None:
         raise OSError(ctypes.get_errno(), "prctl(PR_SET_CHILD_SUBREAPER) failed")
 
 
+def exit_on_sigterm() -> None:
+    """SIGTERM to this process raises SystemExit(128 + SIGTERM) in its main thread, so every open `finally` unwinds
+    before it exits: the current child run's sweep kills its descendants and its scratch root, copy included, is
+    deleted. A second SIGTERM during that cleanup is ignored (L2a obligation 30; review 7498b94a505b F2)."""
+    def _exit(signum: int, _frame) -> None:
+        signal.signal(signum, signal.SIG_IGN)
+        raise SystemExit(128 + signum)
+
+    signal.signal(signal.SIGTERM, _exit)
+
+
 def setup(new_session: bool) -> Callable[[], None]:
     parent = os.getpid()
 
