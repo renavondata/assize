@@ -1,0 +1,5 @@
+# P0m's mutant (L2a obligation 32): an exemption whose commit is absent from base..HEAD, which P0m never applies, is admitted.
+[[edit]]
+path = "harness/claims.py"
+old = "            for sha in exemptions if sha not in in_range]"
+new = "            for sha in exemptions if False]"
