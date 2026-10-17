@@ -1,0 +1,62 @@
+copy of /tmp/assize-review-232
+  at /tmp/assize-scratch-n5x1n7b_/assize-copy-h10h9ph5/repo
+applied 1 edit(s) from harness/edits/P0m_stale_exemption_accepted.toml
+pin:       P0m
+protects:  a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; every party is read
+role:      mutant
+tree:      /tmp/assize-scratch-n5x1n7b_/assize-copy-h10h9ph5/repo
+invoked:   /tmp/assize-review-232
+scratch:   /tmp/assize-scratch-n5x1n7b_
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: the last 6 commits read as merges and no other
+  [ok] fixture: 29 branch commits read, want 29
+  [ok] builder, ordinary path: parties reported ['builder m s'], instructions [], findings []; want ['builder m s'], [], []
+  [ok] no trailer: parties reported [], instructions [], findings ['no_proposer']; want [], [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], instructions [], findings ['entrenched_without_guy']; want ['builder m s'], [], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], instructions [], findings []; want ['guy', 'builder m s'], [], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], instructions [], findings []; want ['builder m s', 'guy'], [], []
+  [ok] malformed party: parties reported ['builder m'], instructions [], findings ['bad_party']; want ['builder m'], [], ['bad_party']
+  [ok] auditor, ordinary path: parties reported ['auditor m s'], instructions [], findings []; want ['auditor m s'], [], []
+  [ok] body-only Proposer, not exempted: parties reported [], instructions [], findings ['no_proposer']; want [], [], ['no_proposer']
+  [ok] body-only Proposer, exempted: parties reported ['reviewer m s'], instructions [], findings []; want ['reviewer m s'], [], []
+  [ok] body-only Proposer, another party exempted: parties reported [], instructions [], findings ['no_proposer']; want [], [], ['no_proposer']
+  [ok] builder, Instruction of gfrmin's open instruction issue, CLAUDE.md: parties reported ['builder m s'], instructions [1], findings []; want ['builder m s'], [1], []
+  [ok] builder, Instruction of gfrmin's closed instruction issue, .github/: parties reported ['builder m s'], instructions [2], findings []; want ['builder m s'], [2], []
+  [ok] builder, Instruction of an issue another account authored, CLAUDE.md: parties reported ['builder m s'], instructions [3], findings ['entrenched_without_guy']; want ['builder m s'], [3], ['entrenched_without_guy']
+  [ok] builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md: parties reported ['builder m s'], instructions [4], findings ['entrenched_without_guy']; want ['builder m s'], [4], ['entrenched_without_guy']
+  [ok] builder, Instruction of an issue not read, CLAUDE.md: parties reported ['builder m s'], instructions [9], findings ['entrenched_without_guy']; want ['builder m s'], [9], ['entrenched_without_guy']
+  [ok] builder, malformed Instruction, CLAUDE.md: parties reported ['builder m s'], instructions [], findings ['entrenched_without_guy']; want ['builder m s'], [], ['entrenched_without_guy']
+  [ok] builder, Instruction of a draft gfrmin signed, .claude/: parties reported ['builder m s'], instructions [5], findings []; want ['builder m s'], [5], []
+  [ok] builder, Instruction of a draft the Vizier labelled itself, .claude/: parties reported ['builder m s'], instructions [6], findings ['entrenched_without_guy']; want ['builder m s'], [6], ['entrenched_without_guy']
+  [ok] builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md: parties reported ['builder m s'], instructions [7], findings ['entrenched_without_guy']; want ['builder m s'], [7], ['entrenched_without_guy']
+  [ok] builder, Instruction of an issue gfrmin edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [12], findings []; want ['builder m s'], [12], []
+  [ok] builder, Instruction of an issue another account edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [13], findings ['entrenched_without_guy']; want ['builder m s'], [13], ['entrenched_without_guy']
+  [ok] builder, Instruction of a draft its poster edited before signing, .claude/: parties reported ['builder m s'], instructions [14], findings []; want ['builder m s'], [14], []
+  [ok] builder, Instruction of an issue whose edits were not read, CLAUDE.md: parties reported ['builder m s'], instructions [15], findings ['entrenched_without_guy']; want ['builder m s'], [15], ['entrenched_without_guy']
+  [ok] merge by gfrmin's noreply: parties reported ['guy'], instructions [], findings []; want ['guy'], [], []
+  [ok] merge by gfrmin's own address, CLAUDE.md: parties reported ['guy'], instructions [], findings []; want ['guy'], [], []
+  [ok] merge by assize-builder: parties reported ['builder'], instructions [], findings []; want ['builder'], [], []
+  [ok] merge by assize-reviewer, .github/: parties reported ['reviewer'], instructions [], findings ['entrenched_without_guy']; want ['reviewer'], [], ['entrenched_without_guy']
+  [ok] merge by an unknown author: parties reported [], instructions [], findings ['unknown_merge_author']; want [], [], ['unknown_merge_author']
+  [ok] merge by an unknown author, Proposer: guy trailer: parties reported [], instructions [], findings ['unknown_merge_author']; want [], [], ['unknown_merge_author']
+  [ok] fixture: every exemption reachable from master is inert (['exemption 844425de493c: inert_exemption: reachable from master; P0m never reads it', 'exemption c92cff2827f4: inert_exemption: reachable from master; P0m never reads it'])
+  [ok] fixture: an exemption not reachable from the base is not inert
+  [ok] fixture: every exemption on the branch is in the checked range
+  [FAIL] fixture: an exemption naming a sha absent from the branch is stale ([])
+  [ok] timeline, gfrmin labels: `instruction` label applied by 'gfrmin' at 2026-01-01T00:00:00Z, want 'gfrmin' at 2026-01-01T00:00:00Z
+  [ok] timeline, the Vizier labels: `instruction` label applied by 'assize-vizier' at 2026-01-01T01:00:00Z, want 'assize-vizier' at 2026-01-01T01:00:00Z
+  [ok] timeline, the Vizier labels, gfrmin relabels: `instruction` label applied by 'gfrmin' at 2026-01-01T02:00:00Z, want 'gfrmin' at 2026-01-01T02:00:00Z
+  [ok] timeline, gfrmin labels, another account relabels: `instruction` label applied by 'assize-builder' at 2026-01-01T02:00:00Z, want 'assize-builder' at 2026-01-01T02:00:00Z
+  [ok] timeline, gfrmin labels, then unlabels: `instruction` label applied by None at None, want None at None
+  [ok] timeline, only other labels and events: `instruction` label applied by None at None, want None at None
+  [ok] real branch: no git repository, or no master to compare, at /tmp/assize-review-232 (base 2e2883086bfe38596385c5e44f00406043f53557)
+  [ok] real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from 2e2883086bfe ([])
+  [ok] real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range ([])
+    fc4d61546bc4 parties ['builder claude-sonnet-5-5 afb09511-436a-4efe-91a1-e7c130432604'] instructions []
+    1d530e8d0e37 parties ['builder claude-sonnet-5-5 afb09511-436a-4efe-91a1-e7c130432604'] instructions []
+    3bb76234596c parties ['builder claude-sonnet-5-5 afb09511-436a-4efe-91a1-e7c130432604'] instructions []
+    492f85a326c0 parties ['builder claude-sonnet-5-5 afb09511-436a-4efe-91a1-e7c130432604'] instructions []
+    74388b663fca parties ['reviewer claude-opus-5-5 7abf982f-fe81-43d7-a6c3-5e5efd3745ac'] instructions []
+    dba90c597ea0 parties ['builder claude-opus-5-5 806ee6c6-b200-4ea3-91a6-76bb02bb065c'] instructions []
+  [ok] real branch 2e2883086bfe..HEAD: 6 commits; findings []
+result:    FAIL
