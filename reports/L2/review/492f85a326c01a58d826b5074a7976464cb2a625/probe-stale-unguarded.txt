@@ -1,0 +1,2 @@
+raised CalledProcessError Command '['git', '-C', '/tmp/rv232.YoCs/probe', 'rev-list', 'None..HEAD']' returned non-zero exit status 128.
+empty table: n/a
