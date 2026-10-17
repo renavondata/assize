@@ -1,0 +1,35 @@
+# probe copy /tmp/rv235.qfsO/probe at ef1e03c; clean P0bg then with edit P0bg_stale_base_unguarded applied; 2026-10-17T18:12:37Z
+## clean
+  [ok] control: /tmp/rv235-ds1fpj74/assize-nogit-s5vftup3 holds no .git
+  [ok] the real-branch check on a tree with no .git does not raise (None)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/rv235-ds1fpj74/assize-nogit-s5vftup3 (base None)'])
+P0bg clean -> True
+## apply edit
+loader: (Edit(path='harness/pins.py', old='    stale = claims.stale_exemptions(root, base, exemptions) if base is not None else []\n', new='    stale = claims.stale_exemptions(root, base, exemptions)\n'),)
+## mutant stale_base_unguarded applied to /tmp/rv235.qfsO/probe
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/tmp/rv235.qfsO/probe/harness/edits.py", line 35, in load
+    raise EditError(f"{rel}: file not found")
+harness.edits.EditError: P0bg_stale_base_unguarded: file not found
+applied (Edit(path='harness/pins.py', old='    stale = claims.stale_exemptions(root, base, exemptions) if base is not None else []\n', new='    stale = claims.stale_exemptions(root, base, exemptions)\n'),)
+ harness/pins.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+diff --git a/harness/pins.py b/harness/pins.py
+index 8d47f0f..a67d31f 100644
+--- a/harness/pins.py
++++ b/harness/pins.py
+@@ -849,7 +849,7 @@ def _p0m_real_branch(expect, root: Path, patterns, exemptions=claims.PROPOSER_EX
+     inert = claims.inert_exemptions(root, base, exemptions) if base is not None else []
+     expect(not inert, f"real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from {base and base[:12]} "
+                       f"({[str(f) for f in inert]})")
+-    stale = claims.stale_exemptions(root, base, exemptions) if base is not None else []
++    stale = claims.stale_exemptions(root, base, exemptions)
+     expect(not stale, f"real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range "
+                       f"({[str(f) for f in stale]})")
+     real = claims.branch_commits(root, base) if base is not None else []
+  [ok] control: /tmp/rv235m-9wxe0lkm/assize-nogit-65lpiff4 holds no .git
+  [FAIL] the real-branch check on a tree with no .git does not raise (CalledProcessError: Command '['git', '-C', '/tmp/rv235m-9wxe0lkm/assize-nogit-65lpiff4', 'rev-list', 'None..HEAD']' returned non-zero exit status 128.)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/rv235m-9wxe0lkm/assize-nogit-65lpiff4 (base None)'])
+P0bg mutant -> False
+# done 2026-10-17T18:13:02Z

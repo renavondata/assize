@@ -1,0 +1,13 @@
+copy of /tmp/rv235.qfsO/clone
+  at /tmp/assize-scratch-caqsjj1a/assize-copy-yx1lny0s/repo
+twin: no edits applied
+pin:       P0bg
+protects:  P0m's real-branch check on a tree with no .git fails naming the missing repository instead of raising
+role:      twin
+tree:      /tmp/assize-scratch-caqsjj1a/assize-copy-yx1lny0s/repo
+invoked:   /tmp/rv235.qfsO/clone
+scratch:   /tmp/assize-scratch-caqsjj1a
+  [ok] control: /tmp/assize-scratch-caqsjj1a/assize-nogit-t9zzypu2 holds no .git
+  [ok] the real-branch check on a tree with no .git does not raise (None)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/assize-scratch-caqsjj1a/assize-nogit-t9zzypu2 (base None)'])
+result:    PASS

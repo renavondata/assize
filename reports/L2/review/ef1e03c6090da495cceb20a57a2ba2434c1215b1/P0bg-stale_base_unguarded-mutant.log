@@ -1,0 +1,13 @@
+copy of /tmp/rv235.qfsO/clone
+  at /tmp/assize-scratch-nnldz5qh/assize-copy-dlt701yy/repo
+applied 1 edit(s) from harness/edits/P0bg_stale_base_unguarded.toml
+pin:       P0bg
+protects:  P0m's real-branch check on a tree with no .git fails naming the missing repository instead of raising
+role:      mutant
+tree:      /tmp/assize-scratch-nnldz5qh/assize-copy-dlt701yy/repo
+invoked:   /tmp/rv235.qfsO/clone
+scratch:   /tmp/assize-scratch-nnldz5qh
+  [ok] control: /tmp/assize-scratch-nnldz5qh/assize-nogit-olv35wms holds no .git
+  [FAIL] the real-branch check on a tree with no .git does not raise (CalledProcessError: Command '['git', '-C', '/tmp/assize-scratch-nnldz5qh/assize-nogit-olv35wms', 'rev-list', 'None..HEAD']' returned non-zero exit status 128.)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/assize-scratch-nnldz5qh/assize-nogit-olv35wms (base None)'])
+result:    FAIL
