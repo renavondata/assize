@@ -1,0 +1,10 @@
+# Fixture mutant for P0h (L2a obligation 26): the check leaves a grandchild writing in its copy, then fails.
+[[edit]]
+path = "harness/fixtures/toy.py"
+old = "def check_toy() -> bool:\n"
+new = """def check_toy() -> bool:
+    from harness.fixtures.litter import litter
+
+    litter()
+    return False
+"""

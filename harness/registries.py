@@ -19,6 +19,7 @@ REGISTRIES = {
     "fixture.leaks": "harness.fixtures.leaks",
     "fixture.escapee": "harness.fixtures.escapee",
     "fixture.daemon": "harness.fixtures.daemon",
+    "fixture.litter": "harness.fixtures.litter",
     "fixture.podman_pause": "harness.fixtures.podman_pause",
     "fixture.no_mutants": "harness.fixtures.no_mutants",
     "fixture.dup_pin": "harness.fixtures.dup_pin",

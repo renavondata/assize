@@ -19,7 +19,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from harness import claims, config, context, edits, proc, runner, scan, tree
-from harness.fixtures import daemon, escapee, leaky, witness
+from harness.fixtures import daemon, escapee, leaky, litter, witness
 from harness.nested import run_nested
 from harness.pin import ALWAYS, ROOT, Mutant, Pin, RegistryError, validate
 
@@ -153,7 +153,8 @@ def p0g_stale() -> bool:
 P0H_SCOPE = ("after every child run, before its scratch root is deleted, every descendant of the orchestrator (a "
              "child subreaper) is dead: a cooperating grandchild dies by the parent-death signal and is not counted; "
              "a non-cooperating grandchild and a double-forked daemon are killed by the sweep, counted in "
-             "leaked_processes, and make the run LEAKED. Out of scope: a process that never descends from the "
+             "leaked_processes, and make the run LEAKED; a mutant run's disposable copy is removed only after that "
+             "sweep, so a grandchild still writing in it yields a LEAKED row, not an orchestrator exception. Out of scope: a process that never descends from the "
              "orchestrator (e.g. a container under the runtime's own shim; P10), and the outermost orchestrator "
              "being SIGKILLed.")
 
@@ -193,7 +194,7 @@ def p0h_timeouts_leave_nothing() -> bool:
     n.expect(row.get("scratch_removed") is True and not scratch.exists(), f"scratch root {scratch} removed")
     _kill(pid, leaky.MARKER)
     shutil.rmtree(scratch, ignore_errors=True)
-    return all((n.ok, p0h_escapee(), p0h_daemon()))
+    return all((n.ok, p0h_escapee(), p0h_daemon(), p0h_copy_swept_first()))
 
 
 def p0h_escapee() -> bool:
@@ -234,6 +235,28 @@ def p0h_daemon() -> bool:
     d.expect(d.exit_code not in (0, None), "suite exits non-zero")
     _kill(pid, daemon.MARKER)
     return d.ok
+
+
+def p0h_copy_swept_first() -> bool:
+    """A non-cooperating grandchild of a mutant check, still writing in its disposable copy, is swept before the copy
+    is removed: the run row is LEAKED, the copy is discarded and the orchestrator finishes with its summary (L2a
+    obligation 26; review 4649b6b2b4e0 F4)."""
+    w = run_nested("litter", "fixture.litter", "mutants", config=escapee.FAST)
+    row = w.run("fixture/toy", "fixture/toy/litters_copy", "mutant")
+    # Read from the run directory's known path, not the row: a run that ends in an exception writes no row, and its
+    # writer must still be found and killed.
+    pid = _pid(w.out / "runs" / "fixture__toy" / "litters_copy" / "mutant" / litter.PID_FILE)
+    w.expect(pid is not None, f"writer PID recorded after its first write ({pid})")
+    w.expect(pid is not None and not proc.alive(pid, litter.MARKER), "writer dead when the nested run returns")
+    w.expect(row.get("observed") == "fail" and row.get("twin_observed") == "pass", "mutant failed, its twin passed")
+    w.expect(row.get("leaked_processes", 0) >= 1, f"leaked_processes >= 1 ({row.get('leaked_processes')})")
+    w.expect(row.get("verdict") == "LEAKED", "verdict LEAKED")
+    w.expect(row.get("copy_discarded") is True and not Path(row.get("tree", "/nonexistent")).exists(),
+             f"copy {row.get('tree')} discarded")
+    w.expect(w.summary.get("leaked") == 1, "the orchestrator finished: summary row with leaked = 1")
+    _kill(pid, litter.MARKER)
+    shutil.rmtree(row.get("scratch", "/nonexistent"), ignore_errors=True)
+    return w.ok
 
 
 def p0bb_runtime_infrastructure_prestarted() -> bool:
@@ -6007,7 +6030,9 @@ PINS = [
                                      Mutant("scratch_kept", _edits("P0h_scratch_kept")),
                                      Mutant("leaked_not_counted", _edits("P0h_leaked_not_counted")),
                                      Mutant("subreaper_not_set", _edits("P0h_subreaper_not_set")),
-                                     Mutant("sweep_skipped", _edits("P0h_sweep_skipped"))), HARNESS),
+                                     Mutant("sweep_skipped", _edits("P0h_sweep_skipped")),
+                                     Mutant("copy_deleted_before_sweep", _edits("P0h_copy_deleted_before_sweep"))),
+        HARNESS),
     Pin("P0bb", "the harness entry point, run without make, starts rootless Podman's pause process before arming its "
                 "subreaper, so a check using Podman is not reported as leaking it",
         p0bb_runtime_infrastructure_prestarted, (Mutant("pause_not_prestarted", _edits("P0bb_pause_not_prestarted")),),

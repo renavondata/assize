@@ -1,0 +1,39 @@
+Cleanup transcript — review of PR #226 at 1dcac40, session 3b39d5d9-be4e-4fda-b90c-dcb088316c1a, run 38988223091
+
+Scratch copies made by this session: /tmp/review-226-clone (git clone of the local repository, detached at 1dcac40,
+origin https://github.com/renavondata/assize.git; make pins ran here 00:55:53Z–01:35:18Z), /tmp/review-226-probe
+(probe.sh and 20 probe outputs), /tmp/review-226-ci-art (pins-report artefact of CI run 38985405986),
+/tmp/review-226-make-pins.txt (the reproduction's stdout). Transcripts were copied into this directory first.
+
+=== cleanup 2026-10-17T01:36:26Z
+processes before:
+  (only this session's own progress-monitor shell loop over /tmp/review-226-make-pins.txt, pid 1820059; no harness,
+  make, check, writer or probe process)
+scratch roots before: /tmp/assize-scratch-2eqhwk0j /tmp/assize-scratch-9keas62n /tmp/assize-scratch-qdguqy2u
+removed /tmp/review-226-clone /tmp/review-226-ci-art /tmp/review-226-probe /tmp/review-226-make-pins.txt
+left: none
+scratch roots after: /tmp/assize-scratch-2eqhwk0j /tmp/assize-scratch-9keas62n /tmp/assize-scratch-qdguqy2u
+  /tmp/assize-scratch-2eqhwk0j 2026-10-17 05:53
+  /tmp/assize-scratch-9keas62n 2026-10-17 06:56
+  /tmp/assize-scratch-qdguqy2u 2026-10-17 06:46
+  (all three present before this session started at 00:51Z = 07:51 local; left as found, L1 obligation 25)
+processes after:
+  (the same monitor loop only; stopped at 01:38Z with the harness's TaskStop, see below)
+podman: 2 assize-candidate containers (left as found)
+
+The reproduction's own scratch roots (/tmp/assize-scratch-lv8apwko and its predecessors) were removed by the harness:
+522/522 run rows carry scratch_removed: true (rows.jsonl here holds the P0h and summary rows; the full pins.jsonl was
+in the removed clone, its tally is recorded in review F2).
+
+Probe: 20 runs of `harness run --registry fixture.litter --phase mutants --under-edits
+harness/edits/P0h_copy_deleted_before_sweep.toml` ended "writers still alive: 0" (probe.txt, last line).
+
+The resolver's empty reports/L0/forecasts/38988223091.jsonl and reports/L1/forecasts/38988223091.jsonl were
+deleted uncommitted.
+
+Post-stop verification (appended before the commit):
+=== 2026-10-17T01:38:54Z processes
+  pgrep -af 'review-226|assize-litter|harness run|harness check|make pins|assize-copy' -> none
+=== /tmp
+  no /tmp/review-226*, assize-copy-*, assize-nested-*
+  /tmp/assize-scratch-2eqhwk0j /tmp/assize-scratch-9keas62n /tmp/assize-scratch-qdguqy2u (pre-existing, left as found)

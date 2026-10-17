@@ -1,0 +1,12 @@
+# P0h's sixth mutant (L2a obligation 26): the disposable copy is deleted on leaving its own `with`, before the scratch
+# root's sweep, while a leaked descendant may still be writing in it.
+[[edit]]
+path = "harness/runner.py"
+old = """    with (run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch:
+        copy = copy_tree(ROOT, under=scratch)
+        row["tree"] = str(copy)
+"""
+new = """    with ((run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch,
+          disposable_copy(ROOT, under=scratch) as copy):
+        row["tree"] = str(copy)
+"""

@@ -1,0 +1,44 @@
+probe start 2026-10-17T00:58:18Z head 1dcac40 N=20
+run 1: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 2: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 3: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 4: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 5: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 6: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 7: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 8: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 9: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 10: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 11: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 12: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 13: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 14: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 15: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 16: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 17: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 18: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 19: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+run 20: exit 1 summary_rows 0
+0  OSError: [Errno 39] Directory not empty
+probe end 2026-10-17T00:59:18Z; writers still alive: 0
+0
+PROBE EXIT 0
