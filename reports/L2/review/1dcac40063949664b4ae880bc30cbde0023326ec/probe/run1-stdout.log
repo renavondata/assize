@@ -1,0 +1,33 @@
+UNDER EDITS: harness/edits/P0h_copy_deleted_before_sweep.toml (sha256 10ba373116087090f5bd20b87b4045db34245123a04988dfa0157a2c7c0159db)
+copy: /tmp/assize-copy-pt6d1kan/repo
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/tmp/assize-copy-pt6d1kan/repo/harness/__main__.py", line 52, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/assize-copy-pt6d1kan/repo/harness/__main__.py", line 44, in main
+    return runner.run(a.registry, a.phase, a.out, a.config, a.scratch_root, a.since, a.since_run,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-pt6d1kan/repo/harness/runner.py", line 423, in run
+    mrow, trow = _run_mutant(registry, pin, mutant, out, cfg, scratch_root)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-pt6d1kan/repo/harness/runner.py", line 204, in _run_mutant
+    mrow = _run_in_copy(registry, pin, mutant, "mutant", out, cfg, scratch_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/assize-copy-pt6d1kan/repo/harness/runner.py", line 162, in _run_in_copy
+    with ((run_dir / "transcript.log").open("w") as log, _scratch(scratch_root, cfg, row) as scratch,
+  File "/home/g/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/tmp/assize-copy-pt6d1kan/repo/harness/tree.py", line 40, in disposable_copy
+    shutil.rmtree(copy.parent)
+  File "/home/g/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/shutil.py", line 752, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/home/g/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/shutil.py", line 672, in _rmtree_safe_fd
+    _rmtree_safe_fd(dirfd, fullname, onerror)
+  File "/home/g/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/shutil.py", line 683, in _rmtree_safe_fd
+    onerror(os.rmdir, fullname, sys.exc_info())
+  File "/home/g/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/shutil.py", line 681, in _rmtree_safe_fd
+    os.rmdir(entry.name, dir_fd=topfd)
+OSError: [Errno 39] Directory not empty: 'litter'
+registry fixture.litter: 1 pins, 1 mutants; phase=mutants; child_timeout_s=3.0 (../../review-226-clone/harness/fixtures/fast.toml)
