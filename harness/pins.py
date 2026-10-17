@@ -297,6 +297,36 @@ def p0bb_runtime_infrastructure_prestarted() -> bool:
     return ok()
 
 
+def p0bd_overlap_refused() -> bool:
+    """The orchestrator's spawn raises `Overlap`, and starts nothing, while a descendant of an earlier child is still
+    alive; with no live descendant the same spawn runs (L2a obligation 28; S 359bebf). Called in-process: no clean
+    path leaves a descendant past the sweep, so the assertion is reached only by holding one alive here."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-overlap-", dir=context.scratch))
+    marker = work / "spawned"
+    cmd = proc.python("-c", f"open({str(marker)!r}, 'w').close()")
+    sleeper = subprocess.Popen(proc.python("-c", "import time; time.sleep(60)"), preexec_fn=proc.setup(False))
+    try:
+        expect(sleeper.pid in proc.descendants(), f"control: the earlier child {sleeper.pid} is a live descendant")
+        with (work / "overlap.log").open("w") as log:
+            try:
+                runner._spawn(cmd, work, work, 30.0, log)
+                raised = False
+            except runner.Overlap:
+                raised = True
+        expect(raised, "spawn with a live descendant raises Overlap")
+        expect(not marker.exists(), "and the refused child never ran")
+    finally:
+        sleeper.kill()
+        sleeper.wait()
+    with (work / "control.log").open("w") as log:
+        result = runner._spawn(cmd, work, work, 30.0, log)
+    expect(result == ("pass", runner.EXIT_PASS) and marker.exists(),
+           f"control: with no live descendant the same spawn runs ({result})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
@@ -6070,6 +6100,9 @@ PINS = [
                 "subreaper, so a check using Podman is not reported as leaking it",
         p0bb_runtime_infrastructure_prestarted, (Mutant("pause_not_prestarted", _edits("P0bb_pause_not_prestarted")),),
         HARNESS),
+    Pin("P0bd", "the orchestrator refuses to spawn a child, raising Overlap, while a descendant of an earlier child is "
+                "still alive, and spawns it once none is",
+        p0bd_overlap_refused, (Mutant("overlap_unchecked", _edits("P0bd_overlap_unchecked")),), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
