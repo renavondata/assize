@@ -1748,6 +1748,39 @@ def p0y_trailers_parse() -> bool:
     return ok()
 
 
+def p0bc_outer_sweeps_killed_inner() -> bool:
+    """`harness run --under-edits` is a child subreaper that sweeps after its inner run: when the inner run is SIGKILLed
+    while a daemon it adopted is live, the daemon is reparented to the outer process, which kills it, counts it in
+    `under-edits.json` and exits non-zero (L2a obligation 27; review 4649b6b2b4e0 F5)."""
+    from harness.fixtures import orphaner
+
+    expect, ok = _expecter()
+    out = context.run_dir / "nested" / "under-edits"
+    shutil.rmtree(out, ignore_errors=True)
+    out.mkdir(parents=True)
+    cmd = proc.python("-m", "harness", "run", "--under-edits", "harness/fixtures/edits/toy_off_by_one.toml",
+                      "--registry", "fixture.orphaner", "--phase", "clean", "--out", str(out),
+                      "--config", str(escapee.FAST))
+    with (out / "stdout.log").open("w") as log:
+        code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False),
+                              env=proc.child_env()).returncode
+    print(f"under-edits run: exit {code}; transcript {out / 'stdout.log'}")
+    run_dir = out / "runs" / "fixture__orphaner" / "clean"
+    pid = _pid(run_dir / daemon.PID_FILE)
+    record = json.loads((out / "under-edits.json").read_text()) if (out / "under-edits.json").is_file() else {}
+    expect(pid is not None, f"daemon PID recorded ({pid})")
+    expect(record.get("inner_exit") == -signal.SIGKILL, f"the inner run was SIGKILLed ({record.get('inner_exit')})")
+    expect(pid is not None and not proc.alive(pid, daemon.MARKER),
+           "daemon dead when the outer run returns (reparented to the outer subreaper and swept)")
+    expect(record.get("leaked_processes", 0) >= 1, f"outer leaked_processes >= 1 ({record.get('leaked_processes')})")
+    expect(code not in (0, None), f"outer run exits non-zero ({code})")
+    _kill(pid, daemon.MARKER)
+    scratch_file = run_dir / orphaner.SCRATCH_FILE
+    if scratch_file.is_file():
+        shutil.rmtree(scratch_file.read_text(), ignore_errors=True)
+    return ok()
+
+
 def _cite_run(n: int, sha: str, created: str, **over: object) -> dict:
     """A `pins` run as the Actions API projects it into a record (`ledger.RUN_RECORD`)."""
     return {"conclusion": "success", "created_at": created, "event": "pull_request", "head_branch": "b",
@@ -6183,6 +6216,11 @@ PINS = [
         p0ba_cite_from_harness, (Mutant("cite_drops_sha", _edits("P0ba_cite_drops_sha")),
                                  Mutant("cite_header_from_local", _edits("P0ba_cite_header_from_local")),
                                  Mutant("hook_skips_status", _edits("P0ba_hook_skips_status"))), HARNESS),
+    Pin("P0bc", "`harness run --under-edits` is a child subreaper that sweeps after its inner run: a daemon orphaned by "
+                "an inner run killed with SIGKILL is killed, counted in under-edits.json and fails the invocation",
+        p0bc_outer_sweeps_killed_inner, (Mutant("outer_sweep_removed", _edits("P0bc_outer_sweep_removed")),
+                                         Mutant("outer_subreaper_not_set", _edits("P0bc_outer_subreaper_not_set"))),
+        HARNESS),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

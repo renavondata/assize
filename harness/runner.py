@@ -452,8 +452,13 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
 
 def run_under_edits(edits_file: str, registry: str, phase: str, out: Path, config_path: Path | None) -> int:
     """Run the whole suite inside a disposable copy carrying `edits_file` (an unregistered mutant).
-    The invocation tree is not modified."""
+    The invocation tree is not modified. This process is a child subreaper: if the inner run dies before its own sweep
+    (SIGKILL), its orphans are reparented here, and are swept, counted and recorded in `out/under-edits.json` before
+    the copy is removed; a leak fails the invocation (L2a obligation 27; review 4649b6b2b4e0 F5)."""
     mutant_edits = edits.load(edits_file)
+    cfg = config_mod.load(config_path)
+    proc.start_runtime_infrastructure()
+    proc.set_subreaper()  # the inner run's orphans, if it is killed, are reparented here
     with disposable_copy(ROOT) as copy:
         print(f"UNDER EDITS: {edits_file} "
               f"(sha256 {hashlib.sha256((ROOT / edits_file).read_bytes()).hexdigest()})")
@@ -468,5 +473,11 @@ def run_under_edits(edits_file: str, registry: str, phase: str, out: Path, confi
                           "--out", str(out.resolve()))
         if config_path is not None:
             cmd += ["--config", str(config_path.resolve())]
-        return subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False),
-                              env=proc.child_env(copy.parent)).returncode
+        inner = subprocess.run(cmd, cwd=copy, preexec_fn=proc.setup(False),
+                               env=proc.child_env(copy.parent)).returncode
+        leaked = proc.sweep(cfg.reap_grace_s, cfg.poll_step_s)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "under-edits.json").write_text(json.dumps({"edits": edits_file, "inner_exit": inner,
+                                                      "leaked_processes": leaked}, sort_keys=True) + "\n")
+    print(f"under edits: inner run exit {inner}; outer sweep killed {leaked} leaked processes")
+    return inner if inner != 0 else (EXIT_FAIL if leaked else 0)

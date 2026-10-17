@@ -1,0 +1,6 @@
+# P0bc's mutant `outer_sweep_removed` (L2a obligation 27): `run --under-edits` no longer sweeps after its inner run, so
+# an orphan of a killed inner run outlives the invocation.
+[[edit]]
+path = "harness/runner.py"
+old = "        leaked = proc.sweep(cfg.reap_grace_s, cfg.poll_step_s)\n"
+new = "        leaked = 0\n"

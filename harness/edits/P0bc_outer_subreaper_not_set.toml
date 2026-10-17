@@ -1,0 +1,6 @@
+# P0bc's mutant `outer_subreaper_not_set` (L2a obligation 27): `run --under-edits` is not a child subreaper, so an
+# orphan of a killed inner run is reparented past it and its sweep finds nothing.
+[[edit]]
+path = "harness/runner.py"
+old = "    proc.set_subreaper()  # the inner run's orphans, if it is killed, are reparented here\n"
+new = "    pass\n"
