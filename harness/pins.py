@@ -379,7 +379,8 @@ def p0bg_p0m_without_git() -> bool:
 
     patterns = claims.codeowners_patterns((ROOT / "CODEOWNERS").read_text())
     try:
-        _p0m_real_branch(probe, work, patterns)
+        # A non-empty table, so that an unguarded call on a missing base is reached (the shipped table is empty).
+        _p0m_real_branch(probe, work, patterns, {"f" * 40: "builder m s"})
         raised = None
     except Exception as e:  # the defect: a traceback where a finding belongs
         raised = f"{type(e).__name__}: {e}"
@@ -841,14 +842,14 @@ def _branch_base(root: Path) -> str | None:
     return None
 
 
-def _p0m_real_branch(expect, root: Path, patterns) -> None:
+def _p0m_real_branch(expect, root: Path, patterns, exemptions=claims.PROPOSER_EXEMPTIONS) -> None:
     """P0m on the invocation tree's own branch. A tree with no `.git` is a stated failure, never a raise."""
     base = _branch_base(root)
     expect(base is not None, f"real branch: no git repository, or no master to compare, at {root} (base {base})")
-    inert = claims.inert_exemptions(root, base) if base is not None else []
+    inert = claims.inert_exemptions(root, base, exemptions) if base is not None else []
     expect(not inert, f"real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from {base and base[:12]} "
                       f"({[str(f) for f in inert]})")
-    stale = claims.stale_exemptions(root, base) if base is not None else []
+    stale = claims.stale_exemptions(root, base, exemptions) if base is not None else []
     expect(not stale, f"real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range "
                       f"({[str(f) for f in stale]})")
     real = claims.branch_commits(root, base) if base is not None else []
