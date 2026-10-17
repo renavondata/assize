@@ -15,6 +15,7 @@ REGISTRIES = {
     "fixture.broken": "harness.fixtures.broken",
     "fixture.inconclusive": "harness.fixtures.inconclusive",
     "fixture.noncausal": "harness.fixtures.noncausal",
+    "fixture.orphaner": "harness.fixtures.orphaner",
     "fixture.stale": "harness.fixtures.stale",
     "fixture.leaks": "harness.fixtures.leaks",
     "fixture.escapee": "harness.fixtures.escapee",

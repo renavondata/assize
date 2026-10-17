@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o27-outer-sweep (brief 2 A2, L2a obligation 27 of reports/L1/REPORT.md): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "b9b95b17-48f3-4a05-82ee-8f8b30b63237"

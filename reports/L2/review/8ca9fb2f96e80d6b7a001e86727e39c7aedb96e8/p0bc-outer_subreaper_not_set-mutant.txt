@@ -1,0 +1,16 @@
+copy of /tmp/rev-dedf45b9
+  at /tmp/assize-scratch-08dvitk_/assize-copy-qo51qkqz/repo
+applied 1 edit(s) from harness/edits/P0bc_outer_subreaper_not_set.toml
+pin:       P0bc
+protects:  `harness run --under-edits` is a child subreaper that sweeps after its inner run: a daemon orphaned by an inner run killed with SIGKILL is killed, counted in under-edits.json and fails the invocation
+role:      mutant
+tree:      /tmp/assize-scratch-08dvitk_/assize-copy-qo51qkqz/repo
+invoked:   /tmp/rev-dedf45b9
+scratch:   /tmp/assize-scratch-08dvitk_
+under-edits run: exit 247; transcript /tmp/rev-dedf45b9/out/pins/runs/P0bc/outer_subreaper_not_set/mutant/nested/under-edits/stdout.log
+  [ok] daemon PID recorded (2585871)
+  [ok] the inner run was SIGKILLed (-9)
+  [FAIL] daemon dead when the outer run returns (reparented to the outer subreaper and swept)
+  [FAIL] outer leaked_processes >= 1 (0)
+  [ok] outer run exits non-zero (247)
+result:    FAIL

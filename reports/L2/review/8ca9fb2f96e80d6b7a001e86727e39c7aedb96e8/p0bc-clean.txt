@@ -1,0 +1,13 @@
+pin:       P0bc
+protects:  `harness run --under-edits` is a child subreaper that sweeps after its inner run: a daemon orphaned by an inner run killed with SIGKILL is killed, counted in under-edits.json and fails the invocation
+role:      clean
+tree:      /tmp/rev-dedf45b9
+invoked:   /tmp/rev-dedf45b9
+scratch:   /tmp/assize-scratch-pouaph1s
+under-edits run: exit 247; transcript /tmp/rev-dedf45b9/out/pins/runs/P0bc/clean/nested/under-edits/stdout.log
+  [ok] daemon PID recorded (2523850)
+  [ok] the inner run was SIGKILLed (-9)
+  [ok] daemon dead when the outer run returns (reparented to the outer subreaper and swept)
+  [ok] outer leaked_processes >= 1 (1)
+  [ok] outer run exits non-zero (247)
+result:    PASS
