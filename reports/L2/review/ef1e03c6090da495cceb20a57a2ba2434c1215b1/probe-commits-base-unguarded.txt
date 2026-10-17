@@ -1,0 +1,9 @@
+# probe copy /tmp/rv235.qfsO/probe at ef1e03c, reverted to clean, then the third guard in _p0m_real_branch dropped by hand (no registered mutant); 2026-10-17T18:14:33Z
+edit applied: 'real = claims.branch_commits(root, base) if base is not None else []' -> 'real = claims.branch_commits(root, base)'
+ harness/pins.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  [ok] control: /tmp/rv235c-gyjplqqm/assize-nogit-ytv_t1c5 holds no .git
+  [FAIL] the real-branch check on a tree with no .git does not raise (CalledProcessError: Command '['git', '-C', '/tmp/rv235c-gyjplqqm/assize-nogit-ytv_t1c5', 'log', '--reverse', '--format=%H%x1f%P%x1f%ae%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f%(trailers:key=Instruction,valueonly,separator=%x1e)%x1f%B%x1d', 'None..HEAD']' returned non-zero exit status 128.)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/rv235c-gyjplqqm/assize-nogit-ytv_t1c5 (base None)'])
+P0bg with commits guard dropped -> False
+# reverted; done 2026-10-17T18:14:33Z

@@ -1,0 +1,6 @@
+# P0bg's second mutant (review 492f85a F3): the real-branch check no longer guards stale_exemptions on the missing base, so a tree with no
+# .git raises where a finding belongs.
+[[edit]]
+path = "harness/pins.py"
+old = "    stale = claims.stale_exemptions(root, base, exemptions) if base is not None else []\n"
+new = "    stale = claims.stale_exemptions(root, base, exemptions)\n"
