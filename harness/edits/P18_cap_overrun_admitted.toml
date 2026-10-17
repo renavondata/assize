@@ -1,0 +1,6 @@
+# P18's mutant `cap_overrun_admitted` (L2a obligation 35, review 571ee56 F2): the report never compares the pilot's
+# wall-clock with its cap, so a pilot whose cap passed during its last request states a verdict.
+[[edit]]
+path = "pilot/run.py"
+old = "if played.wall_s > cap else None"
+new = "if False else None"

@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o35-cap-overrun (L2a obligation 35, the pilot's cap checked only between requests): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "bbdce2cc-8405-4f91-b927-c9d15a53d3c7"
