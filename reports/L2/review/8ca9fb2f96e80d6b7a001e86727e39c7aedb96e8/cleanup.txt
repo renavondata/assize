@@ -1,0 +1,12 @@
+cleanup by review session dedf45b9 run 38991795163 at 2026-10-17T02:16:24Z
+--- scratch clones and temp files (/tmp/rev-*): none
+--- /tmp/assize-* (the one entry predates this session's first listing):
+drwx------ 3 g g 60 Oct 17 02:14 /tmp/assize-nested-8bu_k_wo
+--- harness/daemon/escapee processes:
+none
+--- assize containers (podman), created:
+assize-candidate-acfbfaa8000641e5 2026-10-10 22:12:06.867784943 +0300 IDT
+assize-candidate-b7d7caf3d86d44b8 2026-10-13 03:29:39.308431047 +0300 IDT
+assize-candidate-d3f9d95755994413 2026-10-13 08:36:07.15663141 +0300 IDT
+assize-candidate-c39a761a88ea4a62 2026-10-14 13:36:51.26715602 +0300 IDT
+assize-candidate-ecfd12cbae2c4a66 2026-10-15 20:10:05.76825345 +0300 IDT

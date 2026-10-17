@@ -1,0 +1,26 @@
+probe: hand run of harness run --under-edits with fixture.orphaner at 8ca9fb2, 2026-10-17T01:46:41Z
+--- /tmp before:
+/tmp/assize-nested-8bu_k_wo
+/tmp/assize-scratch-ai17ty4r
+UNDER EDITS: harness/fixtures/edits/toy_off_by_one.toml (sha256 117541cc695986de9ad42ec48ca0310d65ce2f55c7f9821fa5f54d118a9b0a17)
+copy: /tmp/assize-copy-6x0qj08x/repo
+under edits: inner run exit -9; outer sweep killed 1 leaked processes
+outer exit 247
+--- under-edits.json:
+{"edits": "harness/fixtures/edits/toy_off_by_one.toml", "inner_exit": -9, "leaked_processes": 1}
+--- inner run dir:
+daemon.pid
+scratch.path
+transcript.log
+daemon pid 2520335 alive? no
+--- scratch.path: /tmp/assize-scratch-w6vghhfe exists? yes
+--- /tmp after:
+/tmp/assize-nested-8bu_k_wo
+/tmp/assize-scratch-ai17ty4r
+/tmp/assize-scratch-w6vghhfe
+--- inner transcript tail:
+protects:  leaves a daemon, then SIGKILLs its own orchestrator (seeded defect)
+role:      clean
+tree:      /tmp/assize-copy-6x0qj08x/repo
+invoked:   /tmp/assize-copy-6x0qj08x/repo
+scratch:   /tmp/assize-scratch-w6vghhfe
