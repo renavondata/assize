@@ -6,13 +6,17 @@ Instruction #112 Parts A and D: a session's first act is its declaration comment
 appends no forecast row; a session that writes no STATUS, review or audit file posts its stop comment. Those two
 comments are the two a session makes about itself. `python -m harness.sessions tokens <log>` prints the tokens a
 session used, for its declaration's end; `python -m harness.sessions limit <log>` exits 1 when the session ended with
-`usage_limit_reached`, the step the price counts (`ledger.LIMIT_STEP`)."""
+`usage_limit_reached`, the step the price counts (`ledger.LIMIT_STEP`).
+
+Instruction #240: `python -m harness.sessions secrets <log>` exits 1 when the log carries the value of any `*_TOKEN`
+environment variable; the workflows run it after their `redact` step and before upload."""
 
 from __future__ import annotations
 
 import functools
 import itertools
 import json
+import os
 import re
 import sys
 from collections.abc import Iterable, Mapping, Sequence
@@ -201,11 +205,33 @@ def limit_reached(events: Sequence[Mapping]) -> bool:
     return bool(results) and LIMIT in json.dumps(results[-1])
 
 
+def leaked(text: str, env: Mapping[str, str]) -> list[str]:
+    """The names, never the values, of the `*_TOKEN` variables whose non-empty value occurs in the log (instruction
+    #240 item 2)."""
+    return sorted(k for k, v in env.items() if k.endswith("_TOKEN") and v and v in text)
+
+
+def secrets(path: str, env: Mapping[str, str]) -> int:
+    """1 when the log at `path` carries the value of a `*_TOKEN` variable of `env`, so the run fails before the log is
+    uploaded; 0 otherwise. A log that cannot be read is said and passes: there is nothing to upload."""
+    try:
+        with open(path, errors="replace") as f:
+            text = f.read()
+    except OSError as e:
+        print(f"{path}: not read ({e}); nothing to upload", file=sys.stderr)
+        return 0
+    names = leaked(text, env)
+    print(f"{path}: {'carries the value of ' + ', '.join(names) if names else 'carries no *_TOKEN value'}")
+    return 1 if names else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
-    if len(args) != 2 or args[0] not in ("tokens", "limit"):
-        print("usage: python -m harness.sessions tokens|limit <stream-json log>", file=sys.stderr)
+    if len(args) != 2 or args[0] not in ("tokens", "limit", "secrets"):
+        print("usage: python -m harness.sessions tokens|limit|secrets <stream-json log>", file=sys.stderr)
         return 2
+    if args[0] == "secrets":
+        return secrets(args[1], os.environ)
     try:
         with open(args[1]) as f:
             events = parse(f.read())

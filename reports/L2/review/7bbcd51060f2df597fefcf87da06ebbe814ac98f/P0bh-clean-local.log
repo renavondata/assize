@@ -1,0 +1,33 @@
+pin:       P0bh
+protects:  a session log is redacted before upload, and a log still carrying a *_TOKEN value fails the run and is not uploaded
+role:      clean
+tree:      /tmp/p242.OA2D
+invoked:   /tmp/p242.OA2D
+scratch:   /tmp/assize-scratch-cu62te0d
+build.log: carries no *_TOKEN value
+build.log: carries the value of OTHER_TOKEN
+build.log: not read ([Errno 2] No such file or directory: 'build.log'); nothing to upload
+review.log: carries no *_TOKEN value
+review.log: carries the value of OTHER_TOKEN
+review.log: not read ([Errno 2] No such file or directory: 'review.log'); nothing to upload
+  [ok] leaked names every *_TOKEN whose value is in the log, ignoring empty values and others
+  [ok] a log without a token value leaks nothing
+  [ok] build.yml: `redact` then `secrets` are the last always-run steps before the upload (['usage limit', 'redact', 'secrets'])
+  [ok] build.yml: `redact` reads the tokens from the environment; its command line names no value
+  [ok] build.yml: `secrets` runs `harness.sessions secrets build.log`
+  [ok] build.yml, a log carrying both tokens: step exits [0, 0], want [0, 0]
+  [ok] build.yml, a log carrying both tokens: the log is uploaded with every token replaced by [redacted] and nothing else lost
+  [ok] build.yml, a log carrying a token `redact` does not know: step exits [0, 1], want [0, 1]
+  [ok] build.yml, a log carrying a token `redact` does not know: no log is left to upload
+  [ok] build.yml, no log: step exits [0, 0], want [0, 0]
+  [ok] build.yml, no log: no log is left to upload
+  [ok] review.yml: `redact` then `secrets` are the last always-run steps before the upload (['usage limit', 'redact', 'secrets'])
+  [ok] review.yml: `redact` reads the tokens from the environment; its command line names no value
+  [ok] review.yml: `secrets` runs `harness.sessions secrets review.log`
+  [ok] review.yml, a log carrying both tokens: step exits [0, 0], want [0, 0]
+  [ok] review.yml, a log carrying both tokens: the log is uploaded with every token replaced by [redacted] and nothing else lost
+  [ok] review.yml, a log carrying a token `redact` does not know: step exits [0, 1], want [0, 1]
+  [ok] review.yml, a log carrying a token `redact` does not know: no log is left to upload
+  [ok] review.yml, no log: step exits [0, 0], want [0, 0]
+  [ok] review.yml, no log: no log is left to upload
+result:    PASS
