@@ -5788,13 +5788,17 @@ def p5_commitment_order() -> bool:
 
 
 # P14 plays the random incumbent (brief 1 section 4) for two episodes in one container, each cut to INCUMBENT_STEPS
-# steps: 2 x 100 draws over Crafter's 17 actions expect about 11.8 per action, enough for Pearson's chi-square. Its
-# uniformity is refused only below UNIFORM_ALPHA, the false-failure rate the pin accepts per runtime per run, stated
-# before any run; a candidate's score never passes through it.
+# steps: 2 x 100 draws over Crafter's 17 actions, about 11.8 per action. Its uniformity is refused only when Pearson's
+# statistic has an exact multinomial p value below UNIFORM_ALPHA, the false-failure rate the pin accepts per runtime
+# per run, stated before any run; a candidate's score never passes through it.
 INCUMBENT = ROOT / "incumbents" / "random"
 INCUMBENT_EPISODES = 2
 INCUMBENT_STEPS = 100
 UNIFORM_ALPHA = 1e-6
+# L2a obligation 33: 200 draws over 17 actions whose exact p value under the uniform multinomial is about 1.65e-6, at or
+# above UNIFORM_ALPHA, while the asymptotic chi-square law (16 df, statistic 59.25) puts it near 7.0e-7, below: a
+# count a uniform agent produces that the chi-square law would refuse.
+UNIFORM_BOUNDARY = (37, 12, 12, 11, 11, 11, 11, 11, 11, 10, 9, 9, 9, 9, 9, 9, 9)
 
 
 class _Recording:
@@ -5838,14 +5842,46 @@ def _floor_summary(observations: list[dict], targets) -> dict:
     return {tg["name"]: one(tg) for tg in targets}
 
 
-def _chi2_sf(x: float, df: int) -> float:
-    """P(X >= x) for X chi-square with `df` degrees of freedom: the regularised upper gamma Q(df/2, x/2) in its closed
-    forms, a finite sum for integer shape and erfc plus a finite sum for half-integer shape."""
-    h = x / 2
-    if df % 2 == 0:
-        return math.exp(-h) * math.fsum(h ** i / math.factorial(i) for i in range(df // 2))
-    return math.erfc(math.sqrt(h)) + math.exp(-h) * math.fsum(h ** (i + 0.5) / math.gamma(i + 1.5)
-                                                               for i in range((df - 1) // 2))
+def _uniform_sf(counts) -> Fraction:
+    """The exact p value of Pearson's statistic for `counts` under n draws uniform over len(counts) cells: the fraction
+    of the k^n draw sequences whose sum of squared counts is at least the observed one (the statistic is increasing in
+    it). Counted cell by cell over (draws placed, sum of squares so far); a state whose every completion reaches the
+    observed sum, since the r unplaced draws over `left` cells add at least ceil(r^2 / left), is counted whole, and one
+    none of whose completions can reach it, since they add at most r^2, is dropped."""
+    n, k = sum(counts), len(counts)
+    s0 = sum(c * c for c in counts)
+    completions = {}
+
+    def ways(left: int, r: int) -> list[int]:
+        """Prefix sums over c of C(r, c) * left^(r - c): the r unplaced draws, c of them in this cell."""
+        if (left, r) not in completions:
+            acc, out = 0, [0]
+            for c in range(r + 1):
+                acc += math.comb(r, c) * left ** (r - c)
+                out.append(acc)
+            completions[left, r] = out
+        return completions[left, r]
+
+    layer, tail = {0: {0: 1}}, 0  # layer[m][s]: sequences of m draws over the cells so far with sum of squares s
+    for j in range(k):
+        left, nxt = k - j - 1, {}
+        for m, row in layer.items():
+            r = n - m
+            for s, w in row.items():
+                if not left:
+                    tail += w * math.comb(n, m) if s + r * r >= s0 else 0
+                    continue
+                inner = [c for c in range(r + 1) if s + c * c + -(-(r - c) ** 2 // left) < s0]
+                p = ways(left, r)
+                lo, hi = (inner[0], inner[-1]) if inner else (r + 1, r)
+                tail += w * math.comb(n, m) * (p[lo] + p[r + 1] - p[hi + 1])
+                for c in range(lo, hi + 1):
+                    if s + c * c + (r - c) ** 2 < s0:
+                        continue  # even the rest in one cell falls short: no completion reaches the observed sum
+                    d = nxt.setdefault(m + c, {})
+                    d[s + c * c] = d.get(s + c * c, 0) + w * math.comb(m + c, c)
+        layer = nxt
+    return Fraction(tail, k ** n)
 
 
 def _build(rt, context_dir: Path) -> str:
@@ -5861,13 +5897,20 @@ def p14_random_incumbent() -> bool:
     """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
     runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
     pin's, plays two episodes in one container, each ended by the World; every action it plays is uniform over the
-    legal actions (Pearson's chi-square not refused at UNIFORM_ALPHA); and its recorded log-loss at every declared
+    legal actions (Pearson's statistic not refused at UNIFORM_ALPHA by its exact multinomial p value, which is right
+    where it is known in closed form and does not refuse UNIFORM_BOUNDARY); and its recorded log-loss at every declared
     target equals the predictive floor derived by definition from the episode's own observations, per episode, so the
     floor starts afresh in each, finite and positive."""
     from judge import episodes, runtime
     from worlds.crafter import binding
 
     expect, ok = _expecter()
+    for counts, want in (((6, 0, 0), Fraction(1, 3 ** 5)), ((2, 2, 2), Fraction(1)), ((1, 1, 0), Fraction(1)),
+                         ((2, 1, 0), Fraction(21, 27))):
+        expect(_uniform_sf(counts) == want, f"exact p of {counts}: {_uniform_sf(counts)}, {want} by enumeration")
+    edge = _uniform_sf(UNIFORM_BOUNDARY)
+    expect(sum(UNIFORM_BOUNDARY) == INCUMBENT_EPISODES * INCUMBENT_STEPS and edge >= UNIFORM_ALPHA,
+           f"a uniform agent's count {UNIFORM_BOUNDARY} is not refused: exact p {float(edge):.3g} >= {UNIFORM_ALPHA}")
     m = binding.manifest()
     base = runtime.candidate_config()["base_image"]
     froms = [ln.split()[1] for ln in (INCUMBENT / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
@@ -5899,11 +5942,11 @@ def p14_random_incumbent() -> bool:
         counts = [played.count(a) for a in range(k)]
         e = len(played) / k
         chi2 = math.fsum((c - e) ** 2 / e for c in counts)
-        p = _chi2_sf(chi2, k - 1)
-        say(f"  {rt.name} actions: {len(played)} played, counts {counts}; chi-square {chi2:.3f}, df {k - 1}, p {p:.3g}")
+        p = _uniform_sf(counts)
+        say(f"  {rt.name} actions: {len(played)} played, counts {counts}; Pearson {chi2:.3f}, exact p {float(p):.3g}")
         expect(all(w.legal_actions == list(range(k)) for w in worlds),
                f"{rt.name}: the legal set is all {k} actions, so uniform means {e:.2f} each")
-        expect(p >= UNIFORM_ALPHA, f"{rt.name}: actions uniform over the legal ones: p {p:.3g} >= {UNIFORM_ALPHA}")
+        expect(p >= UNIFORM_ALPHA, f"{rt.name}: actions uniform over the legal ones: p {float(p):.3g} >= {UNIFORM_ALPHA}")
         strays = _removing_strays(rt, before)
         expect(not strays, f"{rt.name}: no candidate container listed after the cases ({strays})")
 
@@ -6527,7 +6570,8 @@ PINS = [
     Pin("P14", "the random incumbent's image plays uniformly over legal actions and records exactly the predictive floor",
         p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
-                               Mutant("seen_not_reset", _edits("P14_seen_not_reset"))), JUDGE_SIDE),
+                               Mutant("seen_not_reset", _edits("P14_seen_not_reset")),
+                               Mutant("asymptotic_p", _edits("P14_asymptotic_p"))), JUDGE_SIDE),
     Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
         p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),
