@@ -1,0 +1,7 @@
+brute-force agreement: 40/40 random vectors (k<=5, n<=7)
+boundary exact 1.65209e-06 (15.8s); >= alpha True; chi-square(16) sf at 59.25: 6.998e-07, < alpha True
+uniform sample 0: exact 0.703953 (1.3s)
+uniform sample 1: exact 0.167531 (3.6s)
+uniform sample 2: exact 0.311234 (3.1s)
+all on one action, k=17 n=200: exact p 1.3824984266327238e-245
+exit 0

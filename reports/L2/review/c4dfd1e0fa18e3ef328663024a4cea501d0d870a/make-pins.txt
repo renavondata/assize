@@ -1,0 +1,338 @@
+uv run --frozen python -m harness run --registry harness --phase all --out /tmp/rv246.qKqO/out 
+Using CPython 3.11.17
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 12 packages in 384ms
+registry harness: 84 pins, 239 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0: observed pass -> ok (5.542s) ../out/runs/P0/clean/transcript.log
+[clean ] P0b: observed pass -> ok (0.782s) ../out/runs/P0b/clean/transcript.log
+[clean ] P0c: observed pass -> ok (2.144s) ../out/runs/P0c/clean/transcript.log
+[clean ] P0d: observed pass -> ok (6.597s) ../out/runs/P0d/clean/transcript.log
+[clean ] P0e: observed pass -> ok (4.33s) ../out/runs/P0e/clean/transcript.log
+[clean ] P0f: observed pass -> ok (3.265s) ../out/runs/P0f/clean/transcript.log
+[clean ] P0g: observed pass -> ok (3.716s) ../out/runs/P0g/clean/transcript.log
+[clean ] P0h: observed pass -> ok (19.74s) ../out/runs/P0h/clean/transcript.log
+[clean ] P0bb: observed pass -> ok (2.276s) ../out/runs/P0bb/clean/transcript.log
+[clean ] P0bd: observed pass -> ok (0.899s) ../out/runs/P0bd/clean/transcript.log
+[clean ] P0bf: observed pass -> ok (6.827s) ../out/runs/P0bf/clean/transcript.log
+[clean ] P0bg: observed pass -> ok (0.823s) ../out/runs/P0bg/clean/transcript.log
+[clean ] P0i: observed pass -> ok (0.803s) ../out/runs/P0i/clean/transcript.log
+[clean ] P0j: observed pass -> ok (1.399s) ../out/runs/P0j/clean/transcript.log
+[clean ] P0k: observed pass -> ok (0.786s) ../out/runs/P0k/clean/transcript.log
+[clean ] P0l: observed pass -> ok (0.703s) ../out/runs/P0l/clean/transcript.log
+[clean ] P0m: observed pass -> ok (1.035s) ../out/runs/P0m/clean/transcript.log
+[clean ] P0n: observed pass -> ok (1.412s) ../out/runs/P0n/clean/transcript.log
+[clean ] P0o: observed pass -> ok (1.314s) ../out/runs/P0o/clean/transcript.log
+[clean ] P0q: observed pass -> ok (0.851s) ../out/runs/P0q/clean/transcript.log
+[clean ] P0r: observed pass -> ok (1.837s) ../out/runs/P0r/clean/transcript.log
+[clean ] P0s: observed pass -> ok (0.842s) ../out/runs/P0s/clean/transcript.log
+[clean ] P0t: observed pass -> ok (0.818s) ../out/runs/P0t/clean/transcript.log
+[clean ] P0u: observed pass -> ok (10.055s) ../out/runs/P0u/clean/transcript.log
+[clean ] P0v: observed pass -> ok (0.737s) ../out/runs/P0v/clean/transcript.log
+[clean ] P0w: observed pass -> ok (20.11s) ../out/runs/P0w/clean/transcript.log
+[clean ] P0x: observed pass -> ok (26.547s) ../out/runs/P0x/clean/transcript.log
+[clean ] P0y: observed pass -> ok (2.489s) ../out/runs/P0y/clean/transcript.log
+[clean ] P0z: observed pass -> ok (0.711s) ../out/runs/P0z/clean/transcript.log
+[clean ] P0aa: observed pass -> ok (0.906s) ../out/runs/P0aa/clean/transcript.log
+[clean ] P0ab: observed pass -> ok (0.802s) ../out/runs/P0ab/clean/transcript.log
+[clean ] P0ac: observed pass -> ok (1.793s) ../out/runs/P0ac/clean/transcript.log
+[clean ] P0ad: observed pass -> ok (4.058s) ../out/runs/P0ad/clean/transcript.log
+[clean ] P0ae: observed pass -> ok (0.872s) ../out/runs/P0ae/clean/transcript.log
+[clean ] P0af: observed pass -> ok (0.77s) ../out/runs/P0af/clean/transcript.log
+[clean ] P0ag: observed pass -> ok (3.55s) ../out/runs/P0ag/clean/transcript.log
+[clean ] P0ah: observed pass -> ok (0.749s) ../out/runs/P0ah/clean/transcript.log
+[clean ] P0ai: observed pass -> ok (1.167s) ../out/runs/P0ai/clean/transcript.log
+[clean ] P0aj: observed pass -> ok (0.969s) ../out/runs/P0aj/clean/transcript.log
+[clean ] P0ak: observed pass -> ok (0.862s) ../out/runs/P0ak/clean/transcript.log
+[clean ] P0al: observed pass -> ok (0.895s) ../out/runs/P0al/clean/transcript.log
+[clean ] P0am: observed pass -> ok (0.74s) ../out/runs/P0am/clean/transcript.log
+[clean ] P0an: observed pass -> ok (0.762s) ../out/runs/P0an/clean/transcript.log
+[clean ] P0aq: observed pass -> ok (0.68s) ../out/runs/P0aq/clean/transcript.log
+[clean ] P0ar: observed pass -> ok (0.856s) ../out/runs/P0ar/clean/transcript.log
+[clean ] P0aw: observed pass -> ok (0.805s) ../out/runs/P0aw/clean/transcript.log
+[clean ] P0ax: observed pass -> ok (1.229s) ../out/runs/P0ax/clean/transcript.log
+[clean ] P0ay: observed pass -> ok (1.077s) ../out/runs/P0ay/clean/transcript.log
+[clean ] P0az: observed pass -> ok (0.744s) ../out/runs/P0az/clean/transcript.log
+[clean ] P0ba: observed pass -> ok (3.906s) ../out/runs/P0ba/clean/transcript.log
+[clean ] P0bc: observed pass -> ok (4.503s) ../out/runs/P0bc/clean/transcript.log
+[clean ] P0be: observed pass -> ok (3.76s) ../out/runs/P0be/clean/transcript.log
+[clean ] P0bh: observed pass -> ok (4.051s) ../out/runs/P0bh/clean/transcript.log
+[clean ] P1: observed pass -> ok (4.943s) ../out/runs/P1/clean/transcript.log
+[clean ] P2: observed pass -> ok (2.992s) ../out/runs/P2/clean/transcript.log
+[clean ] P3: observed pass -> ok (40.237s) ../out/runs/P3/clean/transcript.log
+[clean ] P4: observed pass -> ok (16.928s) ../out/runs/P4/clean/transcript.log
+[clean ] P5: observed pass -> ok (7.829s) ../out/runs/P5/clean/transcript.log
+[clean ] P14: observed pass -> ok (28.259s) ../out/runs/P14/clean/transcript.log
+[clean ] P15: observed pass -> ok (21.546s) ../out/runs/P15/clean/transcript.log
+[clean ] P7: observed pass -> ok (20.997s) ../out/runs/P7/clean/transcript.log
+[clean ] P13: observed pass -> ok (6.126s) ../out/runs/P13/clean/transcript.log
+[clean ] P9: observed pass -> ok (3.199s) ../out/runs/P9/clean/transcript.log
+[clean ] P16: observed pass -> ok (2.942s) ../out/runs/P16/clean/transcript.log
+[clean ] P17: observed pass -> ok (13.687s) ../out/runs/P17/clean/transcript.log
+[clean ] P18: observed pass -> ok (2.127s) ../out/runs/P18/clean/transcript.log
+[clean ] P12: observed pass -> ok (15.677s) ../out/runs/P12/clean/transcript.log
+[clean ] P19: observed pass -> ok (2.102s) ../out/runs/P19/clean/transcript.log
+[clean ] P20: observed pass -> ok (2.405s) ../out/runs/P20/clean/transcript.log
+[clean ] P33: observed pass -> ok (2.502s) ../out/runs/P33/clean/transcript.log
+[clean ] P22: observed pass -> ok (1.022s) ../out/runs/P22/clean/transcript.log
+[clean ] P23: observed pass -> ok (19.755s) ../out/runs/P23/clean/transcript.log
+[clean ] P24: observed pass -> ok (7.745s) ../out/runs/P24/clean/transcript.log
+[clean ] P25: observed pass -> ok (0.91s) ../out/runs/P25/clean/transcript.log
+[clean ] P26: observed pass -> ok (3.112s) ../out/runs/P26/clean/transcript.log
+[clean ] P27: observed pass -> ok (1.649s) ../out/runs/P27/clean/transcript.log
+[clean ] P28: observed pass -> ok (0.697s) ../out/runs/P28/clean/transcript.log
+[clean ] P29: observed pass -> ok (11.433s) ../out/runs/P29/clean/transcript.log
+[clean ] P30: observed pass -> ok (12.444s) ../out/runs/P30/clean/transcript.log
+[clean ] P31: observed pass -> ok (9.289s) ../out/runs/P31/clean/transcript.log
+[clean ] P32: observed pass -> ok (0.919s) ../out/runs/P32/clean/transcript.log
+[clean ] P10: observed pass -> ok (33.63s) ../out/runs/P10/clean/transcript.log
+[clean ] P6: observed pass -> ok (3.839s) ../out/runs/P6/clean/transcript.log
+[clean ] P11: observed pass -> ok (28.176s) ../out/runs/P11/clean/transcript.log
+[mutant] P0/survivors_ignored: mutant fail, twin pass -> KILLED (6.692s + 7.178s) ../out/runs/P0/survivors_ignored/mutant/transcript.log
+[mutant] P0b/env_switch: mutant fail, twin pass -> KILLED (0.915s + 0.833s) ../out/runs/P0b/env_switch/mutant/transcript.log
+[mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.72s + 0.661s) ../out/runs/P0b/judge_imports_mutants/mutant/transcript.log
+[mutant] P0c/clean_failures_ignored: mutant fail, twin pass -> KILLED (2.419s + 2.34s) ../out/runs/P0c/clean_failures_ignored/mutant/transcript.log
+[mutant] P0d/inconclusive_dropped: mutant fail, twin pass -> KILLED (7.512s + 7.444s) ../out/runs/P0d/inconclusive_dropped/mutant/transcript.log
+[mutant] P0e/validation_off: mutant fail, twin pass -> KILLED (13.756s + 4.141s) ../out/runs/P0e/validation_off/mutant/transcript.log
+[mutant] P0f/twin_ignored: mutant fail, twin pass -> KILLED (3.26s + 3.074s) ../out/runs/P0f/twin_ignored/mutant/transcript.log
+[mutant] P0g/stale_ignored: mutant fail, twin pass -> KILLED (5.286s + 4.345s) ../out/runs/P0g/stale_ignored/mutant/transcript.log
+[mutant] P0h/death_signal_reverted: mutant fail, twin pass -> KILLED (21.864s + 19.358s) ../out/runs/P0h/death_signal_reverted/mutant/transcript.log
+[mutant] P0h/scratch_kept: mutant fail, twin pass -> KILLED (19.758s + 19.168s) ../out/runs/P0h/scratch_kept/mutant/transcript.log
+[mutant] P0h/leaked_not_counted: mutant fail, twin pass -> KILLED (19.569s + 19.605s) ../out/runs/P0h/leaked_not_counted/mutant/transcript.log
+[mutant] P0h/subreaper_not_set: mutant fail, twin pass -> KILLED (17.154s + 19.759s) ../out/runs/P0h/subreaper_not_set/mutant/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (15.846s + 19.022s) ../out/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0h/copy_deleted_before_sweep: mutant fail, twin pass -> KILLED (18.947s + 19.73s) ../out/runs/P0h/copy_deleted_before_sweep/mutant/transcript.log
+[mutant] P0bb/pause_not_prestarted: mutant fail, twin pass -> KILLED (4.17s + 2.115s) ../out/runs/P0bb/pause_not_prestarted/mutant/transcript.log
+[mutant] P0bd/overlap_unchecked: mutant fail, twin pass -> KILLED (0.955s + 0.82s) ../out/runs/P0bd/overlap_unchecked/mutant/transcript.log
+[mutant] P0bf/sigterm_unhandled: mutant fail, twin pass -> KILLED (1.619s + 6.778s) ../out/runs/P0bf/sigterm_unhandled/mutant/transcript.log
+[mutant] P0bg/base_unguarded: mutant fail, twin pass -> KILLED (0.665s + 0.72s) ../out/runs/P0bg/base_unguarded/mutant/transcript.log
+[mutant] P0bg/stale_base_unguarded: mutant fail, twin pass -> KILLED (0.744s + 0.74s) ../out/runs/P0bg/stale_base_unguarded/mutant/transcript.log
+[mutant] P0i/pycache_top_level_only: mutant fail, twin pass -> KILLED (0.907s + 0.909s) ../out/runs/P0i/pycache_top_level_only/mutant/transcript.log
+[mutant] P0i/pycache_prefix_unset: mutant fail, twin pass -> KILLED (0.886s + 0.878s) ../out/runs/P0i/pycache_prefix_unset/mutant/transcript.log
+[mutant] P0j/incomplete_facts_accepted: mutant fail, twin pass -> KILLED (1.338s + 1.389s) ../out/runs/P0j/incomplete_facts_accepted/mutant/transcript.log
+[mutant] P0k/proposer_check_dropped: mutant fail, twin pass -> KILLED (0.865s + 0.929s) ../out/runs/P0k/proposer_check_dropped/mutant/transcript.log
+[mutant] P0k/self_resolution_admitted: mutant fail, twin pass -> KILLED (1.21s + 0.885s) ../out/runs/P0k/self_resolution_admitted/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.9s + 0.855s) ../out/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0l/obligation_registry_skipped: mutant fail, twin pass -> KILLED (0.696s + 0.795s) ../out/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+[mutant] P0m/trailer_check_disabled: mutant fail, twin pass -> KILLED (1.248s + 1.517s) ../out/runs/P0m/trailer_check_disabled/mutant/transcript.log
+[mutant] P0m/first_proposer_only: mutant fail, twin pass -> KILLED (1.515s + 1.433s) ../out/runs/P0m/first_proposer_only/mutant/transcript.log
+[mutant] P0m/exemption_unkeyed: mutant fail, twin pass -> KILLED (1.295s + 1.396s) ../out/runs/P0m/exemption_unkeyed/mutant/transcript.log
+[mutant] P0m/exemption_party_unchecked: mutant fail, twin pass -> KILLED (1.364s + 1.241s) ../out/runs/P0m/exemption_party_unchecked/mutant/transcript.log
+[mutant] P0m/unknown_merge_author: mutant fail, twin pass -> KILLED (1.306s + 1.197s) ../out/runs/P0m/unknown_merge_author/mutant/transcript.log
+[mutant] P0m/instruction_author_unchecked: mutant fail, twin pass -> KILLED (1.493s + 1.161s) ../out/runs/P0m/instruction_author_unchecked/mutant/transcript.log
+[mutant] P0m/instruction_label_unchecked: mutant fail, twin pass -> KILLED (1.18s + 1.297s) ../out/runs/P0m/instruction_label_unchecked/mutant/transcript.log
+[mutant] P0m/instruction_labeler_unchecked: mutant fail, twin pass -> KILLED (1.242s + 1.273s) ../out/runs/P0m/instruction_labeler_unchecked/mutant/transcript.log
+[mutant] P0m/body_edit_unchecked: mutant fail, twin pass -> KILLED (1.293s + 1.281s) ../out/runs/P0m/body_edit_unchecked/mutant/transcript.log
+[mutant] P0m/inert_exemption_admitted: mutant fail, twin pass -> KILLED (1.386s + 1.34s) ../out/runs/P0m/inert_exemption_admitted/mutant/transcript.log
+[mutant] P0m/stale_exemption_accepted: mutant fail, twin pass -> KILLED (1.342s + 1.324s) ../out/runs/P0m/stale_exemption_accepted/mutant/transcript.log
+[mutant] P0m/mechanism_rejected: mutant fail, twin pass -> KILLED (1.196s + 1.27s) ../out/runs/P0m/mechanism_rejected/mutant/transcript.log
+[mutant] P0m/mechanism_as_guy: mutant fail, twin pass -> KILLED (1.348s + 1.279s) ../out/runs/P0m/mechanism_as_guy/mutant/transcript.log
+[mutant] P0n/ranking_reversed: mutant fail, twin pass -> KILLED (1.388s + 1.344s) ../out/runs/P0n/ranking_reversed/mutant/transcript.log
+[mutant] P0o/overturned_scored_success: mutant fail, twin pass -> KILLED (1.247s + 1.301s) ../out/runs/P0o/overturned_scored_success/mutant/transcript.log
+[mutant] P0q/ledger_rewrite_admitted: mutant fail, twin pass -> KILLED (0.84s + 0.891s) ../out/runs/P0q/ledger_rewrite_admitted/mutant/transcript.log
+[mutant] P0q/draws_not_append_only: mutant fail, twin pass -> KILLED (0.925s + 0.92s) ../out/runs/P0q/draws_not_append_only/mutant/transcript.log
+[mutant] P0r/late_forecast_admitted: mutant fail, twin pass -> KILLED (1.789s + 1.822s) ../out/runs/P0r/late_forecast_admitted/mutant/transcript.log
+[mutant] P0s/outcome_inverted: mutant fail, twin pass -> KILLED (0.832s + 0.858s) ../out/runs/P0s/outcome_inverted/mutant/transcript.log
+[mutant] P0s/free_resolved_by_mechanism: mutant fail, twin pass -> KILLED (0.924s + 0.878s) ../out/runs/P0s/free_resolved_by_mechanism/mutant/transcript.log
+[mutant] P0s/branch_most_recent_pr: mutant fail, twin pass -> KILLED (0.844s + 0.897s) ../out/runs/P0s/branch_most_recent_pr/mutant/transcript.log
+[mutant] P0t/latency_dropped: mutant fail, twin pass -> KILLED (1.0s + 0.901s) ../out/runs/P0t/latency_dropped/mutant/transcript.log
+[mutant] P0t/guy_items_undercounted: mutant fail, twin pass -> KILLED (0.851s + 0.792s) ../out/runs/P0t/guy_items_undercounted/mutant/transcript.log
+[mutant] P0t/wish_from_instruction: mutant fail, twin pass -> KILLED (0.915s + 0.778s) ../out/runs/P0t/wish_from_instruction/mutant/transcript.log
+[mutant] P0t/first_entrant_only: mutant fail, twin pass -> KILLED (0.833s + 0.832s) ../out/runs/P0t/first_entrant_only/mutant/transcript.log
+[mutant] P0t/costless_session_dropped: mutant fail, twin pass -> KILLED (0.889s + 0.89s) ../out/runs/P0t/costless_session_dropped/mutant/transcript.log
+[mutant] P0t/cost_pooled: mutant fail, twin pass -> KILLED (0.923s + 0.838s) ../out/runs/P0t/cost_pooled/mutant/transcript.log
+[mutant] P0t/first_result_charged: mutant fail, twin pass -> KILLED (0.885s + 0.849s) ../out/runs/P0t/first_result_charged/mutant/transcript.log
+[mutant] P0t/result_per_session: mutant fail, twin pass -> KILLED (0.899s + 0.911s) ../out/runs/P0t/result_per_session/mutant/transcript.log
+[mutant] P0u/argmin_election: mutant fail, twin pass -> KILLED (10.994s + 9.771s) ../out/runs/P0u/argmin_election/mutant/transcript.log
+[mutant] P0u/hedge_election: mutant fail, twin pass -> KILLED (10.012s + 10.457s) ../out/runs/P0u/hedge_election/mutant/transcript.log
+[mutant] P0u/unweighted_estimate: mutant fail, twin pass -> KILLED (10.075s + 10.326s) ../out/runs/P0u/unweighted_estimate/mutant/transcript.log
+[mutant] P0u/draw_not_published: mutant fail, twin pass -> KILLED (10.047s + 9.615s) ../out/runs/P0u/draw_not_published/mutant/transcript.log
+[mutant] P0u/draw_push_forced: mutant fail, twin pass -> KILLED (9.146s + 9.233s) ../out/runs/P0u/draw_push_forced/mutant/transcript.log
+[mutant] P0u/entrants_from_head: mutant fail, twin pass -> KILLED (8.623s + 9.341s) ../out/runs/P0u/entrants_from_head/mutant/transcript.log
+[mutant] P0u/entrants_beyond_second_ignored: mutant fail, twin pass -> KILLED (8.699s + 9.278s) ../out/runs/P0u/entrants_beyond_second_ignored/mutant/transcript.log
+[mutant] P0v/reviewer_label_excluded: mutant fail, twin pass -> KILLED (0.681s + 0.715s) ../out/runs/P0v/reviewer_label_excluded/mutant/transcript.log
+[mutant] P0w/witness_ignored: mutant fail, twin pass -> KILLED (15.902s + 17.562s) ../out/runs/P0w/witness_ignored/mutant/transcript.log
+[mutant] P0w/harness_change_skips: mutant fail, twin pass -> KILLED (15.085s + 16.565s) ../out/runs/P0w/harness_change_skips/mutant/transcript.log
+[mutant] P0w/skip_counted_ok: mutant fail, twin pass -> KILLED (17.682s + 18.579s) ../out/runs/P0w/skip_counted_ok/mutant/transcript.log
+[mutant] P0w/non_ancestor_base: mutant fail, twin pass -> KILLED (17.552s + 18.095s) ../out/runs/P0w/non_ancestor_base/mutant/transcript.log
+[mutant] P0x/price_line_dropped: mutant fail, twin pass -> KILLED (25.333s + 25.548s) ../out/runs/P0x/price_line_dropped/mutant/transcript.log
+[mutant] P0x/none_on_workflow_admitted: mutant fail, twin pass -> KILLED (26.349s + 26.886s) ../out/runs/P0x/none_on_workflow_admitted/mutant/transcript.log
+[mutant] P0x/scoped_by_number: mutant fail, twin pass -> KILLED (25.015s + 26.666s) ../out/runs/P0x/scoped_by_number/mutant/transcript.log
+[mutant] P0y/split_trailer_block_admitted: mutant fail, twin pass -> KILLED (2.028s + 2.939s) ../out/runs/P0y/split_trailer_block_admitted/mutant/transcript.log
+[mutant] P0y/hook_unconditioned: mutant fail, twin pass -> KILLED (2.815s + 2.368s) ../out/runs/P0y/hook_unconditioned/mutant/transcript.log
+[mutant] P0z/pins_failure_unrouted: mutant fail, twin pass -> KILLED (0.601s + 0.556s) ../out/runs/P0z/pins_failure_unrouted/mutant/transcript.log
+[mutant] P0aa/held_item_retaken: mutant fail, twin pass -> KILLED (0.649s + 0.601s) ../out/runs/P0aa/held_item_retaken/mutant/transcript.log
+[mutant] P0ab/shell_edit_admitted: mutant fail, twin pass -> KILLED (0.71s + 0.615s) ../out/runs/P0ab/shell_edit_admitted/mutant/transcript.log
+[mutant] P0ab/silent_master_stop_admitted: mutant fail, twin pass -> KILLED (0.648s + 0.62s) ../out/runs/P0ab/silent_master_stop_admitted/mutant/transcript.log
+[mutant] P0ac/instruction_without_because_admitted: mutant fail, twin pass -> KILLED (1.761s + 1.659s) ../out/runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+[mutant] P0ac/both_forms_admitted: mutant fail, twin pass -> KILLED (1.57s + 1.72s) ../out/runs/P0ac/both_forms_admitted/mutant/transcript.log
+[mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (3.519s + 3.008s) ../out/runs/P0ad/seal_after_act/mutant/transcript.log
+[mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (3.221s + 3.415s) ../out/runs/P0ad/seal_same_commit_admitted/mutant/transcript.log
+[mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (2.912s + 3.325s) ../out/runs/P0ad/candidate_omitted_admitted/mutant/transcript.log
+[mutant] P0ad/deleted_status_read: mutant fail, twin pass -> KILLED (1.661s + 3.418s) ../out/runs/P0ad/deleted_status_read/mutant/transcript.log
+[mutant] P0ae/exposure_inferred: mutant fail, twin pass -> KILLED (0.764s + 0.718s) ../out/runs/P0ae/exposure_inferred/mutant/transcript.log
+[mutant] P0ae/void_scored: mutant fail, twin pass -> KILLED (0.972s + 0.906s) ../out/runs/P0ae/void_scored/mutant/transcript.log
+[mutant] P0ae/void_not_counted: mutant fail, twin pass -> KILLED (0.933s + 0.782s) ../out/runs/P0ae/void_not_counted/mutant/transcript.log
+[mutant] P0ae/later_label_ignored: mutant fail, twin pass -> KILLED (0.762s + 0.712s) ../out/runs/P0ae/later_label_ignored/mutant/transcript.log
+[mutant] P0ae/label_by_anyone: mutant fail, twin pass -> KILLED (0.655s + 0.656s) ../out/runs/P0ae/label_by_anyone/mutant/transcript.log
+[mutant] P0af/alpha_zero: mutant fail, twin pass -> KILLED (0.727s + 0.722s) ../out/runs/P0af/alpha_zero/mutant/transcript.log
+[mutant] P0af/fixed_order_dropped: mutant fail, twin pass -> KILLED (0.781s + 0.761s) ../out/runs/P0af/fixed_order_dropped/mutant/transcript.log
+[mutant] P0af/fixed_order_not_required: mutant fail, twin pass -> KILLED (0.811s + 0.842s) ../out/runs/P0af/fixed_order_not_required/mutant/transcript.log
+[mutant] P0af/silence_is_an_act: mutant fail, twin pass -> KILLED (0.848s + 0.708s) ../out/runs/P0af/silence_is_an_act/mutant/transcript.log
+[mutant] P0ag/regime_after_seed: mutant fail, twin pass -> KILLED (2.768s + 3.43s) ../out/runs/P0ag/regime_after_seed/mutant/transcript.log
+[mutant] P0ag/seed_after_act_admitted: mutant fail, twin pass -> KILLED (2.777s + 2.804s) ../out/runs/P0ag/seed_after_act_admitted/mutant/transcript.log
+[mutant] P0ah/kept_not_filed: mutant fail, twin pass -> KILLED (0.769s + 0.707s) ../out/runs/P0ah/kept_not_filed/mutant/transcript.log
+[mutant] P0ah/merged_not_filed: mutant fail, twin pass -> KILLED (0.707s + 0.707s) ../out/runs/P0ah/merged_not_filed/mutant/transcript.log
+[mutant] P0ah/kept_without_exposure: mutant fail, twin pass -> KILLED (0.707s + 0.706s) ../out/runs/P0ah/kept_without_exposure/mutant/transcript.log
+[mutant] P0ah/item_always_pr: mutant fail, twin pass -> KILLED (0.702s + 0.654s) ../out/runs/P0ah/item_always_pr/mutant/transcript.log
+[mutant] P0ai/probe_from_unkept: mutant fail, twin pass -> KILLED (0.786s + 0.778s) ../out/runs/P0ai/probe_from_unkept/mutant/transcript.log
+[mutant] P0ai/probe_unseeded: mutant fail, twin pass -> KILLED (0.724s + 0.72s) ../out/runs/P0ai/probe_unseeded/mutant/transcript.log
+[mutant] P0ai/probe_needs_exposure: mutant fail, twin pass -> KILLED (0.704s + 0.767s) ../out/runs/P0ai/probe_needs_exposure/mutant/transcript.log
+[mutant] P0ai/probe_not_priced: mutant fail, twin pass -> KILLED (0.76s + 0.78s) ../out/runs/P0ai/probe_not_priced/mutant/transcript.log
+[mutant] P0aj/awaits_guy_clause_removed: mutant fail, twin pass -> KILLED (0.724s + 0.792s) ../out/runs/P0aj/awaits_guy_clause_removed/mutant/transcript.log
+[mutant] P0ak/undeclared_session_admitted: mutant fail, twin pass -> KILLED (0.818s + 0.831s) ../out/runs/P0ak/undeclared_session_admitted/mutant/transcript.log
+[mutant] P0ak/duration_misresolved: mutant fail, twin pass -> KILLED (0.776s + 0.847s) ../out/runs/P0ak/duration_misresolved/mutant/transcript.log
+[mutant] P0ak/cancelled_scored: mutant fail, twin pass -> KILLED (0.859s + 0.725s) ../out/runs/P0ak/cancelled_scored/mutant/transcript.log
+[mutant] P0ak/over_bound_uncounted: mutant fail, twin pass -> KILLED (0.72s + 0.71s) ../out/runs/P0ak/over_bound_uncounted/mutant/transcript.log
+[mutant] P0ak/limit_uncounted: mutant fail, twin pass -> KILLED (0.788s + 0.73s) ../out/runs/P0ak/limit_uncounted/mutant/transcript.log
+[mutant] P0al/after_edit_as_drafted: mutant fail, twin pass -> KILLED (0.711s + 0.704s) ../out/runs/P0al/after_edit_as_drafted/mutant/transcript.log
+[mutant] P0al/other_editor_counted: mutant fail, twin pass -> KILLED (0.777s + 0.719s) ../out/runs/P0al/other_editor_counted/mutant/transcript.log
+[mutant] P0al/unreadable_edits_resolved: mutant fail, twin pass -> KILLED (0.711s + 0.782s) ../out/runs/P0al/unreadable_edits_resolved/mutant/transcript.log
+[mutant] P0al/detail_uncounted: mutant fail, twin pass -> KILLED (0.667s + 0.659s) ../out/runs/P0al/detail_uncounted/mutant/transcript.log
+[mutant] P0am/draft_check_clause_removed: mutant fail, twin pass -> KILLED (0.657s + 0.609s) ../out/runs/P0am/draft_check_clause_removed/mutant/transcript.log
+[mutant] P0an/pr_branch_forecast_admitted: mutant fail, twin pass -> KILLED (0.661s + 0.653s) ../out/runs/P0an/pr_branch_forecast_admitted/mutant/transcript.log
+[mutant] P0an/silent_stop_admitted: mutant fail, twin pass -> KILLED (0.662s + 0.606s) ../out/runs/P0an/silent_stop_admitted/mutant/transcript.log
+[mutant] P0aq/label_branch_removed: mutant fail, twin pass -> KILLED (0.658s + 0.663s) ../out/runs/P0aq/label_branch_removed/mutant/transcript.log
+[mutant] P0aq/round_cap_removed: mutant fail, twin pass -> KILLED (0.657s + 0.72s) ../out/runs/P0aq/round_cap_removed/mutant/transcript.log
+[mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.673s + 0.656s) ../out/runs/P0aq/conflict_as_clean/mutant/transcript.log
+[mutant] P0ar/forecasts_shared: mutant fail, twin pass -> KILLED (0.857s + 0.859s) ../out/runs/P0ar/forecasts_shared/mutant/transcript.log
+[mutant] P0ar/status_shared: mutant fail, twin pass -> KILLED (0.831s + 0.914s) ../out/runs/P0ar/status_shared/mutant/transcript.log
+[mutant] P0ar/registry_frozen_only: mutant fail, twin pass -> KILLED (0.835s + 0.88s) ../out/runs/P0ar/registry_frozen_only/mutant/transcript.log
+[mutant] P0ar/status_by_date: mutant fail, twin pass -> KILLED (0.881s + 0.819s) ../out/runs/P0ar/status_by_date/mutant/transcript.log
+[mutant] P0ar/duplicate_overrides: mutant fail, twin pass -> KILLED (0.871s + 0.867s) ../out/runs/P0ar/duplicate_overrides/mutant/transcript.log
+[mutant] P0aw/checkout_without_contents: mutant fail, twin pass -> KILLED (0.61s + 0.663s) ../out/runs/P0aw/checkout_without_contents/mutant/transcript.log
+[mutant] P0ax/accused_judges_itself: mutant fail, twin pass -> KILLED (0.878s + 0.952s) ../out/runs/P0ax/accused_judges_itself/mutant/transcript.log
+[mutant] P0ax/head_files_kept: mutant fail, twin pass -> KILLED (1.074s + 0.972s) ../out/runs/P0ax/head_files_kept/mutant/transcript.log
+[mutant] P0ay/monotone_ignores_instruction: mutant fail, twin pass -> KILLED (0.832s + 0.883s) ../out/runs/P0ay/monotone_ignores_instruction/mutant/transcript.log
+[mutant] P0ay/removal_unsigned_admitted: mutant fail, twin pass -> KILLED (0.925s + 0.884s) ../out/runs/P0ay/removal_unsigned_admitted/mutant/transcript.log
+[mutant] P0ay/registry_read_as_text: mutant fail, twin pass -> KILLED (0.755s + 0.933s) ../out/runs/P0ay/registry_read_as_text/mutant/transcript.log
+[mutant] P0az/pins_master_privileged: mutant fail, twin pass -> KILLED (0.723s + 0.66s) ../out/runs/P0az/pins_master_privileged/mutant/transcript.log
+[mutant] P0az/pins_master_secret: mutant fail, twin pass -> KILLED (0.686s + 0.782s) ../out/runs/P0az/pins_master_secret/mutant/transcript.log
+[mutant] P0ba/cite_drops_sha: mutant fail, twin pass -> KILLED (3.189s + 3.296s) ../out/runs/P0ba/cite_drops_sha/mutant/transcript.log
+[mutant] P0ba/cite_header_from_local: mutant fail, twin pass -> KILLED (3.27s + 2.956s) ../out/runs/P0ba/cite_header_from_local/mutant/transcript.log
+[mutant] P0ba/hook_skips_status: mutant fail, twin pass -> KILLED (2.379s + 3.338s) ../out/runs/P0ba/hook_skips_status/mutant/transcript.log
+[mutant] P0bc/outer_sweep_removed: mutant fail, twin pass -> KILLED (2.141s + 4.545s) ../out/runs/P0bc/outer_sweep_removed/mutant/transcript.log
+[mutant] P0bc/outer_subreaper_not_set: mutant fail, twin pass -> KILLED (2.003s + 4.023s) ../out/runs/P0bc/outer_subreaper_not_set/mutant/transcript.log
+[mutant] P0be/spawn_env_inherited: mutant fail, twin pass -> KILLED (3.074s + 3.216s) ../out/runs/P0be/spawn_env_inherited/mutant/transcript.log
+[mutant] P0be/nested_env_inherited: mutant fail, twin pass -> KILLED (2.75s + 2.855s) ../out/runs/P0be/nested_env_inherited/mutant/transcript.log
+[mutant] P0be/under_edits_env_inherited: mutant fail, twin pass -> KILLED (3.168s + 3.162s) ../out/runs/P0be/under_edits_env_inherited/mutant/transcript.log
+[mutant] P0bh/redact_skipped: mutant fail, twin pass -> KILLED (3.468s + 3.692s) ../out/runs/P0bh/redact_skipped/mutant/transcript.log
+[mutant] P0bh/secrets_check_blind: mutant fail, twin pass -> KILLED (3.736s + 3.52s) ../out/runs/P0bh/secrets_check_blind/mutant/transcript.log
+[mutant] P1/seed_reissued: mutant fail, twin pass -> KILLED (4.078s + 4.577s) ../out/runs/P1/seed_reissued/mutant/transcript.log
+[mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (3.932s + 3.923s) ../out/runs/P1/reuse_check_skipped/mutant/transcript.log
+[mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (4.176s + 4.934s) ../out/runs/P1/domain_check_skipped/mutant/transcript.log
+[mutant] P1/training_undomained: mutant fail, twin pass -> KILLED (4.499s + 5.029s) ../out/runs/P1/training_undomained/mutant/transcript.log
+[mutant] P1/csprng_replaced: mutant fail, twin pass -> KILLED (4.735s + 3.773s) ../out/runs/P1/csprng_replaced/mutant/transcript.log
+[mutant] P2/network_enabled: mutant fail, twin pass -> KILLED (4.027s + 1.816s) ../out/runs/P2/network_enabled/mutant/transcript.log
+[mutant] P2/judge_mounted: mutant fail, twin pass -> KILLED (1.814s + 1.454s) ../out/runs/P2/judge_mounted/mutant/transcript.log
+[mutant] P2/private_storage_mounted: mutant fail, twin pass -> KILLED (1.5s + 1.51s) ../out/runs/P2/private_storage_mounted/mutant/transcript.log
+[mutant] P2/rootfs_writable: mutant fail, twin pass -> KILLED (1.869s + 1.549s) ../out/runs/P2/rootfs_writable/mutant/transcript.log
+[mutant] P2/memory_limit_dropped: mutant fail, twin pass -> KILLED (1.66s + 1.66s) ../out/runs/P2/memory_limit_dropped/mutant/transcript.log
+[mutant] P3/failures_dropped: mutant fail, twin pass -> KILLED (36.895s + 37.735s) ../out/runs/P3/failures_dropped/mutant/transcript.log
+[mutant] P3/played_at_end: mutant fail, twin pass -> KILLED (38.691s + 36.957s) ../out/runs/P3/played_at_end/mutant/transcript.log
+[mutant] P4/self_reported: mutant fail, twin pass -> KILLED (14.623s + 14.615s) ../out/runs/P4/self_reported/mutant/transcript.log
+[mutant] P4/client_rusage: mutant fail, twin pass -> KILLED (14.295s + 14.101s) ../out/runs/P4/client_rusage/mutant/transcript.log
+[mutant] P4/not_differenced: mutant fail, twin pass -> KILLED (14.5s + 14.885s) ../out/runs/P4/not_differenced/mutant/transcript.log
+[mutant] P4/peak_from_current: mutant fail, twin pass -> KILLED (13.985s + 14.454s) ../out/runs/P4/peak_from_current/mutant/transcript.log
+[mutant] P4/init_process_rusage: mutant fail, twin pass -> KILLED (16.466s + 15.677s) ../out/runs/P4/init_process_rusage/mutant/transcript.log
+[mutant] P5/next_sent_early: mutant fail, twin pass -> KILLED (9.364s + 7.697s) ../out/runs/P5/next_sent_early/mutant/transcript.log
+[mutant] P5/next_in_observation: mutant fail, twin pass -> KILLED (8.346s + 7.288s) ../out/runs/P5/next_in_observation/mutant/transcript.log
+[mutant] P5/next_in_begin: mutant fail, twin pass -> KILLED (7.172s + 8.074s) ../out/runs/P5/next_in_begin/mutant/transcript.log
+[mutant] P5/next_in_notice: mutant fail, twin pass -> KILLED (8.526s + 7.273s) ../out/runs/P5/next_in_notice/mutant/transcript.log
+[mutant] P14/first_legal_action: mutant fail, twin pass -> KILLED (22.225s + 22.67s) ../out/runs/P14/first_legal_action/mutant/transcript.log
+[mutant] P14/floor_unsmoothed: mutant fail, twin pass -> KILLED (22.056s + 24.87s) ../out/runs/P14/floor_unsmoothed/mutant/transcript.log
+[mutant] P14/seen_not_reset: mutant fail, twin pass -> KILLED (23.617s + 26.266s) ../out/runs/P14/seen_not_reset/mutant/transcript.log
+[mutant] P14/asymptotic_p: mutant fail, twin pass -> KILLED (7.342s + 16.539s) ../out/runs/P14/asymptotic_p/mutant/transcript.log
+[mutant] P15/abs_difference: mutant fail, twin pass -> KILLED (1.404s + 14.175s) ../out/runs/P15/abs_difference/mutant/transcript.log
+[mutant] P15/shift_dropped: mutant fail, twin pass -> KILLED (5.858s + 14.931s) ../out/runs/P15/shift_dropped/mutant/transcript.log
+[mutant] P15/one_arm: mutant fail, twin pass -> KILLED (5.407s + 13.674s) ../out/runs/P15/one_arm/mutant/transcript.log
+[mutant] P15/budget_one_arm: mutant fail, twin pass -> KILLED (14.804s + 13.43s) ../out/runs/P15/budget_one_arm/mutant/transcript.log
+[mutant] P7/clipped: mutant fail, twin pass -> KILLED (13.826s + 13.575s) ../out/runs/P7/clipped/mutant/transcript.log
+[mutant] P7/missing_imputed: mutant fail, twin pass -> KILLED (12.974s + 13.045s) ../out/runs/P7/missing_imputed/mutant/transcript.log
+[mutant] P7/sum_unchecked: mutant fail, twin pass -> KILLED (12.776s + 15.486s) ../out/runs/P7/sum_unchecked/mutant/transcript.log
+[mutant] P13/infinite_dropped: mutant fail, twin pass -> KILLED (5.555s + 5.379s) ../out/runs/P13/infinite_dropped/mutant/transcript.log
+[mutant] P13/realised_row_only: mutant fail, twin pass -> KILLED (5.484s + 6.448s) ../out/runs/P13/realised_row_only/mutant/transcript.log
+[mutant] P13/entropy_missing_imputed: mutant fail, twin pass -> KILLED (5.498s + 4.837s) ../out/runs/P13/entropy_missing_imputed/mutant/transcript.log
+[mutant] P13/bin_product_rounded: mutant fail, twin pass -> KILLED (5.12s + 5.425s) ../out/runs/P13/bin_product_rounded/mutant/transcript.log
+[mutant] P13/bin_exact_rational: mutant fail, twin pass -> KILLED (4.92s + 5.023s) ../out/runs/P13/bin_exact_rational/mutant/transcript.log
+[mutant] P9/record_dropped: mutant fail, twin pass -> KILLED (3.069s + 3.013s) ../out/runs/P9/record_dropped/mutant/transcript.log
+[mutant] P9/utility_altered: mutant fail, twin pass -> KILLED (2.756s + 3.248s) ../out/runs/P9/utility_altered/mutant/transcript.log
+[mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (3.597s + 3.279s) ../out/runs/P9/chain_update_skipped/mutant/transcript.log
+[mutant] P9/opened_for_rewrite: mutant fail, twin pass -> KILLED (0.729s + 3.082s) ../out/runs/P9/opened_for_rewrite/mutant/transcript.log
+[mutant] P9/genesis_empty: mutant fail, twin pass -> KILLED (2.93s + 2.92s) ../out/runs/P9/genesis_empty/mutant/transcript.log
+[mutant] P9/signature_unchecked: mutant fail, twin pass -> KILLED (3.083s + 3.085s) ../out/runs/P9/signature_unchecked/mutant/transcript.log
+[mutant] P9/independent_heads: mutant fail, twin pass -> KILLED (2.974s + 2.663s) ../out/runs/P9/independent_heads/mutant/transcript.log
+[mutant] P16/unattributed_admitted: mutant fail, twin pass -> KILLED (2.766s + 2.678s) ../out/runs/P16/unattributed_admitted/mutant/transcript.log
+[mutant] P16/any_credential: mutant fail, twin pass -> KILLED (2.737s + 2.791s) ../out/runs/P16/any_credential/mutant/transcript.log
+[mutant] P16/registration_taken_over: mutant fail, twin pass -> KILLED (2.956s + 2.619s) ../out/runs/P16/registration_taken_over/mutant/transcript.log
+[mutant] P17/fixed_proposer: mutant fail, twin pass -> KILLED (10.637s + 12.716s) ../out/runs/P17/fixed_proposer/mutant/transcript.log
+[mutant] P17/seeds_before_proposer: mutant fail, twin pass -> KILLED (14.29s + 11.594s) ../out/runs/P17/seeds_before_proposer/mutant/transcript.log
+[mutant] P17/idempotency_dropped: mutant fail, twin pass -> KILLED (14.562s + 13.354s) ../out/runs/P17/idempotency_dropped/mutant/transcript.log
+[mutant] P17/conflict_unchecked: mutant fail, twin pass -> KILLED (11.451s + 11.993s) ../out/runs/P17/conflict_unchecked/mutant/transcript.log
+[mutant] P17/hash_partial: mutant fail, twin pass -> KILLED (10.627s + 12.787s) ../out/runs/P17/hash_partial/mutant/transcript.log
+[mutant] P18/cap_ignored: mutant fail, twin pass -> KILLED (2.348s + 1.817s) ../out/runs/P18/cap_ignored/mutant/transcript.log
+[mutant] P18/cap_overrun_admitted: mutant fail, twin pass -> KILLED (2.301s + 1.985s) ../out/runs/P18/cap_overrun_admitted/mutant/transcript.log
+[mutant] P18/failures_dropped: mutant fail, twin pass -> KILLED (1.622s + 1.809s) ../out/runs/P18/failures_dropped/mutant/transcript.log
+[mutant] P18/throughput_from_episodes: mutant fail, twin pass -> KILLED (1.761s + 1.875s) ../out/runs/P18/throughput_from_episodes/mutant/transcript.log
+[mutant] P18/proposer_from_config: mutant fail, twin pass -> KILLED (2.126s + 1.781s) ../out/runs/P18/proposer_from_config/mutant/transcript.log
+[mutant] P18/mixed_proposers_admitted: mutant fail, twin pass -> KILLED (2.336s + 1.817s) ../out/runs/P18/mixed_proposers_admitted/mutant/transcript.log
+[mutant] P18/infinite_pooled_finite: mutant fail, twin pass -> KILLED (1.816s + 1.814s) ../out/runs/P18/infinite_pooled_finite/mutant/transcript.log
+[mutant] P18/short_request_admitted: mutant fail, twin pass -> KILLED (2.304s + 1.897s) ../out/runs/P18/short_request_admitted/mutant/transcript.log
+[mutant] P12/peak_differenced: mutant fail, twin pass -> KILLED (14.539s + 13.082s) ../out/runs/P12/peak_differenced/mutant/transcript.log
+[mutant] P12/unmeasured_free: mutant fail, twin pass -> KILLED (13.651s + 13.317s) ../out/runs/P12/unmeasured_free/mutant/transcript.log
+[mutant] P12/floor_dropped: mutant fail, twin pass -> KILLED (14.1s + 13.246s) ../out/runs/P12/floor_dropped/mutant/transcript.log
+[mutant] P19/world_table_hardcoded: mutant fail, twin pass -> KILLED (1.991s + 2.09s) ../out/runs/P19/world_table_hardcoded/mutant/transcript.log
+[mutant] P20/crafter_price_fallback: mutant fail, twin pass -> KILLED (2.287s + 2.337s) ../out/runs/P20/crafter_price_fallback/mutant/transcript.log
+[mutant] P33/rates_underived: mutant fail, twin pass -> KILLED (2.324s + 2.159s) ../out/runs/P33/rates_underived/mutant/transcript.log
+[mutant] P33/schema_delta_optional: mutant fail, twin pass -> KILLED (1.918s + 1.92s) ../out/runs/P33/schema_delta_optional/mutant/transcript.log
+[mutant] P22/replay_unchecked: mutant fail, twin pass -> KILLED (0.946s + 0.982s) ../out/runs/P22/replay_unchecked/mutant/transcript.log
+[mutant] P23/partial_dropped: mutant fail, twin pass -> KILLED (15.905s + 15.498s) ../out/runs/P23/partial_dropped/mutant/transcript.log
+[mutant] P23/interrupted_unsealed: mutant fail, twin pass -> KILLED (17.763s + 16.163s) ../out/runs/P23/interrupted_unsealed/mutant/transcript.log
+[mutant] P23/closing_unattributed: mutant fail, twin pass -> KILLED (15.971s + 15.357s) ../out/runs/P23/closing_unattributed/mutant/transcript.log
+[mutant] P24/isdigit_guard: mutant fail, twin pass -> KILLED (7.002s + 6.715s) ../out/runs/P24/isdigit_guard/mutant/transcript.log
+[mutant] P25/entries_unchecked: mutant fail, twin pass -> KILLED (0.656s + 0.6s) ../out/runs/P25/entries_unchecked/mutant/transcript.log
+[mutant] P25/verify_unchecked: mutant fail, twin pass -> KILLED (0.66s + 0.757s) ../out/runs/P25/verify_unchecked/mutant/transcript.log
+[mutant] P25/heads_world_readable: mutant fail, twin pass -> KILLED (0.708s + 0.764s) ../out/runs/P25/heads_world_readable/mutant/transcript.log
+[mutant] P26/key_version_ignored: mutant fail, twin pass -> KILLED (2.473s + 2.563s) ../out/runs/P26/key_version_ignored/mutant/transcript.log
+[mutant] P27/tolerance_loose: mutant fail, twin pass -> KILLED (1.583s + 1.472s) ../out/runs/P27/tolerance_loose/mutant/transcript.log
+[mutant] P27/tolerance_zero: mutant fail, twin pass -> KILLED (1.61s + 1.769s) ../out/runs/P27/tolerance_zero/mutant/transcript.log
+[mutant] P28/scored_only: mutant fail, twin pass -> KILLED (0.724s + 0.658s) ../out/runs/P28/scored_only/mutant/transcript.log
+[mutant] P29/escape_untorn: mutant fail, twin pass -> KILLED (9.683s + 9.527s) ../out/runs/P29/escape_untorn/mutant/transcript.log
+[mutant] P29/close_untorn: mutant fail, twin pass -> KILLED (9.231s + 9.032s) ../out/runs/P29/close_untorn/mutant/transcript.log
+[mutant] P30/image_id_unchecked: mutant fail, twin pass -> KILLED (14.301s + 8.941s) ../out/runs/P30/image_id_unchecked/mutant/transcript.log
+[mutant] P31/verify_omitted: mutant fail, twin pass -> KILLED (7.667s + 8.471s) ../out/runs/P31/verify_omitted/mutant/transcript.log
+[mutant] P31/eager_imports: mutant fail, twin pass -> KILLED (9.145s + 10.304s) ../out/runs/P31/eager_imports/mutant/transcript.log
+[mutant] P32/declared_runtime_ignored: mutant fail, twin pass -> KILLED (0.839s + 0.716s) ../out/runs/P32/declared_runtime_ignored/mutant/transcript.log
+[mutant] P32/declaration_env_ignored: mutant fail, twin pass -> KILLED (0.742s + 0.799s) ../out/runs/P32/declaration_env_ignored/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (41.081s + 32.652s) ../out/runs/P10/removal_skipped/mutant/transcript.log
+[mutant] P10/stray_scope_global: mutant fail, twin pass -> KILLED (30.04s + 29.939s) ../out/runs/P10/stray_scope_global/mutant/transcript.log
+[mutant] P10/leaked_not_recorded: mutant fail, twin pass -> KILLED (30.575s + 30.334s) ../out/runs/P10/leaked_not_recorded/mutant/transcript.log
+[mutant] P6/crafter_field_in_schema: mutant fail, twin pass -> KILLED (2.668s + 3.283s) ../out/runs/P6/crafter_field_in_schema/mutant/transcript.log
+[mutant] P6/native_key_in_schema: mutant fail, twin pass -> KILLED (4.083s + 3.058s) ../out/runs/P6/native_key_in_schema/mutant/transcript.log
+[mutant] P6/pattern_hides_vocabulary: mutant fail, twin pass -> KILLED (2.869s + 3.256s) ../out/runs/P6/pattern_hides_vocabulary/mutant/transcript.log
+[mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (23.121s + 22.984s) ../out/runs/P11/set_order_restored/mutant/transcript.log
+[mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (25.507s + 24.261s) ../out/runs/P11/seed_ignored/mutant/transcript.log
+[mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (27.094s + 25.339s) ../out/runs/P11/hash_constant/mutant/transcript.log
+[mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (22.626s + 25.775s) ../out/runs/P11/field_dropped/mutant/transcript.log
+[mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (7.482s + 24.405s) ../out/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+[mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (25.882s + 25.68s) ../out/runs/P11/golden_hash_altered/mutant/transcript.log
+[mutant] P11/stream_truncated: mutant fail, twin pass -> KILLED (19.324s + 25.825s) ../out/runs/P11/stream_truncated/mutant/transcript.log
+clean: 84/84 passed, 0/84 failed
+mutants: 239/239 killed, 0/239 survived, 0/239 inconclusive, 0/239 stale, 0/239 non-causal, 0 leaked (clean and mutant)
+twins: 239/239 passed
+skipped: 0/84 pins, 0 mutants
+report: ../out/pins.jsonl
+PINS PASSED
+exit 0
