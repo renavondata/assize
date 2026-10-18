@@ -5787,16 +5787,18 @@ def p5_commitment_order() -> bool:
     return ok()
 
 
-# P14 plays the random incumbent (brief 1 section 4) for three episodes in one container, each cut to INCUMBENT_STEPS
-# steps: 3 x 100 draws over Crafter's 17 actions, about 17.6 per action. Its uniformity is refused only when Pearson's
+# P14 plays the random incumbent (brief 1 section 4) for five episodes in one container, each cut to INCUMBENT_STEPS
+# steps: 5 x 100 draws over Crafter's 17 actions, about 29 per action. A random agent can die before the cut (the third
+# episode ended at 60 and 64 steps in two of ten runs), so five, not three: coverage needs 275 draws and survives the
+# loss of 225. Its uniformity is refused only when Pearson's
 # statistic over the first PEARSON_EPISODES episodes (200 draws, the most the exact tail below is computed for in
 # reasonable time) has an exact multinomial p value below UNIFORM_ALPHA, the false-failure rate the pin accepts per
 # runtime per run, stated before any run; a candidate's score never passes through it. Pearson has almost no power
-# against one action dropped (L2a obligation 34: refused in 1e-4 of runs), so all three episodes also face a coverage
+# against one action dropped (L2a obligation 34: refused in 1e-4 of runs), so all five episodes also face a coverage
 # test: an action never played is refused, which is a false failure of a uniform agent with the exact probability
 # `_some_cell_empty_sf` of the committed draw count, asserted below UNIFORM_ALPHA before any run.
 INCUMBENT = ROOT / "incumbents" / "random"
-INCUMBENT_EPISODES = 3
+INCUMBENT_EPISODES = 5
 PEARSON_EPISODES = 2
 INCUMBENT_STEPS = 100
 UNIFORM_ALPHA = 1e-6
@@ -5907,7 +5909,7 @@ def _build(rt, context_dir: Path) -> str:
 def p14_random_incumbent() -> bool:
     """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
     runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
-    pin's, plays three episodes in one container, each ended by the World; every action it plays is uniform over the
+    pin's, plays five episodes in one container, each ended by the World; every action it plays is uniform over the
     legal actions (Pearson's statistic over the first PEARSON_EPISODES episodes not refused at UNIFORM_ALPHA by its
     exact multinomial p value, which is right where it is known in closed form and does not refuse UNIFORM_BOUNDARY;
     and every legal action played at least once over all of them, a refusal whose false-failure probability for a
