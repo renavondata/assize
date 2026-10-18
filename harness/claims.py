@@ -227,7 +227,10 @@ def status_check(root: Path, paths: Sequence[Path]) -> list[Finding]:
 
 # ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
 
-PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor|vizier) \S+ \S+)$")
+# Instruction #239 item 1: `mechanism <tool> <run id>`, the resolver's party (Amendment 4 rule 3), with `<tool>` a
+# dotted module name and `<run id>` digits or `local`. It carries no one's authority: `needs_guy` reads only `guy`.
+PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor|vizier) \S+ \S+"
+                   r"|mechanism [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+ (?:\d+|local))$")
 TRAILER_SEP = "\x1e"
 
 
@@ -244,6 +247,15 @@ class Commit:
 def parties(trailer_values: str) -> tuple[str, ...]:
     """Every `Proposer:` trailer value of a commit, one party per line, in order."""
     return tuple(v.strip() for v in trailer_values.split(TRAILER_SEP) if v.strip())
+
+
+def malformed_parties(where: str, ps: Sequence[str], merge: bool = False) -> list[Finding]:
+    """A `bad_party` finding per party outside PARTY's grammar; a merge may also name its author's MERGE_AUTHORS party.
+    The one reader of that grammar, for P0m (`commit_findings`) and the pre-push hook (`trailer_findings`) alike
+    (instruction #239 item 2)."""
+    return [Finding(where, "bad_party", f"{p!r} is not `guy`, `<kind> <model> <session>` or "
+                                        f"`mechanism <tool> <run id>`")
+            for p in ps if not (PARTY.match(p) or merge and p in MERGE_AUTHORS.values())]
 
 
 # A commit whose `Proposer:` line git does not parse as a trailer, read from its message body instead. Keyed by full
@@ -390,8 +402,7 @@ def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Iss
                         f"merge authored by {c.author!r}, no account of {sorted(MERGE_AUTHORS)}")]
     if not c.parties:
         return [Finding(where, "no_proposer", "no `Proposer:` trailer")]
-    malformed = [Finding(where, "bad_party", f"{p!r} is not `guy` or `<kind> <model> <session>`")
-                 for p in c.parties if not (PARTY.match(p) or c.merge and p in MERGE_AUTHORS.values())]
+    malformed = malformed_parties(where, c.parties, c.merge)
     touched = needs_guy(c, patterns)
     instructed = any(authorises(issues.get(n)) for n in c.instructions)
     unsigned = ([Finding(where, "entrenched_without_guy",
@@ -482,7 +493,7 @@ def trailer_findings(repo: Path, revisions: str) -> list[Finding]:
         outside = [Finding(where, "outside_trailer_block", f"{len(written[k])} `{k}:` lines, {len(parsed[k])} parsed "
                                                            f"by git as trailers")
                    for k in TRAILER_KEYS if len(written[k]) > len(parsed[k])]
-        return unparsed + outside
+        return unparsed + outside + malformed_parties(where, parsed["Proposer"])
 
     return [f for r in records for f in findings(r)]
 

@@ -1,0 +1,7 @@
+# P0m's mutant `mechanism_rejected` (instruction #239 item 3): PARTY as before, so the resolver's
+# `mechanism <tool> <run id>` party is a `bad_party` on any path.
+[[edit]]
+path = "harness/claims.py"
+old = """PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor|vizier) \\S+ \\S+"
+                   r"|mechanism [A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)+ (?:\\d+|local))$")"""
+new = """PARTY = re.compile(r"^(?:guy|(?:builder|reviewer|counsel|auditor|vizier) \\S+ \\S+)$")"""

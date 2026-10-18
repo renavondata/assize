@@ -1,0 +1,6 @@
+# P0m's mutant `mechanism_as_guy` (instruction #239 item 3): a `mechanism` party satisfies the entrenched-path check,
+# so the resolver alone may write CLAUDE.md.
+[[edit]]
+path = "harness/claims.py"
+old = """if "guy" not in c.parties else []"""
+new = """if not any(p == "guy" or p.startswith("mechanism ") for p in c.parties) else []"""
