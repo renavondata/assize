@@ -9,6 +9,7 @@ import math
 import os
 import py_compile
 import re
+import shlex
 import shutil
 import signal
 import subprocess
@@ -1954,6 +1955,62 @@ def p0be_spawn_sites_use_child_env() -> bool:
     expect(rec is not None, f"the under-edits probe check ran and recorded {path}")
     if rec is not None:
         sound("under-edits", rec, "parent", rec["root_parent"], {own})
+    return ok()
+
+
+FAKE_TOKENS = {"GH_TOKEN": "ghp_fakeP0bhBuilderToken0123456789", "CLAUDE_CODE_OAUTH_TOKEN": "sk-ant-oat-fakeP0bh0123"}
+FAKE_OTHER = {"OTHER_TOKEN": "fakeP0bhOtherToken0123"}
+AFTER_SESSION = re.compile(r"- if: always\(\)\n\s+name: ([^\n]+)\n\s+run: ([^\n]+)\n")
+
+
+def _after_session(text: str) -> list[tuple[str, str]]:
+    """The named always-run `run:` steps of a session workflow that precede its artifact upload, in order."""
+    return AFTER_SESSION.findall(text.split("uses: actions/upload-artifact", 1)[0])
+
+
+def p0bh_logs_redacted() -> bool:
+    """A session workflow's log is redacted before upload: its `redact` step replaces both tokens, read from the
+    environment and never from its own command line, and its `secrets` step then fails the run and removes the log
+    when the value of any `*_TOKEN` variable is still in it, so the upload finds nothing (instruction #240). The steps
+    before the upload are run as written, on a log carrying fake tokens, in a scratch directory."""
+    from harness import sessions
+
+    expect, ok = _expecter()
+    every = FAKE_TOKENS | FAKE_OTHER
+    expect(sessions.leaked("x " + " y ".join(every.values()), every | {"EMPTY_TOKEN": "", "GH_HOST": "x"})
+           == sorted(every), "leaked names every *_TOKEN whose value is in the log, ignoring empty values and others")
+    expect(sessions.leaked("nothing here", every) == [], "a log without a token value leaks nothing")
+    base = {k: v for k, v in proc.child_env().items() if not k.endswith("_TOKEN")} | {"PYTHONPATH": str(ROOT)}
+    for w, log in (("build.yml", "build.log"), ("review.yml", "review.log")):
+        steps = _after_session((ROOT / ".github" / "workflows" / w).read_text())
+        names = [n for n, _ in steps]
+        expect(names[-2:] == ["redact", "secrets"], f"{w}: `redact` then `secrets` are the last always-run steps before "
+                                                    f"the upload ({names})")
+        cmds = dict(steps)
+        expect("$" not in cmds.get("redact", "") and "secrets." not in cmds.get("redact", ""),
+               f"{w}: `redact` reads the tokens from the environment; its command line names no value")
+        expect(cmds.get("secrets", "").startswith(f"uv run --frozen python -m harness.sessions secrets {log} "),
+               f"{w}: `secrets` runs `harness.sessions secrets {log}`")
+        for what, content, env, want_codes, want_log in (
+                ("a log carrying both tokens", "start " + " mid ".join(FAKE_TOKENS.values()) * 2 + " end\n",
+                 FAKE_TOKENS, [0, 0], "redacted"),
+                ("a log carrying a token `redact` does not know", "start " + " mid ".join(every.values()) + " end\n",
+                 every, [0, 1], None),
+                ("no log", None, FAKE_TOKENS, [0, 0], None)):
+            work = Path(tempfile.mkdtemp(prefix="assize-p0bh-", dir=context.scratch))
+            if content is not None:
+                (work / log).write_text(content)
+            codes = [subprocess.run(["bash", "-c", cmds[n].replace("uv run --frozen python", shlex.quote(sys.executable))],
+                                    cwd=work, env=base | env).returncode for n in ("redact", "secrets") if n in cmds]
+            after = (work / log).read_text() if (work / log).exists() else None
+            expect(codes == want_codes, f"{w}, {what}: step exits {codes}, want {want_codes}")
+            if want_log is None:
+                expect(after is None, f"{w}, {what}: no log is left to upload")
+            else:
+                expect(after is not None and not sessions.leaked(after, every) and "[redacted]" in after
+                       and after.startswith("start ") and after.endswith(" end\n"),
+                       f"{w}, {what}: the log is uploaded with every token replaced by [redacted] and nothing else lost")
+            shutil.rmtree(work, ignore_errors=True)
     return ok()
 
 
@@ -6424,6 +6481,11 @@ PINS = [
                                          Mutant("nested_env_inherited", _edits("P0be_nested_env_inherited")),
                                          Mutant("under_edits_env_inherited", _edits("P0be_under_edits_env_inherited"))),
         HARNESS),
+    Pin("P0bh", "a session log is redacted before upload, and a log still carrying a *_TOKEN value fails the run and is "
+                "not uploaded",
+        p0bh_logs_redacted, (Mutant("redact_skipped", _edits("P0bh_redact_skipped")),
+                             Mutant("secrets_check_blind", _edits("P0bh_secrets_check_blind"))),
+        HARNESS + (".github/workflows/build.yml", ".github/workflows/review.yml")),
     Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
         p1_seed_issuance, (Mutant("seed_reissued", _edits("P1_seed_reissued")),
                            Mutant("reuse_check_skipped", _edits("P1_reuse_check_skipped")),

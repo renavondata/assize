@@ -1,0 +1,9 @@
+# P0bh's mutant `redact_skipped` (instruction #240 item 1): the build workflow's `redact` step is gone, so the log goes
+# to the `secrets` check, and to the upload, with the tokens in it.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """      - if: always()
+        name: redact
+        run: python3 -c 'import functools, os, pathlib; p = pathlib.Path("build.log"); vs = [v.encode() for v in map(os.environ.get, ("GH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN")) if v]; p.exists() and p.write_bytes(functools.reduce(lambda b, v:b.replace(v, b"[redacted]"), vs, p.read_bytes()))'
+"""
+new = ""
