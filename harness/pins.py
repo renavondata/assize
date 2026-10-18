@@ -6262,6 +6262,82 @@ def p18_pilot() -> bool:
     return ok()
 
 
+# P34's fixture (L2a obligation 36; review 571ee563f91d F3): P18's pilot asked in one request of 10, its incumbent a
+# builder party of its own, so a registration under any other party shows. No candidate's score passes through it.
+P34_CFG = P18_CFG | {"pilot": P18_CFG["pilot"] | {"episodes": 10},
+                     "incumbent": {"context": "incumbents/random",
+                                   "proposer": {"kind": "builder", "model": "p34-model", "session": "p34-incumbent"}}}
+P34_IMAGE = "sha256:" + "d" * 64
+
+
+def p34_pilot_main() -> bool:
+    """`pilot/__main__.py`'s `pilot()` (L2a obligation 36; review 571ee563f91d F3) over a faked runtime, image build and
+    `evaluate()` that writes its records through the real `judge.ledger` into the ledger `pilot()` verifies, with the
+    real registry in a scratch judge-private store. The image is registered under `[incumbent].proposer` and the
+    records carry that party, as the judge stamps them; with the ledger intact the pilot states a verdict, records no
+    ledger finding and exits 0. With one record of the ledger altered after the request, the verdict is STOPPED for
+    the ledger's failed verification, the report carries the findings, and `pilot()` exits 1."""
+    import importlib
+    from types import SimpleNamespace
+
+    from judge import evaluate, ledger, registry, runtime
+    from worlds.crafter import binding as crafter
+
+    main = importlib.import_module("pilot.__main__")
+    expect, ok = _expecter()
+    fake_binding = SimpleNamespace(manifest=lambda: {"targets": [{"name": t} for t in P18_TARGETS]},
+                                   crafter=SimpleNamespace(constants=SimpleNamespace(achievements=P18_COMPONENTS)),
+                                   hafner_score=crafter.hafner_score)
+
+    def run(name: str, alter: bool) -> tuple[int, dict, Path]:
+        work = Path(tempfile.mkdtemp(prefix=f"assize-p34-{name}-", dir=context.scratch))
+        private, ledgers = work / "private", work / "ledgers"
+        ledgers.mkdir()
+
+        def fake_evaluate(image, world, n, rid, *, private, ledgers, runtime_name):
+            party = registry.proposer_of(private, image)
+            led = evaluate.ledger_path(ledgers, world)
+            written = ledger.append(led, private, rid, [_p18_record(i, party) for i in range(n)])
+            if alter:
+                rows = led.read_text().splitlines()
+                rows[3] = json.dumps(json.loads(rows[3]) | {"utility": 99}, sort_keys=True)
+                led.write_text("\n".join(rows) + "\n")
+            return written
+
+        saved = [(evaluate, "_usable", evaluate._usable), (evaluate, "evaluate", evaluate.evaluate),
+                 (evaluate, "_binding", evaluate._binding), (runtime, "pull", runtime.pull), (main, "build", main.build)]
+        evaluate._usable = lambda rt_name: SimpleNamespace(name=rt_name, binary="false")
+        evaluate.evaluate, evaluate._binding = fake_evaluate, lambda world: fake_binding
+        runtime.pull, main.build = (lambda rt, image: None), (lambda rt, context: P34_IMAGE)
+        try:
+            code = main.pilot(private, ledgers, "fake", work / "out", f"p34-{name}", P34_CFG, False)
+            registered = registry.proposer_of(private, P34_IMAGE)
+        except (registry.Refused, ValueError, OSError, KeyError) as e:
+            expect(False, f"{name}: pilot() runs over the fakes ({type(e).__name__}: {e})")
+            return -1, {}, work
+        finally:
+            for mod, attr, value in saved:
+                setattr(mod, attr, value)
+        rep = json.loads((work / "out" / "report.json").read_text())
+        print(f"  {name}: exit {code}; verdict {rep['verdict']}; ledger findings {rep['ledger_findings']}; "
+              f"registered to {registered}")
+        expect(registered == P34_CFG["incumbent"]["proposer"] and rep["proposer"] == registered,
+               f"{name}: the image is registered under [incumbent].proposer and the records carry it ({registered})")
+        return code, rep, work
+
+    code, rep, work = run("intact", alter=False)
+    expect(code == 0 and rep.get("verdict") in {"FIT", "MARGINAL", "UNFIT"} and rep.get("ledger_findings") == [],
+           f"intact ledger: a verdict, no ledger finding, exit 0 ({code}, {rep.get('verdict')})")
+    expect(len((work / "out" / "records.jsonl").read_text().splitlines()) == 10,
+           "intact ledger: every record appended to records.jsonl")
+    code, rep, _ = run("altered", alter=True)
+    expect(code == 1 and str(rep.get("verdict")).startswith("STOPPED: the ledger fails verification")
+           and len(rep.get("ledger_findings", [])) > 0,
+           f"one ledger record altered: STOPPED for the ledger, its findings reported, exit 1 "
+           f"({code}, {rep.get('verdict')}, {rep.get('ledger_findings')})")
+    return ok()
+
+
 # Witnesses (instruction #108 item 1): the paths each pin's check or mutants read. A change under harness/, or to
 # Makefile, pyproject.toml or uv.lock, runs every pin whatever it witnesses (runner.FORCE_ALL); a pin that reads the
 # real branch, the ledgers or the GitHub API witnesses ALWAYS.
@@ -6571,6 +6647,10 @@ PINS = [
                     Mutant("mixed_proposers_admitted", _edits("P18_mixed_proposers_admitted")),
                     Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
                     Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
+    Pin("P34", "`python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification "
+               "makes the pilot STOPPED with exit 1",
+        p34_pilot_main, (Mutant("ledger_findings_ignored", _edits("P34_ledger_findings_ignored")),
+                         Mutant("registration_unbound", _edits("P34_registration_unbound"))), JUDGE_SIDE),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),

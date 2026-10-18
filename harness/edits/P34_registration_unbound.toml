@@ -1,0 +1,6 @@
+# P34's mutant `registration_unbound` (L2a obligation 36; review 571ee563f91d F3): the pilot registers the incumbent's
+# image under a party of its own instead of `[incumbent].proposer`, so the records carry a proposer the config never named.
+[[edit]]
+path = "pilot/__main__.py"
+old = "registry.credential(private, cfg[\"incumbent\"][\"proposer\"])"
+new = "registry.credential(private, {\"kind\": \"builder\", \"model\": \"pilot\", \"session\": \"pilot\"})"

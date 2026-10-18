@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o36-pilot-main-pinned (L2a obligation 36, `pilot/__main__.py` paths pinned): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "e45383fa-a1b0-48bf-87dd-8634b42893e5"
