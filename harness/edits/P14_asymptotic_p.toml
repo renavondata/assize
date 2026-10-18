@@ -1,0 +1,15 @@
+# P14's mutant `asymptotic_p` (L2a obligation 33): the uniformity p value is restored to the asymptotic chi-square law
+# of the old `_chi2_sf`, Q(df/2, x/2) at Pearson's statistic with k - 1 df, in place of the exact multinomial tail.
+[[edit]]
+path = "harness/pins.py"
+old = """    s0 = sum(c * c for c in counts)
+    completions = {}
+"""
+new = """    s0 = sum(c * c for c in counts)
+    h, df = (k * s0 / n - n) / 2, k - 1
+    if df % 2 == 0:
+        return math.exp(-h) * math.fsum(h ** i / math.factorial(i) for i in range(df // 2))
+    return math.erfc(math.sqrt(h)) + math.exp(-h) * math.fsum(h ** (i + 0.5) / math.gamma(i + 1.5)
+                                                               for i in range((df - 1) // 2))
+    completions = {}
+"""
