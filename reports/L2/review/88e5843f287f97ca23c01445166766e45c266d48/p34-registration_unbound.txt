@@ -1,0 +1,46 @@
+pin:       P34
+protects:  `python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification makes the pilot STOPPED with exit 1
+role:      mutant
+tree:      /tmp/rv247.YJIx/registration_unbound
+invoked:   /tmp/rv247.YJIx/registration_unbound
+scratch:   /tmp/rv247.YJIx/scr-registration_unbound
+VERDICT: FIT (smoke: not evidence)
+proposer: {"kind": "builder", "model": "pilot", "session": "pilot"}
+world crafter; runtime fake; image sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee; judge_sha256 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+episodes: 10 recorded of 10 requested (cap 1000.0 s); terminations {'crash': 1, 'terminal': 9}
+utility over 10 episodes: mean 1.8, min 0, max 3; counts {'0': 1, '1': 3, '2': 3, '3': 3}
+Hafner score (reported beside the utility, never as it): 54.62170623934094
+throughput: 10673.178712089775 episodes/s over 0.0 s wall-clock, 1 requests
+compute per episode over 10: cpu_s mean 0.01, wall_s mean 0.02, peak_memory_bytes max 1009, price mean 4.499999999999999e-06
+predictive floor, per declared target: log-loss per scored step (scored, missing, infinite); mean entropy
+  a: +inf (100, 5, 1); 0.275
+  b: 0.55 (100, 5, 0); 0.275
+time-to-learn. Assumption: a candidate's per-episode utility is distributed as the incumbent's shifted by delta achievements per episode. Note: a random agent's variance is a weak proxy for that of a competent agent.
+  delta | episodes per arm | measure | wall-clock s (both arms)
+  0.25 | 97 | 0.9209499999999999 | 0.01817640322842635
+  0.5 | 24 | 0.9176249999999999 | 0.004497254407033324
+  1.0 | 5 | 0.9152749999999998 | 0.0009369280014652759
+  intact: exit 0; verdict FIT; ledger findings []; registered to {'kind': 'builder', 'model': 'pilot', 'session': 'pilot'}
+  [FAIL] intact: the image is registered under [incumbent].proposer and the records carry it ({'kind': 'builder', 'model': 'pilot', 'session': 'pilot'})
+  [ok] intact ledger: a verdict, no ledger finding, exit 0 (0, FIT)
+  [ok] intact ledger: every record appended to records.jsonl
+VERDICT: STOPPED: the ledger fails verification (2 findings) (smoke: not evidence)
+proposer: {"kind": "builder", "model": "pilot", "session": "pilot"}
+world crafter; runtime fake; image sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee; judge_sha256 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+episodes: 10 recorded of 10 requested (cap 1000.0 s); terminations {'crash': 1, 'terminal': 9}
+utility over 10 episodes: mean 1.8, min 0, max 3; counts {'0': 1, '1': 3, '2': 3, '3': 3}
+Hafner score (reported beside the utility, never as it): 54.62170623934094
+throughput: 10137.54605906387 episodes/s over 0.0 s wall-clock, 1 requests
+compute per episode over 10: cpu_s mean 0.01, wall_s mean 0.02, peak_memory_bytes max 1009, price mean 4.499999999999999e-06
+predictive floor, per declared target: log-loss per scored step (scored, missing, infinite); mean entropy
+  a: +inf (100, 5, 1); 0.275
+  b: 0.55 (100, 5, 0); 0.275
+time-to-learn. Assumption: a candidate's per-episode utility is distributed as the incumbent's shifted by delta achievements per episode. Note: a random agent's variance is a weak proxy for that of a competent agent.
+  delta | episodes per arm | measure | wall-clock s (both arms)
+  0.25 | 97 | 0.9209499999999999 | 0.019136781117413192
+  0.5 | 24 | 0.9176249999999999 | 0.0047348736785352225
+  1.0 | 5 | 0.9152749999999998 | 0.0009864320163615048
+  altered: exit 1; verdict STOPPED: the ledger fails verification (2 findings); ledger findings ['crafter.ledger.jsonl is 11875 bytes; the last signed head says 11758', "pilot-p34-altered-0[3]: sha256 is not the record's own digest"]; registered to {'kind': 'builder', 'model': 'pilot', 'session': 'pilot'}
+  [FAIL] altered: the image is registered under [incumbent].proposer and the records carry it ({'kind': 'builder', 'model': 'pilot', 'session': 'pilot'})
+  [ok] one ledger record altered: STOPPED for the ledger, its findings reported, exit 1 (1, STOPPED: the ledger fails verification (2 findings), ['crafter.ledger.jsonl is 11875 bytes; the last signed head says 11758', "pilot-p34-altered-0[3]: sha256 is not the record's own digest"])
+result:    FAIL
