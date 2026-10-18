@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o33-exact-uniform-rebuilt (L2a obligation 33, rebuilt from master by cherry-picking 98bea19 of closed PR #234): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "e5c2325f-233b-4601-b5f3-015bbefa70b6"
