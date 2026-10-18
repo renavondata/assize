@@ -698,6 +698,10 @@ TRAILER_FIXTURE = (  # (label, path written, Proposer trailer lines, finding cod
     ("builder then guy, .github/", ".github/x.yml", ("builder m s", "guy"), set()),
     ("malformed party", "docs/y.md", ("builder m",), {"bad_party"}),
     ("auditor, ordinary path", "docs/a.md", ("auditor m s",), set()),
+    # instruction #239 item 3: the resolver's party
+    ("mechanism, ordinary path", "reports/L2/r.jsonl", ("mechanism harness.ledger 39063593787",), set()),
+    ("mechanism alone, CLAUDE.md", "CLAUDE.md", ("mechanism harness.ledger local",), {"entrenched_without_guy"}),
+    ("mechanism, non-dotted tool", "docs/n.md", ("mechanism ledger 39063593787",), {"bad_party"}),
 )
 EXEMPTION_FIXTURE = (  # (label, path, party stated only in the body, party exempted or None, parties, findings wanted)
     ("body-only Proposer, not exempted", "docs/z.md", "reviewer m s", None, (), {"no_proposer"}),
@@ -892,7 +896,13 @@ def p0m_commit_proposers() -> bool:
         expect(got == want and c.parties == trailers and c.instructions == cited,
                f"{label}: parties reported {list(c.parties)}, instructions {list(c.instructions)}, findings "
                f"{sorted(got)}; want {list(trailers)}, {list(cited)}, {sorted(want)}")
-    inert = claims.inert_exemptions(work / "repo", "master", exemptions)
+    # instruction #239 item 2: the pre-push hook reads the trailer grammar as P0m does
+    grammar = {"no_proposer", "bad_party"}
+    trailered = commits[:len(TRAILER_FIXTURE)]
+    hooked = {f.where for f in claims.trailer_findings(work / "repo", f"{trailered[0].sha}~1..{trailered[-1].sha}")}
+    pinned = {f.where for c in trailered for f in claims.commit_findings(c, patterns) if f.code in grammar}
+    expect(hooked == pinned, f"fixture: the hook refuses {sorted(hooked)}, P0m's grammar {sorted(pinned)}")
+    inert =claims.inert_exemptions(work / "repo", "master", exemptions)
     expect(bool(exemptions) and {f.where for f in inert} == {f"exemption {s[:12]}" for s in exemptions}
            and all(f.code == "inert_exemption" for f in inert),
            f"fixture: every exemption reachable from master is inert ({[str(f) for f in inert]})")
@@ -6265,7 +6275,9 @@ PINS = [
                                 Mutant("instruction_labeler_unchecked", _edits("P0m_instruction_labeler_unchecked")),
                                 Mutant("body_edit_unchecked", _edits("P0m_body_edit_unchecked")),
                                 Mutant("inert_exemption_admitted", _edits("P0m_inert_exemption_admitted")),
-                                Mutant("stale_exemption_accepted", _edits("P0m_stale_exemption_accepted"))), ALWAYS),
+                                Mutant("stale_exemption_accepted", _edits("P0m_stale_exemption_accepted")),
+                                Mutant("mechanism_rejected", _edits("P0m_mechanism_rejected")),
+                                Mutant("mechanism_as_guy", _edits("P0m_mechanism_as_guy"))), ALWAYS),
     Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
         p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),), HARNESS),
     Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",
