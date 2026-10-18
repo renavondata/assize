@@ -1,0 +1,8 @@
+pins	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T10:26:24.2008784Z   clean: true
+pins	make pins	2026-10-18T10:33:53.6329609Z [clean ] P0bh: observed pass -> ok (2.189s) out/pins/runs/P0bh/clean/transcript.log
+pins	make pins	2026-10-18T10:33:53.6373357Z [mutant] P0b/judge_imports_mutants: mutant fail, twin pass -> KILLED (0.48s + 0.482s) out/pins/runs/P0b/judge_imports_mutants/mutant/transcript.log
+pins	make pins	2026-10-18T10:42:49.5934889Z [mutant] P0aq/conflict_as_clean: mutant fail, twin pass -> KILLED (0.48s + 0.479s) out/pins/runs/P0aq/conflict_as_clean/mutant/transcript.log
+pins	make pins	2026-10-18T10:55:27.7258289Z [mutant] P0bh/redact_skipped: mutant fail, twin pass -> KILLED (2.034s + 2.234s) out/pins/runs/P0bh/redact_skipped/mutant/transcript.log
+pins	make pins	2026-10-18T10:55:27.7260173Z [mutant] P0bh/secrets_check_blind: mutant fail, twin pass -> KILLED (2.235s + 2.234s) out/pins/runs/P0bh/secrets_check_blind/mutant/transcript.log
+pins	make pins	2026-10-18T11:11:25.0376632Z clean: 84/84 passed, 0/84 failed
+pins	make pins	2026-10-18T11:11:25.0377446Z mutants: 236/236 killed, 0/236 survived, 0/236 inconclusive, 0/236 stale, 0/236 non-causal, 0 leaked (clean and mutant)
