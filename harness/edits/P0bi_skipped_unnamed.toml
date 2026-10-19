@@ -1,0 +1,5 @@
+# P0bi's second mutant (review 492f85a F4): a row read as neither a forecast nor a resolution is dropped silently.
+[[edit]]
+path = "harness/ledger.py"
+old = "    skipped = [r for r in rows if \"claim\" not in r and \"id\" not in r and \"resolves\" not in r]\n"
+new = "    skipped: list[dict] = []\n"

@@ -584,6 +584,14 @@ def open_forecasts(rows: Sequence[dict]) -> list[dict]:
     return [r for r in rows if "claim" in r and r.get("id") not in resolved]
 
 
+def open_count(rows: Sequence[dict]) -> tuple[list[dict], list[dict], list[dict]]:
+    """The open forecasts, the legacy resolutions read under `resolves` (claims.L0_PRE_RULE's rows), and the rows read
+    as neither a forecast nor a resolution, which are named, never dropped (review 492f85a F4)."""
+    legacy = [r for r in rows if "claim" not in r and "id" not in r and "resolves" in r]
+    skipped = [r for r in rows if "claim" not in r and "id" not in r and "resolves" not in r]
+    return open_forecasts(rows), legacy, skipped
+
+
 def resolve(rows: Sequence[dict], observe: Observe, now: str, session: str) -> tuple[list[dict], list[str]]:
     """Resolutions for every open typed forecast whose outcome is observable, and a line for every one that could not
     be read or whose type no outcome function names (never dropped silently)."""
@@ -1218,6 +1226,9 @@ def main(argv: list[str] | None = None) -> int:
     q.add_argument("--until", default=None, help="ISO timestamp; now if absent")
     q.add_argument("--head", default="HEAD")
     q.add_argument("--repo", type=Path, default=Path("."))
+    o = sub.add_parser("open", help="the number of open forecasts at <head>; legacy and skipped rows named on stderr")
+    o.add_argument("--head", default="HEAD")
+    o.add_argument("--repo", type=Path, default=Path("."))
     t = sub.add_parser("status", help="the master view of STATUS: the file of the most recently merged pull request")
     t.add_argument("--head", default="HEAD")
     t.add_argument("--repo", type=Path, default=Path("."))
@@ -1276,6 +1287,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "resolve":
         return _resolve_cli(a.repo, a.session)
+    if a.cmd == "open":
+        rows = ledger_rows(a.repo, a.head)
+        got, legacy, skipped = open_count(rows)
+        print(f"# {sum(1 for r in rows if 'claim' in r)} forecasts at {a.head}; {len(got)} open; {len(legacy)} legacy "
+              f"resolutions read under `resolves` ({', '.join(str(r['resolves']) for r in legacy) or 'none'}); "
+              f"{len(skipped)} rows read as neither ({', '.join(json.dumps(r)[:80] for r in skipped) or 'none'})",
+              file=sys.stderr)
+        print(len(got))
+        return 0
     if a.cmd == "status":
         view = status_view(a.repo, a.head)
         if view is None:

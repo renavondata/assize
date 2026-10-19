@@ -393,6 +393,50 @@ def p0bg_p0m_without_git() -> bool:
     return ok()
 
 
+_P0BI_P = {"kind": "builder", "model": "m", "session": "s"}
+OPEN_FROZEN = ({"id": "aaaaaaaaaaaa", "ts": "2026-01-01T00:00:00Z", "proposer": _P0BI_P, "claim": "a", "p": 0.5},
+               {"resolves": "aaaaaaaaaaaa", "ts": "2026-01-01T00:00:01Z", "outcome": True})  # the L0 legacy shape
+OPEN_SESSION = ({"id": "bbbbbbbbbbbb", "ts": "2026-01-02T00:00:00Z", "proposer": _P0BI_P, "claim": "b", "p": 0.5},
+                {"id": "cccccccccccc", "ts": "2026-01-02T00:00:00Z", "proposer": _P0BI_P, "claim": "c", "p": 0.5},
+                {"id": "bbbbbbbbbbbb", "ts": "2026-01-02T00:00:01Z", "proposer": _P0BI_P, "outcome": False},
+                {"ts": "2026-01-02T00:00:02Z", "note": "p0bi-neither"})
+
+
+def p0bi_open_count() -> bool:
+    """`python -m harness.ledger open` counts the open forecasts at a head, reading the A1.6 resolution shape and the
+    legacy L0 `resolves` shape alike, and names on stderr the legacy rows it read and the rows it read as neither
+    (review 492f85a F4; the review procedure's counter raised `KeyError: 'id'` on the legacy rows)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    rows = ledger.ordered(list(OPEN_FROZEN + OPEN_SESSION))
+    try:
+        got, legacy, skipped = ledger.open_count(rows)
+        raised = None
+    except Exception as e:  # the defect: a traceback where a count belongs
+        got, legacy, skipped, raised = [], [], [], f"{type(e).__name__}: {e}"
+    expect(raised is None, f"the count over both resolution shapes does not raise ({raised})")
+    expect([f["id"] for f in got] == ["cccccccccccc"], f"one forecast is open, the unresolved one ({got})")
+    expect([r["resolves"] for r in legacy] == ["aaaaaaaaaaaa"], f"the legacy resolution is read and named ({legacy})")
+    expect([r.get("note") for r in skipped] == ["p0bi-neither"], f"the row of neither shape is named ({skipped})")
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bi-", dir=context.scratch))
+    repo = work / "repo"
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+    (repo / "reports/L0/forecasts").mkdir(parents=True)
+    (repo / "reports/L0/forecasts.jsonl").write_text("".join(json.dumps(r) + "\n" for r in OPEN_FROZEN))
+    (repo / "reports/L0/forecasts/s.jsonl").write_text("".join(json.dumps(r) + "\n" for r in OPEN_SESSION))
+    for args in (("init", "-q", "-b", "master"), ("add", "-A"), ("commit", "-q", "-m", "ledger")):
+        subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, env=env)
+    out = subprocess.run([sys.executable, "-B", "-m", "harness.ledger", "open", "--head", "HEAD", "--repo", str(repo)],
+                         cwd=ROOT, capture_output=True, text=True)
+    expect(out.returncode == 0 and out.stdout.strip() == "1",
+           f"the command prints 1 (exit {out.returncode}; stdout {out.stdout.strip()!r}; {out.stderr.strip()[-200:]!r})")
+    expect("1 legacy" in out.stderr and "aaaaaaaaaaaa" in out.stderr and "1 rows read as neither" in out.stderr
+           and "p0bi-neither" in out.stderr, f"stderr names the legacy and the skipped rows ({out.stderr.strip()!r})")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
@@ -6376,6 +6420,10 @@ PINS = [
         p0bg_p0m_without_git, (Mutant("base_unguarded", _edits("P0bg_base_unguarded")),
                                Mutant("stale_base_unguarded", _edits("P0bg_stale_base_unguarded")),
                                Mutant("commits_base_unguarded", _edits("P0bg_commits_base_unguarded"))), HARNESS),
+    Pin("P0bi", "the open-forecast count reads both resolution shapes and names the legacy and the skipped rows",
+        p0bi_open_count, (Mutant("resolves_unread", _edits("P0bi_resolves_unread")),
+                          Mutant("skipped_unnamed", _edits("P0bi_skipped_unnamed")),
+                          Mutant("legacy_unnamed", _edits("P0bi_legacy_unnamed"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),

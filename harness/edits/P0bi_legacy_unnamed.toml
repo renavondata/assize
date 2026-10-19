@@ -1,0 +1,5 @@
+# P0bi's third mutant (review 492f85a F4): the legacy `resolves` rows are read but no longer named.
+[[edit]]
+path = "harness/ledger.py"
+old = "    legacy = [r for r in rows if \"claim\" not in r and \"id\" not in r and \"resolves\" in r]\n"
+new = "    legacy: list[dict] = []\n"
