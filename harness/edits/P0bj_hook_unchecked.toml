@@ -1,0 +1,5 @@
+# P0bj's fourth mutant: the pre-push hook no longer runs the author check.
+[[edit]]
+path = "harness/hooks/pre-push"
+old = "PYTHONPATH=\"$here\" python3 -B -m harness.claims authors \"$base\" HEAD --repo . || {\n"
+new = "true || {\n"

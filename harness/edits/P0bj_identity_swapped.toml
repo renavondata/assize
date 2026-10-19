@@ -1,0 +1,6 @@
+# P0bj's first mutant (review ef1e03c F7): the seeded identity swap, builder's commits read as assize-reviewer's and
+# reviewer's as assize-builder's.
+[[edit]]
+path = "harness/claims.py"
+old = "PARTY_ACCOUNTS: Mapping[str, str] = {\"builder\": \"assize-builder\", \"reviewer\": \"assize-reviewer\",\n"
+new = "PARTY_ACCOUNTS: Mapping[str, str] = {\"builder\": \"assize-reviewer\", \"reviewer\": \"assize-builder\",\n"

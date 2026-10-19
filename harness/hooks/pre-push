@@ -14,6 +14,12 @@ PYTHONPATH="$here" python3 -B -m harness.claims trailers "$base..HEAD" --repo . 
   echo "pre-push: refused: amend your own unpushed commit so that git parses its trailers (instruction #110)" >&2
   exit 1
 }
+# Review ef1e03c F7: it refuses a push carrying a commit whose author is not the account its proposer acts through
+# (`python -m harness.claims authors`), while that commit can still be amended.
+PYTHONPATH="$here" python3 -B -m harness.claims authors "$base" HEAD --repo . || {
+  echo "pre-push: refused: re-author your own unpushed commit as the account you act through, e.g. git commit --amend --no-edit --author='assize-reviewer <assize-reviewer@users.noreply.github.com>' (review ef1e03c F7)" >&2
+  exit 1
+}
 statuses=$(git diff --name-only --diff-filter=AM "$base...HEAD" -- 'reports/L*/status/*.md') || {
   echo "pre-push: refused: cannot read the STATUS files the unpushed commits add or change" >&2
   exit 1

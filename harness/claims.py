@@ -379,6 +379,46 @@ def merge_parties(email: str) -> tuple[str, ...]:
     return (party,) if party is not None else ()
 
 
+# Review ef1e03c F7 (CLAUDE.md A1.7): a party that acts through an account authors its commits as that account, so the
+# git author does not misstate who proposed. The Auditor and the Vizier are procedures of the reviewer account
+# (Amendments 2 and 3, appended). `guy` (whose authority a Builder carries on an instruction commit), `counsel` and
+# `mechanism` (run inside another party's session) hold no account of their own here, and constrain nothing.
+PARTY_ACCOUNTS: Mapping[str, str] = {"builder": "assize-builder", "reviewer": "assize-reviewer",
+                                     "auditor": "assize-reviewer", "vizier": "assize-reviewer"}
+
+
+def author_findings(c: Commit) -> list[Finding]:
+    """An `author_not_proposer` finding on a non-merge commit whose author address does not name the one account every
+    account-holding party of its `Proposer:` trailers acts through; a merge's party is read from its author already."""
+    wanted = sorted({PARTY_ACCOUNTS[p.split()[0]] for p in c.parties if p.split()[0] in PARTY_ACCOUNTS})
+    got = account(c.author)
+    return ([Finding(f"commit {c.sha[:12]}", "author_not_proposer",
+                     f"authored by {c.author!r} (account {got!r}); parties {list(c.parties)} act through {wanted}")]
+            if not c.merge and wanted and wanted != [got] else [])
+
+
+# The rule binds prospectively: it reads only the commits descending from the one that introduced it, read from git as
+# PRICE_MARK dates instruction #70's rule. A commit made before the rule stood in its history (PR #251's four review
+# commits, which no force-push can rewrite) is outside it, and so is master's older history a merge brings in.
+AUTHOR_MARK = "def author_findings("
+AUTHOR_PATH = "harness/claims.py"
+
+
+def author_law(repo: Path, head: str = "HEAD", mark: str = AUTHOR_MARK, path: str = AUTHOR_PATH) -> str | None:
+    """The first commit in `head`'s history that adds `mark` to `path`, or None if there is none."""
+    out = _git(repo, "log", "--reverse", "--format=%H", f"-S{mark}", head, "--", path).split()
+    return out[0] if out else None
+
+
+def author_check(repo: Path, base: str, head: str = "HEAD") -> list[Finding]:
+    """`author_findings` on every commit in base..head that descends from `author_law` (itself included); with no
+    such commit in head's history, on every commit in base..head (the rule's own uncommitted tree)."""
+    law = author_law(repo, head)
+    bound = (set(_git(repo, "rev-list", "--ancestry-path", f"{law}..{head}").split()) | {law}
+             if law is not None else None)
+    return [f for c in branch_commits(repo, base, head) if bound is None or c.sha in bound for f in author_findings(c)]
+
+
 def codeowners_patterns(text: str) -> tuple[str, ...]:
     return tuple(line.split()[0].lstrip("/") for line in text.splitlines()
                  if line.strip() and not line.lstrip().startswith("#"))
@@ -860,9 +900,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     """`python -m harness.claims signed <n>...`: whether each issue carries Guy's authority (Amendment 3). The Builder
     acts only on an issue printed `signed`. `trailers <revisions>`: exits non-zero if a commit's trailers do not parse
     (instruction #110 Part C). `next <item>...`: the first item no open pull request holds (Part A item 2).
-    `status-check <path>...`: exits non-zero if P0l would reject a STATUS file (instruction #211 item 2)."""
+    `status-check <path>...`: exits non-zero if P0l would reject a STATUS file (instruction #211 item 2).
+    `authors <base> [<head>]`: exits non-zero if a commit's author is not the account its proposer acts through
+    (review ef1e03c F7)."""
     ap = argparse.ArgumentParser(prog="python -m harness.claims")
     sub = ap.add_subparsers(dest="cmd", required=True)
+    w = sub.add_parser("authors", help="refuse commits authored by an account other than the one their proposer uses")
+    w.add_argument("base")
+    w.add_argument("head", nargs="?", default="HEAD")
+    w.add_argument("--repo", type=Path, default=Path("."))
     s = sub.add_parser("signed", help="whether each issue is an instruction Guy signed")
     s.add_argument("numbers", type=int, nargs="*")
     s.add_argument("--repo", type=Path, default=Path("."))
@@ -880,6 +926,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     c.add_argument("paths", type=Path, nargs="+")
     c.add_argument("--repo", type=Path, default=Path("."), help="the tree whose reports/L*/ci/*.json records are read")
     a = ap.parse_args(argv)
+    if a.cmd == "authors":
+        found = author_check(a.repo, a.base, a.head)
+        for f in found:
+            print(f, file=sys.stderr)
+        print(f"authors {a.base}..{a.head}: {len(found)} findings", file=sys.stderr)
+        return 1 if found else 0
     if a.cmd == "status-check":
         found = status_check(a.repo, a.paths)
         for f in found:
