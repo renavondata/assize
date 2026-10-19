@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o40-p15-second-fixture (L2a obligation 40, S a9de119: P15 is pinned on a two-point fixture only): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "8e6a1321-1a8f-47bd-a924-6623b6bf384d"
