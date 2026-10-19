@@ -1,0 +1,30 @@
+# reports/L0/forecasts/39143819017.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39143819017.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39143819017.jsonl: 94 open, 88 typed; resolved 3, unreadable 20
+resolved 1e93ab59f049 True — reports/L2/review-c4dfd1e0fa18e3ef328663024a4cea501d0d870a.md at c9185c838648: ACCEPT WITH OBLIGATIONS
+resolved 80d190993559 False — pins run 39136961259 attempt 1 on c95bddbf448c: failure
+resolved c0981202a62c False — run 39136337928: 100.0 minutes, bound 90
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404)
+)
+UNREAD 02d749e28bef: pins_green {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103: gh: Not Found (HTTP 404)
+)
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103/commits?per_page=100: gh: Not Found (HTTP 404)
+)
+UNREAD 191a63d44bf2: session_minutes {'run': 'local', 'bound': 25}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 2c9577e1a69c: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 3c074d68d679: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD b379e6a4b68b: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD e1ff2bd0a05c: session_minutes {'run': 'local', 'bound': 30}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 49b9c525ee57: session_minutes {'run': 'local', 'bound': 40}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 062c95189282: session_minutes {'run': 'local', 'bound': 90}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 5676da4ef8c1: session_minutes {'run': 'local', 'bound': 90}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 46089f87516d: host_verdict {'layer': 'L2', 'verdict': 'FIT'}: not read (ValueError: invalid literal for int() with base 10: 'L2')
+UNREAD 6a8633af3d01: session_minutes {'run': 'local', 'bound': 90}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 22fb418f1ca6: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD a06f68215bec: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 623abfb5c41b: session_minutes {'run': 'local', 'bound': 60}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD f3d3b79b388d: session_minutes {'run': 'local', 'bound': 40}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 2d02cc672c8e: session_minutes {'run': 'local', 'bound': 40}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD ed405b304e08: session_minutes {'run': 'local', 'bound': 30}: not read (ValueError: invalid literal for int() with base 10: 'local')
