@@ -6555,6 +6555,19 @@ P34_CFG = P18_CFG | {"pilot": P18_CFG["pilot"] | {"episodes": 10},
 P34_IMAGE = "sha256:" + "d" * 64
 
 
+def _pilot_hash_by_definition(root: Path) -> str:
+    """SHA-256 over every file of pilot/ under `root` but bytecode caches, in path order: path from `root`, NUL, the
+    SHA-256 of its bytes, newline. Derived here from the definition, independently of `pilot/run.py`."""
+    import hashlib
+
+    rels = sorted(f.relative_to(root).as_posix() for f in (root / "pilot").rglob("*")
+                  if f.is_file() and "__pycache__" not in f.relative_to(root).parts)
+    h = hashlib.sha256()
+    for rel in rels:
+        h.update(rel.encode() + b"\0" + hashlib.sha256((root / rel).read_bytes()).hexdigest().encode() + b"\n")
+    return h.hexdigest()
+
+
 def p34_pilot_main() -> bool:
     """`pilot/__main__.py`'s `pilot()` (L2a obligation 36; review 571ee563f91d F3) over a faked runtime, image build and
     `evaluate()` that writes its records through the real `judge.ledger` into the ledger `pilot()` verifies, with the
@@ -6569,6 +6582,7 @@ def p34_pilot_main() -> bool:
     from worlds.crafter import binding as crafter
 
     main = importlib.import_module("pilot.__main__")
+    pilot_run = importlib.import_module("pilot.run")
     expect, ok = _expecter()
     fake_binding = SimpleNamespace(manifest=lambda: {"targets": [{"name": t} for t in P18_TARGETS]},
                                    crafter=SimpleNamespace(constants=SimpleNamespace(achievements=P18_COMPONENTS)),
@@ -6615,6 +6629,23 @@ def p34_pilot_main() -> bool:
            f"intact ledger: a verdict, no ledger finding, exit 0 ({code}, {rep.get('verdict')})")
     expect(len((work / "out" / "records.jsonl").read_text().splitlines()) == 10,
            "intact ledger: every record appended to records.jsonl")
+    # L2a obligation 37 (brief 2 A2: "The pilot runner and its config are hashed into every pilot report, beside
+    # `judge_sha256`"). The hash is derived here from its definition, over every file of pilot/ but bytecode caches, and
+    # the report states it in JSON and in Markdown; a byte changed in any one file of a copy gives another hash.
+    want = _pilot_hash_by_definition(ROOT)
+    expect(rep.get("pilot_sha256") == want and f"pilot_sha256 {want}" in (work / "out" / "report.md").read_text(),
+           f"the report states pilot_sha256 {want} in report.json and report.md ({rep.get('pilot_sha256')})")
+    copy = Path(tempfile.mkdtemp(prefix="assize-p34-hash-", dir=context.scratch))
+    shutil.copytree(ROOT / "pilot", copy / "pilot", ignore=shutil.ignore_patterns("__pycache__"))
+    base = _pilot_hash_by_definition(copy)
+    for f in sorted(p for p in (copy / "pilot").rglob("*") if p.is_file()):
+        original = f.read_bytes()
+        f.write_bytes(original + b"\n")
+        changed = pilot_run.pilot_hash(copy)
+        f.write_bytes(original)
+        expect(changed != base, f"a byte added to {f.relative_to(copy)} changes pilot_sha256")
+    expect(pilot_run.pilot_hash(copy) == base == pilot_run.pilot_hash(ROOT),
+           "the copy of pilot/ hashes as pilot/ does, and restored files restore the hash")
     code, rep, _ = run("altered", alter=True)
     expect(code == 1 and str(rep.get("verdict")).startswith("STOPPED: the ledger fails verification")
            and len(rep.get("ledger_findings", [])) > 0,
@@ -6954,9 +6985,11 @@ PINS = [
                     Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
                     Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
     Pin("P34", "`python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification "
-               "makes the pilot STOPPED with exit 1",
+               "makes the pilot STOPPED with exit 1; the report states the hash of pilot/ beside judge_sha256",
         p34_pilot_main, (Mutant("ledger_findings_ignored", _edits("P34_ledger_findings_ignored")),
-                         Mutant("registration_unbound", _edits("P34_registration_unbound"))), JUDGE_SIDE),
+                         Mutant("registration_unbound", _edits("P34_registration_unbound")),
+                         Mutant("pilot_hash_config_omitted", _edits("P34_pilot_hash_config_omitted")),
+                         Mutant("pilot_hash_is_judge_hash", _edits("P34_pilot_hash_is_judge_hash"))), JUDGE_SIDE),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),
