@@ -1,9 +1,10 @@
-# STATUS — L2 — 2026-10-19 — f057c15 — PR #251
-VERDICT: SESSION DONE: L2a obligation 36 (`pilot/__main__.py` paths unpinned, R 571ee563f91d F3) discharged by pin P34, rebuilt from master after review 660cb1a BLOCK on #247 (late reviewer row, P0r); mutants `ledger_findings_ignored` and `registration_unbound` KILLED with passing twins
+# STATUS — L2 — 2026-10-19 — b15543e — PR #251
+VERDICT: SESSION DONE: review f057c157 F1 (resolver silently left a pins_green forecast open) answered in b15543e: `_pins_green` now raises Unreadable naming the PR, the run count and the earliest run; mutant `P0s/pins_green_dropped` KILLED with a passing twin. Obligation 36 (pin P34, R 571ee563f91d F3) as before
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
-pins CI run 39205283711 on f057c15: success (reports/L2/ci/39205283711.json)
-pins: clean 85/85; mutants 242/242 KILLED (count of `[mutant] ... KILLED` lines in the run log); twins not recounted here; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
-changed: harness/{pins.py,edits/P34_ledger_findings_ignored.toml,edits/P34_registration_unbound.toml,proposer.d/l2a-o36-pilot-main-pinned-rebuilt.toml}, reports/L2/{forecasts/07f0c67e-….jsonl,ci/39205283711.json,status/l2a-o36-pilot-main-pinned-rebuilt.md}
+pins CI run 39213283132 on b15543e: success (reports/L2/ci/39213283132.json)
+pins: clean 85/85; mutants 243/243 KILLED (count of `[mutant] ... KILLED` lines in the run log); twins 243/243; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0
+changed: harness/{ledger.py,pins.py,edits/P0s_pins_green_dropped.toml,edits/P34_ledger_findings_ignored.toml,edits/P34_registration_unbound.toml,proposer.d/l2a-o36-pilot-main-pinned-rebuilt.toml}, reports/L2/{forecasts/07f0c67e-….jsonl,ci/39213283132.json,status/l2a-o36-pilot-main-pinned-rebuilt.md}
+did: PR-branch session on #251 (newest review f057c157 BLOCK, F1 only blocking): the fix commit b15543e was already on the branch; this session verified it against CI run 39213283132 and updated STATUS; no forecast row appended (a PR branch takes none; rule 2, P0r); F2 (base 8 behind master) was answered by the merge c2a3d03; F3 stays an obligation on L3
 did: PR-branch session on #247 (newest review BLOCK, F1/F2): rebuilt on a new branch from master ead01d1 by `git cherry-pick --no-commit a874b28`, keeping only its code paths; the old proposer row and forecasts of #247 are not carried; #247 is superseded by this PR
 did: attempt 1 of run 39205283711 failed with `P3/played_at_end` NON-CAUSAL (twin failed, 64.6 s against the mutant's 30.6 s; my diff touches neither P3 nor `judge/`; P3's clean check passes locally in 29 s); I re-ran the failed job once (attempt 2) and it succeeded; the cause of the twin failure is not established, treated as load-dependent timing
 did: forecasts for this branch were written before it opened (a new branch); no tool call was denied; no push was refused
