@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o34-r0cdb209-f5-starvation (L2a obligation 34, review 0cdb209 F5: P14 plays until its committed draw count is reached): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "03c70349-079d-4c69-a16f-489e7df2d504"

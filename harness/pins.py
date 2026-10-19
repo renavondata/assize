@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import types
 from fractions import Fraction
 from pathlib import Path
 
@@ -5981,10 +5982,11 @@ def p5_commitment_order() -> bool:
     return ok()
 
 
-# P14 plays the random incumbent (brief 1 section 4) for five episodes in one container, each cut to INCUMBENT_STEPS
-# steps: 5 x 100 draws over Crafter's 17 actions, about 29 per action. A random agent can die before the cut (the third
-# episode ended at 60 and 64 steps in two of ten runs), so five, not three: coverage needs 275 draws and survives the
-# loss of 225. Its uniformity is refused only when Pearson's
+# P14 plays the random incumbent (brief 1 section 4) in one container over binding seeds 1, 2, ..., each episode cut to
+# INCUMBENT_STEPS steps, until DRAWS = 5 x 100 draws over Crafter's 17 actions are played, about 29 per action. A random
+# agent can die before the cut (seed 3 did, at step 42 at the earliest, in 4 of 100 episodes; review 0cdb209 F5), and
+# then a further seed is played, so the committed draw count is a fact of every run, not a hope that no episode dies
+# early. Its uniformity is refused only when Pearson's
 # statistic over the first PEARSON_EPISODES episodes (200 draws, the most the exact tail below is computed for in
 # reasonable time) has an exact multinomial p value below UNIFORM_ALPHA, the false-failure rate the pin accepts per
 # runtime per run, stated before any run; a candidate's score never passes through it. Pearson has almost no power
@@ -5995,6 +5997,7 @@ INCUMBENT = ROOT / "incumbents" / "random"
 INCUMBENT_EPISODES = 5
 PEARSON_EPISODES = 2
 INCUMBENT_STEPS = 100
+DRAWS = INCUMBENT_EPISODES * INCUMBENT_STEPS
 UNIFORM_ALPHA = 1e-6
 # L2a obligation 33: 200 draws over 17 actions whose exact p value under the uniform multinomial is about 1.65e-6, at or
 # above UNIFORM_ALPHA, while the asymptotic chi-square law (16 df, statistic 59.25) puts it near 7.0e-7, below: a
@@ -6017,7 +6020,8 @@ class _Recording:
         return self.observations[-1]
 
 
-def _recorded_crafter(n: int, steps: int) -> list[_Recording]:
+def _recorded_crafter(steps: int):
+    """The recorded Crafter episode of a binding seed, cut to `steps` steps."""
     from worlds.crafter import binding
 
     def cut(seed: int):
@@ -6025,7 +6029,17 @@ def _recorded_crafter(n: int, steps: int) -> list[_Recording]:
         ep._env._length = steps
         return _Recording(ep)
 
-    return [cut(seed) for seed in range(1, n + 1)]
+    return cut
+
+
+def _worlds_until(make, target: int, drawn: list):
+    """make(1), make(2), ..., each appended to `drawn` and yielded once those before it are played (`episodes.played`
+    draws the next World only then), until their draws reach `target` or one of them was played for no draw. Each World
+    before the last adds at least one draw, so at most `target` + 1 are drawn: an early death costs episodes, not the
+    committed draw count (review 0cdb209 F5)."""
+    while sum(len(w.actions) for w in drawn) < target and all(w.actions for w in drawn):
+        drawn.append(make(len(drawn) + 1))
+        yield drawn[-1]
 
 
 def _floor_summary(observations: list[dict], targets) -> dict:
@@ -6103,7 +6117,8 @@ def _build(rt, context_dir: Path) -> str:
 def p14_random_incumbent() -> bool:
     """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
     runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
-    pin's, plays five episodes in one container, each ended by the World; every action it plays is uniform over the
+    pin's, plays episodes in one container, each ended by the World, until DRAWS draws are played, however early an
+    episode ends (an early death does not fail a uniform agent); every action it plays is uniform over the
     legal actions (Pearson's statistic over the first PEARSON_EPISODES episodes not refused at UNIFORM_ALPHA by its
     exact multinomial p value, which is right where it is known in closed form and does not refuse UNIFORM_BOUNDARY;
     and every legal action played at least once over all of them, a refusal whose false-failure probability for a
@@ -6122,10 +6137,16 @@ def p14_random_incumbent() -> bool:
            f"a uniform agent's count {UNIFORM_BOUNDARY} is not refused: exact p {float(edge):.3g} >= {UNIFORM_ALPHA}")
     m = binding.manifest()
     k = len(m["actions"])
-    miss = _some_cell_empty_sf(INCUMBENT_EPISODES * INCUMBENT_STEPS, k)
+    miss = _some_cell_empty_sf(DRAWS, k)
     expect(_some_cell_empty_sf(3, 3) == Fraction(7, 9) and miss < UNIFORM_ALPHA,
            f"a uniform agent leaves an action unplayed with exact probability {float(miss):.3g} < {UNIFORM_ALPHA} "
            f"(3 draws over 3 cells leave one empty with probability {_some_cell_empty_sf(3, 3)}, 7/9 by enumeration)")
+    for steps, want in ((30, -(-DRAWS // 30)), (INCUMBENT_STEPS, INCUMBENT_EPISODES), (0, 1)):
+        drawn: list = []
+        n = sum(1 for _ in _worlds_until(lambda seed: types.SimpleNamespace(actions=[0] * steps), DRAWS, drawn))
+        expect(n == len(drawn) == want,
+               f"episodes ended at {steps} draws: {n} drawn to reach the committed {DRAWS}, {want} by division "
+               f"(an episode of no draw ends the drawing)")
     base = runtime.candidate_config()["base_image"]
     froms = [ln.split()[1] for ln in (INCUMBENT / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
     expect(froms == [base], f"the incumbent's one FROM is the judge's pinned base image ({froms}, {base})")
@@ -6135,14 +6156,15 @@ def p14_random_incumbent() -> bool:
         before = _candidates(rt)
         image = _build(rt, INCUMBENT)
         say(f"  {rt.name} incumbent image: {image}")
+        worlds: list[_Recording] = []
         try:
-            worlds = _recorded_crafter(INCUMBENT_EPISODES, INCUMBENT_STEPS)
-            records = episodes.run(rt, image, worlds, m)
+            records = episodes.run(rt, image, _worlds_until(_recorded_crafter(INCUMBENT_STEPS), DRAWS, worlds), m)
         finally:
             subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
         say(f"  {rt.name} incumbent: {json.dumps(records)}")
-        expect([r["termination"] in episodes.WORLD_ENDINGS for r in records] == [True] * INCUMBENT_EPISODES,
-               f"{rt.name}: {INCUMBENT_EPISODES} episodes, each ended by the World "
+        expect(len(records) == len(worlds) >= INCUMBENT_EPISODES
+               and all(r["termination"] in episodes.WORLD_ENDINGS for r in records),
+               f"{rt.name}: {len(worlds)} episodes, at least {INCUMBENT_EPISODES}, each ended by the World "
                f"({[(r['termination'], r['steps']) for r in records]})")
         for r, w in zip(records, worlds):
             want = _floor_summary(w.observations, m["targets"])
@@ -6153,9 +6175,10 @@ def p14_random_incumbent() -> bool:
                 expect(got == v, f"{rt.name} episode {r['episode']} {name}: recorded {got}, floor derived {v}")
         every = [a for w in worlds for a in w.actions]
         unplayed = [a for a in range(k) if a not in every]
-        left = _some_cell_empty_sf(len(every), k)  # fewer than committed if an episode ended early: then no verdict
-        expect(left < UNIFORM_ALPHA, f"{rt.name}: {len(every)} draws, enough that a uniform agent leaves an action "
-                                     f"unplayed with probability {float(left):.3g} < {UNIFORM_ALPHA}")
+        left = _some_cell_empty_sf(len(every), k)
+        expect(len(every) >= DRAWS and left < UNIFORM_ALPHA,
+               f"{rt.name}: {len(every)} draws, at least the committed {DRAWS}, so a uniform agent leaves an action "
+               f"unplayed with probability {float(left):.3g} < {UNIFORM_ALPHA}")
         expect(not unplayed, f"{rt.name}: every one of the {k} actions played in {len(every)} draws (unplayed {unplayed})")
         played = [a for w in worlds[:PEARSON_EPISODES] for a in w.actions]
         counts = [played.count(a) for a in range(k)]
@@ -6885,7 +6908,8 @@ PINS = [
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
                                Mutant("seen_not_reset", _edits("P14_seen_not_reset")),
                                Mutant("asymptotic_p", _edits("P14_asymptotic_p")),
-                               Mutant("one_action_dropped", _edits("P14_one_action_dropped"))), JUDGE_SIDE),
+                               Mutant("one_action_dropped", _edits("P14_one_action_dropped")),
+                               Mutant("top_up_dropped", _edits("P14_top_up_dropped"))), JUDGE_SIDE),
     Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
         p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),
