@@ -1,0 +1,7 @@
+# P14's mutant `top_up_dropped` (L2a obligation 34, review 0cdb209 F5): the pin draws a fixed INCUMBENT_EPISODES
+# Worlds again, however few draws they yield, so an episode that ends early starves coverage of its committed draw
+# count. The fixture of episodes ended at 30 draws (and at none) refuses it.
+[[edit]]
+path = "harness/pins.py"
+old = """    while sum(len(w.actions) for w in drawn) < target and all(w.actions for w in drawn):"""
+new = """    while len(drawn) < INCUMBENT_EPISODES and all(w.actions for w in drawn):"""
