@@ -1,0 +1,5 @@
+# P0bj's third mutant: the rule is read retrospectively, over commits made before it stood in their history.
+[[edit]]
+path = "harness/claims.py"
+old = "    law = author_law(repo, head)\n"
+new = "    law = None\n"

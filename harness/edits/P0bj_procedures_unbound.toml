@@ -1,0 +1,5 @@
+# P0bj's second mutant: the Auditor and the Vizier, procedures of the reviewer account, are bound to no account.
+[[edit]]
+path = "harness/claims.py"
+old = "                                     \"auditor\": \"assize-reviewer\", \"vizier\": \"assize-reviewer\"}\n"
+new = "                                     }\n"

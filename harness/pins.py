@@ -437,6 +437,98 @@ def p0bi_open_count() -> bool:
     return ok()
 
 
+_BUILDER, _REVIEWER = "assize-builder@users.noreply.github.com", "assize-reviewer@gfrm.in"
+# (label, author address, Proposer parties, whether it is a finding), each committed after the rule
+AUTHOR_FIXTURE = (
+    ("builder by assize-builder", _BUILDER, ("builder m s",), False),
+    ("reviewer by assize-reviewer", _REVIEWER, ("reviewer m s",), False),
+    ("reviewer by assize-builder (review ef1e03c F7's commit)", _BUILDER, ("reviewer m s",), True),
+    ("builder by assize-reviewer", _REVIEWER, ("builder m s",), True),
+    ("auditor by assize-reviewer", "1+assize-reviewer@users.noreply.github.com", ("auditor m s",), False),
+    ("vizier by assize-builder", _BUILDER, ("vizier m s",), True),
+    ("instruction commit: guy and builder, by assize-builder", _BUILDER, ("guy", "builder m s"), False),
+    ("resolver commit: reviewer and mechanism, by assize-reviewer", _REVIEWER,
+     ("reviewer m s", "mechanism harness.ledger 1"), False),
+    ("guy by an unlisted address", "f@f", ("guy",), False),
+    ("builder by an unlisted address", "f@f", ("builder m s",), True),
+    ("builder and reviewer on one commit", _BUILDER, ("builder m s", "reviewer m s"), True),
+)
+
+
+def _author_repo(repo: Path) -> dict[str, str]:
+    """A fixture repository: a base (origin/master), a pre-rule reviewer commit authored as assize-builder, the commit
+    adding claims.AUTHOR_MARK to claims.AUTHOR_PATH, one commit per AUTHOR_FIXTURE case on branch `bad`, and on branch
+    `good` (from the rule) only the cases that are no finding. Returns the shas by name."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str, author: str = "f@f") -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env | {"GIT_AUTHOR_EMAIL": author}).stdout.strip()
+
+    def commit(name: str, author: str, ps: tuple[str, ...], text: str = "") -> str:
+        target = repo / (claims.AUTHOR_PATH if text else f"docs/{name}.md")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text or f"{name}\n")
+        git("add", "-A")
+        git("commit", "-q", "-m", f"{name}\n\n" + "".join(f"Proposer: {p}\n" for p in ps), author=author)
+        return git("rev-parse", "HEAD")
+
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "bad")
+    shas = {"base": commit("base", "f@f", ("guy",))}
+    git("update-ref", "refs/remotes/origin/master", shas["base"])
+    shas["pre"] = commit("pre", _BUILDER, ("reviewer m s",))
+    shas["law"] = commit("law", _BUILDER, ("builder m s",), f"{claims.AUTHOR_MARK}c): ...\n")
+    shas |= {label: commit(f"case{n}", author, ps) for n, (label, author, ps, _) in enumerate(AUTHOR_FIXTURE)}
+    git("checkout", "-q", "-b", "good", shas["law"])
+    shas["good"] = [commit(f"good{n}", author, ps) for n, (_, author, ps, bad) in enumerate(AUTHOR_FIXTURE)
+                    if not bad][-1]
+    git("checkout", "-q", "bad")
+    return shas
+
+
+def _push_hook(repo: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(["sh", str(ROOT / "harness/hooks/pre-push"), "origin", "x"], cwd=repo, capture_output=True,
+                          text=True, stdin=subprocess.DEVNULL, env=os.environ | claims.GIT_ENV | FIXTURE_GIT)
+
+
+def p0bj_author_is_proposer() -> bool:
+    """A non-merge commit whose `Proposer:` parties act through an account (builder: assize-builder; reviewer and its
+    procedures auditor and vizier: assize-reviewer) is authored by that account, read from its author address (review
+    ef1e03c F7; CLAUDE.md A1.7). The rule binds the commits descending from the one introducing it; the pre-push hook
+    refuses a misattributed commit while it can still be amended; the real branch is checked in CI."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bj-", dir=context.scratch))
+    repo = work / "repo"
+    shas = _author_repo(repo)
+    expect(claims.author_law(repo) == shas["law"], f"the rule is dated by the commit adding its mark "
+                                                   f"({claims.author_law(repo)}, want {shas['law']})")
+    found = {f.where for f in claims.author_check(repo, shas["base"]) if f.code == "author_not_proposer"}
+    for label, _, _, bad in AUTHOR_FIXTURE:
+        where = f"commit {shas[label][:12]}"
+        expect((where in found) == bad, f"{label}: {'a finding' if bad else 'no finding'} ({where in found})")
+    expect(f"commit {shas['pre'][:12]}" not in found, "a commit made before the rule stood in its history is not read")
+    want = {f"commit {shas[label][:12]}" for label, _, _, bad in AUTHOR_FIXTURE if bad}
+    expect(found == want, f"exactly the misattributed commits after the rule are findings ({len(found)}, "
+                          f"want {len(want)})")
+    bad = _push_hook(repo)
+    expect(bad.returncode != 0 and "author_not_proposer" in bad.stderr,
+           f"the pre-push hook refuses the branch carrying them (exit {bad.returncode}; {bad.stderr.strip()[-300:]!r})")
+    subprocess.run(["git", "-C", str(repo), "checkout", "-q", "good"], check=True, capture_output=True,
+                   env=os.environ | claims.GIT_ENV)
+    good = _push_hook(repo)
+    expect(good.returncode == 0, f"twin: it passes the branch carrying none (exit {good.returncode}; "
+                                 f"{good.stderr.strip()[-300:]!r})")
+    shutil.rmtree(work, ignore_errors=True)
+    root = _real_root()
+    base = _branch_base(root)
+    expect(base is not None, f"real branch: no git repository, or no master to compare, at {root}")
+    real = claims.author_check(root, base) if base is not None else []
+    expect(not real, f"real branch {base and base[:12]}..HEAD since {claims.author_law(root) if base else None}: "
+                     f"findings {[str(f) for f in real]}")
+    return ok()
+
+
 STAMP_OLD, STAMP_NEW = "VALUE = 4\n", "VALUE = 5\n"
 STAMP_READ = "import sys; from pkg import stamp; print(stamp.VALUE, sys.flags.dont_write_bytecode)"
 
@@ -6424,6 +6516,12 @@ PINS = [
         p0bi_open_count, (Mutant("resolves_unread", _edits("P0bi_resolves_unread")),
                           Mutant("skipped_unnamed", _edits("P0bi_skipped_unnamed")),
                           Mutant("legacy_unnamed", _edits("P0bi_legacy_unnamed"))), HARNESS),
+    Pin("P0bj", "a commit whose proposer acts through an account is authored by that account, from the rule's own "
+                "commit on; the pre-push hook refuses one that is not",
+        p0bj_author_is_proposer, (Mutant("identity_swapped", _edits("P0bj_identity_swapped")),
+                                  Mutant("procedures_unbound", _edits("P0bj_procedures_unbound")),
+                                  Mutant("retrospective", _edits("P0bj_retrospective")),
+                                  Mutant("hook_unchecked", _edits("P0bj_hook_unchecked"))), ALWAYS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
