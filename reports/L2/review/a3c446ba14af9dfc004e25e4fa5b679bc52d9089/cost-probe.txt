@@ -1,0 +1,10 @@
+committed config: {'experiments': 1000, 'posterior_draws': 1000, 'deltas': [0.25, 0.5, 1.0], 'budget_s': 86400}
+cap at the L1 pilot throughput 0.7197 eps/s: 31092
+2-value fixture: one read at m=1: 0.09s (measure 0.7570)
+2-value fixture: one read at m=10: 0.13s (measure 0.7874)
+2-value fixture: one read at m=100: 0.13s (measure 0.9940)
+2-value fixture: one read at m=1000: 0.13s (measure 1.0000)
+20-value utilities: one read at m=1: 0.37s (measure 0.5390)
+20-value utilities: one read at m=10: 0.43s (measure 0.5591)
+20-value utilities: one read at m=100: 0.90s (measure 0.6547)
+20-value utilities: one read at m=1000: 0.92s (measure 0.9005)

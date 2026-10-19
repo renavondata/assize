@@ -1,0 +1,7 @@
+cleanup 2026-10-19T22:17:40Z
+processes matching harness|pilot|make pins before cleanup (none expected):
+scratch roots /tmp/pins-* /tmp/assize-* newer than the run's start 2026-10-19T21:40Z (none expected):
+removing /tmp/review-261 (scratch copies pins, probe, transcripts)
+remaining: ls: cannot access '/tmp/review-261': No such file or directory
+processes after:
+done
