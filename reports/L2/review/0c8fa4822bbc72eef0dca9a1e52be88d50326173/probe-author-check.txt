@@ -1,0 +1,27 @@
+## authors check, real branch at head
+authors origin/master..HEAD: 0 findings
+exit 0
+## law commit
+2ecc223492b61f2152c0eef02b6f387eed870446
+## probe: reviewer-trailer commit authored as assize-builder (runner env)
+assize-builder <assize-builder@users.noreply.github.com>
+commit f0b9b9c7e9c7: author_not_proposer: authored by 'assize-builder@users.noreply.github.com' (account 'assize-builder'); parties ['reviewer claude-opus-5-5 dccdb8f0-1fd3-48e5-bd44-7ab384290d8a'] act through ['assize-reviewer']
+authors origin/master..HEAD: 1 findings
+exit 1
+## hook on that branch
+trailers 0c8fa4822bbc72eef0dca9a1e52be88d50326173..HEAD: 0 findings
+commit f0b9b9c7e9c7: author_not_proposer: authored by 'assize-builder@users.noreply.github.com' (account 'assize-builder'); parties ['reviewer claude-opus-5-5 dccdb8f0-1fd3-48e5-bd44-7ab384290d8a'] act through ['assize-reviewer']
+authors 0c8fa4822bbc72eef0dca9a1e52be88d50326173..HEAD: 1 findings
+pre-push: refused: re-author your own unpushed commit as the account you act through, e.g. git commit --amend --no-edit --author='assize-reviewer <assize-reviewer@users.noreply.github.com>' (review ef1e03c F7)
+hook exit 1
+## twin: amended as assize-reviewer
+assize-reviewer <assize-reviewer@users.noreply.github.com>
+authors origin/master..HEAD: 0 findings
+exit 0
+trailers 0c8fa4822bbc72eef0dca9a1e52be88d50326173..HEAD: 0 findings
+authors 0c8fa4822bbc72eef0dca9a1e52be88d50326173..HEAD: 0 findings
+hook exit 0
+## probe: merge of master (with pre-rule misattributed #251 commits) into branch
+Auto-merging harness/pins.py
+authors 5ab369d..HEAD: 0 findings
+exit 0

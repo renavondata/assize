@@ -1,0 +1,19 @@
+pin:       P0ac
+protects:  a wish is drafted as a brief amendment unless the draft says in one line why it cannot wait
+role:      clean
+tree:      /tmp/assize-review-254-cCH3/repo
+invoked:   /tmp/assize-review-254-cCH3/repo
+scratch:   /tmp/assize-review-254-cCH3/rerun3-P0ac-bonC/scratch
+  [ok] a brief amendment: findings [], want []
+  [ok] an instruction with its reason: findings [], want []
+  [ok] neither form: findings ['no_form'], want ['no_form']
+  [ok] both forms: findings ['both_forms'], want ['both_forms']
+  [ok] no wish on the first line: findings ['no_wish'], want ['no_wish']
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] master's merge base with HEAD read (5ab369dc4ebc059fa2e1f8b37923a3a6ed154bcc)
+    real: rule merged 2026-10-12T17:14:52+08:00; 8 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212]
+  [ok] real drafts: findings []
+result:    PASS
