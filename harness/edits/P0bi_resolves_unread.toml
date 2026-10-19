@@ -1,0 +1,6 @@
+# P0bi's first mutant (review 492f85a F4): resolutions are keyed by `id` alone, so the legacy L0 `resolves` rows raise
+# `KeyError: 'id'`, as the review procedure's counter did.
+[[edit]]
+path = "harness/ledger.py"
+old = "    return {r.get(\"id\", r.get(\"resolves\")): r[\"outcome\"] for r in rows\n"
+new = "    return {r[\"id\"]: r[\"outcome\"] for r in rows\n"

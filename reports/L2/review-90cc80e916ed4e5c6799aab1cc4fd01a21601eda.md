@@ -1,0 +1,13 @@
+VERDICT: ACCEPT WITH OBLIGATIONS
+proposer: {kind: reviewer, model: claude-sonnet-5-5, session: fb7d71c6-32f8-4dbd-a6e8-71958a4d912e}
+reviewed head: 90cc80e916ed4e5c6799aab1cc4fd01a21601eda (PR #253, builder session e687ebb3-4758-47ea-ba2a-b79fe71edc17; mine differs)
+
+Reproduction: GitHub clone of the branch, scratch copy only (deleted afterwards; `ls /tmp` shows no `rv253`, `p253-*` or `assize-p0bi*`). A full `make pins` exceeds the cloud limit and was not run; the witness for it is the CI artefact of run 39219338310 on 03ec9a7 (success, 85/85, 244/244 mutants KILLED per the STATUS), and 90cc80e differs from 03ec9a7 only by the STATUS and CI-record files. A `pins` run on 90cc80e (39223673696) was in progress at review time; the verdict is read on the head my push produces (step 5).
+Probe (reports/L2/review/90cc80e916ed4e5c6799aab1cc4fd01a21601eda/probe-p0bi.txt): `p0bi_open_count` clean = True; each of the three mutants (`resolves_unread`, `skipped_unnamed`, `legacy_unnamed`) applied to `harness/ledger.py` from its edit file = False (KILLED), original restored after each. `python -m harness.ledger open --head HEAD` on the branch: 375 forecasts, 96 open, legacy `876d1d05c550` and `a30e37db1152` named, 0 rows read as neither, exit 0. No flake: probe and Builder agree.
+
+Scope: the PR cites no `Instruction:` issue; it takes review 492f85a F4 as an obligation item. The diff touches no entrenched path (`.claude/`, `.github/`, `CLAUDE.md`, `CODEOWNERS`) and records no layer verdict; not a layer boundary. The change to `.claude/commands/review.md` is drafted as text in the PR body for Guy, not made.
+
+F1: `open_count` reads only the rows' shape (`claim`/`id`/`resolves` keys); a legacy `resolves` row whose `resolves` id names no forecast is counted as legacy and named, never checked against the forecasts. Harmless today (both legacy ids resolve forecasts of L0), and not a pre-stated criterion — severity: OBLIGATION on L2a — witness: reports/L2/review/90cc80e916ed4e5c6799aab1cc4fd01a21601eda/probe-p0bi.txt
+F2: the review procedure's context line in `.claude/commands/review.md` still raises `KeyError: 'id'` on the legacy rows until Guy swaps it for `uv run --frozen python -m harness.ledger open --head FETCH_HEAD || echo none` (entrenched; drafted in the PR body). The same carried obligation as ef1e03c F5 / cf5286c F4; this PR supplies the command, not the swap — severity: OBLIGATION on L2a — witness: PR #253 body; the counter's `x["id"]` over rows with `outcome` is the reported KeyError source (command 5 itself was not run by this session)
+
+forecasts resolved: by `harness.ledger resolve` in the following commit (ids in that commit).
