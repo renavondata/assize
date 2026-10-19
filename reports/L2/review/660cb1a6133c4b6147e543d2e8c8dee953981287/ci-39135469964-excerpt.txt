@@ -1,0 +1,7 @@
+pins	make pins	2026-10-18T14:22:21.4487520Z [clean ] P0r: observed fail -> FAILED (0.827s) out/pins/runs/P0r/clean/transcript.log
+pins	make pins	2026-10-18T14:22:21.4488011Z CLEAN FAILED: P0r (observed fail)
+pins	make pins	2026-10-18T14:22:21.4520067Z [mutant] P0r/late_forecast_admitted: mutant fail, twin fail -> NON-CAUSAL (0.792s + 0.844s) out/pins/runs/P0r/late_forecast_admitted/mutant/transcript.log
+pins	make pins	2026-10-18T14:22:21.4520877Z MUTANT NON-CAUSAL: P0r/late_forecast_admitted
+pins	make pins	2026-10-18T14:22:37.7975690Z clean: 10/11 passed, 1/11 failed
+pins	make pins	2026-10-18T14:22:37.7976380Z mutants: 37/38 killed, 0/38 survived, 0/38 inconclusive, 0/38 stale, 1/38 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-18T14:22:37.7978567Z PINS FAILED
