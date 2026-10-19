@@ -228,8 +228,12 @@ def _bound(rule: Callable[[int, Mapping, Observe, str], Outcome | None]) -> Call
 
 def _pins_green(pr: int, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """The first `pins` run on the pull request created at or after the forecast concluded success at attempt 1."""
-    runs = [r for r in observe("pins_runs", pr) if _at_or_after(r.get("created_at"), f["ts"])]
+    on_pr = observe("pins_runs", pr)
+    runs = [r for r in on_pr if _at_or_after(r.get("created_at"), f["ts"])]
     if not runs:
+        if on_pr:
+            raise Unreadable(f"pr {pr} has {len(on_pr)} pins runs, none created at or after the forecast's ts {f['ts']} "
+                             f"(the earliest, {min(r['created_at'] for r in on_pr)}, precedes it)")
         return None
     first = min(runs, key=lambda r: (_t(r["created_at"]), int(r["id"])))
     attempt = observe("run_attempt", int(first["id"]))

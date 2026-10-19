@@ -1,0 +1,6 @@
+# P0s's mutant `pins_green_dropped` (review f057c157 F1): a pins_green forecast whose PR has pins runs, all created
+# before the forecast's ts, is left open without a line, instead of being named as unreadable.
+[[edit]]
+path = "harness/ledger.py"
+old = "        if on_pr:\n            raise Unreadable(f\"pr {pr} has {len(on_pr)} pins runs, none created at or after the forecast's ts {f['ts']} \"\n                             f\"(the earliest, {min(r['created_at'] for r in on_pr)}, precedes it)\")\n"
+new = ""

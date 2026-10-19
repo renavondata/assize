@@ -1,0 +1,6 @@
+# P34's mutant `ledger_findings_ignored` (L2a obligation 36; review 571ee563f91d F3): the pilot never downgrades its
+# verdict when the ledger fails verification, so a pilot over a tampered ledger states a verdict and exits 0.
+[[edit]]
+path = "pilot/__main__.py"
+old = "    if findings and not rep[\"verdict\"].startswith(\"STOPPED\"):"
+new = "    if False:"

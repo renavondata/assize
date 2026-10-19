@@ -1322,10 +1322,13 @@ OUTCOME_FIXTURE = (
     (_typed("free text, untyped", 0.5, None, {}), None),
     (_typed("free text, typed free", 0.5, "free", {}), None),
 )
-OUTCOME_UNREAD = (_typed("no such type", 0.5, "nonsense", {}),)
+OUTCOME_UNREAD = (_typed("no such type", 0.5, "nonsense", {}),
+                  # review f057c157 F1: the PR's one pins run precedes the forecast's ts, so it is named, not dropped
+                  _typed("pins, every run before the forecast", 0.8, "pins_green", {"pr": 15}))
 OUTCOME_ANSWERS = {  # what the GitHub API and the tree answer, in the shapes the real observer returns
     ("pins_runs", 1): [_pins_run(10, "a" * 40, BEFORE_TS), _pins_run(12, "c" * 40, LATER_TS),
                        _pins_run(11, "b" * 40, AFTER_TS)],
+    ("pins_runs", 15): [_pins_run(20, "e" * 40, BEFORE_TS)],
     ("run_attempt", 10): {"status": "completed", "conclusion": "success"},
     ("run_attempt", 11): {"status": "completed", "conclusion": "failure"},
     ("run_attempt", 12): {"status": "completed", "conclusion": "success"},
@@ -1386,8 +1389,8 @@ def p0s_outcomes_by_code() -> bool:
                                                                            f"observable typed forecast")
     expect(all(r["proposer"] == {"kind": "mechanism", "model": "harness.ledger", "session": "p0s"} and r["ts"] ==
                OUTCOME_NOW and r.get("witness") for r in got), "every resolution is the mechanism's, now, witnessed")
-    expect(len(unread) == 1 and OUTCOME_UNREAD[0]["id"] in unread[0], f"the unknown type is named, not dropped "
-                                                                      f"({unread})")
+    expect(len(unread) == len(OUTCOME_UNREAD) and all(f["id"] in u for f, u in zip(OUTCOME_UNREAD, unread)),
+           f"the unknown type and the pins_green with only earlier runs are each named, not dropped ({unread})")
     findings = claims.ledger_findings(_ledger(*rows, *got))
     expect(not findings, f"forecasts and resolutions pass the ledger check ({[str(f) for f in findings]})")
     again, _ = ledger.resolve(rows + got, _observe, OUTCOME_NOW, "p0s")
@@ -6374,6 +6377,82 @@ def p18_pilot() -> bool:
     return ok()
 
 
+# P34's fixture (L2a obligation 36; review 571ee563f91d F3): P18's pilot asked in one request of 10, its incumbent a
+# builder party of its own, so a registration under any other party shows. No candidate's score passes through it.
+P34_CFG = P18_CFG | {"pilot": P18_CFG["pilot"] | {"episodes": 10},
+                     "incumbent": {"context": "incumbents/random",
+                                   "proposer": {"kind": "builder", "model": "p34-model", "session": "p34-incumbent"}}}
+P34_IMAGE = "sha256:" + "d" * 64
+
+
+def p34_pilot_main() -> bool:
+    """`pilot/__main__.py`'s `pilot()` (L2a obligation 36; review 571ee563f91d F3) over a faked runtime, image build and
+    `evaluate()` that writes its records through the real `judge.ledger` into the ledger `pilot()` verifies, with the
+    real registry in a scratch judge-private store. The image is registered under `[incumbent].proposer` and the
+    records carry that party, as the judge stamps them; with the ledger intact the pilot states a verdict, records no
+    ledger finding and exits 0. With one record of the ledger altered after the request, the verdict is STOPPED for
+    the ledger's failed verification, the report carries the findings, and `pilot()` exits 1."""
+    import importlib
+    from types import SimpleNamespace
+
+    from judge import evaluate, ledger, registry, runtime
+    from worlds.crafter import binding as crafter
+
+    main = importlib.import_module("pilot.__main__")
+    expect, ok = _expecter()
+    fake_binding = SimpleNamespace(manifest=lambda: {"targets": [{"name": t} for t in P18_TARGETS]},
+                                   crafter=SimpleNamespace(constants=SimpleNamespace(achievements=P18_COMPONENTS)),
+                                   hafner_score=crafter.hafner_score)
+
+    def run(name: str, alter: bool) -> tuple[int, dict, Path]:
+        work = Path(tempfile.mkdtemp(prefix=f"assize-p34-{name}-", dir=context.scratch))
+        private, ledgers = work / "private", work / "ledgers"
+        ledgers.mkdir()
+
+        def fake_evaluate(image, world, n, rid, *, private, ledgers, runtime_name):
+            party = registry.proposer_of(private, image)
+            led = evaluate.ledger_path(ledgers, world)
+            written = ledger.append(led, private, rid, [_p18_record(i, party) for i in range(n)])
+            if alter:
+                rows = led.read_text().splitlines()
+                rows[3] = json.dumps(json.loads(rows[3]) | {"utility": 99}, sort_keys=True)
+                led.write_text("\n".join(rows) + "\n")
+            return written
+
+        saved = [(evaluate, "_usable", evaluate._usable), (evaluate, "evaluate", evaluate.evaluate),
+                 (evaluate, "_binding", evaluate._binding), (runtime, "pull", runtime.pull), (main, "build", main.build)]
+        evaluate._usable = lambda rt_name: SimpleNamespace(name=rt_name, binary="false")
+        evaluate.evaluate, evaluate._binding = fake_evaluate, lambda world: fake_binding
+        runtime.pull, main.build = (lambda rt, image: None), (lambda rt, context: P34_IMAGE)
+        try:
+            code = main.pilot(private, ledgers, "fake", work / "out", f"p34-{name}", P34_CFG, False)
+            registered = registry.proposer_of(private, P34_IMAGE)
+        except (registry.Refused, ValueError, OSError, KeyError) as e:
+            expect(False, f"{name}: pilot() runs over the fakes ({type(e).__name__}: {e})")
+            return -1, {}, work
+        finally:
+            for mod, attr, value in saved:
+                setattr(mod, attr, value)
+        rep = json.loads((work / "out" / "report.json").read_text())
+        print(f"  {name}: exit {code}; verdict {rep['verdict']}; ledger findings {rep['ledger_findings']}; "
+              f"registered to {registered}")
+        expect(registered == P34_CFG["incumbent"]["proposer"] and rep["proposer"] == registered,
+               f"{name}: the image is registered under [incumbent].proposer and the records carry it ({registered})")
+        return code, rep, work
+
+    code, rep, work = run("intact", alter=False)
+    expect(code == 0 and rep.get("verdict") in {"FIT", "MARGINAL", "UNFIT"} and rep.get("ledger_findings") == [],
+           f"intact ledger: a verdict, no ledger finding, exit 0 ({code}, {rep.get('verdict')})")
+    expect(len((work / "out" / "records.jsonl").read_text().splitlines()) == 10,
+           "intact ledger: every record appended to records.jsonl")
+    code, rep, _ = run("altered", alter=True)
+    expect(code == 1 and str(rep.get("verdict")).startswith("STOPPED: the ledger fails verification")
+           and len(rep.get("ledger_findings", [])) > 0,
+           f"one ledger record altered: STOPPED for the ledger, its findings reported, exit 1 "
+           f"({code}, {rep.get('verdict')}, {rep.get('ledger_findings')})")
+    return ok()
+
+
 # Witnesses (instruction #108 item 1): the paths each pin's check or mutants read. A change under harness/, or to
 # Makefile, pyproject.toml or uv.lock, runs every pin whatever it witnesses (runner.FORCE_ALL); a pin that reads the
 # real branch, the ledgers or the GitHub API witnesses ALWAYS.
@@ -6464,7 +6543,8 @@ PINS = [
     Pin("P0s", "typed forecasts are resolved by code from what the API shows; free ones never by the mechanism",
         p0s_outcomes_by_code, (Mutant("outcome_inverted", _edits("P0s_outcome_inverted")),
                                Mutant("free_resolved_by_mechanism", _edits("P0s_free_resolved_by_mechanism")),
-                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr"))), HARNESS),
+                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr")),
+                               Mutant("pins_green_dropped", _edits("P0s_pins_green_dropped"))), HARNESS),
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")),
@@ -6690,6 +6770,10 @@ PINS = [
                     Mutant("mixed_proposers_admitted", _edits("P18_mixed_proposers_admitted")),
                     Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
                     Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
+    Pin("P34", "`python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification "
+               "makes the pilot STOPPED with exit 1",
+        p34_pilot_main, (Mutant("ledger_findings_ignored", _edits("P34_ledger_findings_ignored")),
+                         Mutant("registration_unbound", _edits("P34_registration_unbound"))), JUDGE_SIDE),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),

@@ -1,0 +1,46 @@
+pin:       P34
+protects:  `python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification makes the pilot STOPPED with exit 1
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-kuf861w8
+VERDICT: FIT (smoke: not evidence)
+proposer: {"kind": "builder", "model": "p34-model", "session": "p34-incumbent"}
+world crafter; runtime fake; image sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee; judge_sha256 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+episodes: 10 recorded of 10 requested (cap 1000.0 s); terminations {'crash': 1, 'terminal': 9}
+utility over 10 episodes: mean 1.8, min 0, max 3; counts {'0': 1, '1': 3, '2': 3, '3': 3}
+Hafner score (reported beside the utility, never as it): 54.62170623934094
+throughput: 9943.105550021384 episodes/s over 0.0 s wall-clock, 1 requests
+compute per episode over 10: cpu_s mean 0.01, wall_s mean 0.02, peak_memory_bytes max 1009, price mean 4.499999999999999e-06
+predictive floor, per declared target: log-loss per scored step (scored, missing, infinite); mean entropy
+  a: +inf (100, 5, 1); 0.275
+  b: 0.55 (100, 5, 0); 0.275
+time-to-learn. Assumption: a candidate's per-episode utility is distributed as the incumbent's shifted by delta achievements per episode. Note: a random agent's variance is a weak proxy for that of a competent agent.
+  delta | episodes per arm | measure | wall-clock s (both arms)
+  0.25 | 97 | 0.9209499999999999 | 0.019511006800041742
+  0.5 | 24 | 0.9176249999999999 | 0.004827465600010327
+  1.0 | 5 | 0.9152749999999998 | 0.0010057220000021516
+  intact: exit 0; verdict FIT; ledger findings []; registered to {'kind': 'builder', 'model': 'p34-model', 'session': 'p34-incumbent'}
+  [ok] intact: the image is registered under [incumbent].proposer and the records carry it ({'kind': 'builder', 'model': 'p34-model', 'session': 'p34-incumbent'})
+  [ok] intact ledger: a verdict, no ledger finding, exit 0 (0, FIT)
+  [ok] intact ledger: every record appended to records.jsonl
+VERDICT: STOPPED: the ledger fails verification (2 findings) (smoke: not evidence)
+proposer: {"kind": "builder", "model": "p34-model", "session": "p34-incumbent"}
+world crafter; runtime fake; image sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee; judge_sha256 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+episodes: 10 recorded of 10 requested (cap 1000.0 s); terminations {'crash': 1, 'terminal': 9}
+utility over 10 episodes: mean 1.8, min 0, max 3; counts {'0': 1, '1': 3, '2': 3, '3': 3}
+Hafner score (reported beside the utility, never as it): 54.62170623934094
+throughput: 10354.936146207965 episodes/s over 0.0 s wall-clock, 1 requests
+compute per episode over 10: cpu_s mean 0.01, wall_s mean 0.02, peak_memory_bytes max 1009, price mean 4.499999999999999e-06
+predictive floor, per declared target: log-loss per scored step (scored, missing, infinite); mean entropy
+  a: +inf (100, 5, 1); 0.275
+  b: 0.55 (100, 5, 0); 0.275
+time-to-learn. Assumption: a candidate's per-episode utility is distributed as the incumbent's shifted by delta achievements per episode. Note: a random agent's variance is a weak proxy for that of a competent agent.
+  delta | episodes per arm | measure | wall-clock s (both arms)
+  0.25 | 97 | 0.9209499999999999 | 0.018735026200141648
+  0.5 | 24 | 0.9176249999999999 | 0.004635470400035047
+  1.0 | 5 | 0.9152749999999998 | 0.0009657230000073014
+  altered: exit 1; verdict STOPPED: the ledger fails verification (2 findings); ledger findings ['crafter.ledger.jsonl is 11995 bytes; the last signed head says 11878', "pilot-p34-altered-0[3]: sha256 is not the record's own digest"]; registered to {'kind': 'builder', 'model': 'p34-model', 'session': 'p34-incumbent'}
+  [ok] altered: the image is registered under [incumbent].proposer and the records carry it ({'kind': 'builder', 'model': 'p34-model', 'session': 'p34-incumbent'})
+  [ok] one ledger record altered: STOPPED for the ledger, its findings reported, exit 1 (1, STOPPED: the ledger fails verification (2 findings), ['crafter.ledger.jsonl is 11995 bytes; the last signed head says 11878', "pilot-p34-altered-0[3]: sha256 is not the record's own digest"])
+result:    PASS
