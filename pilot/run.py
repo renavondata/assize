@@ -17,7 +17,8 @@ each denominator:
 - throughput: recorded episodes per wall-clock second of the whole pilot, container starts, seed issuance and ledger
   writes included, since that is what evaluating a candidate costs on this host;
 - the time-to-learn table at that throughput (`timetolearn.py`), its stated assumption, the note that a random agent's
-  variance is a weak proxy for a competent agent's, and the verdict FIT, MARGINAL or UNFIT;
+  variance is a weak proxy for a competent agent's, and the verdict FIT, MARGINAL or UNFIT, taken from the expected
+  reading of "90% posterior mass" with the assurance reading's episodes per arm, wall-clock and verdict beside it;
 - `pilot_sha256`, beside the records' `judge_sha256`: the hash of every file of `pilot/` (`pilot_hash`);
 - the proposer every record carries, which the judge took from the registering credential (A4 item 2). Records
   carrying more than one proposer, judge hash or image are not one pilot: the report says so and gives no verdict."""
@@ -183,8 +184,11 @@ def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Seq
         "throughput_episodes_per_s": throughput,
         "requests": list(played.requests),
         "time_to_learn": {"assumption": ASSUMPTION, "note": PROXY, "config": dict(ttl),
+                          "verdict_assurance": None if stopped else timetolearn.verdict(rows, ttl, assured=True),
                           "rows": [{"delta": r.delta, "episodes_per_arm": r.episodes_per_arm, "measure": r.measure,
-                                    "wall_s": r.wall_s} for r in rows]},
+                                    "wall_s": r.wall_s, "assured_episodes_per_arm": r.assured_episodes_per_arm,
+                                    "assured_measure": r.assured_measure, "assured_wall_s": r.assured_wall_s}
+                                   for r in rows]},
     }
 
 
@@ -209,8 +213,13 @@ def render(rep: Mapping) -> str:
         *(f"  {t}: {p['log_loss_per_step']} ({p['scored']}, {p['missing']}, {p['infinite']}); "
           f"{rep['calibration'][t]['mean_entropy']}" for t, p in rep["prediction"].items()),
         f"time-to-learn. Assumption: {rep['time_to_learn']['assumption']}. Note: {rep['time_to_learn']['note']}.",
-        "  delta | episodes per arm | measure | wall-clock s (both arms)",
-        *(f"  {r['delta']} | {r['episodes_per_arm']} | {r['measure']} | {r['wall_s']}"
+        "  expected reading (the committed one, which gives the verdict): mean posterior mass on the correct sign "
+        "reaches the mass; assurance reading: that fraction of experiments reach it",
+        f"  verdict under the assurance reading, shown beside the committed one: {rep['time_to_learn']['verdict_assurance']}",
+        "  delta | episodes per arm | measure | wall-clock s (both arms) | assured episodes per arm | assured fraction "
+        "| assured wall-clock s",
+        *(f"  {r['delta']} | {r['episodes_per_arm']} | {r['measure']} | {r['wall_s']} | {r['assured_episodes_per_arm']} "
+          f"| {r['assured_measure']} | {r['assured_wall_s']}"
           for r in rep["time_to_learn"]["rows"]),
     ]
     return "\n".join(lines) + "\n"

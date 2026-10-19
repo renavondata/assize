@@ -6212,7 +6212,8 @@ def p15_time_to_learn() -> bool:
     fixture whose answer is known in closed form, the Bayesian-bootstrap time-to-learn finds, for every shift, the
     smallest episodes per arm whose expected posterior mass on the correct sign reaches the mass, within TTL_FACTOR of
     the normal oracle; the wall-clock counts both arms; and the verdict is FIT, MARGINAL or UNFIT as the budget affords
-    the oracle's episodes for 0.5, only for 1, or for neither."""
+    the oracle's episodes for 0.5, only for 1, or for neither. Beside it the assurance reading (the mass is reached in
+    that fraction of experiments) finds twice the oracle's episodes, within the same factor, and never the verdict."""
     import statistics
 
     from pilot import timetolearn as ttl
@@ -6240,6 +6241,30 @@ def p15_time_to_learn() -> bool:
             below = ttl.measure(TTL_UTILITIES, d, got[0] - 1, cfg) if got[0] > 1 else None
             expect(below is None or below < cfg["mass"], f"delta {d}: m* is the smallest: measure at m*-1 {below}")
 
+    # The assurance reading (review 0d5e9ec F1): the posterior mass reaches `mass` in a `mass` fraction of experiments,
+    # which asks twice the episodes, 8 sigma^2 z^2 / delta^2, since the posterior mean's noise adds one more z. The
+    # table's assurance column is read beside the committed one at a budget affording the oracle's episodes x TTL_FACTOR.
+    oracle_a = {d: 2 * oracle[d] for d in cfg["deltas"]}
+    cap_a = math.ceil(TTL_FACTOR * max(oracle_a.values()))
+    throughput_a = (2 * cap_a + 0.5) / cfg["budget_s"]
+    rows_a = ttl.table(TTL_UTILITIES, throughput_a, cfg)
+    expect(ttl.affordable(throughput_a, cfg) == cap_a, f"the assurance table's budget affords {cap_a} episodes per arm")
+    for r in rows_a:
+        print(f"  delta {r.delta}: assured episodes per arm {r.assured_episodes_per_arm} (fraction "
+              f"{r.assured_measure}), expected {r.episodes_per_arm}, assurance oracle {oracle_a[r.delta]:.2f}")
+        m_a = r.assured_episodes_per_arm
+        expect(m_a is not None and oracle_a[r.delta] / TTL_FACTOR <= m_a <= oracle_a[r.delta] * TTL_FACTOR,
+               f"delta {r.delta}: assured m* {m_a} within x{TTL_FACTOR} of the assurance oracle {oracle_a[r.delta]:.2f}")
+        expect(m_a is not None and r.episodes_per_arm is not None and m_a > r.episodes_per_arm,
+               f"delta {r.delta}: assurance asks more episodes ({m_a}) than the expected reading ({r.episodes_per_arm})")
+        if m_a is not None:
+            expect(r.assured_measure >= cfg["mass"], f"delta {r.delta}: assured fraction {r.assured_measure} >= mass")
+            expect(r.assured_wall_s == 2 * m_a / throughput_a, f"delta {r.delta}: assured wall-clock counts both arms")
+            below_a = ttl.assurance(TTL_UTILITIES, r.delta, m_a - 1, cfg) if m_a > 1 else None
+            expect(below_a is None or below_a < cfg["mass"], f"delta {r.delta}: assured m* is the smallest ({below_a})")
+    expect(ttl.verdict(rows_a, cfg) == "FIT" and ttl.verdict(rows_a, cfg, assured=True) == "FIT",
+           "a budget affording the assurance oracle is FIT under both readings")
+
     flat = ttl.episodes_per_arm((3,) * 50, cfg["fit_delta"], cap, cfg)
     expect(flat == (1, 1.0), f"no incumbent variance: one episode per arm, all mass on the correct sign ({flat})")
 
@@ -6261,6 +6286,9 @@ def p15_time_to_learn() -> bool:
         expect(all(r.wall_s == 2 * r.episodes_per_arm / throughput for r in rows if r.episodes_per_arm is not None),
                f"{want}: wall-clock counts both arms")
         expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
+        if want == "FIT":
+            expect(ttl.verdict(rows, cfg, assured=True) != "FIT",
+                   "the budget affording the expected m* is FIT, and not FIT under the assurance reading, which asks more")
     return ok()
 
 # P17 registers the random incumbent's image under one credential and asks `evaluate` for EVALUATE_EPISODES full
@@ -6945,7 +6973,8 @@ PINS = [
         p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),
                             Mutant("one_arm", _edits("P15_one_arm")),
-                            Mutant("budget_one_arm", _edits("P15_budget_one_arm"))), JUDGE_SIDE),
+                            Mutant("budget_one_arm", _edits("P15_budget_one_arm")),
+                            Mutant("expected_for_assurance", _edits("P15_expected_for_assurance"))), JUDGE_SIDE),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
