@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-r-ef1e03c-f4-commits-base-unguarded (review ef1e03c F4, P0bg commits guard): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "165b0c18-4283-4d19-93b3-8f371a075adb"
