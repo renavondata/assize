@@ -1278,10 +1278,13 @@ OUTCOME_FIXTURE = (
     (_typed("free text, untyped", 0.5, None, {}), None),
     (_typed("free text, typed free", 0.5, "free", {}), None),
 )
-OUTCOME_UNREAD = (_typed("no such type", 0.5, "nonsense", {}),)
+OUTCOME_UNREAD = (_typed("no such type", 0.5, "nonsense", {}),
+                  # review f057c157 F1: the PR's one pins run precedes the forecast's ts, so it is named, not dropped
+                  _typed("pins, every run before the forecast", 0.8, "pins_green", {"pr": 15}))
 OUTCOME_ANSWERS = {  # what the GitHub API and the tree answer, in the shapes the real observer returns
     ("pins_runs", 1): [_pins_run(10, "a" * 40, BEFORE_TS), _pins_run(12, "c" * 40, LATER_TS),
                        _pins_run(11, "b" * 40, AFTER_TS)],
+    ("pins_runs", 15): [_pins_run(20, "e" * 40, BEFORE_TS)],
     ("run_attempt", 10): {"status": "completed", "conclusion": "success"},
     ("run_attempt", 11): {"status": "completed", "conclusion": "failure"},
     ("run_attempt", 12): {"status": "completed", "conclusion": "success"},
@@ -1342,8 +1345,8 @@ def p0s_outcomes_by_code() -> bool:
                                                                            f"observable typed forecast")
     expect(all(r["proposer"] == {"kind": "mechanism", "model": "harness.ledger", "session": "p0s"} and r["ts"] ==
                OUTCOME_NOW and r.get("witness") for r in got), "every resolution is the mechanism's, now, witnessed")
-    expect(len(unread) == 1 and OUTCOME_UNREAD[0]["id"] in unread[0], f"the unknown type is named, not dropped "
-                                                                      f"({unread})")
+    expect(len(unread) == len(OUTCOME_UNREAD) and all(f["id"] in u for f, u in zip(OUTCOME_UNREAD, unread)),
+           f"the unknown type and the pins_green with only earlier runs are each named, not dropped ({unread})")
     findings = claims.ledger_findings(_ledger(*rows, *got))
     expect(not findings, f"forecasts and resolutions pass the ledger check ({[str(f) for f in findings]})")
     again, _ = ledger.resolve(rows + got, _observe, OUTCOME_NOW, "p0s")
@@ -6491,7 +6494,8 @@ PINS = [
     Pin("P0s", "typed forecasts are resolved by code from what the API shows; free ones never by the mechanism",
         p0s_outcomes_by_code, (Mutant("outcome_inverted", _edits("P0s_outcome_inverted")),
                                Mutant("free_resolved_by_mechanism", _edits("P0s_free_resolved_by_mechanism")),
-                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr"))), HARNESS),
+                               Mutant("branch_most_recent_pr", _edits("P0s_branch_most_recent_pr")),
+                               Mutant("pins_green_dropped", _edits("P0s_pins_green_dropped"))), HARNESS),
     Pin("P0t", "every item that reached Guy is counted once, with its latency, answered or not",
         p0t_price, (Mutant("latency_dropped", _edits("P0t_latency_dropped")),
                     Mutant("guy_items_undercounted", _edits("P0t_guy_items_undercounted")),
