@@ -1,0 +1,30 @@
+  [ok] the count over both resolution shapes does not raise (None)
+  [ok] one forecast is open, the unresolved one ([{'id': 'cccccccccccc', 'ts': '2026-01-02T00:00:00Z', 'proposer': {'kind': 'builder', 'model': 'm', 'session': 's'}, 'claim': 'c', 'p': 0.5}])
+  [ok] the legacy resolution is read and named ([{'resolves': 'aaaaaaaaaaaa', 'ts': '2026-01-01T00:00:01Z', 'outcome': True}])
+  [ok] the row of neither shape is named ([{'ts': '2026-01-02T00:00:02Z', 'note': 'p0bi-neither'}])
+  [ok] the command prints 1 (exit 0; stdout '1'; '# 3 forecasts at HEAD; 1 open; 1 legacy resolutions read under `resolves` (aaaaaaaaaaaa); 1 rows read as neither ({"ts": "2026-01-02T00:00:02Z", "note": "p0bi-neither"})')
+  [ok] stderr names the legacy and the skipped rows ('# 3 forecasts at HEAD; 1 open; 1 legacy resolutions read under `resolves` (aaaaaaaaaaaa); 1 rows read as neither ({"ts": "2026-01-02T00:00:02Z", "note": "p0bi-neither"})')
+clean True
+  [FAIL] the count over both resolution shapes does not raise (KeyError: 'id')
+  [FAIL] one forecast is open, the unresolved one ([])
+  [FAIL] the legacy resolution is read and named ([])
+  [FAIL] the row of neither shape is named ([])
+  [FAIL] the command prints 1 (exit 1; stdout ''; 'in rows\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/tmp/rv253/harness/ledger.py", line 95, in <dictcomp>\n    return {r["id"]: r["outcome"] for r in rows\n            ~^^^^^^\nKeyError: \'id\'')
+  [FAIL] stderr names the legacy and the skipped rows ('Traceback (most recent call last):\n  File "<frozen runpy>", line 198, in _run_module_as_main\n  File "<frozen runpy>", line 88, in _run_code\n  File "/tmp/rv253/harness/ledger.py", line 1372, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File "/tmp/rv253/harness/ledger.py", line 1292, in main\n    got, legacy, skipped = open_count(rows)\n                           ^^^^^^^^^^^^^^^^\n  File "/tmp/rv253/harness/ledger.py", line 592, in open_count\n    return open_forecasts(rows), legacy, skipped\n           ^^^^^^^^^^^^^^^^^^^^\n  File "/tmp/rv253/harness/ledger.py", line 583, in open_forecasts\n    resolved = outcomes(rows).keys() | voided(rows)\n               ^^^^^^^^^^^^^^\n  File "/tmp/rv253/harness/ledger.py", line 95, in outcomes\n    return {r["id"]: r["outcome"] for r in rows\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/tmp/rv253/harness/ledger.py", line 95, in <dictcomp>\n    return {r["id"]: r["outcome"] for r in rows\n            ~^^^^^^\nKeyError: \'id\'')
+resolves_unread False
+  [ok] the count over both resolution shapes does not raise (None)
+  [ok] one forecast is open, the unresolved one ([{'id': 'cccccccccccc', 'ts': '2026-01-02T00:00:00Z', 'proposer': {'kind': 'builder', 'model': 'm', 'session': 's'}, 'claim': 'c', 'p': 0.5}])
+  [ok] the legacy resolution is read and named ([{'resolves': 'aaaaaaaaaaaa', 'ts': '2026-01-01T00:00:01Z', 'outcome': True}])
+  [FAIL] the row of neither shape is named ([])
+  [ok] the command prints 1 (exit 0; stdout '1'; '# 3 forecasts at HEAD; 1 open; 1 legacy resolutions read under `resolves` (aaaaaaaaaaaa); 0 rows read as neither (none)')
+  [FAIL] stderr names the legacy and the skipped rows ('# 3 forecasts at HEAD; 1 open; 1 legacy resolutions read under `resolves` (aaaaaaaaaaaa); 0 rows read as neither (none)')
+skipped_unnamed False
+  [ok] the count over both resolution shapes does not raise (None)
+  [ok] one forecast is open, the unresolved one ([{'id': 'cccccccccccc', 'ts': '2026-01-02T00:00:00Z', 'proposer': {'kind': 'builder', 'model': 'm', 'session': 's'}, 'claim': 'c', 'p': 0.5}])
+  [FAIL] the legacy resolution is read and named ([])
+  [ok] the row of neither shape is named ([{'ts': '2026-01-02T00:00:02Z', 'note': 'p0bi-neither'}])
+  [ok] the command prints 1 (exit 0; stdout '1'; '# 3 forecasts at HEAD; 1 open; 0 legacy resolutions read under `resolves` (none); 1 rows read as neither ({"ts": "2026-01-02T00:00:02Z", "note": "p0bi-neither"})')
+  [FAIL] stderr names the legacy and the skipped rows ('# 3 forecasts at HEAD; 1 open; 0 legacy resolutions read under `resolves` (none); 1 rows read as neither ({"ts": "2026-01-02T00:00:02Z", "note": "p0bi-neither"})')
+legacy_unnamed False
+# 375 forecasts at HEAD; 96 open; 2 legacy resolutions read under `resolves` (876d1d05c550, a30e37db1152); 0 rows read as neither (none)
+96
