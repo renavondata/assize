@@ -143,10 +143,6 @@ def table(utilities: Sequence[float], throughput: float, cfg: dict) -> list[Row]
     expected reading (committed) and, beside it, the assurance reading; then each reading's standard errors."""
     cap = affordable(throughput, cfg)
 
-    def read(delta: float, reading) -> tuple[int | None, float | None, float | None]:
-        found = episodes_per_arm(utilities, delta, cap, cfg, reading)
-        return (None, None, None) if found is None else (found[0], found[1], 2 * found[0] / throughput)
-
     def errors(delta: float, m: int | None, reading) -> tuple[float | None, ...]:
         """The standard error at m*; the reading and its error at m* - 1; the same at the budget."""
         at = lambda k: (reading(utilities, delta, k, cfg), standard_error(utilities, delta, k, cfg, reading))
@@ -154,11 +150,19 @@ def table(utilities: Sequence[float], throughput: float, cfg: dict) -> list[Row]
                 *(at(m - 1) if m is not None and m > 1 else (None, None)),
                 *(at(cap) if cap >= 1 else (None, None)))
 
-    def row(delta: float) -> Row:
-        expected, assured = read(delta, measure), read(delta, assurance)
-        return Row(delta, *expected, *assured, *errors(delta, expected[0], measure), *errors(delta, assured[0], assurance))
+    return [Row(r.delta, r.episodes_per_arm, r.measure, r.wall_s, r.assured_episodes_per_arm, r.assured_measure,
+                r.assured_wall_s, *errors(r.delta, r.episodes_per_arm, measure),
+                *errors(r.delta, r.assured_episodes_per_arm, assurance)) for r in _found(utilities, throughput, cap, cfg)]
 
-    return [row(d) for d in cfg["deltas"]]
+
+def _found(utilities: Sequence[float], throughput: float, cap: int, cfg: dict) -> list[Row]:
+    """The rows' episodes per arm, reading there and wall-clock under each reading, before their standard errors."""
+
+    def read(delta: float, reading) -> tuple[int | None, float | None, float | None]:
+        found = episodes_per_arm(utilities, delta, cap, cfg, reading)
+        return (None, None, None) if found is None else (found[0], found[1], 2 * found[0] / throughput)
+
+    return [Row(d, *read(d, measure), *read(d, assurance)) for d in cfg["deltas"]]
 
 
 def _reading(r: Row, assured: bool) -> tuple[int | None, float | None, float | None]:

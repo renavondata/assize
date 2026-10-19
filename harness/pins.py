@@ -6206,6 +6206,10 @@ TTL_FACTOR = 1.5
 # P15's non-monotone stream (review 0d5e9ec F2): a stub reading at the mass at m = 5 and from m = 9, below it elsewhere,
 # searched up to 16. Doubling reads 1, 2, 4, 8 below and 16 above, then bisection 12, 10, 9 above: it returns 9.
 TTL_STREAM_FIRST, TTL_STREAM_STAYS, TTL_STREAM_CAP = 5, 9, 16
+# Posterior draws per simulated experiment in P15's searches, in place of the committed config's: the search reads every
+# m (review 0d5e9ec F2), each read costs in proportion to the draws, and P15 runs once per mutant and twin. Fewer draws
+# add noise to each experiment's mass, never bias to its mean; a pin constant, through which no candidate's score passes.
+TTL_DRAWS = 200
 # The standard error of P15's given rows for the settling rule; any positive value states the same cases.
 TTL_SE = 0.01
 BRIEF_PILOT = {"world": "crafter", "episodes": 200, "cap_s": 7200}
@@ -6228,6 +6232,7 @@ def p15_time_to_learn() -> bool:
     cfg = whole["time_to_learn"]
     expect(whole["pilot"] == BRIEF_PILOT, f"pilot config is the brief's default ({whole['pilot']})")
     expect({k: cfg[k] for k in BRIEF_TTL} == BRIEF_TTL, f"time-to-learn config is the brief's ({cfg})")
+    cfg = {**cfg, "posterior_draws": TTL_DRAWS}
 
     mean = statistics.fmean(TTL_UTILITIES)
     var = statistics.fmean((u - mean) ** 2 for u in TTL_UTILITIES)
@@ -6341,6 +6346,7 @@ def p15_time_to_learn() -> bool:
         return ok()
     budget = cfg["budget_s"]
     affords = {"FIT": m_fit, "MARGINAL": m_fit - 1, "UNFIT": m_marg - 1}
+    flagged = {}
     for want, k in affords.items():
         throughput = (2 * k + 0.5) / budget  # a quarter-episode spare per arm, so rounding never costs one
         rows = ttl.table(TTL_UTILITIES, throughput, cfg)
@@ -6351,13 +6357,22 @@ def p15_time_to_learn() -> bool:
                f"{want}: wall-clock counts both arms")
         expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
         # Each budget sits on the boundary the search found, where the review witnessed readings one standard error
-        # apart (0.8998 at 25, 0.9049 at 26 for 0.5): the delta that decides the verdict is reported within error.
-        deciding = (marg_d,) if want == "UNFIT" else (fit_d,)
-        expect(ttl.within_error(rows, cfg) == deciding,
-               f"{want}: within Monte Carlo error at {deciding} ({[(r.delta, r.at_budget, r.at_budget_se) for r in rows]})")
+        # apart (0.8998 at 25, 0.9049 at 26 for 0.5). The report's flag is the settling rule applied to the reading
+        # and error at the budget, both recomputed here: the delta that decides the verdict is flagged exactly when
+        # its reading there lies within one standard error of the mass on its side.
+        unsettled = lambda d, detected: (lambda x, s: not (x - s > q if detected else x + s < q))(
+            ttl.measure(TTL_UTILITIES, d, k, cfg), sem(d, k, False))
+        fit_up = unsettled(fit_d, want == "FIT")
+        marg_read = want != "FIT" or fit_up  # marginal_delta is read unless fit_delta stands detected
+        marg_up = marg_read and unsettled(marg_d, want != "UNFIT")
+        want_within = ((fit_d,) if fit_up else ()) + ((marg_d,) if marg_up else ())
+        flagged[want] = ttl.within_error(rows, cfg)
+        expect(flagged[want] == want_within, f"{want}: within Monte Carlo error at {want_within} ({flagged[want]}; "
+               f"{[(r.delta, r.at_budget, r.at_budget_se) for r in rows]})")
         if want == "FIT":
             expect(ttl.verdict(rows, cfg, assured=True) != "FIT",
                    "the budget affording the expected m* is FIT, and not FIT under the assurance reading, which asks more")
+    expect(any(flagged.values()), f"the fixture's boundary budgets exercise the flag on the real stream ({flagged})")
     return ok()
 
 # P17 registers the random incumbent's image under one credential and asks `evaluate` for EVALUATE_EPISODES full
