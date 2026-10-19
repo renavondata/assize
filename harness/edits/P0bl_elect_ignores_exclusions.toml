@@ -1,0 +1,6 @@
+# P0bl's first mutant (audit 8aae43c8c792 finding 1): the election ignores the models it must differ from, so the
+# auditor can be the builder's or the reviewer's model.
+[[edit]]
+path = "harness/ledger.py"
+old = "    allowed = [m for m in entrants if m not in barred(rows, procedure)]\n"
+new = "    allowed = list(entrants)\n"

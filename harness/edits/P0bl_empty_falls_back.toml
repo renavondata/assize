@@ -1,0 +1,5 @@
+# P0bl's third mutant: with no entrant left the election falls back to all of them instead of refusing.
+[[edit]]
+path = "harness/ledger.py"
+old = "        raise ValueError(f\"{procedure}: every entrant is the model of a procedure it must differ from\")\n"
+new = "        allowed = list(entrants)\n"

@@ -1101,6 +1101,9 @@ def layer_price(repo: Path, head: str = "HEAD") -> Callable[[int], Mapping | Non
 # ------------------------------------------------------------ rule 7: models elected (instruction #54 item 7)
 
 PROCEDURES: Mapping[str, str] = {"build": "builder", "review": "reviewer", "audit": "auditor", "vizier": "vizier"}
+# Amendment 2: the Auditor runs "on a model different from both the Builder's and the Reviewer's", the models of the
+# latest recorded build and review draws.
+DISTINCT_FROM: Mapping[str, tuple[str, ...]] = {"audit": ("build", "review")}
 ENTRANTS = "harness/entrants.toml"
 DRAW_LEDGER = "reports/draws.jsonl"  # append-only (claims.APPEND_ONLY): one row per draw, written when it is made
 DRAWS = 1 << 16  # the draw's resolution: a sweep of DRAWS consecutive seeds takes every value of u once
@@ -1207,10 +1210,21 @@ def draw(w: Mapping[str, float], seed: int) -> str:
     return next((m for m, c in edges if u < c), edges[-1][0])
 
 
+def barred(rows: Sequence[dict], procedure: str) -> set[str]:
+    """The models the procedure may not draw: those of the latest recorded draw of each procedure it must differ from."""
+    latest = (max((d for d in draws_of(rows, other) if isinstance(d.get("ts"), str)), key=lambda d: d["ts"],
+                  default=None) for other in DISTINCT_FROM.get(procedure, ()))
+    return {d["drawn"] for d in latest if d is not None}
+
+
 def elect(rows: Sequence[dict], procedure: str, entrants: Sequence[str], bound: float, seed: int) -> Election:
-    """EXP3 over `entrants` at round (recorded draws + 1). Only the model a round drew is updated, by the clipped loss
+    """EXP3 over `entrants` at round (recorded draws + 1), less the models the procedure must differ from; it refuses
+    when none remains. Only the model a round drew is updated, by the clipped loss
     of its resolved forecasts divided by the probability *recorded* with that draw; every other entrant, and a round
     with nothing observed, gets an estimate of zero. A round that cannot be read is counted, not dropped."""
+    allowed = [m for m in entrants if m not in barred(rows, procedure)]
+    if not allowed:
+        raise ValueError(f"{procedure}: every entrant is the model of a procedure it must differ from")
     resolved = outcomes(rows)
     forecasts = [r for r in rows if "claim" in r and isinstance(r.get("p"), (int, float))
                  and isinstance(r.get("proposer"), dict)]
@@ -1224,8 +1238,8 @@ def elect(rows: Sequence[dict], procedure: str, entrants: Sequence[str], bound: 
     seen = [(d, round_loss(d, past[i + 1:], forecasts, resolved, PROCEDURES[procedure]))
             for i, d in enumerate(past) if readable(d)]
     scored = [(d, l) for d, l in seen if l is not None]
-    estimate = {m: sum(min(l, bound) / d["probabilities"][m] for d, l in scored if d["drawn"] == m) for m in entrants}
-    g = gamma(len(entrants), len(past) + 1)
+    estimate = {m: sum(min(l, bound) / d["probabilities"][m] for d, l in scored if d["drawn"] == m) for m in allowed}
+    g = gamma(len(allowed), len(past) + 1)
     p = probabilities(estimate, g, bound)
     return Election(draw(p, seed), g, p, len(past), len(past) - len(seen), len(seen) - len(scored),
                     sum(1 for _, l in scored if l > bound))
