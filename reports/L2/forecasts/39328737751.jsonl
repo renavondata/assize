@@ -1,0 +1,3 @@
+{"id": "387de4de8e3f", "ts": "2026-10-19T22:17:45Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39328737751"}, "outcome": true, "witness": "reports/L2/review-a43565be1a1451f0dd9c83fa9525e5ff49c2ca7f.md at 72efadf305fe: ACCEPT WITH OBLIGATIONS"}
+{"id": "239e1147f93e", "ts": "2026-10-19T22:17:45Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39328737751"}, "outcome": false, "witness": "pins run 39312091520 attempt 1 on c02966b0ea66: cancelled"}
+{"id": "5495166aca19", "ts": "2026-10-19T22:17:45Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39328737751"}, "outcome": false, "witness": "run 39310193418: 135.7 minutes, bound 120"}

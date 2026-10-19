@@ -1,0 +1,6 @@
+# P15's mutant `se_not_of_mean` (review 0d5e9ec F2): the error reported is the spread of one experiment's quantity, not
+# the standard error of the mean over experiments.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """    return float(np.std(per, ddof=1)) / math.sqrt(n) if n > 1 else math.inf"""
+new = """    return float(np.std(per, ddof=1)) if n > 1 else math.inf"""

@@ -19,6 +19,8 @@ each denominator:
 - the time-to-learn table at that throughput (`timetolearn.py`), its stated assumption, the note that a random agent's
   variance is a weak proxy for a competent agent's, and the verdict FIT, MARGINAL or UNFIT, taken from the expected
   reading of "90% posterior mass" with the assurance reading's episodes per arm, wall-clock and verdict beside it;
+  each reading with its Monte Carlo standard errors, and each verdict marked as within Monte Carlo error when a delta
+  it reads is not settled (`timetolearn.within_error`);
 - `pilot_sha256`, beside the records' `judge_sha256`: the hash of every file of `pilot/` (`pilot_hash`);
 - the proposer every record carries, which the judge took from the registering credential (A4 item 2). Records
   carrying more than one proposer, judge hash or image are not one pilot: the report says so and gives no verdict."""
@@ -32,7 +34,7 @@ import math
 import time
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from pilot import timetolearn
@@ -185,18 +187,18 @@ def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Seq
         "requests": list(played.requests),
         "time_to_learn": {"assumption": ASSUMPTION, "note": PROXY, "config": dict(ttl),
                           "verdict_assurance": None if stopped else timetolearn.verdict(rows, ttl, assured=True),
-                          "rows": [{"delta": r.delta, "episodes_per_arm": r.episodes_per_arm, "measure": r.measure,
-                                    "wall_s": r.wall_s, "assured_episodes_per_arm": r.assured_episodes_per_arm,
-                                    "assured_measure": r.assured_measure, "assured_wall_s": r.assured_wall_s}
-                                   for r in rows]},
+                          "within_error": None if stopped else list(timetolearn.within_error(rows, ttl)),
+                          "within_error_assurance": None if stopped else list(timetolearn.within_error(rows, ttl, True)),
+                          "rows": [asdict(r) for r in rows]},
     }
 
 
 def render(rep: Mapping) -> str:
     """The report as terse Markdown, verdict first."""
-    e, u, c = rep["episodes"], rep["utility"], rep["compute"]
+    e, u, c, t = rep["episodes"], rep["utility"], rep["compute"], rep["time_to_learn"]
+    within = lambda ds: f" (within Monte Carlo error at delta {', '.join(map(str, ds))})" if ds else ""
     lines = [
-        f"VERDICT: {rep['verdict']}" + ("" if rep["evidence"] else " (smoke: not evidence)"),
+        f"VERDICT: {rep['verdict']}" + within(t["within_error"]) + ("" if rep["evidence"] else " (smoke: not evidence)"),
         f"proposer: {json.dumps(rep['proposer'], sort_keys=True)}",
         f"world {rep['world']}; runtime {rep['runtime']}; image {rep['image']}; judge_sha256 {rep['judge_sha256']}; "
         f"pilot_sha256 {rep['pilot_sha256']}",
@@ -215,11 +217,17 @@ def render(rep: Mapping) -> str:
         f"time-to-learn. Assumption: {rep['time_to_learn']['assumption']}. Note: {rep['time_to_learn']['note']}.",
         "  expected reading (the committed one, which gives the verdict): mean posterior mass on the correct sign "
         "reaches the mass; assurance reading: that fraction of experiments reach it",
-        f"  verdict under the assurance reading, shown beside the committed one: {rep['time_to_learn']['verdict_assurance']}",
-        "  delta | episodes per arm | measure | wall-clock s (both arms) | assured episodes per arm | assured fraction "
-        "| assured wall-clock s",
-        *(f"  {r['delta']} | {r['episodes_per_arm']} | {r['measure']} | {r['wall_s']} | {r['assured_episodes_per_arm']} "
-          f"| {r['assured_measure']} | {r['assured_wall_s']}"
-          for r in rep["time_to_learn"]["rows"]),
+        f"  verdict under the assurance reading, shown beside the committed one: {t['verdict_assurance']}"
+        + within(t["within_error_assurance"]),
+        "  each reading is a Monte Carlo mean, not monotone in episodes per arm, shown with its standard error at m*, "
+        "at m* - 1 and at the budget; a delta's detection is settled only if the reading at the budget is more than "
+        "one standard error from the mass on the side of the detection",
+        "  delta | episodes per arm | measure (se) | at m*-1 (se) | at budget (se) | wall-clock s (both arms) "
+        "| assured episodes per arm | assured fraction (se) | at m*-1 (se) | at budget (se) | assured wall-clock s",
+        *(f"  {r['delta']} | {r['episodes_per_arm']} | {r['measure']} ({r['se']}) | {r['below']} ({r['below_se']}) "
+          f"| {r['at_budget']} ({r['at_budget_se']}) | {r['wall_s']} | {r['assured_episodes_per_arm']} "
+          f"| {r['assured_measure']} ({r['assured_se']}) | {r['assured_below']} ({r['assured_below_se']}) "
+          f"| {r['assured_at_budget']} ({r['assured_at_budget_se']}) | {r['assured_wall_s']}"
+          for r in t["rows"]),
     ]
     return "\n".join(lines) + "\n"

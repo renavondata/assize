@@ -1,0 +1,24 @@
+copy of /tmp/review-261/pins
+  at /tmp/assize-scratch-_wy7vf13/assize-copy-el5n81pr/repo
+applied 1 edit(s) from harness/edits/P15_first_crossing.toml
+pin:       P15
+protects:  time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict
+role:      mutant
+tree:      /tmp/assize-scratch-_wy7vf13/assize-copy-el5n81pr/repo
+invoked:   /tmp/review-261/pins
+scratch:   /tmp/assize-scratch-_wy7vf13
+  [ok] pilot config is the brief's default ({'world': 'crafter', 'episodes': 200, 'cap_s': 7200})
+  [ok] time-to-learn config is the brief's ({'deltas': [0.25, 0.5, 1.0], 'mass': 0.9, 'fit_delta': 0.5, 'marginal_delta': 1.0, 'budget_s': 86400, 'experiments': 1000, 'posterior_draws': 1000, 'seed': 0})
+  delta 0.25: episodes per arm (105, 0.900905), normal oracle 105.11
+  [ok] delta 0.25: m* 105 within x1.5 of the oracle 105.11
+  [ok] delta 0.25: measure at m* 0.9009 >= 0.9
+  [FAIL] delta 0.25: m* is the smallest: no m below it reaches the mass ([101, 102])
+  delta 0.5: episodes per arm (26, 0.9054500000000001), normal oracle 26.28
+  [ok] delta 0.5: m* 26 within x1.5 of the oracle 26.28
+  [ok] delta 0.5: measure at m* 0.9055 >= 0.9
+  [ok] delta 0.5: m* is the smallest: no m below it reaches the mass ([])
+  delta 1.0: episodes per arm (7, 0.9216449999999999), normal oracle 6.57
+  [ok] delta 1.0: m* 7 within x1.5 of the oracle 6.57
+  [ok] delta 1.0: measure at m* 0.9216 >= 0.9
+  [ok] delta 1.0: m* is the smallest: no m below it reaches the mass ([])
+result:    FAIL
