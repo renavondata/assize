@@ -18,20 +18,25 @@ each denominator:
   writes included, since that is what evaluating a candidate costs on this host;
 - the time-to-learn table at that throughput (`timetolearn.py`), its stated assumption, the note that a random agent's
   variance is a weak proxy for a competent agent's, and the verdict FIT, MARGINAL or UNFIT;
+- `pilot_sha256`, beside the records' `judge_sha256`: the hash of every file of `pilot/` (`pilot_hash`);
 - the proposer every record carries, which the judge took from the registering credential (A4 item 2). Records
   carrying more than one proposer, judge hash or image are not one pilot: the report says so and gives no verdict."""
 
 from __future__ import annotations
 
 import functools
+import hashlib
 import json
 import math
 import time
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 
 from pilot import timetolearn
+
+ROOT = Path(__file__).resolve().parent.parent
 
 ASSUMPTION = ("a candidate's per-episode utility is distributed as the incumbent's shifted by delta achievements per "
               "episode")
@@ -130,6 +135,19 @@ def compute(records: Sequence[dict]) -> dict:
             "price_total": _stats([r["price"]["total"] for r in records])}
 
 
+def pilot_hash(root: Path = ROOT) -> str:
+    """SHA-256 over every file of `pilot/` under `root` but bytecode caches, in path order: path from `root`, a NUL, the
+    SHA-256 of its bytes and a newline. The runner, the time-to-learn table and the config are all in it, so any change
+    to how the pilot runs or what it is asked changes it (brief 2 A2; L2a obligation 37)."""
+    files = sorted((f for f in (root / "pilot").rglob("*") if f.is_file() and "__pycache__" not in f.parts),
+                   key=lambda f: f.relative_to(root).as_posix())
+    h = hashlib.sha256()
+    for f in files:
+        h.update(f.relative_to(root).as_posix().encode() + b"\0" + hashlib.sha256(f.read_bytes()).hexdigest().encode()
+                 + b"\n")
+    return h.hexdigest()
+
+
 def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Sequence[str],
            hafner: Callable[[Sequence[Sequence[str]], Sequence[str]], float], *, evidence: bool) -> dict:
     """The pilot report of `played`: see the module docstring. `evidence` is False for a smoke run, whose report is
@@ -153,6 +171,7 @@ def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Seq
         "episodes": {"requested": cfg["pilot"]["episodes"], "recorded": n, "cap_s": cfg["pilot"]["cap_s"],
                      "terminations": dict(sorted(Counter(r["termination"] for r in rs).items()))},
         **{k: (v[0] if len(v) == 1 else v) for k, v in one.items()},
+        "pilot_sha256": pilot_hash(),
         "utility": {**_stats(utilities), "counts": {str(u): c for u, c in sorted(Counter(utilities).items())},
                     "per_episode": utilities},
         "achievements": {c: sum(c in r["achievements"] for r in rs) for c in components},
@@ -175,7 +194,8 @@ def render(rep: Mapping) -> str:
     lines = [
         f"VERDICT: {rep['verdict']}" + ("" if rep["evidence"] else " (smoke: not evidence)"),
         f"proposer: {json.dumps(rep['proposer'], sort_keys=True)}",
-        f"world {rep['world']}; runtime {rep['runtime']}; image {rep['image']}; judge_sha256 {rep['judge_sha256']}",
+        f"world {rep['world']}; runtime {rep['runtime']}; image {rep['image']}; judge_sha256 {rep['judge_sha256']}; "
+        f"pilot_sha256 {rep['pilot_sha256']}",
         f"episodes: {e['recorded']} recorded of {e['requested']} requested (cap {e['cap_s']} s); "
         f"terminations {e['terminations']}",
         f"utility over {u['n']} episodes: mean {u['mean']}, min {u['min']}, max {u['max']}; counts {u['counts']}",

@@ -1,0 +1,6 @@
+# P34's mutant `pilot_hash_config_omitted` (L2a obligation 37; brief 2 A2): the pilot's hash covers only its Python files,
+# so a change to `pilot/config.toml` (the pilot's size, cap, shifts and thresholds) leaves `pilot_sha256` unmoved.
+[[edit]]
+path = "pilot/run.py"
+old = """if f.is_file() and "__pycache__" not in f.parts)"""
+new = """if f.is_file() and f.suffix == ".py" and "__pycache__" not in f.parts)"""

@@ -1,0 +1,6 @@
+# P34's mutant `pilot_hash_is_judge_hash` (L2a obligation 37; brief 2 A2): the report's `pilot_sha256` is the records'
+# `judge_sha256` again, so the pilot's own code and config are not hashed into the report beside it.
+[[edit]]
+path = "pilot/run.py"
+old = """        "pilot_sha256": pilot_hash(),"""
+new = """        "pilot_sha256": rs[0]["judge_sha256"] if rs else pilot_hash(),"""
