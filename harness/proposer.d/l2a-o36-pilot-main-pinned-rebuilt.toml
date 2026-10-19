@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o36-pilot-main-pinned-rebuilt (L2a obligation 36, `pilot/__main__.py` paths pinned, rebuilt from master): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "07f0c67e-4e86-4c47-ba5c-1301676ae3bc"
