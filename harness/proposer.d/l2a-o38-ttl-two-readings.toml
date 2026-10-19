@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o38-ttl-two-readings (L2a obligation 38, review 0d5e9ec F1: time-to-learn reports m* under the expected and the assurance reading of "90% posterior mass"): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "471a7224-d623-48b7-abe9-122b17fab5dd"
