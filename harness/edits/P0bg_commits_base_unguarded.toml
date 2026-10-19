@@ -1,0 +1,6 @@
+# P0bg's third mutant (review ef1e03c F4): the real-branch check no longer guards branch_commits on the missing base, so a tree with no
+# .git raises `git log None..HEAD` where a finding belongs.
+[[edit]]
+path = "harness/pins.py"
+old = "    real = claims.branch_commits(root, base) if base is not None else []\n"
+new = "    real = claims.branch_commits(root, base)\n"
