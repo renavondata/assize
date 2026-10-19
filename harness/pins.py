@@ -5787,12 +5787,19 @@ def p5_commitment_order() -> bool:
     return ok()
 
 
-# P14 plays the random incumbent (brief 1 section 4) for two episodes in one container, each cut to INCUMBENT_STEPS
-# steps: 2 x 100 draws over Crafter's 17 actions, about 11.8 per action. Its uniformity is refused only when Pearson's
-# statistic has an exact multinomial p value below UNIFORM_ALPHA, the false-failure rate the pin accepts per runtime
-# per run, stated before any run; a candidate's score never passes through it.
+# P14 plays the random incumbent (brief 1 section 4) for five episodes in one container, each cut to INCUMBENT_STEPS
+# steps: 5 x 100 draws over Crafter's 17 actions, about 29 per action. A random agent can die before the cut (the third
+# episode ended at 60 and 64 steps in two of ten runs), so five, not three: coverage needs 275 draws and survives the
+# loss of 225. Its uniformity is refused only when Pearson's
+# statistic over the first PEARSON_EPISODES episodes (200 draws, the most the exact tail below is computed for in
+# reasonable time) has an exact multinomial p value below UNIFORM_ALPHA, the false-failure rate the pin accepts per
+# runtime per run, stated before any run; a candidate's score never passes through it. Pearson has almost no power
+# against one action dropped (L2a obligation 34: refused in 1e-4 of runs), so all five episodes also face a coverage
+# test: an action never played is refused, which is a false failure of a uniform agent with the exact probability
+# `_some_cell_empty_sf` of the committed draw count, asserted below UNIFORM_ALPHA before any run.
 INCUMBENT = ROOT / "incumbents" / "random"
-INCUMBENT_EPISODES = 2
+INCUMBENT_EPISODES = 5
+PEARSON_EPISODES = 2
 INCUMBENT_STEPS = 100
 UNIFORM_ALPHA = 1e-6
 # L2a obligation 33: 200 draws over 17 actions whose exact p value under the uniform multinomial is about 1.65e-6, at or
@@ -5884,6 +5891,12 @@ def _uniform_sf(counts) -> Fraction:
     return Fraction(tail, k ** n)
 
 
+def _some_cell_empty_sf(n: int, k: int) -> Fraction:
+    """The exact probability that n draws uniform over k cells leave at least one cell empty, by inclusion-exclusion
+    over the set of empty cells: sum over j >= 1 of (-1)^(j+1) C(k, j) ((k - j) / k)^n."""
+    return sum((-1) ** (j + 1) * math.comb(k, j) * Fraction(k - j, k) ** n for j in range(1, k + 1))
+
+
 def _build(rt, context_dir: Path) -> str:
     """Build the image of `context_dir` under `rt` with no network and no pull; return its image id."""
     with tempfile.TemporaryDirectory() as d:
@@ -5896,9 +5909,11 @@ def _build(rt, context_dir: Path) -> str:
 def p14_random_incumbent() -> bool:
     """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
     runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
-    pin's, plays two episodes in one container, each ended by the World; every action it plays is uniform over the
-    legal actions (Pearson's statistic not refused at UNIFORM_ALPHA by its exact multinomial p value, which is right
-    where it is known in closed form and does not refuse UNIFORM_BOUNDARY); and its recorded log-loss at every declared
+    pin's, plays five episodes in one container, each ended by the World; every action it plays is uniform over the
+    legal actions (Pearson's statistic over the first PEARSON_EPISODES episodes not refused at UNIFORM_ALPHA by its
+    exact multinomial p value, which is right where it is known in closed form and does not refuse UNIFORM_BOUNDARY;
+    and every legal action played at least once over all of them, a refusal whose false-failure probability for a
+    uniform agent is exactly known and below UNIFORM_ALPHA); and its recorded log-loss at every declared
     target equals the predictive floor derived by definition from the episode's own observations, per episode, so the
     floor starts afresh in each, finite and positive."""
     from judge import episodes, runtime
@@ -5909,9 +5924,14 @@ def p14_random_incumbent() -> bool:
                          ((2, 1, 0), Fraction(21, 27))):
         expect(_uniform_sf(counts) == want, f"exact p of {counts}: {_uniform_sf(counts)}, {want} by enumeration")
     edge = _uniform_sf(UNIFORM_BOUNDARY)
-    expect(sum(UNIFORM_BOUNDARY) == INCUMBENT_EPISODES * INCUMBENT_STEPS and edge >= UNIFORM_ALPHA,
+    expect(sum(UNIFORM_BOUNDARY) == PEARSON_EPISODES * INCUMBENT_STEPS and edge >= UNIFORM_ALPHA,
            f"a uniform agent's count {UNIFORM_BOUNDARY} is not refused: exact p {float(edge):.3g} >= {UNIFORM_ALPHA}")
     m = binding.manifest()
+    k = len(m["actions"])
+    miss = _some_cell_empty_sf(INCUMBENT_EPISODES * INCUMBENT_STEPS, k)
+    expect(_some_cell_empty_sf(3, 3) == Fraction(7, 9) and miss < UNIFORM_ALPHA,
+           f"a uniform agent leaves an action unplayed with exact probability {float(miss):.3g} < {UNIFORM_ALPHA} "
+           f"(3 draws over 3 cells leave one empty with probability {_some_cell_empty_sf(3, 3)}, 7/9 by enumeration)")
     base = runtime.candidate_config()["base_image"]
     froms = [ln.split()[1] for ln in (INCUMBENT / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
     expect(froms == [base], f"the incumbent's one FROM is the judge's pinned base image ({froms}, {base})")
@@ -5937,8 +5957,13 @@ def p14_random_incumbent() -> bool:
             for name, v in want.items():
                 got = r["prediction"].get(name)
                 expect(got == v, f"{rt.name} episode {r['episode']} {name}: recorded {got}, floor derived {v}")
-        k = len(m["actions"])
-        played = [a for w in worlds for a in w.actions]
+        every = [a for w in worlds for a in w.actions]
+        unplayed = [a for a in range(k) if a not in every]
+        left = _some_cell_empty_sf(len(every), k)  # fewer than committed if an episode ended early: then no verdict
+        expect(left < UNIFORM_ALPHA, f"{rt.name}: {len(every)} draws, enough that a uniform agent leaves an action "
+                                     f"unplayed with probability {float(left):.3g} < {UNIFORM_ALPHA}")
+        expect(not unplayed, f"{rt.name}: every one of the {k} actions played in {len(every)} draws (unplayed {unplayed})")
+        played = [a for w in worlds[:PEARSON_EPISODES] for a in w.actions]
         counts = [played.count(a) for a in range(k)]
         e = len(played) / k
         chi2 = math.fsum((c - e) ** 2 / e for c in counts)
@@ -6571,7 +6596,8 @@ PINS = [
         p14_random_incumbent, (Mutant("first_legal_action", _edits("P14_first_legal_action")),
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
                                Mutant("seen_not_reset", _edits("P14_seen_not_reset")),
-                               Mutant("asymptotic_p", _edits("P14_asymptotic_p"))), JUDGE_SIDE),
+                               Mutant("asymptotic_p", _edits("P14_asymptotic_p")),
+                               Mutant("one_action_dropped", _edits("P14_one_action_dropped"))), JUDGE_SIDE),
     Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
         p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),

@@ -1,0 +1,9 @@
+least draws with P(some action unplayed | uniform over 17) < 1e-06: 275 (p at 275: 9.77e-07; at 274: 1.04e-06; at 500: 1.16e-12; at 300: 2.15e-07)
+seed 1: 60 episodes, 0 ended before step 100 (0.000); early endings []; all terminations ['truncated']
+seed 2: 60 episodes, 0 ended before step 100 (0.000); early endings []; all terminations ['truncated']
+seed 3: 60 episodes, 3 ended before step 100 (0.050); early endings [(42, 'terminal'), (57, 'terminal'), (76, 'terminal')]; all terminations ['terminal', 'truncated']
+seed 4: 60 episodes, 0 ended before step 100 (0.000); early endings []; all terminations ['truncated']
+seed 5: 60 episodes, 0 ended before step 100 (0.000); early endings []; all terminations ['truncated']
+all seeds: 3 of 300 episodes ended early (0.010)
+five-episode draw totals over 60 aligned runs: min 442, max 500; below 275 (coverage cannot give a verdict): 0 of 60
+shortest episode seen: 42 steps; the committed loss tolerance is 225 draws, so coverage fails only if the five episodes together lose more than that

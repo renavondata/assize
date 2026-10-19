@@ -1,0 +1,7 @@
+# P14's mutant `one_action_dropped` (L2a obligation 34): the random incumbent draws uniformly from all but the last
+# legal action. Pearson's statistic over 200 draws almost never refuses it; the coverage test over the committed 500
+# draws does, because the dropped action is never played.
+[[edit]]
+path = "incumbents/random/agent.py"
+old = """reply(msg["id"], {"action": CHOOSE(p["legal_actions"]), "prediction": floor(targets, seen)})"""
+new = """reply(msg["id"], {"action": CHOOSE(p["legal_actions"][:-1]), "prediction": floor(targets, seen)})"""
