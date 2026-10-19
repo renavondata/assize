@@ -1,0 +1,6 @@
+# P0bk's third mutant (review ef1e03c F6): a pull-request forecast whose number is an issue stays unread, as the
+# rows for #58 and #103 did.
+[[edit]]
+path = "harness/ledger.py"
+old = "        return observe(\"number\", pr) == \"issue\"\n"
+new = "        return False\n"

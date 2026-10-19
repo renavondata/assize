@@ -218,11 +218,32 @@ def _pr_of(args: Mapping, f: Mapping, observe: Observe, now: str) -> tuple[int |
                   if _at_or_after(now, str(f["resolves_by"])) else None)
 
 
+# A void resolution: the forecast names something that has no record to observe (review dba90c5 F5, ef1e03c F6)
+UNOBSERVABLE = "unobservable"
+
+
+def _issue_not_pr(pr: int, observe: Observe) -> bool:
+    """The number is taken by an issue, not a pull request; False when that cannot be read either."""
+    try:
+        return observe("number", pr) == "issue"
+    except Unreadable:
+        return False
+
+
 def _bound(rule: Callable[[int, Mapping, Observe, str], Outcome | None]) -> Callable[..., Outcome | None]:
-    """A rule on a pull request, read from a forecast whose args name it by `pr` or by `branch`."""
+    """A rule on a pull request, read from a forecast whose args name it by `pr` or by `branch`. A `pr` that the
+    repository gave to an issue has no outcome to observe: void, counted, never scored; any other failure to read is
+    named."""
     def on(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
         pr, settled = _pr_of(args, f, observe, now)
-        return settled if pr is None else rule(pr, f, observe, now)
+        if pr is None:
+            return settled
+        try:
+            return rule(pr, f, observe, now)
+        except Unreadable:
+            if not _issue_not_pr(pr, observe):
+                raise
+            return False, f"#{pr} is an issue, not a pull request", {"void": UNOBSERVABLE}
     return on
 
 
@@ -271,9 +292,20 @@ def _layer_line(report: str, layer: int) -> str | None:
     return lines[-1] if lines else None
 
 
+LAYER_ID = re.compile(r"L?(\d+)")
+
+
+def layer_id(x: object) -> int:
+    """A layer named as `2` or `L2`."""
+    m = LAYER_ID.fullmatch(str(x))
+    if m is None:
+        raise ValueError(f"layer id {x!r} is neither <n> nor L<n>")
+    return int(m.group(1))
+
+
 def _host_verdict(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """The layer's last verdict line in REPORT.md carries `verdict` as a word in its bold verdict (the line if none)."""
-    line = _layer_line(str(observe("report")), int(args["layer"]))
+    line = _layer_line(str(observe("report")), layer_id(args["layer"]))
     if line is None:
         return None
     bold = re.search(r"\*\*(.+?)\*\*", line)
@@ -447,7 +479,10 @@ CANCELLED = "cancelled"
 
 def _session_minutes(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
     """The run ended within `bound` minutes of its start, from the Actions API run's `run_started_at` and `updated_at`
-    (instruction #112 Part A item 2). A run in progress stays open; a cancelled run is void, counted, never scored."""
+    (instruction #112 Part A item 2). A run in progress stays open; a cancelled run is void, counted, never scored; so
+    is a session run outside Actions (`run` `local`), which has no record to observe."""
+    if not str(args["run"]).isdigit():
+        return False, f"run {args['run']}: not an Actions run", {"void": UNOBSERVABLE}
     run = observe("run", int(args["run"]))
     if run.get("status") != "completed":
         return None
@@ -690,6 +725,9 @@ def github_observer(repo: Path, price_of: Callable[[int], Mapping | None]) -> Ob
         if kind == "run":
             return json.loads(_gh(repo, f"repos/{{owner}}/{{repo}}/actions/runs/{key[0]}", "--jq",
                                   "{status, conclusion, run_started_at, updated_at}"))
+        if kind == "number":
+            return _gh(repo, f"repos/{{owner}}/{{repo}}/issues/{key[0]}", "--jq",
+                       'if .pull_request then "pull" else "issue" end').strip()
         if kind == "issue":
             return json.loads(_gh(repo, f"repos/{{owner}}/{{repo}}/issues/{key[0]}", "--jq",
                                   "{number, title, labels: [.labels[].name]}"))

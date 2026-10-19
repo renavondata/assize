@@ -1,0 +1,5 @@
+# P0bk's second mutant (review ef1e03c F6): a layer named `L2` is read by int() alone and named unread.
+[[edit]]
+path = "harness/ledger.py"
+old = "LAYER_ID = re.compile(r\"L?(\\d+)\")\n"
+new = "LAYER_ID = re.compile(r\"(\\d+)\")\n"

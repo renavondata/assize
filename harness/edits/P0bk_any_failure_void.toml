@@ -1,0 +1,6 @@
+# P0bk's fourth mutant (review ef1e03c F6): any failure to read a pull request is resolved void, so a real pull
+# request the API failed on is dropped from the unread rows instead of named.
+[[edit]]
+path = "harness/ledger.py"
+old = "            if not _issue_not_pr(pr, observe):\n"
+new = "            if False:\n"
