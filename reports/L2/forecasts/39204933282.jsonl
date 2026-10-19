@@ -1,0 +1,2 @@
+{"id": "4abc178b1f51", "ts": "2026-10-19T05:32:07Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39204933282"}, "outcome": true, "witness": "reports/L2/review-88e5843f287f97ca23c01445166766e45c266d48.md at 09f215660651: ACCEPT WITH OBLIGATIONS"}
+{"id": "ef8966337701", "ts": "2026-10-19T05:32:07Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39204933282"}, "outcome": true, "witness": "run 39135244287: 14.8 minutes, bound 25"}
