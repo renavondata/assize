@@ -6203,6 +6203,11 @@ TTL_UTILITIES = (0,) * 100 + (2,) * 100
 # The pin's criterion: the Bayesian bootstrap's m* within this factor of the normal oracle's. A pin constant, stated
 # before any run; no candidate's score passes through it.
 TTL_FACTOR = 1.5
+# P15's non-monotone stream (review 0d5e9ec F2): a stub reading at the mass at m = 5 and from m = 9, below it elsewhere,
+# searched up to 16. Doubling reads 1, 2, 4, 8 below and 16 above, then bisection 12, 10, 9 above: it returns 9.
+TTL_STREAM_FIRST, TTL_STREAM_STAYS, TTL_STREAM_CAP = 5, 9, 16
+# The standard error of P15's given rows for the settling rule; any positive value states the same cases.
+TTL_SE = 0.01
 BRIEF_PILOT = {"world": "crafter", "episodes": 200, "cap_s": 7200}
 BRIEF_TTL = {"deltas": [0.25, 0.5, 1.0], "mass": 0.9, "fit_delta": 0.5, "marginal_delta": 1.0, "budget_s": 86400}
 
@@ -6231,15 +6236,28 @@ def p15_time_to_learn() -> bool:
     cap = math.ceil(TTL_FACTOR * 2 * max(oracle.values()))
     found = {}
     for d in cfg["deltas"]:
-        got = ttl.episodes_per_arm(TTL_UTILITIES, d, cap, cfg)
+        # Searched up to the criterion's own bound: every m is read (review 0d5e9ec F2), and a search that reads past
+        # the bound only to fail the criterion would spend the child's timeout.
+        got = ttl.episodes_per_arm(TTL_UTILITIES, d, math.floor(oracle[d] * TTL_FACTOR), cfg)
         found[d] = got
         print(f"  delta {d}: episodes per arm {got}, normal oracle {oracle[d]:.2f}")
         expect(got is not None and oracle[d] / TTL_FACTOR <= got[0] <= oracle[d] * TTL_FACTOR,
                f"delta {d}: m* {got and got[0]} within x{TTL_FACTOR} of the oracle {oracle[d]:.2f}")
         if got is not None:
             expect(got[1] >= cfg["mass"], f"delta {d}: measure at m* {got[1]:.4f} >= {cfg['mass']}")
-            below = ttl.measure(TTL_UTILITIES, d, got[0] - 1, cfg) if got[0] > 1 else None
-            expect(below is None or below < cfg["mass"], f"delta {d}: m* is the smallest: measure at m*-1 {below}")
+            below = [m for m in range(1, got[0]) if ttl.measure(TTL_UTILITIES, d, m, cfg) >= cfg["mass"]]
+            expect(not below, f"delta {d}: m* is the smallest: no m below it reaches the mass ({below})")
+    if not ok():
+        return False  # the later checks rest on these m*; reading them again under a broken search costs the timeout
+
+    # The search on a known non-monotone stream (review 0d5e9ec F2): the reading reaches the mass at TTL_STREAM_FIRST,
+    # falls below it, and stays above it from TTL_STREAM_STAYS. Doubling then bisection lands on a crossing past the
+    # first; the smallest m is the first.
+    stream = lambda _u, _d, m, _c: 0.95 if m == TTL_STREAM_FIRST or m >= TTL_STREAM_STAYS else 0.5
+    got_s = ttl.episodes_per_arm(TTL_UTILITIES, 1.0, TTL_STREAM_CAP, cfg, stream)
+    expect(got_s == (TTL_STREAM_FIRST, 0.95), f"non-monotone stream: m* {got_s}, the first crossing {TTL_STREAM_FIRST}")
+    never = ttl.episodes_per_arm(TTL_UTILITIES, 1.0, TTL_STREAM_FIRST - 1, cfg, stream)
+    expect(never is None, f"non-monotone stream, budget short of every crossing: not detected ({never})")
 
     # The assurance reading (review 0d5e9ec F1): the posterior mass reaches `mass` in a `mass` fraction of experiments,
     # which asks twice the episodes, 8 sigma^2 z^2 / delta^2, since the posterior mean's noise adds one more z. The
@@ -6265,6 +6283,52 @@ def p15_time_to_learn() -> bool:
     expect(ttl.verdict(rows_a, cfg) == "FIT" and ttl.verdict(rows_a, cfg, assured=True) == "FIT",
            "a budget affording the assurance oracle is FIT under both readings")
 
+    # Monte Carlo standard errors (review 0d5e9ec F2), recomputed independently: the sample standard deviation over
+    # experiments of each experiment's mass (expected) or of whether it reaches the mass (assurance), over sqrt(n).
+    def sem(d: float, m: int, assured: bool) -> float:
+        xs = ttl.masses(TTL_UTILITIES, d, m, cfg).tolist()
+        per = [float(x >= cfg["mass"]) for x in xs] if assured else xs
+        return statistics.stdev(per) / math.sqrt(len(per))
+
+    near = lambda a, b: a is not None and abs(a - b) <= 1e-12
+    for r in rows_a:
+        for assured, reading in ((False, ttl.measure), (True, ttl.assurance)):
+            p = "assured_" if assured else ""
+            m, got_se, got_below, got_below_se, at, at_se = (getattr(r, p + f) for f in (
+                "episodes_per_arm", "se", "below", "below_se", "at_budget", "at_budget_se"))
+            print(f"  delta {r.delta} {p or 'expected '}errors: se at m* {m}: {got_se}; at m*-1 {got_below} "
+                  f"({got_below_se}); at the budget {cap_a}: {at} ({at_se})")
+            if m is None or m < 2:
+                expect(False, f"delta {r.delta}: {p}m* {m} leaves no m*-1 to read")
+                continue
+            expect(near(got_se, sem(r.delta, m, assured)), f"delta {r.delta}: {p}se at m* is the sample error of the mean")
+            expect(got_below == reading(TTL_UTILITIES, r.delta, m - 1, cfg)
+                   and near(got_below_se, sem(r.delta, m - 1, assured)), f"delta {r.delta}: {p}reading and se at m*-1")
+            expect(at == reading(TTL_UTILITIES, r.delta, cap_a, cfg) and near(at_se, sem(r.delta, cap_a, assured)),
+                   f"delta {r.delta}: {p}reading and se at the budget's {cap_a} episodes per arm")
+    expect(ttl.within_error(rows_a, cfg) == () and ttl.within_error(rows_a, cfg, assured=True) == (),
+           "a budget affording the assurance oracle x TTL_FACTOR is settled under both readings")
+
+    # The settling rule on rows whose numbers are given: a detection stands only more than one standard error past the
+    # mass at the budget, on its own side; the verdict reads marginal_delta only if fit_delta does not stand detected.
+    e, q = TTL_SE, cfg["mass"]
+    row = lambda d, m, x: ttl.Row(d, m, None, None, at_budget=x, at_budget_se=e)
+    cases = {"detected, 2 se above": (row(0.5, 10, q + 2 * e), True),
+             "detected, half an se above": (row(0.5, 10, q + e / 2), False),
+             "not detected, 2 se below": (row(0.5, None, q - 2 * e), True),
+             "not detected, half an se below": (row(0.5, None, q - e / 2), False),
+             "no episode affordable": (row(0.5, None, None), True)}
+    for what, (r, want) in cases.items():
+        expect(ttl.settled(r, cfg) == want, f"settled, {what}: {want}")
+    fit_d, marg_d = cfg["fit_delta"], cfg["marginal_delta"]
+    pairs = {"fit stands, marginal unsettled": ((row(fit_d, 10, q + 2 * e), row(marg_d, 5, q + e / 2)), ()),
+             "fit unsettled detected": ((row(fit_d, 10, q + e / 2), row(marg_d, 5, q + 2 * e)), (fit_d,)),
+             "fit stands undetected, marginal unsettled": ((row(fit_d, None, q - 2 * e), row(marg_d, None, q - e / 2)),
+                                                           (marg_d,)),
+             "both unsettled": ((row(fit_d, None, q - e / 2), row(marg_d, 5, q + e / 2)), (fit_d, marg_d))}
+    for what, (rs, want) in pairs.items():
+        expect(ttl.within_error(rs, cfg) == want, f"within_error, {what}: {want} ({ttl.within_error(rs, cfg)})")
+
     flat = ttl.episodes_per_arm((3,) * 50, cfg["fit_delta"], cap, cfg)
     expect(flat == (1, 1.0), f"no incumbent variance: one episode per arm, all mass on the correct sign ({flat})")
 
@@ -6286,6 +6350,11 @@ def p15_time_to_learn() -> bool:
         expect(all(r.wall_s == 2 * r.episodes_per_arm / throughput for r in rows if r.episodes_per_arm is not None),
                f"{want}: wall-clock counts both arms")
         expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
+        # Each budget sits on the boundary the search found, where the review witnessed readings one standard error
+        # apart (0.8998 at 25, 0.9049 at 26 for 0.5): the delta that decides the verdict is reported within error.
+        deciding = (marg_d,) if want == "UNFIT" else (fit_d,)
+        expect(ttl.within_error(rows, cfg) == deciding,
+               f"{want}: within Monte Carlo error at {deciding} ({[(r.delta, r.at_budget, r.at_budget_se) for r in rows]})")
         if want == "FIT":
             expect(ttl.verdict(rows, cfg, assured=True) != "FIT",
                    "the budget affording the expected m* is FIT, and not FIT under the assurance reading, which asks more")
@@ -6974,7 +7043,10 @@ PINS = [
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),
                             Mutant("one_arm", _edits("P15_one_arm")),
                             Mutant("budget_one_arm", _edits("P15_budget_one_arm")),
-                            Mutant("expected_for_assurance", _edits("P15_expected_for_assurance"))), JUDGE_SIDE),
+                            Mutant("expected_for_assurance", _edits("P15_expected_for_assurance")),
+                            Mutant("first_crossing", _edits("P15_first_crossing")),
+                            Mutant("boundary_unflagged", _edits("P15_boundary_unflagged")),
+                            Mutant("se_not_of_mean", _edits("P15_se_not_of_mean"))), JUDGE_SIDE),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),

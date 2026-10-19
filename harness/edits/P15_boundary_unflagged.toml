@@ -1,0 +1,6 @@
+# P15's mutant `boundary_unflagged` (review 0d5e9ec F2): a detection is settled by the reading at the budget alone, its
+# standard error ignored, so a verdict on the boundary is read off one draw.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """    return x - se > cfg["mass"] if m is not None else x + se < cfg["mass"]"""
+new = """    return x >= cfg["mass"] if m is not None else x < cfg["mass"]"""

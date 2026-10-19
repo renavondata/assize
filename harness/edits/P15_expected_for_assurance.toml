@@ -2,5 +2,5 @@
 # mass, so it repeats the committed reading's episodes per arm instead of the roughly twice as many assurance asks.
 [[edit]]
 path = "pilot/timetolearn.py"
-old = "    return [Row(d, *read(d, measure), *read(d, assurance)) for d in cfg[\"deltas\"]]\n"
-new = "    return [Row(d, *read(d, measure), *read(d, measure)) for d in cfg[\"deltas\"]]\n"
+old = "        expected, assured = read(delta, measure), read(delta, assurance)\n"
+new = "        expected, assured = read(delta, measure), read(delta, measure)\n"
