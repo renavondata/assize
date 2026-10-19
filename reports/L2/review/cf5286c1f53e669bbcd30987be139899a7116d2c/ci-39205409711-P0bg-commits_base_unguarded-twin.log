@@ -1,0 +1,13 @@
+copy of /home/runner/work/assize/assize
+  at /tmp/assize-scratch-saht53y_/assize-copy-cyq9phfl/repo
+twin: no edits applied
+pin:       P0bg
+protects:  P0m's real-branch check on a tree with no .git fails naming the missing repository instead of raising
+role:      twin
+tree:      /tmp/assize-scratch-saht53y_/assize-copy-cyq9phfl/repo
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-saht53y_
+  [ok] control: /tmp/assize-scratch-saht53y_/assize-nogit-rv_0hqxv holds no .git
+  [ok] the real-branch check on a tree with no .git does not raise (None)
+  [ok] it fails once, naming the missing repository and the tree (['real branch: no git repository, or no master to compare, at /tmp/assize-scratch-saht53y_/assize-nogit-rv_0hqxv (base None)'])
+result:    PASS

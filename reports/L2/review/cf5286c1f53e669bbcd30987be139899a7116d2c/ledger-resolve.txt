@@ -1,0 +1,14 @@
+$ uv run --frozen python -m harness.ledger resolve --session 39210082473   (exit 1; transcribed from this session's tool output)
+# reports/L0/forecasts/39210082473.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39210082473.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39210082473.jsonl: 95 open, 89 typed; resolved 3, unreadable 20
+resolved e31975450868 True — reports/L2/review-0cdb209b3e9992be20a411900a2255347d821fed.md at ee4664ec09bb: ACCEPT WITH OBLIGATIONS
+resolved 0e81a85c694d True — pins run 39205409711 attempt 1 on dd5e8a254e53: success
+resolved 981c08db6eba True — run 39205277936: 53.8 minutes, bound 60
+UNREAD 01e02469234d: review_accept {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58/commits?per_page=100: gh: Not Found (HTTP 404))
+UNREAD 7087dcbb7865: pins_green {'pr': 58}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/58: gh: Not Found (HTTP 404))
+UNREAD 02d749e28bef: pins_green {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103: gh: Not Found (HTTP 404))
+UNREAD c5c1da6369cc: review_accept {'pr': 103}: not read (Unreadable: gh api repos/{owner}/{repo}/pulls/103/commits?per_page=100: gh: Not Found (HTTP 404))
+UNREAD 191a63d44bf2, 2c9577e1a69c, 3c074d68d679, b379e6a4b68b, e1ff2bd0a05c, 49b9c525ee57, 062c95189282, 5676da4ef8c1, 6a8633af3d01, 22fb418f1ca6, a06f68215bec, 623abfb5c41b, f3d3b79b388d, 2d02cc672c8e, ed405b304e08: session_minutes {'run': 'local', ...}: not read (ValueError: invalid literal for int() with base 10: 'local')
+UNREAD 46089f87516d: host_verdict {'layer': 'L2', 'verdict': 'FIT'}: not read (ValueError: invalid literal for int() with base 10: 'L2')
+The two empty files it created under reports/L0/forecasts/ and reports/L1/forecasts/ (0 bytes each) were deleted before commit.
