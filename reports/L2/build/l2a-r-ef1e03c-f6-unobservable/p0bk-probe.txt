@@ -1,0 +1,25 @@
+# P0bk probe at 7f99c61, local, in-process on scratch copies (/tmp/f6/probe.sh): clean, then each mutant applied by
+# harness.edits.load/apply; the last three expectation lines and the pin's return value of each run.
+== clean:   [ok] a void resolution is not a scored outcome
+  [ok] the open forecasts left are the observable-later and the named-unread (['4e497b93d094', '7799dd7a5f23', 'c9eb3f8e4acd', 'ea96927f345e'])
+  [ok] forecasts and resolutions pass the ledger check ([])
+True
+== local_unread:   [ok] a void resolution is not a scored outcome
+  [FAIL] the open forecasts left are the observable-later and the named-unread (['4e497b93d094', '7799dd7a5f23', 'c9eb3f8e4acd', 'ea40204143a6', 'ea96927f345e'])
+  [ok] forecasts and resolutions pass the ledger check ([])
+False
+== layer_prefix_unread:   [ok] a void resolution is not a scored outcome
+  [FAIL] the open forecasts left are the observable-later and the named-unread (['0a19ba10406f', '4e497b93d094', '7799dd7a5f23', 'c9eb3f8e4acd', 'ea96927f345e'])
+  [ok] forecasts and resolutions pass the ledger check ([])
+False
+== issue_unchecked:   [ok] a void resolution is not a scored outcome
+  [FAIL] the open forecasts left are the observable-later and the named-unread (['407adfff7d27', '4e497b93d094', '7799dd7a5f23', 'c9eb3f8e4acd', 'ea96927f345e', 'ec154acee66e', 'fd4bbfe3101f'])
+  [ok] forecasts and resolutions pass the ledger check ([])
+False
+== any_failure_void:   [ok] a void resolution is not a scored outcome
+  [FAIL] the open forecasts left are the observable-later and the named-unread (['4e497b93d094', 'ea96927f345e'])
+  [ok] forecasts and resolutions pass the ledger check ([])
+False
+# Dry resolve of master b8a27c7's ledger with this head's resolver (nothing appended): reports/L2 95 open; resolved 20
+# (19 void unobservable: 15 session_minutes run local, 4 rows on #58 and #103, both issues; 1 scored); unreadable 0.
+# Before the change the same dry resolve gave unreadable 20 (the rows review ef1e03c F6 names).

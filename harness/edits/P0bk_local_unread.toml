@@ -1,0 +1,6 @@
+# P0bk's first mutant (review ef1e03c F6): a session_minutes forecast on run `local` is read as an Actions run id,
+# raises ValueError and is named unread instead of resolved void.
+[[edit]]
+path = "harness/ledger.py"
+old = "    if not str(args[\"run\"]).isdigit():\n"
+new = "    if False:\n"

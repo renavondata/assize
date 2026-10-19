@@ -1490,6 +1490,61 @@ def p0s_outcomes_by_code() -> bool:
     return ok()
 
 
+# (forecast, what the resolver says: True, False, "void", "open" or "unread"): review dba90c5 F5 and ef1e03c F6's rows
+UNOBSERVED_FIXTURE = (
+    (_typed("build run local ends within 60 minutes of its start", 0.7, "session_minutes",
+            {"run": "local", "bound": 60}), "void"),
+    (_typed("host FIT, the layer named L2", 0.4, "host_verdict", {"layer": "L2", "verdict": "FIT"}), False),
+    (_typed("host FIT, no L3 line yet", 0.4, "host_verdict", {"layer": "L3", "verdict": "FIT"}), "open"),
+    (_typed("host FIT, a layer named neither n nor Ln", 0.4, "host_verdict", {"layer": "Lx", "verdict": "FIT"}),
+     "unread"),
+    (_typed("pins on #58, an issue", 0.8, "pins_green", {"pr": 58}), "void"),
+    (_typed("review on #58, an issue", 0.7, "review_accept", {"pr": 58}), "void"),
+    (_typed("merged #58, an issue", 0.9, "merged", {"pr": 58}), "void"),
+    (_typed("merged #59, a pull request the API failed on", 0.9, "merged", {"pr": 59}), "unread"),
+    (_typed("merged #60, nothing read", 0.9, "merged", {"pr": 60}), "unread"),
+)
+UNOBSERVED_NUMBERS = {58: "issue", 59: "pull"}
+
+
+def _observe_unobserved(kind: str, *key: object) -> object:
+    from harness import ledger
+
+    if kind == "report":
+        return "# REPORT\n- L2 — **NetHack UNFIT**\n"
+    if kind == "number" and key[0] in UNOBSERVED_NUMBERS:
+        return UNOBSERVED_NUMBERS[key[0]]
+    raise ledger.Unreadable(f"gh api {(kind, *key)}: Not Found (HTTP 404)")
+
+
+def p0bk_unobservable_closed() -> bool:
+    """`harness.ledger resolve` reads a layer named `L<n>` as layer n; resolves void, counted and never scored, a
+    session_minutes forecast on a run outside Actions (`local`) and a pull-request forecast whose number the repository
+    gave to an issue; and still names every other row it cannot read, so the open denominator is closed by outcomes,
+    voids and named rows (review dba90c5 F5, ef1e03c F6)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    rows = [f for f, _ in UNOBSERVED_FIXTURE]
+    got, unread = ledger.resolve(rows, _observe_unobserved, OUTCOME_NOW, "p0bk")
+    by_id = {r["id"]: r for r in got}
+    named = {f["id"] for f in rows if any(f["id"] in u for u in unread)}
+    for f, want in UNOBSERVED_FIXTURE:
+        r = by_id.get(f["id"])
+        said = ("unread" if f["id"] in named else "open") if r is None else (
+            "void" if r.get("void") == ledger.UNOBSERVABLE else r["outcome"])
+        expect(said == want, f"{f['claim']!r}: {said}, want {want}")
+    expect(len(unread) == len(named), f"each unread line names one forecast ({unread})")
+    voids = {r["id"] for r in got if r.get("void")}
+    expect(not (voids & ledger.outcomes(rows + got).keys()), "a void resolution is not a scored outcome")
+    still = {f["id"] for f in ledger.open_forecasts(rows + got)}
+    expect(still == {f["id"] for f, w in UNOBSERVED_FIXTURE if w in ("open", "unread")},
+           f"the open forecasts left are the observable-later and the named-unread ({sorted(still)})")
+    findings = claims.ledger_findings(_ledger(*rows, *got))
+    expect(not findings, f"forecasts and resolutions pass the ledger check ({[str(f) for f in findings]})")
+    return ok()
+
+
 T0 = "2026-02-01T00:00:00Z"
 
 
@@ -6601,6 +6656,12 @@ PINS = [
                                   Mutant("procedures_unbound", _edits("P0bj_procedures_unbound")),
                                   Mutant("retrospective", _edits("P0bj_retrospective")),
                                   Mutant("hook_unchecked", _edits("P0bj_hook_unchecked"))), ALWAYS),
+    Pin("P0bk", "the resolver reads layer ids L<n>, voids a forecast on a run outside Actions or on a number taken by "
+                "an issue, and names every other row it cannot read",
+        p0bk_unobservable_closed, (Mutant("local_unread", _edits("P0bk_local_unread")),
+                                   Mutant("layer_prefix_unread", _edits("P0bk_layer_prefix_unread")),
+                                   Mutant("issue_unchecked", _edits("P0bk_issue_unchecked")),
+                                   Mutant("any_failure_void", _edits("P0bk_any_failure_void"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
