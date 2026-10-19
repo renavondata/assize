@@ -6200,6 +6200,10 @@ def p14_random_incumbent() -> bool:
 # closed form: with each arm's posterior mean normal, the expected posterior mass on the correct sign at m episodes
 # per arm is Phi(delta / (2 sigma / sqrt(m))), which reaches q at m = 4 sigma^2 Phi^-1(q)^2 / delta^2.
 TTL_UTILITIES = (0,) * 100 + (2,) * 100
+# A second fixture (S a9de119: the first alone is two points of equal weight): 0, 1 and 5 in the ratio 6:3:1, so skewed,
+# mean 0.8 and variance 2.16 (population). A reading that ignores the observed weights, or that takes the first
+# fixture's variance for every stream, passes the first and misses this one by a factor above TTL_FACTOR.
+TTL_SKEWED = (0,) * 120 + (1,) * 60 + (5,) * 20
 # The pin's criterion: the Bayesian bootstrap's m* within this factor of the normal oracle's. A pin constant, stated
 # before any run; no candidate's score passes through it.
 TTL_FACTOR = 1.5
@@ -6254,6 +6258,20 @@ def p15_time_to_learn() -> bool:
             expect(not below, f"delta {d}: m* is the smallest: no m below it reaches the mass ({below})")
     if not ok():
         return False  # the later checks rest on these m*; reading them again under a broken search costs the timeout
+
+    # A second fixture, skewed (S a9de119), at the two deltas the verdict reads (the smaller shifts cost the timeout):
+    # the same closed-form oracle with its own variance, m* within the same factor, the mass reached at m*.
+    var_s = statistics.pvariance(TTL_SKEWED)
+    for d in (cfg["fit_delta"], cfg["marginal_delta"]):
+        want = 4 * var_s * z * z / (d * d)
+        got = ttl.episodes_per_arm(TTL_SKEWED, d, math.floor(want * TTL_FACTOR), cfg)
+        print(f"  skewed fixture, delta {d}: episodes per arm {got}, normal oracle {want:.2f} (variance {var_s})")
+        expect(got is not None and want / TTL_FACTOR <= got[0] <= want * TTL_FACTOR,
+               f"skewed, delta {d}: m* {got and got[0]} within x{TTL_FACTOR} of the oracle {want:.2f}")
+        expect(got is not None and got[1] >= cfg["mass"], f"skewed, delta {d}: measure at m* {got and got[1]} >= mass")
+    expect(var_s != var, f"the second fixture's variance {var_s} is not the first's {var}")
+    if not ok():
+        return False
 
     # The search on a known non-monotone stream (review 0d5e9ec F2): the reading reaches the mass at TTL_STREAM_FIRST,
     # falls below it, and stays above it from TTL_STREAM_STAYS. Doubling then bisection lands on a crossing past the
@@ -7061,7 +7079,8 @@ PINS = [
                             Mutant("expected_for_assurance", _edits("P15_expected_for_assurance")),
                             Mutant("first_crossing", _edits("P15_first_crossing")),
                             Mutant("boundary_unflagged", _edits("P15_boundary_unflagged")),
-                            Mutant("se_not_of_mean", _edits("P15_se_not_of_mean"))), JUDGE_SIDE),
+                            Mutant("se_not_of_mean", _edits("P15_se_not_of_mean")),
+                            Mutant("weights_equal", _edits("P15_weights_equal"))), JUDGE_SIDE),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
