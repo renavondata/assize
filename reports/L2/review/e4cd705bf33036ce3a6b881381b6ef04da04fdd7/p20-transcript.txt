@@ -1,0 +1,15 @@
+Reproduction of P20's schema half at head e4cd705bf33036ce3a6b881381b6ef04da04fdd7, by assize-reviewer session 2c9b06a2-26d5-4951-af71-b230ba96a2a6, run 39390385532.
+Scope: the schema assertion of P20 (`manifest.schema.json rejects <world> without its price`), not the full suite.
+The full `make pins` is not reproduced here: it runs 31-40 minutes, beyond the 10-minute cloud limit (CLAUDE.md, Execution). Its witness is the head's pins CI run (see the review file).
+
+Clean: a scratch copy of the head tree (git archive FETCH_HEAD).
+$ uv run --frozen python -I p20-probe.py <clean-scratch>
+crafter/manifest.json: commits-price-and-conforms=True rejects-without-price=True
+clean exit 0
+
+Mutant `schema_price_optional`: a second scratch copy, with worlds/spec/manifest.schema.json line 8 changed to the `new` text of harness/edits/P20_schema_price_optional.toml (the `"price"` entry removed from `required`). The `old` text matches master line 8 exactly.
+$ uv run --frozen python -I p20-probe.py <mutant-scratch>
+crafter/manifest.json: commits-price-and-conforms=True rejects-without-price=False
+
+Result: the assertion `manifest.schema.json rejects crafter/manifest.json without its price` holds on clean and fails on the mutant, so the mutant is killed by P20's schema half. The judge's `unpriced` refusal is not exercised by this probe, as the edit's own comment states.
+Both scratch copies were removed after this transcript was written.

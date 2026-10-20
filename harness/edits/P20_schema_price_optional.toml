@@ -1,0 +1,7 @@
+# P20's mutant `schema_price_optional` (brief 2, audit 8aae43c8c792 finding 6): the manifest schema no longer requires
+# a price, so a manifest that commits none conforms; only P20's schema half stands between it and a World the schema
+# admits unpriced. The judge's own refusal (`unpriced`) is untouched, so P20's evaluate half still passes.
+[[edit]]
+path = "worlds/spec/manifest.schema.json"
+old = '''  "required": ["schema_version", "world", "source", "observation", "actions", "targets", "utility", "price"],'''
+new = '''  "required": ["schema_version", "world", "source", "observation", "actions", "targets", "utility"],'''
