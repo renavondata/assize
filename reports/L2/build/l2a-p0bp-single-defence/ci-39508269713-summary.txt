@@ -1,0 +1,18 @@
+pins CI run 39508269713 on 0945f38 (attempt 1), lines from `gh run view 39508269713 --log`:
+[clean ] P0bp: observed pass -> ok (3.839s) out/pins/runs/P0bp/clean/transcript.log
+[mutant] P0h/sweep_skipped: mutant fail, twin pass -> KILLED (12.96s + 15.51s) out/pins/runs/P0h/sweep_skipped/mutant/transcript.log
+[mutant] P0bp/bytecode_defences_off: mutant fail, twin pass -> KILLED (2.074s + 3.828s) out/pins/runs/P0bp/bytecode_defences_off/mutant/transcript.log
+[mutant] P0bp/prefix_off_alone: mutant fail, twin pass -> KILLED (1.975s + 3.729s) out/pins/runs/P0bp/prefix_off_alone/mutant/transcript.log
+[mutant] P0bp/exclusion_off_alone: mutant fail, twin pass -> KILLED (3.779s + 3.828s) out/pins/runs/P0bp/exclusion_off_alone/mutant/transcript.log
+[mutant] P0l/sha_comparison_skipped: mutant fail, twin pass -> KILLED (0.42s + 0.419s) out/pins/runs/P0l/sha_comparison_skipped/mutant/transcript.log
+[mutant] P0l/obligation_registry_skipped: mutant fail, twin pass -> KILLED (0.42s + 0.419s) out/pins/runs/P0l/obligation_registry_skipped/mutant/transcript.log
+[mutant] P0bh/redact_skipped: mutant fail, twin pass -> KILLED (1.672s + 1.872s) out/pins/runs/P0bh/redact_skipped/mutant/transcript.log
+[mutant] P1/reuse_check_skipped: mutant fail, twin pass -> KILLED (2.174s + 2.072s) out/pins/runs/P1/reuse_check_skipped/mutant/transcript.log
+[mutant] P1/domain_check_skipped: mutant fail, twin pass -> KILLED (2.072s + 2.022s) out/pins/runs/P1/domain_check_skipped/mutant/transcript.log
+[mutant] P9/chain_update_skipped: mutant fail, twin pass -> KILLED (1.672s + 1.672s) out/pins/runs/P9/chain_update_skipped/mutant/transcript.log
+[mutant] P10/removal_skipped: mutant fail, twin pass -> KILLED (36.359s + 26.694s) out/pins/runs/P10/removal_skipped/mutant/transcript.log
+clean: 92/92 passed, 0/92 failed
+mutants: 294/294 killed, 0/294 survived, 0/294 inconclusive, 0/294 stale, 0/294 non-causal, 0 leaked (clean and mutant)
+twins: 294/294 passed
+skipped: 0/92 pins, 0 mutants since 8ae74de (run 39491466700)
+PINS PASSED
