@@ -318,3 +318,4 @@
 {"procedure": "review", "ts": "2026-10-20T13:45:38Z", "run": 39433170413, "gamma": 0.15635924322049846, "probabilities": {"claude-opus-5-5": 0.25, "claude-sonnet-5-5": 0.25, "claude-haiku-5-5": 0.25, "claude-fable-5-1": 0.25}, "drawn": "claude-fable-5-1"}
 {"procedure": "build", "ts": "2026-10-20T14:06:28Z", "run": 39436191879, "gamma": 0.0738328566643381, "probabilities": {"claude-opus-5-5": 0.4900150163850181, "claude-sonnet-5-5": 0.5099849836149819}, "drawn": "claude-sonnet-5-5"}
 {"procedure": "review", "ts": "2026-10-20T15:07:56Z", "run": 39445560884, "gamma": 0.15577031742459319, "probabilities": {"claude-opus-5-5": 0.25, "claude-sonnet-5-5": 0.25, "claude-haiku-5-5": 0.25, "claude-fable-5-1": 0.25}, "drawn": "claude-opus-5-5"}
+{"procedure": "build", "ts": "2026-10-20T15:20:08Z", "run": 39447394824, "gamma": 0.07358467829267665, "probabilities": {"claude-opus-5-5": 0.4918204981598858, "claude-sonnet-5-5": 0.5081795018401141}, "drawn": "claude-opus-5-5"}
