@@ -1582,7 +1582,7 @@ def p0bk_unobservable_closed() -> bool:
     return ok()
 
 
-def p0bl_auditor_differs() -> bool:
+def p0bo_auditor_differs() -> bool:
     """`harness.ledger elect audit` draws only among entrants that are neither the model of the latest recorded build
     draw nor that of the latest review draw, and refuses when none remains; the other procedures draw among all their
     entrants (Amendment 2, audit 8aae43c8c792 finding 1)."""
@@ -6967,10 +6967,10 @@ PINS = [
                                    Mutant("layer_prefix_unread", _edits("P0bk_layer_prefix_unread")),
                                    Mutant("issue_unchecked", _edits("P0bk_issue_unchecked")),
                                    Mutant("any_failure_void", _edits("P0bk_any_failure_void"))), HARNESS),
-    Pin("P0bl", "an elected auditor is neither the latest builder's model nor the latest reviewer's, and none left is refused",
-        p0bl_auditor_differs, (Mutant("elect_ignores_exclusions", _edits("P0bl_elect_ignores_exclusions")),
-                               Mutant("first_draw_barred", _edits("P0bl_first_draw_barred")),
-                               Mutant("empty_falls_back", _edits("P0bl_empty_falls_back"))), HARNESS),
+    Pin("P0bo", "an elected auditor is neither the latest builder's model nor the latest reviewer's, and none left is refused",
+        p0bo_auditor_differs, (Mutant("elect_ignores_exclusions", _edits("P0bo_elect_ignores_exclusions")),
+                               Mutant("first_draw_barred", _edits("P0bo_first_draw_barred")),
+                               Mutant("empty_falls_back", _edits("P0bo_empty_falls_back"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
