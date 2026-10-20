@@ -7196,7 +7196,8 @@ PINS = [
     Pin("P19", "a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding",
         p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),), JUDGE_SIDE),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
-        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),), JUDGE_SIDE),
+        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),
+                          Mutant("schema_price_optional", _edits("P20_schema_price_optional"))), JUDGE_SIDE),
     Pin("P33", "a World's price is the derivation from its own committed delta; evaluate() refuses underived rates, "
                "another World's among them, and a price without a delta",
         p33_price_derived, (Mutant("rates_underived", _edits("P33_rates_underived")),
