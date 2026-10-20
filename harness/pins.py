@@ -599,11 +599,14 @@ def p0i_no_stale_bytecode() -> bool:
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
-REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "podman-info")
+REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "podman-info")
+STUB_HEAD = "0123456789abcdef0123456789abcdef01234567"
 STUB = "#!/bin/sh\n{body}\n"
 STUB_OK = {"uptime": 'echo " 12:00:00 up 1 day,  load average: 0.10, 0.20, 0.30"',
-           "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"'}
-STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo "podman version 5.0.0"'}
+           "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"',
+           "git": f'echo {STUB_HEAD}'}
+STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo "podman version 5.0.0"',
+             "git": "exit 128"}
 
 
 def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
@@ -614,7 +617,7 @@ def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
         d.mkdir(parents=True)
     for name in STUB_OK:
         stub = stubs / name
-        fails = (lacking, name) in (("uptime", "uptime"), ("podman-info", "podman"))
+        fails = (lacking, name) in (("uptime", "uptime"), ("podman-info", "podman"), ("head", "git"))
         stub.write_text(STUB.format(body=(STUB_FAIL if fails else STUB_OK)[name]))
         stub.chmod(0o755)
     slice_dir, own_dir = root / "slice", root / "own"
@@ -653,6 +656,7 @@ def p0j_host_facts_complete() -> bool:
     expect(all(f"### {name}\n" in facts for name in REQUIRED_FACTS), f"facts record {REQUIRED_FACTS}")
     expect("load average: 0.10" in facts and "0-3" in facts and "agentName" in facts
            and "crun 2 systemd rootless=true" in facts, "facts carry each probe's output")
+    expect(STUB_HEAD in facts, "facts record the checked-out head sha (obligation 43)")
     expect("NOT A MEASUREMENT" not in facts, "complete facts are not refused")
     for name in REQUIRED_FACTS:
         code, facts = _host_facts(work, f"lacks-{name}", name)
@@ -661,6 +665,31 @@ def p0j_host_facts_complete() -> bool:
         expect(name in refusal.split(), f"{name} missing: refusal names it ({refusal!r})")
     shutil.rmtree(work, ignore_errors=True)
     return ok
+
+
+def p0bl_measure_bound_to_head() -> bool:
+    """A `measure-host` facts.txt is admissible as a host witness only if the head it recorded is the head the
+    Reviewer reproduced: the matching head is accepted; another head, a facts file recording none and a malformed sha
+    are each refused, by name, and `claims measure-head` exits accordingly (obligation 43, R 7498b94a505b F1)."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bl-", dir=context.scratch))
+    _, facts = _host_facts(work, "recorded", None)
+    other = "f" * 40
+    expect(not claims.measure_head_findings(facts, STUB_HEAD), "the artefact's own head is accepted")
+    expect(_codes(claims.measure_head_findings(facts, other)) == {("facts", "head_differs")},
+           "another reviewed head is refused head_differs")
+    _, bare = _host_facts(work, "lacks-head", "head")
+    expect(_codes(claims.measure_head_findings(bare, STUB_HEAD)) == {("facts", "head_unrecorded")},
+           "facts recording no head are refused head_unrecorded")
+    forged = facts + f"### head\n$ git rev-parse HEAD\n{other}\n[exit 0]\n"
+    expect(_codes(claims.measure_head_findings(forged, other)) == {("facts", "head_unrecorded")},
+           "two head facts are refused head_unrecorded")
+    path = work / "facts.txt"
+    path.write_text(facts)
+    expect(claims.main(["measure-head", str(path), STUB_HEAD]) == 0, "the CLI exits 0 on the measured head")
+    expect(claims.main(["measure-head", str(path), other]) == 1, "the CLI exits 1 on another head")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
 
 
 def _expecter():
@@ -6864,8 +6893,13 @@ PINS = [
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
                                   Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
-                                  Mutant("own_cgroup_unchecked", _edits("P0j_own_cgroup_unchecked"))),
+                                  Mutant("own_cgroup_unchecked", _edits("P0j_own_cgroup_unchecked")),
+                                  Mutant("head_unrecorded", _edits("P0j_head_unrecorded"))),
         ("scripts/**",)),
+    Pin("P0bl", "a measure artefact is admissible only for the head it recorded: another head or none is refused",
+        p0bl_measure_bound_to_head, (Mutant("head_unchecked", _edits("P0bl_head_unchecked")),
+                                     Mutant("two_heads_accepted", _edits("P0bl_two_heads_accepted"))),
+        HARNESS + ("scripts/**",)),
     Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
         "forecast's session, is rejected",
         p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),
