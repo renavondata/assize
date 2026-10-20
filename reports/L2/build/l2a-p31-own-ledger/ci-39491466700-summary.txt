@@ -1,0 +1,10 @@
+pins CI run 39491466700 on 8ae74de (attempt 1), lines from `gh run view 39491466700 --log`:
+[clean ] P31: observed pass -> ok (6.111s) out/pins/runs/P31/clean/transcript.log
+[mutant] P31/verify_omitted: mutant fail, twin pass -> KILLED (5.27s + 5.541s) out/pins/runs/P31/verify_omitted/mutant/transcript.log
+[mutant] P31/eager_imports: mutant fail, twin pass -> KILLED (6.54s + 5.645s) out/pins/runs/P31/eager_imports/mutant/transcript.log
+[mutant] P31/shared_ledger: mutant fail, twin pass -> KILLED (5.643s + 5.597s) out/pins/runs/P31/shared_ledger/mutant/transcript.log
+clean: 92/92 passed, 0/92 failed
+mutants: 292/292 killed, 0/292 survived, 0/292 inconclusive, 0/292 stale, 0/292 non-causal, 0 leaked (clean and mutant)
+twins: 292/292 passed
+skipped: 0/92 pins, 0 mutants since 48f6001 (run 39467394544)
+PINS PASSED
