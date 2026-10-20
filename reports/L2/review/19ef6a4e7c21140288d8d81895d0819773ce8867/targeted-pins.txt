@@ -1,0 +1,38 @@
+# Targeted reproduction of the two new pins on a scratch worktree at 19ef6a4e7c21140288d8d81895d0819773ce8867
+# (detached worktree under ~/git/worktrees/assize/review-265, removed after the run; reviewer session 50acdd8f-0507-46c8-87cd-2f91eba8fb1d)
+# Full `make pins` was NOT run here: the pins CI run on 6038635 took about 36 minutes (created 03:52:50Z, updated 04:29:01Z),
+# above the cloud-VM bound of 10 minutes (CLAUDE.md, Execution). The full-suite witness is the pins CI run on the head.
+# Command: uv run --frozen python -c 'import harness.pins as p; print(p.p0bl_measure_bound_to_head()); print(p.p0j_host_facts_complete())'
+
+## Clean (unmutated head)
+P0bl clean True   (6 [ok] assertions; CLI exit 0 on the measured head, exit 1 on another head)
+P0j clean True    (every fact present exit 0; each of uptime, cpuset, cpuset-slice, cpuset-own, runner-version, head, podman-info missing is refused by name)
+secs 1
+
+## Mutant head_unchecked (P0bl): claims.py `    if heads[0] != reviewed:` -> `    if False:`
+P0bl head_unchecked -> False
+  [FAIL] another reviewed head is refused head_differs
+  [FAIL] the CLI exits 1 on another head
+KILLED
+
+## Mutant two_heads_accepted (P0bl): claims.py `    if len(heads) != 1:` -> `    if not heads:`
+P0bl two_heads_accepted -> False
+  [FAIL] two head facts are refused head_unrecorded
+KILLED
+
+## Mutant head_unrecorded (P0j): scripts/host_facts.sh `require head git rev-parse HEAD` -> `require head true`
+P0j head_unrecorded -> False
+  [FAIL] facts record the checked-out head sha (obligation 43)
+  [FAIL] head missing: exit non-zero (got 0)
+  [FAIL] head missing: refusal names it ('')
+KILLED
+
+## Hygiene
+Mutants applied with the Edit tool on the scratch worktree only; each reverted before the next; `git checkout -- .` before removal.
+`git worktree remove --force` then `git worktree prune`: worktree list shows only the runner checkout; `ls -d /tmp/assize-p0bl-*` empty.
+
+## Format check of the real artefact (host_facts.sh probe output vs HEAD_FACT regex)
+probe() writes "### head", "$ git rev-parse HEAD", the sha, "[exit 0]" and a blank line, which is what HEAD_FACT matches.
+
+## Pins CI on the head
+pins run 39369853861 on 19ef6a4: in_progress at the time of this review (see review file for the final state).
