@@ -1,0 +1,5 @@
+# P0bo's mutant: host_facts.sh writes the raw machine-id, which systemd asks be kept confidential, into the published facts.
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "  printf '%s' \"$id\" | sha256sum | cut -d' ' -f1\n"
+new = "  printf '%s\\n' \"$id\"\n"

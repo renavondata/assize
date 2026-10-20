@@ -1,0 +1,5 @@
+# P0bo's mutant: the verifier takes the first host-id fact of several; a second host's id appended to an artefact is not noticed.
+[[edit]]
+path = "harness/claims.py"
+old = "                  for name, found in ids.items() if len(found) != 1]\n    hosts = {found[0] for found in ids.values() if len(found) == 1}\n"
+new = "                  for name, found in ids.items() if not found]\n    hosts = {found[0] for found in ids.values() if found}\n"
