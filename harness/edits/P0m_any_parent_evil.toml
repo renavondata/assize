@@ -1,0 +1,6 @@
+# P0m's mutant `any_parent_evil` (brief 2 A4 item 11): a merge's paths are read against each parent (`-m`), not
+# against every parent (`-c`), so a merge carrying an entrenched change one parent authored is refused as evil.
+[[edit]]
+path = "harness/claims.py"
+old = """"--root", "-c", sha)"""
+new = """"--root", "-m", sha)"""

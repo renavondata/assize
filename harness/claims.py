@@ -463,6 +463,12 @@ def needs_guy(c: Commit, patterns: Sequence[str]) -> list[str]:
     return sorted(p for p in c.paths if entrenched(p, patterns)) if "guy" not in c.parties else []
 
 
+def evil_paths(c: Commit, patterns: Sequence[str]) -> list[str]:
+    """Brief 2 A4 item 11: the entrenched paths a merge changes relative to every one of its parents (a merge's `paths`
+    are read with `-c`). A merge may carry an entrenched change one parent authored, never author one, whoever merges."""
+    return sorted(p for p in c.paths if entrenched(p, patterns)) if c.merge else []
+
+
 def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Issue] = {}) -> list[Finding]:
     """Findings on one commit; `issues` holds the issues its `Instruction:` trailers cite, as read (a missing one
     could not be read, so it authorises nothing)."""
@@ -479,7 +485,10 @@ def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Iss
                          f"touches {touched}; parties {list(c.parties)}; instructions "
                          f"{[(n, issues.get(n)) for n in c.instructions]}")]
                 if touched and not instructed else [])
-    return malformed + unsigned
+    evil = evil_paths(c, patterns)
+    authored = [Finding(where, "evil_merge", f"merge by {c.author!r} changes {evil} relative to every parent")] \
+        if evil else []
+    return malformed + unsigned + authored
 
 
 # Git reads no user or system configuration here, so no local setting (e.g. log.showSignature) can alter what is parsed.
