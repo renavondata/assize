@@ -1,0 +1,5 @@
+# harness.ledger resolve --session 39445560884 at ccf7ceb (after the review push); 2026-10-20T15:12:23Z
+# reports/L0/forecasts/39445560884.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39445560884.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39445560884.jsonl: 81 open, 75 typed; resolved 0, unreadable 0
+[exit 0]
