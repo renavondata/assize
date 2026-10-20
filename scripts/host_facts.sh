@@ -2,11 +2,15 @@
 # Record measurement-host facts. Every probe is recorded with its exit status; none is dropped.
 # Brief 1 A4 item 8: a measurement whose facts lack load averages, the runner's cpuset, the runner version or the
 # podman runtime line is not a measurement, so this script exits non-zero if any of those four probes fails.
-# CPUSET_FILE and RUNNER_DIR say where to read two of them; they default to the paths the brief names.
+# It records the checked-out head sha as a fact too (obligation 43), so a verifier can bind the artefact to a head.
+# It also refuses unless both the user slice and the measuring process's own cgroup have a non-empty cpuset.cpus (obligation 42).
+# CPUSET_FILE, RUNNER_DIR and SELF_CGROUP_DIR say where to read three of them; they default to the paths the brief names.
 set -uo pipefail
 out="${1:?usage: host_facts.sh OUT_DIR [CPUSET_FILE] [RUNNER_DIR]}"
 cpuset_file="${2:-/sys/fs/cgroup/user.slice/user-$(id -u).slice/cpuset.cpus.effective}"
 runner_dir="${3:-$HOME/actions-runner}"
+# The cgroup directory the measuring process itself runs in (R 70d26b83818e F2); default from /proc/self/cgroup.
+self_cgroup_dir="${4:-/sys/fs/cgroup$(sed -n 's/^0:://p' /proc/self/cgroup)}"
 mkdir -p "$out"
 facts="$out/facts.txt"
 : > "$facts"
@@ -41,6 +45,15 @@ runner_version() {
   [ "$found" -eq 0 ] || echo "neither $1/.runner nor $1/config.sh is readable"
   return "$found"
 }
+# A cgroup is pinned only if its own cpuset.cpus is non-empty: cpuset.cpus.effective shows the parent's full set on an
+# unpinned child (R 70d26b83818e F1). Both are recorded side by side; an empty or unreadable own set fails.
+pinned_cpus() {
+  local own effective
+  own=$(cat "$1/cpuset.cpus") || return 1
+  effective=$(cat "$1/cpuset.cpus.effective" 2>&1)
+  echo "$1 cpuset.cpus=[$own] cpuset.cpus.effective=[$effective]"
+  [ -n "$own" ]
+}
 probe date date -u +%Y-%m-%dT%H:%M:%SZ
 probe whoami whoami
 probe lscpu lscpu
@@ -53,7 +66,12 @@ probe podman podman --version
 probe own-cgroup cat /proc/self/cgroup
 require uptime uptime
 require cpuset cat "$cpuset_file"
+require cpuset-slice pinned_cpus "$(dirname "$cpuset_file")"
+require cpuset-own pinned_cpus "$self_cgroup_dir"
 require runner-version runner_version "$runner_dir"
+# The head this artefact measured: a host witness is admissible only if it equals the head the Reviewer reproduced
+# (obligation 43, R 7498b94a505b F1; `python -m harness.claims measure-head`).
+require head git rev-parse HEAD
 require podman-info podman info --format '{{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}'
 if [ "${#missing[@]}" -gt 0 ]; then
   echo "NOT A MEASUREMENT: required facts missing: ${missing[*]}" >> "$facts"

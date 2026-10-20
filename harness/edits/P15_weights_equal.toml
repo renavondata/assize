@@ -1,0 +1,6 @@
+# P15's mutant `weights_equal` (S a9de119): the simulated episodes are drawn as if every distinct utility had been
+# observed equally often. The two-point fixture, half each, cannot tell; the skewed one can.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """    observed = np.array([tally[v] for v in sorted(tally)], dtype=float)"""
+new = """    observed = np.ones(len(tally))"""

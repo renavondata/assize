@@ -1,0 +1,16 @@
+== clean: exit 0
+(no FAIL lines) 
+== unlisted_secret_added: exit 1
+  [FAIL] harness/trusted_base.toml equals the tree's declared trusted base, every entry admitted (['unlisted secret ASSIZE_EXTRA_TOKEN', 'unlisted token build.yml secrets.ASSIZE_EXTRA_TOKEN']) 
+== admission_unchecked: exit 1
+  [FAIL] fixture: an entry no amendment admits is refused ([], want ["unadmitted runner_label x: 'Wish #1'"]) 
+== growth_unreported: exit 1
+  [FAIL] fixture: an entry absent from the earlier list is growth
+  [FAIL] fixture: against no earlier list, every entry is growth 
+== inherit_unread: exit 1
+  [FAIL] fixture: the declared set is read from the expressions, `secrets: inherit` as `*` ({'workflow': frozenset({'b.yml', 'a.yml'}), 'runner_label': frozenset({'self-hosted', 'x', 'ubuntu-latest'}), 'secret': frozenset({'S'}), 'token': frozenset({'a.yml secrets.S', 'a.yml github.token'}), 'codeowners': frozenset({'/X @o'})})
+  [FAIL] fixture: the exact, admitted list passes
+  [FAIL] fixture: a secret unlisted is refused (['unlisted secret S', 'stale secret *', 'stale token b.yml secrets.*'], want ['unlisted secret S'])
+  [FAIL] fixture: an entry the tree no longer declares is refused (['stale workflow c.yml', 'stale secret *', 'stale token b.yml secrets.*'], want ['stale workflow c.yml'])
+  [FAIL] fixture: an entry no amendment admits is refused (['stale secret *', 'stale token b.yml secrets.*', "unadmitted runner_label x: 'Wish #1'"], want ["unadmitted runner_label x: 'Wish #1'"])
+  [FAIL] fixture: a kind the law does not name is refused (['unknown kind account', 'stale secret *', 'stale token b.yml secrets.*'], want ['unknown kind account']) 

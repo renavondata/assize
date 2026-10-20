@@ -1,4 +1,4 @@
 # Who built the harness state of branch l2a-audit-8aae43c-f1-auditor-differs (audit 8aae43c8c792 finding 1, the elected auditor differs from the builder's and the reviewer's model): this pull request's own proposer row.
 kind = "builder"
-model = "claude-sonnet-5-5"
-session = "77885b7b-4e05-42a9-af2f-b410f73ea350"
+model = "claude-opus-5-5"
+session = "52e27289-797f-4f4f-aadb-8ced980d76ad"

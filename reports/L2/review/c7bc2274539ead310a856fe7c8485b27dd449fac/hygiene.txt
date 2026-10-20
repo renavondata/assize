@@ -1,0 +1,33 @@
+## hygiene 2026-10-20T07:02:03Z
+$ git -C ~/git/worktrees/assize/review-266 status --porcelain | wc -l
+0
+$ git worktree remove --force ~/git/worktrees/assize/review-266 && git worktree prune && git worktree list
+/home/g/actions-runner/_work/assize/assize c7bc227 [l2a-audit-8aae43c-f5-range-check]
+$ ls ~/git/worktrees/assize/
+$ podman ps -a --format "{{.Names}} {{.Status}} {{.Image}}"
+tuwunel Up 4 days ghcr.io/matrix-construct/tuwunel:latest
+cinny Up 4 days ghcr.io/cinnyapp/cinny:latest
+mautrix-whatsapp Up 4 days dock.mau.dev/mautrix/whatsapp:latest
+matrix-archiver Up 4 days localhost/matrix-local-archiver:latest
+mautrix-telegram Up 4 days dock.mau.dev/mautrix/telegram:latest
+mautrix-discord Up 4 days dock.mau.dev/mautrix/discord:latest
+mautrix-instagram2 Up 4 days dock.mau.dev/mautrix/meta:latest
+mautrix-signal Up 4 days dock.mau.dev/mautrix/signal:latest
+assize-candidate-acfbfaa8000641e5 Exited (0) 9 days ago docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+assize-candidate-b7d7caf3d86d44b8 Exited (0) 7 days ago docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+assize-candidate-d3f9d95755994413 Exited (0) 7 days ago docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+assize-candidate-c39a761a88ea4a62 Exited (0) 292 years ago docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+assize-candidate-ecfd12cbae2c4a66 Exited (0) 4 days ago docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce
+renavon-test-pg17 Up 4 days (healthy) docker.io/library/postgres:17-alpine
+invidious_invidious-db_1 Up 4 days (healthy) docker.io/library/postgres:14
+pod_invidious-infra Up 4 days 
+invidious_ts-mullvad_1 Up 4 days (healthy) docker.io/tailscale/tailscale:latest
+rssfeed-seed_db_1 Up 19 hours (healthy) docker.io/pgvector/pgvector:pg17
+rssfeed-seed_miniflux_1 Up 19 hours docker.io/miniflux/miniflux:latest
+invidious_companion_1 Up 6 hours quay.io/invidious/invidious-companion:latest
+invidious_redlib_1 Up 6 hours localhost/redlib:source
+invidious_invidious_1 Up About a minute (healthy) quay.io/invidious/invidious:latest
+$ pgrep -af "harness|judge|episodes" | grep -v pgrep
+[pgrep exit 0]
+$ find /tmp -maxdepth 1 -newer /tmp/review-266-clean.txt -name "assize*"
+[done]

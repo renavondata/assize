@@ -1,0 +1,6 @@
+# P0bm's mutant `growth_unreported`: an entry is compared with the list it belongs to, not the earlier one, so the
+# Auditor's growth report since the last audit is always empty.
+[[edit]]
+path = "harness/trusted.py"
+old = "if n not in old.get(k, {})]"
+new = "if n not in new.get(k, {})]"

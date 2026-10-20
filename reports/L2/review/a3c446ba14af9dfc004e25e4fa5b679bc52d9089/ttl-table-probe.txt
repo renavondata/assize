@@ -1,0 +1,38 @@
+committed config, 2-value fixture (P15's TTL_UTILITIES), delta 0.5: every reading m=1..30
+  m=1: measure 0.7570 se 0.0136  assurance 0.757
+  m=2: measure 0.6646 se 0.0111  assurance 0.423
+  m=3: measure 0.6844 se 0.0100  assurance 0.368
+  m=4: measure 0.7051 se 0.0092  assurance 0.374
+  m=5: measure 0.7121 se 0.0091  assurance 0.372
+  m=6: measure 0.7314 se 0.0086  assurance 0.393
+  m=7: measure 0.7536 se 0.0082  assurance 0.407
+  m=8: measure 0.7587 se 0.0080  assurance 0.400
+  m=9: measure 0.7752 se 0.0078  assurance 0.413
+  m=10: measure 0.7874 se 0.0077  assurance 0.442
+  m=11: measure 0.8017 se 0.0072  assurance 0.464
+  m=12: measure 0.8066 se 0.0072  assurance 0.510
+  m=13: measure 0.8083 se 0.0073  assurance 0.560
+  m=14: measure 0.8260 se 0.0068  assurance 0.576
+  m=15: measure 0.8399 se 0.0063  assurance 0.573
+  m=16: measure 0.8535 se 0.0061  assurance 0.593
+  m=17: measure 0.8600 se 0.0060  assurance 0.590
+  m=18: measure 0.8536 se 0.0060  assurance 0.578
+  m=19: measure 0.8625 se 0.0060  assurance 0.614
+  m=20: measure 0.8588 se 0.0059  assurance 0.623
+  m=21: measure 0.8790 se 0.0054  assurance 0.670
+  m=22: measure 0.8745 se 0.0055  assurance 0.658
+  m=23: measure 0.8880 se 0.0052  assurance 0.670
+  m=24: measure 0.8884 se 0.0052  assurance 0.664
+  m=25: measure 0.8998 se 0.0049  assurance 0.693
+  m=26: measure 0.9049 se 0.0049  assurance 0.738
+  m=27: measure 0.9012 se 0.0049  assurance 0.712
+  m=28: measure 0.9190 se 0.0042  assurance 0.765
+  m=29: measure 0.9230 se 0.0040  assurance 0.759
+  m=30: measure 0.9194 se 0.0043  assurance 0.759
+table at the L1 host throughput 0.7197369313958408 (cap 31092): 30.9s
+  Row(delta=0.25, episodes_per_arm=101, measure=0.906244, wall_s=280.6581004649101, assured_episodes_per_arm=203, assured_measure=0.906, assured_wall_s=564.0949940037302, se=0.004359395461849359, below=0.8922279999999999, below_se=0.005133540225930956, at_budget=1.0, at_budget_se=0.0, assured_se=0.009233052000787672, assured_below=0.892, assured_below_se=0.009820001651345708, assured_at_budget=1.0, assured_at_budget_se=0.0)
+  Row(delta=0.5, episodes_per_arm=26, measure=0.904866, wall_s=72.24861992166002, assured_episodes_per_arm=49, assured_measure=0.911, assured_wall_s=136.16086062159005, se=0.004912248184510451, below=0.8998120000000001, below_se=0.004925004804904085, at_budget=1.0, at_budget_se=0.0, assured_se=0.009008893392651516, assured_below=0.883, assured_below_se=0.010169287802713343, assured_at_budget=1.0, assured_at_budget_se=0.0)
+  Row(delta=1.0, episodes_per_arm=7, measure=0.918143, wall_s=19.451551517370007, assured_episodes_per_arm=12, assured_measure=0.913, assured_wall_s=33.34551688692001, se=0.004694250370137658, below=0.896467, below_se=0.005479065528908198, at_budget=1.0, at_budget_se=0.0, assured_se=0.008916866630745946, assured_below=0.868, assured_below_se=0.010709373963527967, assured_at_budget=1.0, assured_at_budget_se=0.0)
+verdict FIT within_error ()
+verdict assured FIT within_error assured ()
+cache entries: CacheInfo(hits=251, misses=267, maxsize=None, currsize=267)

@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import types
 from fractions import Fraction
 from pathlib import Path
 
@@ -598,11 +599,14 @@ def p0i_no_stale_bytecode() -> bool:
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
-REQUIRED_FACTS = ("uptime", "cpuset", "runner-version", "podman-info")
+REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "podman-info")
+STUB_HEAD = "0123456789abcdef0123456789abcdef01234567"
 STUB = "#!/bin/sh\n{body}\n"
 STUB_OK = {"uptime": 'echo " 12:00:00 up 1 day,  load average: 0.10, 0.20, 0.30"',
-           "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"'}
-STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo "podman version 5.0.0"'}
+           "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"',
+           "git": f'echo {STUB_HEAD}'}
+STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo "podman version 5.0.0"',
+             "git": "exit 128"}
 
 
 def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
@@ -613,16 +617,23 @@ def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
         d.mkdir(parents=True)
     for name in STUB_OK:
         stub = stubs / name
-        fails = (lacking, name) in (("uptime", "uptime"), ("podman-info", "podman"))
+        fails = (lacking, name) in (("uptime", "uptime"), ("podman-info", "podman"), ("head", "git"))
         stub.write_text(STUB.format(body=(STUB_FAIL if fails else STUB_OK)[name]))
         stub.chmod(0o755)
-    cpuset = root / "cpuset.cpus.effective"
-    if lacking != "cpuset":
-        cpuset.write_text("0-3\n")
+    slice_dir, own_dir = root / "slice", root / "own"
+    for d in (slice_dir, own_dir):
+        d.mkdir()
+        (d / "cpuset.cpus.effective").write_text("0-3\n")
+    cpuset = slice_dir / "cpuset.cpus.effective"
+    # cpuset-slice, cpuset-own: the effective set is non-empty but the cgroup's own cpuset.cpus is empty (unpinned).
+    (slice_dir / "cpuset.cpus").write_text("" if lacking == "cpuset-slice" else "0-3\n")
+    (own_dir / "cpuset.cpus").write_text("" if lacking == "cpuset-own" else "0-3\n")
+    if lacking == "cpuset":
+        cpuset.unlink()
     if lacking != "runner-version":
         (runner / ".runner").write_text('{"agentName": "stub"}')
     env = os.environ | {"PATH": f"{stubs}:{os.environ['PATH']}"}
-    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner)], env=env,
+    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner), str(own_dir)], env=env,
                        capture_output=True, text=True, timeout=60, preexec_fn=proc.setup(False))
     facts = out / "facts.txt"
     return r.returncode, facts.read_text() if facts.is_file() else ""
@@ -645,6 +656,7 @@ def p0j_host_facts_complete() -> bool:
     expect(all(f"### {name}\n" in facts for name in REQUIRED_FACTS), f"facts record {REQUIRED_FACTS}")
     expect("load average: 0.10" in facts and "0-3" in facts and "agentName" in facts
            and "crun 2 systemd rootless=true" in facts, "facts carry each probe's output")
+    expect(STUB_HEAD in facts, "facts record the checked-out head sha (obligation 43)")
     expect("NOT A MEASUREMENT" not in facts, "complete facts are not refused")
     for name in REQUIRED_FACTS:
         code, facts = _host_facts(work, f"lacks-{name}", name)
@@ -653,6 +665,31 @@ def p0j_host_facts_complete() -> bool:
         expect(name in refusal.split(), f"{name} missing: refusal names it ({refusal!r})")
     shutil.rmtree(work, ignore_errors=True)
     return ok
+
+
+def p0bl_measure_bound_to_head() -> bool:
+    """A `measure-host` facts.txt is admissible as a host witness only if the head it recorded is the head the
+    Reviewer reproduced: the matching head is accepted; another head, a facts file recording none and a malformed sha
+    are each refused, by name, and `claims measure-head` exits accordingly (obligation 43, R 7498b94a505b F1)."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bl-", dir=context.scratch))
+    _, facts = _host_facts(work, "recorded", None)
+    other = "f" * 40
+    expect(not claims.measure_head_findings(facts, STUB_HEAD), "the artefact's own head is accepted")
+    expect(_codes(claims.measure_head_findings(facts, other)) == {("facts", "head_differs")},
+           "another reviewed head is refused head_differs")
+    _, bare = _host_facts(work, "lacks-head", "head")
+    expect(_codes(claims.measure_head_findings(bare, STUB_HEAD)) == {("facts", "head_unrecorded")},
+           "facts recording no head are refused head_unrecorded")
+    forged = facts + f"### head\n$ git rev-parse HEAD\n{other}\n[exit 0]\n"
+    expect(_codes(claims.measure_head_findings(forged, other)) == {("facts", "head_unrecorded")},
+           "two head facts are refused head_unrecorded")
+    path = work / "facts.txt"
+    path.write_text(facts)
+    expect(claims.main(["measure-head", str(path), STUB_HEAD]) == 0, "the CLI exits 0 on the measured head")
+    expect(claims.main(["measure-head", str(path), other]) == 1, "the CLI exits 1 on another head")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
 
 
 def _expecter():
@@ -2921,6 +2958,45 @@ def p0az_pins_master_unprivileged() -> bool:
     return ok()
 
 
+TRUSTED_FLOWS = {"a.yml": "jobs:\n  j:\n    runs-on: [self-hosted, x]\n    env:\n      T: ${{ secrets.S }}\n"
+                          "      G: ${{ github.token }}\n",
+                 "b.yml": "jobs:\n  j:\n    uses: o/r/.github/workflows/w.yml@v1\n    secrets: inherit\n"
+                          "  k:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo secrets step\n"}
+TRUSTED_DECLARED = {"workflow": {"a.yml", "b.yml"}, "runner_label": {"self-hosted", "x", "ubuntu-latest"},
+                    "secret": {"S", "*"}, "token": {"a.yml github.token", "a.yml secrets.S", "b.yml secrets.*"},
+                    "codeowners": {"/X @o"}}
+
+
+def p0bm_trusted_base() -> bool:
+    """The trusted base is listed (CLAUDE.md Amendment 2, audit criterion 7; audit 8aae43c8c792 finding 4):
+    `harness/trusted_base.toml` equals the workflows, runner labels, secrets, tokens and CODEOWNERS lines the tree
+    declares, and every entry names an audit-dated amendment present in a brief; growth since a sha is reported."""
+    from harness import trusted
+    expect, ok = _expecter()
+    decl = trusted.declared_from(TRUSTED_FLOWS, "# owners\n/X   @o\n")
+    expect({k: set(v) for k, v in decl.items()} == TRUSTED_DECLARED,
+           f"fixture: the declared set is read from the expressions, `secrets: inherit` as `*` ({decl})")
+    adm = "Audit findings at " + "a" * 12
+    listed = {k: dict.fromkeys(v, adm) for k, v in TRUSTED_DECLARED.items()}
+    expect(trusted.findings(listed, decl, frozenset({adm})) == [], "fixture: the exact, admitted list passes")
+    cases = (("a secret unlisted", {**listed, "secret": {"*": adm}}, ["unlisted secret S"]),
+             ("an entry the tree no longer declares", {**listed, "workflow": {**listed["workflow"], "c.yml": adm}},
+              ["stale workflow c.yml"]),
+             ("an entry no amendment admits", {**listed, "runner_label": {**listed["runner_label"], "x": "Wish #1"}},
+              ["unadmitted runner_label x: 'Wish #1'"]),
+             ("a kind the law does not name", {**listed, "account": {"g": adm}}, ["unknown kind account"]))
+    for what, case, want in cases:
+        got = trusted.findings(case, decl, frozenset({adm}))
+        expect(got == want, f"fixture: {what} is refused ({got}, want {want})")
+    expect(trusted.grown({"secret": {"S": adm}}, {"secret": {"S": adm, "U": adm}}) == [f"secret U: {adm}"],
+           "fixture: an entry absent from the earlier list is growth")
+    expect(trusted.grown({}, {"secret": {"S": adm}}) == [f"secret S: {adm}"],
+           "fixture: against no earlier list, every entry is growth")
+    found = trusted.check(ROOT)
+    expect(found == [], f"{trusted.LIST_PATH} equals the tree's declared trusted base, every entry admitted ({found})")
+    return ok()
+
+
 def _session_branch(git, repo: Path, base: str, branch: str, session: str, date: str) -> str:
     """A synthetic branch off `base` doing what one Builder session does: a forecast, a STATUS and a proposer row, each
     at the path `claims.session_files` gives. Returns the branch's name."""
@@ -4633,7 +4709,10 @@ def p10_container_teardown() -> bool:
 
 
 # P7's malformed predictors (brief 1 section 2): each must end its episode invalid_reply at its first step, unscored.
-MALFORMED = ("undeclared", "short", "zeros", "nan")
+# `above_one` and `below_zero` sum to one with an entry outside [0, 1] (audit 8aae43c8c792 finding 5).
+MALFORMED = ("undeclared", "short", "zeros", "nan", "above_one", "below_zero")
+# The entries of `above_one`, before its zeros; `below_zero` is them reversed.
+OUT_OF_RANGE = (1.5, -0.5)
 
 
 def _forecaster_observations() -> list[dict]:
@@ -4765,13 +4844,20 @@ def p7_infinite_loss() -> bool:
     World's next observation: zero mass on the realised value is recorded +inf and counted, never clipped; an omitted
     target is recorded missing, never imputed; every record equals the one derived independently by replaying the
     episode. A prediction naming an undeclared target, of the wrong length, not summing to one, or carrying NaN ends
-    its episode invalid_reply before the World advances (brief 1 section 2)."""
+    its episode invalid_reply before the World advances (brief 1 section 2). So does one summing to one with an entry
+    above one and one below zero, either way round, with no negative loss and no exception (audit 8aae43c8c792
+    finding 5); the judge's `invalid` refuses both lists directly too, whatever runtime is usable."""
     from harness.fixtures import candidates
-    from judge import episodes
+    from judge import episodes, scoring
     from worlds.crafter import binding
 
     expect, ok = _expecter()
     m = binding.manifest()
+    first = m["targets"][0]
+    for p in (list(OUT_OF_RANGE), list(reversed(OUT_OF_RANGE))):
+        p = p + [0.0] * (len(first["support"]) - len(p))
+        why = scoring.invalid({first["name"]: p}, m["targets"])
+        expect(math.fsum(p) == 1 and why is not None, f"{first['name']} {p}: sums to one, refused: {why}")
     want = _forecaster_summary(m["targets"])
     calibration = _forecaster_calibration(m["targets"], episodes.calibration_bins())
     print(f"  derived: {json.dumps(want)}")
@@ -4793,7 +4879,11 @@ def p7_infinite_loss() -> bool:
         cal = records[0].get("calibration") if records else None
         expect(cal == calibration, f"{rt.name} forecaster: the recorded calibration equals P13's derivation")
         for behaviour in MALFORMED:
-            records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            try:
+                records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            except Exception as e:  # noqa: BLE001 - a judge that raises on a reply has failed this case
+                records = []
+                expect(False, f"{rt.name} {behaviour}: the judge raised {e!r}")
             say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
             expect([(r["termination"], r["steps"]) for r in records] == [("invalid_reply", 0)],
                    f"{rt.name} {behaviour}: invalid_reply at the first step, before the World advances")
@@ -6008,10 +6098,11 @@ def p5_commitment_order() -> bool:
     return ok()
 
 
-# P14 plays the random incumbent (brief 1 section 4) for five episodes in one container, each cut to INCUMBENT_STEPS
-# steps: 5 x 100 draws over Crafter's 17 actions, about 29 per action. A random agent can die before the cut (the third
-# episode ended at 60 and 64 steps in two of ten runs), so five, not three: coverage needs 275 draws and survives the
-# loss of 225. Its uniformity is refused only when Pearson's
+# P14 plays the random incumbent (brief 1 section 4) in one container over binding seeds 1, 2, ..., each episode cut to
+# INCUMBENT_STEPS steps, until DRAWS = 5 x 100 draws over Crafter's 17 actions are played, about 29 per action. A random
+# agent can die before the cut (seed 3 did, at step 42 at the earliest, in 4 of 100 episodes; review 0cdb209 F5), and
+# then a further seed is played, so the committed draw count is a fact of every run, not a hope that no episode dies
+# early. Its uniformity is refused only when Pearson's
 # statistic over the first PEARSON_EPISODES episodes (200 draws, the most the exact tail below is computed for in
 # reasonable time) has an exact multinomial p value below UNIFORM_ALPHA, the false-failure rate the pin accepts per
 # runtime per run, stated before any run; a candidate's score never passes through it. Pearson has almost no power
@@ -6022,6 +6113,7 @@ INCUMBENT = ROOT / "incumbents" / "random"
 INCUMBENT_EPISODES = 5
 PEARSON_EPISODES = 2
 INCUMBENT_STEPS = 100
+DRAWS = INCUMBENT_EPISODES * INCUMBENT_STEPS
 UNIFORM_ALPHA = 1e-6
 # L2a obligation 33: 200 draws over 17 actions whose exact p value under the uniform multinomial is about 1.65e-6, at or
 # above UNIFORM_ALPHA, while the asymptotic chi-square law (16 df, statistic 59.25) puts it near 7.0e-7, below: a
@@ -6044,7 +6136,8 @@ class _Recording:
         return self.observations[-1]
 
 
-def _recorded_crafter(n: int, steps: int) -> list[_Recording]:
+def _recorded_crafter(steps: int):
+    """The recorded Crafter episode of a binding seed, cut to `steps` steps."""
     from worlds.crafter import binding
 
     def cut(seed: int):
@@ -6052,7 +6145,17 @@ def _recorded_crafter(n: int, steps: int) -> list[_Recording]:
         ep._env._length = steps
         return _Recording(ep)
 
-    return [cut(seed) for seed in range(1, n + 1)]
+    return cut
+
+
+def _worlds_until(make, target: int, drawn: list):
+    """make(1), make(2), ..., each appended to `drawn` and yielded once those before it are played (`episodes.played`
+    draws the next World only then), until their draws reach `target` or one of them was played for no draw. Each World
+    before the last adds at least one draw, so at most `target` + 1 are drawn: an early death costs episodes, not the
+    committed draw count (review 0cdb209 F5)."""
+    while sum(len(w.actions) for w in drawn) < target and all(w.actions for w in drawn):
+        drawn.append(make(len(drawn) + 1))
+        yield drawn[-1]
 
 
 def _floor_summary(observations: list[dict], targets) -> dict:
@@ -6130,7 +6233,8 @@ def _build(rt, context_dir: Path) -> str:
 def p14_random_incumbent() -> bool:
     """The random incumbent of brief 1 section 4 is a candidate image that exercises the whole path: under every usable
     runtime its image builds offline from the judge's pinned base image and, run by the judge with no command of the
-    pin's, plays five episodes in one container, each ended by the World; every action it plays is uniform over the
+    pin's, plays episodes in one container, each ended by the World, until DRAWS draws are played, however early an
+    episode ends (an early death does not fail a uniform agent); every action it plays is uniform over the
     legal actions (Pearson's statistic over the first PEARSON_EPISODES episodes not refused at UNIFORM_ALPHA by its
     exact multinomial p value, which is right where it is known in closed form and does not refuse UNIFORM_BOUNDARY;
     and every legal action played at least once over all of them, a refusal whose false-failure probability for a
@@ -6149,10 +6253,16 @@ def p14_random_incumbent() -> bool:
            f"a uniform agent's count {UNIFORM_BOUNDARY} is not refused: exact p {float(edge):.3g} >= {UNIFORM_ALPHA}")
     m = binding.manifest()
     k = len(m["actions"])
-    miss = _some_cell_empty_sf(INCUMBENT_EPISODES * INCUMBENT_STEPS, k)
+    miss = _some_cell_empty_sf(DRAWS, k)
     expect(_some_cell_empty_sf(3, 3) == Fraction(7, 9) and miss < UNIFORM_ALPHA,
            f"a uniform agent leaves an action unplayed with exact probability {float(miss):.3g} < {UNIFORM_ALPHA} "
            f"(3 draws over 3 cells leave one empty with probability {_some_cell_empty_sf(3, 3)}, 7/9 by enumeration)")
+    for steps, want in ((30, -(-DRAWS // 30)), (INCUMBENT_STEPS, INCUMBENT_EPISODES), (0, 1)):
+        drawn: list = []
+        n = sum(1 for _ in _worlds_until(lambda seed: types.SimpleNamespace(actions=[0] * steps), DRAWS, drawn))
+        expect(n == len(drawn) == want,
+               f"episodes ended at {steps} draws: {n} drawn to reach the committed {DRAWS}, {want} by division "
+               f"(an episode of no draw ends the drawing)")
     base = runtime.candidate_config()["base_image"]
     froms = [ln.split()[1] for ln in (INCUMBENT / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
     expect(froms == [base], f"the incumbent's one FROM is the judge's pinned base image ({froms}, {base})")
@@ -6162,14 +6272,15 @@ def p14_random_incumbent() -> bool:
         before = _candidates(rt)
         image = _build(rt, INCUMBENT)
         say(f"  {rt.name} incumbent image: {image}")
+        worlds: list[_Recording] = []
         try:
-            worlds = _recorded_crafter(INCUMBENT_EPISODES, INCUMBENT_STEPS)
-            records = episodes.run(rt, image, worlds, m)
+            records = episodes.run(rt, image, _worlds_until(_recorded_crafter(INCUMBENT_STEPS), DRAWS, worlds), m)
         finally:
             subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
         say(f"  {rt.name} incumbent: {json.dumps(records)}")
-        expect([r["termination"] in episodes.WORLD_ENDINGS for r in records] == [True] * INCUMBENT_EPISODES,
-               f"{rt.name}: {INCUMBENT_EPISODES} episodes, each ended by the World "
+        expect(len(records) == len(worlds) >= INCUMBENT_EPISODES
+               and all(r["termination"] in episodes.WORLD_ENDINGS for r in records),
+               f"{rt.name}: {len(worlds)} episodes, at least {INCUMBENT_EPISODES}, each ended by the World "
                f"({[(r['termination'], r['steps']) for r in records]})")
         for r, w in zip(records, worlds):
             want = _floor_summary(w.observations, m["targets"])
@@ -6180,9 +6291,10 @@ def p14_random_incumbent() -> bool:
                 expect(got == v, f"{rt.name} episode {r['episode']} {name}: recorded {got}, floor derived {v}")
         every = [a for w in worlds for a in w.actions]
         unplayed = [a for a in range(k) if a not in every]
-        left = _some_cell_empty_sf(len(every), k)  # fewer than committed if an episode ended early: then no verdict
-        expect(left < UNIFORM_ALPHA, f"{rt.name}: {len(every)} draws, enough that a uniform agent leaves an action "
-                                     f"unplayed with probability {float(left):.3g} < {UNIFORM_ALPHA}")
+        left = _some_cell_empty_sf(len(every), k)
+        expect(len(every) >= DRAWS and left < UNIFORM_ALPHA,
+               f"{rt.name}: {len(every)} draws, at least the committed {DRAWS}, so a uniform agent leaves an action "
+               f"unplayed with probability {float(left):.3g} < {UNIFORM_ALPHA}")
         expect(not unplayed, f"{rt.name}: every one of the {k} actions played in {len(every)} draws (unplayed {unplayed})")
         played = [a for w in worlds[:PEARSON_EPISODES] for a in w.actions]
         counts = [played.count(a) for a in range(k)]
@@ -6204,9 +6316,22 @@ def p14_random_incumbent() -> bool:
 # closed form: with each arm's posterior mean normal, the expected posterior mass on the correct sign at m episodes
 # per arm is Phi(delta / (2 sigma / sqrt(m))), which reaches q at m = 4 sigma^2 Phi^-1(q)^2 / delta^2.
 TTL_UTILITIES = (0,) * 100 + (2,) * 100
+# A second fixture (S a9de119: the first alone is two points of equal weight): 0, 1 and 5 in the ratio 6:3:1, so skewed,
+# mean 0.8 and variance 2.16 (population). A reading that ignores the observed weights, or that takes the first
+# fixture's variance for every stream, passes the first and misses this one by a factor above TTL_FACTOR.
+TTL_SKEWED = (0,) * 120 + (1,) * 60 + (5,) * 20
 # The pin's criterion: the Bayesian bootstrap's m* within this factor of the normal oracle's. A pin constant, stated
 # before any run; no candidate's score passes through it.
 TTL_FACTOR = 1.5
+# P15's non-monotone stream (review 0d5e9ec F2): a stub reading at the mass at m = 5 and from m = 9, below it elsewhere,
+# searched up to 16. Doubling reads 1, 2, 4, 8 below and 16 above, then bisection 12, 10, 9 above: it returns 9.
+TTL_STREAM_FIRST, TTL_STREAM_STAYS, TTL_STREAM_CAP = 5, 9, 16
+# Posterior draws per simulated experiment in P15's searches, in place of the committed config's: the search reads every
+# m (review 0d5e9ec F2), each read costs in proportion to the draws, and P15 runs once per mutant and twin. Fewer draws
+# add noise to each experiment's mass, never bias to its mean; a pin constant, through which no candidate's score passes.
+TTL_DRAWS = 200
+# The standard error of P15's given rows for the settling rule; any positive value states the same cases.
+TTL_SE = 0.01
 BRIEF_PILOT = {"world": "crafter", "episodes": 200, "cap_s": 7200}
 BRIEF_TTL = {"deltas": [0.25, 0.5, 1.0], "mass": 0.9, "fit_delta": 0.5, "marginal_delta": 1.0, "budget_s": 86400}
 
@@ -6216,7 +6341,8 @@ def p15_time_to_learn() -> bool:
     fixture whose answer is known in closed form, the Bayesian-bootstrap time-to-learn finds, for every shift, the
     smallest episodes per arm whose expected posterior mass on the correct sign reaches the mass, within TTL_FACTOR of
     the normal oracle; the wall-clock counts both arms; and the verdict is FIT, MARGINAL or UNFIT as the budget affords
-    the oracle's episodes for 0.5, only for 1, or for neither."""
+    the oracle's episodes for 0.5, only for 1, or for neither. Beside it the assurance reading (the mass is reached in
+    that fraction of experiments) finds twice the oracle's episodes, within the same factor, and never the verdict."""
     import statistics
 
     from pilot import timetolearn as ttl
@@ -6226,6 +6352,7 @@ def p15_time_to_learn() -> bool:
     cfg = whole["time_to_learn"]
     expect(whole["pilot"] == BRIEF_PILOT, f"pilot config is the brief's default ({whole['pilot']})")
     expect({k: cfg[k] for k in BRIEF_TTL} == BRIEF_TTL, f"time-to-learn config is the brief's ({cfg})")
+    cfg = {**cfg, "posterior_draws": TTL_DRAWS}
 
     mean = statistics.fmean(TTL_UTILITIES)
     var = statistics.fmean((u - mean) ** 2 for u in TTL_UTILITIES)
@@ -6234,15 +6361,112 @@ def p15_time_to_learn() -> bool:
     cap = math.ceil(TTL_FACTOR * 2 * max(oracle.values()))
     found = {}
     for d in cfg["deltas"]:
-        got = ttl.episodes_per_arm(TTL_UTILITIES, d, cap, cfg)
+        # Searched up to the criterion's own bound: every m is read (review 0d5e9ec F2), and a search that reads past
+        # the bound only to fail the criterion would spend the child's timeout.
+        got = ttl.episodes_per_arm(TTL_UTILITIES, d, math.floor(oracle[d] * TTL_FACTOR), cfg)
         found[d] = got
         print(f"  delta {d}: episodes per arm {got}, normal oracle {oracle[d]:.2f}")
         expect(got is not None and oracle[d] / TTL_FACTOR <= got[0] <= oracle[d] * TTL_FACTOR,
                f"delta {d}: m* {got and got[0]} within x{TTL_FACTOR} of the oracle {oracle[d]:.2f}")
         if got is not None:
             expect(got[1] >= cfg["mass"], f"delta {d}: measure at m* {got[1]:.4f} >= {cfg['mass']}")
-            below = ttl.measure(TTL_UTILITIES, d, got[0] - 1, cfg) if got[0] > 1 else None
-            expect(below is None or below < cfg["mass"], f"delta {d}: m* is the smallest: measure at m*-1 {below}")
+            below = [m for m in range(1, got[0]) if ttl.measure(TTL_UTILITIES, d, m, cfg) >= cfg["mass"]]
+            expect(not below, f"delta {d}: m* is the smallest: no m below it reaches the mass ({below})")
+    if not ok():
+        return False  # the later checks rest on these m*; reading them again under a broken search costs the timeout
+
+    # A second fixture, skewed (S a9de119), at the two deltas the verdict reads (the smaller shifts cost the timeout):
+    # the same closed-form oracle with its own variance, m* within the same factor, the mass reached at m*.
+    var_s = statistics.pvariance(TTL_SKEWED)
+    for d in (cfg["fit_delta"], cfg["marginal_delta"]):
+        want = 4 * var_s * z * z / (d * d)
+        got = ttl.episodes_per_arm(TTL_SKEWED, d, math.floor(want * TTL_FACTOR), cfg)
+        print(f"  skewed fixture, delta {d}: episodes per arm {got}, normal oracle {want:.2f} (variance {var_s})")
+        expect(got is not None and want / TTL_FACTOR <= got[0] <= want * TTL_FACTOR,
+               f"skewed, delta {d}: m* {got and got[0]} within x{TTL_FACTOR} of the oracle {want:.2f}")
+        expect(got is not None and got[1] >= cfg["mass"], f"skewed, delta {d}: measure at m* {got and got[1]} >= mass")
+    expect(var_s != var, f"the second fixture's variance {var_s} is not the first's {var}")
+    if not ok():
+        return False
+
+    # The search on a known non-monotone stream (review 0d5e9ec F2): the reading reaches the mass at TTL_STREAM_FIRST,
+    # falls below it, and stays above it from TTL_STREAM_STAYS. Doubling then bisection lands on a crossing past the
+    # first; the smallest m is the first.
+    stream = lambda _u, _d, m, _c: 0.95 if m == TTL_STREAM_FIRST or m >= TTL_STREAM_STAYS else 0.5
+    got_s = ttl.episodes_per_arm(TTL_UTILITIES, 1.0, TTL_STREAM_CAP, cfg, stream)
+    expect(got_s == (TTL_STREAM_FIRST, 0.95), f"non-monotone stream: m* {got_s}, the first crossing {TTL_STREAM_FIRST}")
+    never = ttl.episodes_per_arm(TTL_UTILITIES, 1.0, TTL_STREAM_FIRST - 1, cfg, stream)
+    expect(never is None, f"non-monotone stream, budget short of every crossing: not detected ({never})")
+
+    # The assurance reading (review 0d5e9ec F1): the posterior mass reaches `mass` in a `mass` fraction of experiments,
+    # which asks twice the episodes, 8 sigma^2 z^2 / delta^2, since the posterior mean's noise adds one more z. The
+    # table's assurance column is read beside the committed one at a budget affording the oracle's episodes x TTL_FACTOR.
+    oracle_a = {d: 2 * oracle[d] for d in cfg["deltas"]}
+    cap_a = math.ceil(TTL_FACTOR * max(oracle_a.values()))
+    throughput_a = (2 * cap_a + 0.5) / cfg["budget_s"]
+    rows_a = ttl.table(TTL_UTILITIES, throughput_a, cfg)
+    expect(ttl.affordable(throughput_a, cfg) == cap_a, f"the assurance table's budget affords {cap_a} episodes per arm")
+    for r in rows_a:
+        print(f"  delta {r.delta}: assured episodes per arm {r.assured_episodes_per_arm} (fraction "
+              f"{r.assured_measure}), expected {r.episodes_per_arm}, assurance oracle {oracle_a[r.delta]:.2f}")
+        m_a = r.assured_episodes_per_arm
+        expect(m_a is not None and oracle_a[r.delta] / TTL_FACTOR <= m_a <= oracle_a[r.delta] * TTL_FACTOR,
+               f"delta {r.delta}: assured m* {m_a} within x{TTL_FACTOR} of the assurance oracle {oracle_a[r.delta]:.2f}")
+        expect(m_a is not None and r.episodes_per_arm is not None and m_a > r.episodes_per_arm,
+               f"delta {r.delta}: assurance asks more episodes ({m_a}) than the expected reading ({r.episodes_per_arm})")
+        if m_a is not None:
+            expect(r.assured_measure >= cfg["mass"], f"delta {r.delta}: assured fraction {r.assured_measure} >= mass")
+            expect(r.assured_wall_s == 2 * m_a / throughput_a, f"delta {r.delta}: assured wall-clock counts both arms")
+            below_a = ttl.assurance(TTL_UTILITIES, r.delta, m_a - 1, cfg) if m_a > 1 else None
+            expect(below_a is None or below_a < cfg["mass"], f"delta {r.delta}: assured m* is the smallest ({below_a})")
+    expect(ttl.verdict(rows_a, cfg) == "FIT" and ttl.verdict(rows_a, cfg, assured=True) == "FIT",
+           "a budget affording the assurance oracle is FIT under both readings")
+
+    # Monte Carlo standard errors (review 0d5e9ec F2), recomputed independently: the sample standard deviation over
+    # experiments of each experiment's mass (expected) or of whether it reaches the mass (assurance), over sqrt(n).
+    def sem(d: float, m: int, assured: bool) -> float:
+        xs = ttl.masses(TTL_UTILITIES, d, m, cfg).tolist()
+        per = [float(x >= cfg["mass"]) for x in xs] if assured else xs
+        return statistics.stdev(per) / math.sqrt(len(per))
+
+    near = lambda a, b: a is not None and abs(a - b) <= 1e-12
+    for r in rows_a:
+        for assured, reading in ((False, ttl.measure), (True, ttl.assurance)):
+            p = "assured_" if assured else ""
+            m, got_se, got_below, got_below_se, at, at_se = (getattr(r, p + f) for f in (
+                "episodes_per_arm", "se", "below", "below_se", "at_budget", "at_budget_se"))
+            print(f"  delta {r.delta} {p or 'expected '}errors: se at m* {m}: {got_se}; at m*-1 {got_below} "
+                  f"({got_below_se}); at the budget {cap_a}: {at} ({at_se})")
+            if m is None or m < 2:
+                expect(False, f"delta {r.delta}: {p}m* {m} leaves no m*-1 to read")
+                continue
+            expect(near(got_se, sem(r.delta, m, assured)), f"delta {r.delta}: {p}se at m* is the sample error of the mean")
+            expect(got_below == reading(TTL_UTILITIES, r.delta, m - 1, cfg)
+                   and near(got_below_se, sem(r.delta, m - 1, assured)), f"delta {r.delta}: {p}reading and se at m*-1")
+            expect(at == reading(TTL_UTILITIES, r.delta, cap_a, cfg) and near(at_se, sem(r.delta, cap_a, assured)),
+                   f"delta {r.delta}: {p}reading and se at the budget's {cap_a} episodes per arm")
+    expect(ttl.within_error(rows_a, cfg) == () and ttl.within_error(rows_a, cfg, assured=True) == (),
+           "a budget affording the assurance oracle x TTL_FACTOR is settled under both readings")
+
+    # The settling rule on rows whose numbers are given: a detection stands only more than one standard error past the
+    # mass at the budget, on its own side; the verdict reads marginal_delta only if fit_delta does not stand detected.
+    e, q = TTL_SE, cfg["mass"]
+    row = lambda d, m, x: ttl.Row(d, m, None, None, at_budget=x, at_budget_se=e)
+    cases = {"detected, 2 se above": (row(0.5, 10, q + 2 * e), True),
+             "detected, half an se above": (row(0.5, 10, q + e / 2), False),
+             "not detected, 2 se below": (row(0.5, None, q - 2 * e), True),
+             "not detected, half an se below": (row(0.5, None, q - e / 2), False),
+             "no episode affordable": (row(0.5, None, None), True)}
+    for what, (r, want) in cases.items():
+        expect(ttl.settled(r, cfg) == want, f"settled, {what}: {want}")
+    fit_d, marg_d = cfg["fit_delta"], cfg["marginal_delta"]
+    pairs = {"fit stands, marginal unsettled": ((row(fit_d, 10, q + 2 * e), row(marg_d, 5, q + e / 2)), ()),
+             "fit unsettled detected": ((row(fit_d, 10, q + e / 2), row(marg_d, 5, q + 2 * e)), (fit_d,)),
+             "fit stands undetected, marginal unsettled": ((row(fit_d, None, q - 2 * e), row(marg_d, None, q - e / 2)),
+                                                           (marg_d,)),
+             "both unsettled": ((row(fit_d, None, q - e / 2), row(marg_d, 5, q + e / 2)), (fit_d, marg_d))}
+    for what, (rs, want) in pairs.items():
+        expect(ttl.within_error(rs, cfg) == want, f"within_error, {what}: {want} ({ttl.within_error(rs, cfg)})")
 
     flat = ttl.episodes_per_arm((3,) * 50, cfg["fit_delta"], cap, cfg)
     expect(flat == (1, 1.0), f"no incumbent variance: one episode per arm, all mass on the correct sign ({flat})")
@@ -6256,6 +6480,7 @@ def p15_time_to_learn() -> bool:
         return ok()
     budget = cfg["budget_s"]
     affords = {"FIT": m_fit, "MARGINAL": m_fit - 1, "UNFIT": m_marg - 1}
+    flagged = {}
     for want, k in affords.items():
         throughput = (2 * k + 0.5) / budget  # a quarter-episode spare per arm, so rounding never costs one
         rows = ttl.table(TTL_UTILITIES, throughput, cfg)
@@ -6265,6 +6490,23 @@ def p15_time_to_learn() -> bool:
         expect(all(r.wall_s == 2 * r.episodes_per_arm / throughput for r in rows if r.episodes_per_arm is not None),
                f"{want}: wall-clock counts both arms")
         expect(got == want, f"{k} episodes per arm affordable: verdict {got}, want {want}")
+        # Each budget sits on the boundary the search found, where the review witnessed readings one standard error
+        # apart (0.8998 at 25, 0.9049 at 26 for 0.5). The report's flag is the settling rule applied to the reading
+        # and error at the budget, both recomputed here: the delta that decides the verdict is flagged exactly when
+        # its reading there lies within one standard error of the mass on its side.
+        unsettled = lambda d, detected: (lambda x, s: not (x - s > q if detected else x + s < q))(
+            ttl.measure(TTL_UTILITIES, d, k, cfg), sem(d, k, False))
+        fit_up = unsettled(fit_d, want == "FIT")
+        marg_read = want != "FIT" or fit_up  # marginal_delta is read unless fit_delta stands detected
+        marg_up = marg_read and unsettled(marg_d, want != "UNFIT")
+        want_within = ((fit_d,) if fit_up else ()) + ((marg_d,) if marg_up else ())
+        flagged[want] = ttl.within_error(rows, cfg)
+        expect(flagged[want] == want_within, f"{want}: within Monte Carlo error at {want_within} ({flagged[want]}; "
+               f"{[(r.delta, r.at_budget, r.at_budget_se) for r in rows]})")
+        if want == "FIT":
+            expect(ttl.verdict(rows, cfg, assured=True) != "FIT",
+                   "the budget affording the expected m* is FIT, and not FIT under the assurance reading, which asks more")
+    expect(any(flagged.values()), f"the fixture's boundary budgets exercise the flag on the real stream ({flagged})")
     return ok()
 
 # P17 registers the random incumbent's image under one credential and asks `evaluate` for EVALUATE_EPISODES full
@@ -6510,7 +6752,12 @@ def p18_pilot() -> bool:
            f"throughput is recorded episodes over the pilot's wall-clock {played.wall_s} s "
            f"({rep['throughput_episodes_per_s']})")
     expect(rep["proposer"] == P18_PARTY, f"the report's proposer is the records' ({rep['proposer']})")
-    rates = [100 * sum(c in r["achievements"] for r in every) / 25 for c in P18_COMPONENTS]
+    # L2a obligation 41 (brief 2 A2): the incumbent's variance is reported as a weak proxy, in the record and in the
+    # rendering a reader sees beside the verdict.
+    text = run.render(rep)
+    expect("weak proxy" in rep["time_to_learn"]["note"] and f"Note: {rep['time_to_learn']['note']}." in text,
+           f"the report states the random incumbent's variance is a weak proxy ({rep['time_to_learn']['note']!r})")
+    rates =[100 * sum(c in r["achievements"] for r in every) / 25 for c in P18_COMPONENTS]
     hafner = math.exp(math.fsum(math.log(1 + s) for s in rates) / len(rates)) - 1
     expect(math.isclose(rep["hafner_score"], hafner), f"Hafner score {rep['hafner_score']} is {hafner}")
     a, b = rep["prediction"]["a"], rep["prediction"]["b"]
@@ -6559,6 +6806,19 @@ P34_CFG = P18_CFG | {"pilot": P18_CFG["pilot"] | {"episodes": 10},
 P34_IMAGE = "sha256:" + "d" * 64
 
 
+def _pilot_hash_by_definition(root: Path) -> str:
+    """SHA-256 over every file of pilot/ under `root` but bytecode caches, in path order: path from `root`, NUL, the
+    SHA-256 of its bytes, newline. Derived here from the definition, independently of `pilot/run.py`."""
+    import hashlib
+
+    rels = sorted(f.relative_to(root).as_posix() for f in (root / "pilot").rglob("*")
+                  if f.is_file() and "__pycache__" not in f.relative_to(root).parts)
+    h = hashlib.sha256()
+    for rel in rels:
+        h.update(rel.encode() + b"\0" + hashlib.sha256((root / rel).read_bytes()).hexdigest().encode() + b"\n")
+    return h.hexdigest()
+
+
 def p34_pilot_main() -> bool:
     """`pilot/__main__.py`'s `pilot()` (L2a obligation 36; review 571ee563f91d F3) over a faked runtime, image build and
     `evaluate()` that writes its records through the real `judge.ledger` into the ledger `pilot()` verifies, with the
@@ -6573,6 +6833,7 @@ def p34_pilot_main() -> bool:
     from worlds.crafter import binding as crafter
 
     main = importlib.import_module("pilot.__main__")
+    pilot_run = importlib.import_module("pilot.run")
     expect, ok = _expecter()
     fake_binding = SimpleNamespace(manifest=lambda: {"targets": [{"name": t} for t in P18_TARGETS]},
                                    crafter=SimpleNamespace(constants=SimpleNamespace(achievements=P18_COMPONENTS)),
@@ -6619,6 +6880,23 @@ def p34_pilot_main() -> bool:
            f"intact ledger: a verdict, no ledger finding, exit 0 ({code}, {rep.get('verdict')})")
     expect(len((work / "out" / "records.jsonl").read_text().splitlines()) == 10,
            "intact ledger: every record appended to records.jsonl")
+    # L2a obligation 37 (brief 2 A2: "The pilot runner and its config are hashed into every pilot report, beside
+    # `judge_sha256`"). The hash is derived here from its definition, over every file of pilot/ but bytecode caches, and
+    # the report states it in JSON and in Markdown; a byte changed in any one file of a copy gives another hash.
+    want = _pilot_hash_by_definition(ROOT)
+    expect(rep.get("pilot_sha256") == want and f"pilot_sha256 {want}" in (work / "out" / "report.md").read_text(),
+           f"the report states pilot_sha256 {want} in report.json and report.md ({rep.get('pilot_sha256')})")
+    copy = Path(tempfile.mkdtemp(prefix="assize-p34-hash-", dir=context.scratch))
+    shutil.copytree(ROOT / "pilot", copy / "pilot", ignore=shutil.ignore_patterns("__pycache__"))
+    base = _pilot_hash_by_definition(copy)
+    for f in sorted(p for p in (copy / "pilot").rglob("*") if p.is_file()):
+        original = f.read_bytes()
+        f.write_bytes(original + b"\n")
+        changed = pilot_run.pilot_hash(copy)
+        f.write_bytes(original)
+        expect(changed != base, f"a byte added to {f.relative_to(copy)} changes pilot_sha256")
+    expect(pilot_run.pilot_hash(copy) == base == pilot_run.pilot_hash(ROOT),
+           "the copy of pilot/ hashes as pilot/ does, and restored files restore the hash")
     code, rep, _ = run("altered", alter=True)
     expect(code == 1 and str(rep.get("verdict")).startswith("STOPPED: the ledger fails verification")
            and len(rep.get("ledger_findings", [])) > 0,
@@ -6697,8 +6975,15 @@ PINS = [
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
-        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),),
+        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
+                                  Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
+                                  Mutant("own_cgroup_unchecked", _edits("P0j_own_cgroup_unchecked")),
+                                  Mutant("head_unrecorded", _edits("P0j_head_unrecorded"))),
         ("scripts/**",)),
+    Pin("P0bl", "a measure artefact is admissible only for the head it recorded: another head or none is refused",
+        p0bl_measure_bound_to_head, (Mutant("head_unchecked", _edits("P0bl_head_unchecked")),
+                                     Mutant("two_heads_accepted", _edits("P0bl_two_heads_accepted"))),
+        HARNESS + ("scripts/**",)),
     Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
         "forecast's session, is rejected",
         p0k_forecast_ledger, (Mutant("proposer_check_dropped", _edits("P0k_proposer_check_dropped")),
@@ -6863,6 +7148,13 @@ PINS = [
         p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
                                         Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
         HARNESS + (".github/workflows/pins-master.yml",)),
+    Pin("P0bm", "the trusted base is listed: the list equals the workflows, runner labels, secrets, tokens and "
+                "CODEOWNERS lines the tree declares, each admitted by an audit-dated amendment; growth is reported",
+        p0bm_trusted_base, (Mutant("unlisted_secret_added", _edits("P0bm_unlisted_secret_added")),
+                            Mutant("admission_unchecked", _edits("P0bm_admission_unchecked")),
+                            Mutant("growth_unreported", _edits("P0bm_growth_unreported")),
+                            Mutant("inherit_unread", _edits("P0bm_inherit_unread"))),
+        HARNESS + (".github/workflows/**", "CODEOWNERS", "docs/briefs/**")),
     Pin("P0ba", "a STATUS's header sha and pins citation are printed by the harness from the run's own head_sha, and a "
                 "push of a STATUS P0l would reject is refused",
         p0ba_cite_from_harness, (Mutant("cite_drops_sha", _edits("P0ba_cite_drops_sha")),
@@ -6916,16 +7208,23 @@ PINS = [
                                Mutant("floor_unsmoothed", _edits("P14_floor_unsmoothed")),
                                Mutant("seen_not_reset", _edits("P14_seen_not_reset")),
                                Mutant("asymptotic_p", _edits("P14_asymptotic_p")),
-                               Mutant("one_action_dropped", _edits("P14_one_action_dropped"))), JUDGE_SIDE),
+                               Mutant("one_action_dropped", _edits("P14_one_action_dropped")),
+                               Mutant("top_up_dropped", _edits("P14_top_up_dropped"))), JUDGE_SIDE),
     Pin("P15", "time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict",
         p15_time_to_learn, (Mutant("abs_difference", _edits("P15_abs_difference")),
                             Mutant("shift_dropped", _edits("P15_shift_dropped")),
                             Mutant("one_arm", _edits("P15_one_arm")),
-                            Mutant("budget_one_arm", _edits("P15_budget_one_arm"))), JUDGE_SIDE),
+                            Mutant("budget_one_arm", _edits("P15_budget_one_arm")),
+                            Mutant("expected_for_assurance", _edits("P15_expected_for_assurance")),
+                            Mutant("first_crossing", _edits("P15_first_crossing")),
+                            Mutant("boundary_unflagged", _edits("P15_boundary_unflagged")),
+                            Mutant("se_not_of_mean", _edits("P15_se_not_of_mean")),
+                            Mutant("weights_equal", _edits("P15_weights_equal"))), JUDGE_SIDE),
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
-                           Mutant("sum_unchecked", _edits("P7_sum_unchecked"))), JUDGE_SIDE),
+                           Mutant("sum_unchecked", _edits("P7_sum_unchecked")),
+                           Mutant("range_check_removed", _edits("P7_range_check_removed"))), JUDGE_SIDE),
     Pin("P13", "every scored step, +inf included, enters each support value's reliability row; entropy is never imputed",
         p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
                           Mutant("realised_row_only", _edits("P13_realised_row_only")),
@@ -6959,11 +7258,14 @@ PINS = [
                     Mutant("proposer_from_config", _edits("P18_proposer_from_config")),
                     Mutant("mixed_proposers_admitted", _edits("P18_mixed_proposers_admitted")),
                     Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
-                    Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
+                    Mutant("short_request_admitted", _edits("P18_short_request_admitted")),
+                    Mutant("proxy_note_dropped", _edits("P18_proxy_note_dropped"))), JUDGE_SIDE),
     Pin("P34", "`python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification "
-               "makes the pilot STOPPED with exit 1",
+               "makes the pilot STOPPED with exit 1; the report states the hash of pilot/ beside judge_sha256",
         p34_pilot_main, (Mutant("ledger_findings_ignored", _edits("P34_ledger_findings_ignored")),
-                         Mutant("registration_unbound", _edits("P34_registration_unbound"))), JUDGE_SIDE),
+                         Mutant("registration_unbound", _edits("P34_registration_unbound")),
+                         Mutant("pilot_hash_config_omitted", _edits("P34_pilot_hash_config_omitted")),
+                         Mutant("pilot_hash_is_judge_hash", _edits("P34_pilot_hash_is_judge_hash"))), JUDGE_SIDE),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),
@@ -6971,7 +7273,8 @@ PINS = [
     Pin("P19", "a World is bound by its directory alone, a manifest beside a binding; no manifest, no binding",
         p19_world_discovery, (Mutant("world_table_hardcoded", _edits("P19_world_table_hardcoded")),), JUDGE_SIDE),
     Pin("P20", "a World is priced from its own manifest; evaluate() refuses one that commits no price",
-        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),), JUDGE_SIDE),
+        p20_world_price, (Mutant("crafter_price_fallback", _edits("P20_crafter_price_fallback")),
+                          Mutant("schema_price_optional", _edits("P20_schema_price_optional"))), JUDGE_SIDE),
     Pin("P33", "a World's price is the derivation from its own committed delta; evaluate() refuses underived rates, "
                "another World's among them, and a price without a delta",
         p33_price_derived, (Mutant("rates_underived", _edits("P33_rates_underived")),

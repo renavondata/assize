@@ -17,21 +17,29 @@ each denominator:
 - throughput: recorded episodes per wall-clock second of the whole pilot, container starts, seed issuance and ledger
   writes included, since that is what evaluating a candidate costs on this host;
 - the time-to-learn table at that throughput (`timetolearn.py`), its stated assumption, the note that a random agent's
-  variance is a weak proxy for a competent agent's, and the verdict FIT, MARGINAL or UNFIT;
+  variance is a weak proxy for a competent agent's, and the verdict FIT, MARGINAL or UNFIT, taken from the expected
+  reading of "90% posterior mass" with the assurance reading's episodes per arm, wall-clock and verdict beside it;
+  each reading with its Monte Carlo standard errors, and each verdict marked as within Monte Carlo error when a delta
+  it reads is not settled (`timetolearn.within_error`);
+- `pilot_sha256`, beside the records' `judge_sha256`: the hash of every file of `pilot/` (`pilot_hash`);
 - the proposer every record carries, which the judge took from the registering credential (A4 item 2). Records
   carrying more than one proposer, judge hash or image are not one pilot: the report says so and gives no verdict."""
 
 from __future__ import annotations
 
 import functools
+import hashlib
 import json
 import math
 import time
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from pathlib import Path
 
 from pilot import timetolearn
+
+ROOT = Path(__file__).resolve().parent.parent
 
 ASSUMPTION = ("a candidate's per-episode utility is distributed as the incumbent's shifted by delta achievements per "
               "episode")
@@ -130,6 +138,19 @@ def compute(records: Sequence[dict]) -> dict:
             "price_total": _stats([r["price"]["total"] for r in records])}
 
 
+def pilot_hash(root: Path = ROOT) -> str:
+    """SHA-256 over every file of `pilot/` under `root` but bytecode caches, in path order: path from `root`, a NUL, the
+    SHA-256 of its bytes and a newline. The runner, the time-to-learn table and the config are all in it, so any change
+    to how the pilot runs or what it is asked changes it (brief 2 A2; L2a obligation 37)."""
+    files = sorted((f for f in (root / "pilot").rglob("*") if f.is_file() and "__pycache__" not in f.parts),
+                   key=lambda f: f.relative_to(root).as_posix())
+    h = hashlib.sha256()
+    for f in files:
+        h.update(f.relative_to(root).as_posix().encode() + b"\0" + hashlib.sha256(f.read_bytes()).hexdigest().encode()
+                 + b"\n")
+    return h.hexdigest()
+
+
 def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Sequence[str],
            hafner: Callable[[Sequence[Sequence[str]], Sequence[str]], float], *, evidence: bool) -> dict:
     """The pilot report of `played`: see the module docstring. `evidence` is False for a smoke run, whose report is
@@ -153,6 +174,7 @@ def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Seq
         "episodes": {"requested": cfg["pilot"]["episodes"], "recorded": n, "cap_s": cfg["pilot"]["cap_s"],
                      "terminations": dict(sorted(Counter(r["termination"] for r in rs).items()))},
         **{k: (v[0] if len(v) == 1 else v) for k, v in one.items()},
+        "pilot_sha256": pilot_hash(),
         "utility": {**_stats(utilities), "counts": {str(u): c for u, c in sorted(Counter(utilities).items())},
                     "per_episode": utilities},
         "achievements": {c: sum(c in r["achievements"] for r in rs) for c in components},
@@ -164,18 +186,22 @@ def report(played: Played, cfg: Mapping, targets: Sequence[str], components: Seq
         "throughput_episodes_per_s": throughput,
         "requests": list(played.requests),
         "time_to_learn": {"assumption": ASSUMPTION, "note": PROXY, "config": dict(ttl),
-                          "rows": [{"delta": r.delta, "episodes_per_arm": r.episodes_per_arm, "measure": r.measure,
-                                    "wall_s": r.wall_s} for r in rows]},
+                          "verdict_assurance": None if stopped else timetolearn.verdict(rows, ttl, assured=True),
+                          "within_error": None if stopped else list(timetolearn.within_error(rows, ttl)),
+                          "within_error_assurance": None if stopped else list(timetolearn.within_error(rows, ttl, True)),
+                          "rows": [asdict(r) for r in rows]},
     }
 
 
 def render(rep: Mapping) -> str:
     """The report as terse Markdown, verdict first."""
-    e, u, c = rep["episodes"], rep["utility"], rep["compute"]
+    e, u, c, t = rep["episodes"], rep["utility"], rep["compute"], rep["time_to_learn"]
+    within = lambda ds: f" (within Monte Carlo error at delta {', '.join(map(str, ds))})" if ds else ""
     lines = [
-        f"VERDICT: {rep['verdict']}" + ("" if rep["evidence"] else " (smoke: not evidence)"),
+        f"VERDICT: {rep['verdict']}" + within(t["within_error"]) + ("" if rep["evidence"] else " (smoke: not evidence)"),
         f"proposer: {json.dumps(rep['proposer'], sort_keys=True)}",
-        f"world {rep['world']}; runtime {rep['runtime']}; image {rep['image']}; judge_sha256 {rep['judge_sha256']}",
+        f"world {rep['world']}; runtime {rep['runtime']}; image {rep['image']}; judge_sha256 {rep['judge_sha256']}; "
+        f"pilot_sha256 {rep['pilot_sha256']}",
         f"episodes: {e['recorded']} recorded of {e['requested']} requested (cap {e['cap_s']} s); "
         f"terminations {e['terminations']}",
         f"utility over {u['n']} episodes: mean {u['mean']}, min {u['min']}, max {u['max']}; counts {u['counts']}",
@@ -189,8 +215,19 @@ def render(rep: Mapping) -> str:
         *(f"  {t}: {p['log_loss_per_step']} ({p['scored']}, {p['missing']}, {p['infinite']}); "
           f"{rep['calibration'][t]['mean_entropy']}" for t, p in rep["prediction"].items()),
         f"time-to-learn. Assumption: {rep['time_to_learn']['assumption']}. Note: {rep['time_to_learn']['note']}.",
-        "  delta | episodes per arm | measure | wall-clock s (both arms)",
-        *(f"  {r['delta']} | {r['episodes_per_arm']} | {r['measure']} | {r['wall_s']}"
-          for r in rep["time_to_learn"]["rows"]),
+        "  expected reading (the committed one, which gives the verdict): mean posterior mass on the correct sign "
+        "reaches the mass; assurance reading: that fraction of experiments reach it",
+        f"  verdict under the assurance reading, shown beside the committed one: {t['verdict_assurance']}"
+        + within(t["within_error_assurance"]),
+        "  each reading is a Monte Carlo mean, not monotone in episodes per arm, shown with its standard error at m*, "
+        "at m* - 1 and at the budget; a delta's detection is settled only if the reading at the budget is more than "
+        "one standard error from the mass on the side of the detection",
+        "  delta | episodes per arm | measure (se) | at m*-1 (se) | at budget (se) | wall-clock s (both arms) "
+        "| assured episodes per arm | assured fraction (se) | at m*-1 (se) | at budget (se) | assured wall-clock s",
+        *(f"  {r['delta']} | {r['episodes_per_arm']} | {r['measure']} ({r['se']}) | {r['below']} ({r['below_se']}) "
+          f"| {r['at_budget']} ({r['at_budget_se']}) | {r['wall_s']} | {r['assured_episodes_per_arm']} "
+          f"| {r['assured_measure']} ({r['assured_se']}) | {r['assured_below']} ({r['assured_below_se']}) "
+          f"| {r['assured_at_budget']} ({r['assured_at_budget_se']}) | {r['assured_wall_s']}"
+          for r in t["rows"]),
     ]
     return "\n".join(lines) + "\n"

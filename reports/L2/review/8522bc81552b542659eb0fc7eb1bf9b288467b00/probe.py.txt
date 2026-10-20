@@ -1,0 +1,30 @@
+"""Reviewer probes of P0bm at 8522bc8, on the tree's own files read into memory (no file changed).
+F1: a workflow whose steps reach the implicit GITHUB_TOKEN (actions/checkout's default `token`) without an expression.
+F2: an added secret listed with an existing audit heading as its admission passes `findings`."""
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1])
+sys.path.insert(0, str(repo))
+from harness import trusted  # noqa: E402
+
+flows = {p.name: p.read_text() for p in sorted((repo / ".github/workflows").glob("*.yml"))}
+owners = (repo / "CODEOWNERS").read_text()
+listed = trusted.parse((repo / trusted.LIST_PATH).read_text())
+admitted = trusted.admissions(repo)
+
+print("== F1: workflows using actions/checkout with no github.token expression, and their listed tokens")
+for name, text in flows.items():
+    if "actions/checkout" in text:
+        toks = sorted(t for t in listed["token"] if t.startswith(name + " "))
+        print(f"  {name}: permissions block={'permissions:' in text}; listed tokens={toks}")
+
+print("== F2: a new secret added to build.yml AND listed citing the existing heading")
+grown_flows = {**flows, "build.yml": flows["build.yml"].replace(
+    "      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}\n",
+    "      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}\n      EXTRA: ${{ secrets.ASSIZE_EXTRA_TOKEN }}\n")}
+adm = "Audit findings at 8aae43c8c792"
+grown_list = {**listed, "secret": {**listed["secret"], "ASSIZE_EXTRA_TOKEN": adm},
+              "token": {**listed["token"], "build.yml secrets.ASSIZE_EXTRA_TOKEN": adm}}
+print("  findings:", trusted.findings(grown_list, trusted.declared_from(grown_flows, owners), admitted))
+print("  grown vs current list:", trusted.grown(listed, grown_list))

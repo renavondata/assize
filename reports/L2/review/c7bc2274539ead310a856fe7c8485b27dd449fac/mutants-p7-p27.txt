@@ -1,0 +1,185 @@
+## mutants at c7bc2274539ead310a856fe7c8485b27dd449fac 2026-10-20T07:00:12Z: each applied by harness.edits.apply, pin run, tree reverted by git checkout -- .
+
+### P7/clipped
+judge/scoring.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  [ok] health [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  [ok] health [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  derived: {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] the declared runtime (none declared) is witnessed
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [FAIL] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 138.15510557964274, 'log_loss': 138.15510557964274}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [FAIL] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 138.15510557964274, 'log_loss': 138.15510557964274}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster: the recorded calibration equals P13's derivation
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  [ok] podman zeros: invalid_reply at the first step, before the World advances
+  [ok] podman zeros: nothing scored
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  [ok] podman above_one: invalid_reply at the first step, before the World advances
+  [ok] podman above_one: nothing scored
+  [ok] podman below_zero: invalid_reply at the first step, before the World advances
+  [ok] podman below_zero: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (2 failed)
+P7/clipped -> False KILLED
+[exit 0]
+reverted: 0 paths dirty
+
+### P7/missing_imputed
+judge/scoring.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  [ok] health [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  [ok] health [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  derived: {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] the declared runtime (none declared) is witnessed
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [FAIL] podman forecaster stone: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.51292546497023, 'log_loss': 11.51292546497023}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster: the recorded calibration equals P13's derivation
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  [ok] podman zeros: invalid_reply at the first step, before the World advances
+  [ok] podman zeros: nothing scored
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  [ok] podman above_one: invalid_reply at the first step, before the World advances
+  [ok] podman above_one: nothing scored
+  [ok] podman below_zero: invalid_reply at the first step, before the World advances
+  [ok] podman below_zero: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (1 failed)
+P7/missing_imputed -> False KILLED
+[exit 0]
+reverted: 0 paths dirty
+
+### P7/sum_unchecked
+judge/scoring.py | 2 --
+ 1 file changed, 2 deletions(-)
+  [ok] health [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  [ok] health [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  derived: {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] the declared runtime (none declared) is witnessed
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster: the recorded calibration equals P13's derivation
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  [FAIL] podman zeros: invalid_reply at the first step, before the World advances
+  [FAIL] podman zeros: nothing scored
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  [ok] podman above_one: invalid_reply at the first step, before the World advances
+  [ok] podman above_one: nothing scored
+  [ok] podman below_zero: invalid_reply at the first step, before the World advances
+  [ok] podman below_zero: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+  [FAIL] podman: every assertion above held (2 failed)
+P7/sum_unchecked -> False KILLED
+[exit 0]
+reverted: 0 paths dirty
+
+### P7/range_check_removed
+judge/scoring.py | 2 --
+ 1 file changed, 2 deletions(-)
+  [FAIL] health [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: None
+  [FAIL] health [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: None
+  derived: {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "wood": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "stone": {"scored": 0, "missing": 5, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}}
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] the declared runtime (none declared) is witnessed
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster: the recorded calibration equals P13's derivation
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  [ok] podman zeros: invalid_reply at the first step, before the World advances
+  [ok] podman zeros: nothing scored
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  [ok] podman above_one: invalid_reply at the first step, before the World advances
+  [ok] podman above_one: nothing scored
+  [ok] podman below_zero: invalid_reply at the first step, before the World advances
+  [ok] podman below_zero: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+P7/range_check_removed -> False KILLED
+[exit 0]
+reverted: 0 paths dirty
+
+### P27/tolerance_loose
+judge/scoring.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  [ok] the bound Worlds declare support sizes [10]
+  [FAIL] support 10: a sum of 1 + 2·10·ε is invalid (None)
+  [FAIL] support 10: a sum of 1 - 2·10·ε is invalid (None)
+  [ok] support 10: a sum of 1 + 1·10·ε is valid (None)
+  [ok] support 10: a sum of 1 - 1·10·ε is valid (None)
+  [ok] support 10: the adversarial softmax sums 2.0·ε from one, not exactly one
+  [ok] support 10: the adversarial softmax, 2.0·ε from one, is valid (None)
+P27/tolerance_loose -> False KILLED
+[exit 0]
+reverted: 0 paths dirty
+
+### P27/tolerance_zero
+judge/scoring.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  [ok] the bound Worlds declare support sizes [10]
+  [ok] support 10: a sum of 1 + 2·10·ε is invalid (t: probabilities sum to 1.0000000000000044)
+  [ok] support 10: a sum of 1 - 2·10·ε is invalid (t: probabilities sum to 0.9999999999999956)
+  [FAIL] support 10: a sum of 1 + 1·10·ε is valid (t: probabilities sum to 1.0000000000000022)
+  [FAIL] support 10: a sum of 1 - 1·10·ε is valid (t: probabilities sum to 0.9999999999999978)
+  [ok] support 10: the adversarial softmax sums 2.0·ε from one, not exactly one
+  [FAIL] support 10: the adversarial softmax, 2.0·ε from one, is valid (t: probabilities sum to 0.9999999999999996)
+P27/tolerance_zero -> False KILLED
+[exit 0]
+reverted: 0 paths dirty

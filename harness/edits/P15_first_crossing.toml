@@ -1,0 +1,27 @@
+# P15's mutant `first_crossing` (review 0d5e9ec F2): the search doubles then bisects, as if the reading were monotone
+# in m, and returns the first crossing it meets rather than the smallest m whose reading reaches the mass.
+[[edit]]
+path = "pilot/timetolearn.py"
+old = """    readings = ((m, reading(utilities, delta, m, cfg)) for m in range(1, cap + 1))
+    return next(((m, x) for m, x in readings if x >= cfg["mass"]), None)
+"""
+new = """    if cap < 1:
+        return None
+    hit = lambda m: (lambda x: (x >= cfg["mass"], x))(reading(utilities, delta, m, cfg))
+
+    def double(lo: int, m: int) -> tuple[int, int, float] | None:
+        ok, x = hit(m)
+        if ok:
+            return lo, m, x
+        return None if m == cap else double(m, min(2 * m, cap))
+
+    def bisect(lo: int, hi: int, x_hi: float) -> tuple[int, float]:
+        if hi - lo <= 1:
+            return hi, x_hi
+        mid = (lo + hi) // 2
+        ok, x = hit(mid)
+        return bisect(lo, mid, x) if ok else bisect(mid, hi, x_hi)
+
+    found = double(0, 1)
+    return None if found is None else bisect(*found)
+"""

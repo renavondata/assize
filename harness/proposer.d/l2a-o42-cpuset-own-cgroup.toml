@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-o42-cpuset-own-cgroup (L2a obligation 42, R 70d26b83818e F1, F2): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "5a7ab494-bbf4-43d2-8dbd-f73e35859d05"

@@ -1,0 +1,8 @@
+  [ok] the bound Worlds declare support sizes [10]
+  [ok] support 10: a sum of 1 + 2·10·ε is invalid (t: probabilities sum to 1.0000000000000044)
+  [ok] support 10: a sum of 1 - 2·10·ε is invalid (t: probabilities sum to 0.9999999999999956)
+  [FAIL] support 10: a sum of 1 + 1·10·ε is valid (t: probabilities sum to 1.0000000000000022)
+  [FAIL] support 10: a sum of 1 - 1·10·ε is valid (t: probabilities sum to 0.9999999999999978)
+  [ok] support 10: the adversarial softmax sums 2.0·ε from one, not exactly one
+  [FAIL] support 10: the adversarial softmax, 2.0·ε from one, is valid (t: probabilities sum to 0.9999999999999996)
+RESULT False

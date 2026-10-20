@@ -1,0 +1,99 @@
+copy of /tmp/review-261/pins
+  at /tmp/assize-scratch-i5m0xxlf/assize-copy-rlap2csw/repo
+applied 1 edit(s) from harness/edits/P15_boundary_unflagged.toml
+pin:       P15
+protects:  time-to-learn finds the episodes per arm a known shift needs, counts both arms, and states the verdict
+role:      mutant
+tree:      /tmp/assize-scratch-i5m0xxlf/assize-copy-rlap2csw/repo
+invoked:   /tmp/review-261/pins
+scratch:   /tmp/assize-scratch-i5m0xxlf
+  [ok] pilot config is the brief's default ({'world': 'crafter', 'episodes': 200, 'cap_s': 7200})
+  [ok] time-to-learn config is the brief's ({'deltas': [0.25, 0.5, 1.0], 'mass': 0.9, 'fit_delta': 0.5, 'marginal_delta': 1.0, 'budget_s': 86400, 'experiments': 1000, 'posterior_draws': 1000, 'seed': 0})
+  delta 0.25: episodes per arm (101, 0.902145), normal oracle 105.11
+  [ok] delta 0.25: m* 101 within x1.5 of the oracle 105.11
+  [ok] delta 0.25: measure at m* 0.9021 >= 0.9
+  [ok] delta 0.25: m* is the smallest: no m below it reaches the mass ([])
+  delta 0.5: episodes per arm (26, 0.9054500000000001), normal oracle 26.28
+  [ok] delta 0.5: m* 26 within x1.5 of the oracle 26.28
+  [ok] delta 0.5: measure at m* 0.9055 >= 0.9
+  [ok] delta 0.5: m* is the smallest: no m below it reaches the mass ([])
+  delta 1.0: episodes per arm (7, 0.9216449999999999), normal oracle 6.57
+  [ok] delta 1.0: m* 7 within x1.5 of the oracle 6.57
+  [ok] delta 1.0: measure at m* 0.9216 >= 0.9
+  [ok] delta 1.0: m* is the smallest: no m below it reaches the mass ([])
+  [ok] non-monotone stream: m* (5, 0.95), the first crossing 5
+  [ok] non-monotone stream, budget short of every crossing: not detected (None)
+  [ok] the assurance table's budget affords 316 episodes per arm
+  delta 0.25: assured episodes per arm 193 (fraction 0.901), expected 101, assurance oracle 210.22
+  [ok] delta 0.25: assured m* 193 within x1.5 of the assurance oracle 210.22
+  [ok] delta 0.25: assurance asks more episodes (193) than the expected reading (101)
+  [ok] delta 0.25: assured fraction 0.901 >= mass
+  [ok] delta 0.25: assured wall-clock counts both arms
+  [ok] delta 0.25: assured m* is the smallest (0.864)
+  delta 0.5: assured episodes per arm 46 (fraction 0.9), expected 26, assurance oracle 52.56
+  [ok] delta 0.5: assured m* 46 within x1.5 of the assurance oracle 52.56
+  [ok] delta 0.5: assurance asks more episodes (46) than the expected reading (26)
+  [ok] delta 0.5: assured fraction 0.9 >= mass
+  [ok] delta 0.5: assured wall-clock counts both arms
+  [ok] delta 0.5: assured m* is the smallest (0.877)
+  delta 1.0: assured episodes per arm 13 (fraction 0.908), expected 7, assurance oracle 13.14
+  [ok] delta 1.0: assured m* 13 within x1.5 of the assurance oracle 13.14
+  [ok] delta 1.0: assurance asks more episodes (13) than the expected reading (7)
+  [ok] delta 1.0: assured fraction 0.908 >= mass
+  [ok] delta 1.0: assured wall-clock counts both arms
+  [ok] delta 1.0: assured m* is the smallest (0.899)
+  [ok] a budget affording the assurance oracle is FIT under both readings
+  delta 0.25 expected errors: se at m* 101: 0.004602587074981068; at m*-1 0.8996649999999999 (0.004844293545498141); at the budget 316: 0.98742 (0.0012959641673762137)
+  [ok] delta 0.25: se at m* is the sample error of the mean
+  [ok] delta 0.25: reading and se at m*-1
+  [ok] delta 0.25: reading and se at the budget's 316 episodes per arm
+  delta 0.25 assured_errors: se at m* 193: 0.009449248027662744; at m*-1 0.864 (0.010845350230473038); at the budget 316: 0.967 (0.005651808820452346)
+  [ok] delta 0.25: assured_se at m* is the sample error of the mean
+  [ok] delta 0.25: assured_reading and se at m*-1
+  [ok] delta 0.25: assured_reading and se at the budget's 316 episodes per arm
+  delta 0.5 expected errors: se at m* 26: 0.0047850699466564115; at m*-1 0.8965 (0.004984189216125542); at the budget 316: 1.0 (0.0)
+  [ok] delta 0.5: se at m* is the sample error of the mean
+  [ok] delta 0.5: reading and se at m*-1
+  [ok] delta 0.5: reading and se at the budget's 316 episodes per arm
+  delta 0.5 assured_errors: se at m* 46: 0.00949157995752499; at m*-1 0.877 (0.010391293421849803); at the budget 316: 1.0 (0.0)
+  [ok] delta 0.5: assured_se at m* is the sample error of the mean
+  [ok] delta 0.5: assured_reading and se at m*-1
+  [ok] delta 0.5: assured_reading and se at the budget's 316 episodes per arm
+  delta 1.0 expected errors: se at m* 7: 0.004470100756781191; at m*-1 0.895985 (0.0054839929753742345); at the budget 316: 1.0 (0.0)
+  [ok] delta 1.0: se at m* is the sample error of the mean
+  [ok] delta 1.0: reading and se at m*-1
+  [ok] delta 1.0: reading and se at the budget's 316 episodes per arm
+  delta 1.0 assured_errors: se at m* 13: 0.009144376393151129; at m*-1 0.899 (0.009533618929341046); at the budget 316: 1.0 (0.0)
+  [ok] delta 1.0: assured_se at m* is the sample error of the mean
+  [ok] delta 1.0: assured_reading and se at m*-1
+  [ok] delta 1.0: assured_reading and se at the budget's 316 episodes per arm
+  [ok] a budget affording the assurance oracle x TTL_FACTOR is settled under both readings
+  [ok] settled, detected, 2 se above: True
+  [FAIL] settled, detected, half an se above: False
+  [ok] settled, not detected, 2 se below: True
+  [FAIL] settled, not detected, half an se below: False
+  [ok] settled, no episode affordable: True
+  [ok] within_error, fit stands, marginal unsettled: () (())
+  [FAIL] within_error, fit unsettled detected: (0.5,) (())
+  [FAIL] within_error, fit stands undetected, marginal unsettled: (1.0,) (())
+  [FAIL] within_error, both unsettled: (0.5, 1.0) (())
+  [ok] no incumbent variance: one episode per arm, all mass on the correct sign ((1, 1.0))
+  [ok] fixture separates the verdicts: m* 7 for 1.0 < m* 26 for 0.5
+  26 episodes per arm affordable: [(0.25, None, None), (0.5, 26, 85577.14285714286), (1.0, 7, 23040.0)]
+  [ok] FIT: the budget affords 26 episodes per arm, both arms run
+  [ok] FIT: wall-clock counts both arms
+  [ok] 26 episodes per arm affordable: verdict FIT, want FIT
+  [ok] FIT: within Monte Carlo error at () ((); [(0.25, 0.746755, 0.007835485933547123), (0.5, 0.9054500000000001, 0.0047850699466564115), (1.0, 0.9968899999999999, 0.0004245682020101815)])
+  [ok] the budget affording the expected m* is FIT, and not FIT under the assurance reading, which asks more
+  25 episodes per arm affordable: [(0.25, None, None), (0.5, None, None), (1.0, 7, 23952.47524752475)]
+  [ok] MARGINAL: the budget affords 25 episodes per arm, both arms run
+  [ok] MARGINAL: wall-clock counts both arms
+  [ok] 25 episodes per arm affordable: verdict MARGINAL, want MARGINAL
+  [FAIL] MARGINAL: within Monte Carlo error at (0.5,) ((); [(0.25, 0.73148, 0.008011625661858255), (0.5, 0.8965, 0.004984189216125542), (1.0, 0.9955700000000001, 0.0006929684735291394)])
+  6 episodes per arm affordable: [(0.25, None, None), (0.5, None, None), (1.0, None, None)]
+  [ok] UNFIT: the budget affords 6 episodes per arm, both arms run
+  [ok] UNFIT: wall-clock counts both arms
+  [ok] 6 episodes per arm affordable: verdict UNFIT, want UNFIT
+  [FAIL] UNFIT: within Monte Carlo error at (1.0,) ((); [(0.25, 0.61891, 0.009685423032543251), (0.5, 0.72992, 0.008667030114809283), (1.0, 0.895985, 0.0054839929753742345)])
+  [FAIL] the fixture's boundary budgets exercise the flag on the real stream ({'FIT': (), 'MARGINAL': (), 'UNFIT': ()})
+result:    FAIL

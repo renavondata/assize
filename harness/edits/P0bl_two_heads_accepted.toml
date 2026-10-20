@@ -1,0 +1,5 @@
+# P0bl's mutant: the verifier takes the first head fact of several; a head appended after the true one is not noticed.
+[[edit]]
+path = "harness/claims.py"
+old = "    if len(heads) != 1:\n"
+new = "    if not heads:\n"

@@ -1,0 +1,54 @@
+## clean at c7bc2274539ead310a856fe7c8485b27dd449fac 2026-10-20T06:59:32Z
+$ uv run --frozen python -c "import harness.pins as p; print(\"P7\", p.p7_infinite_loss()); print(\"P27\", p.p27_sum_tolerance())"
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+Installed 12 packages in 12ms
+  [ok] health [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  [ok] health [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]: sums to one, refused: health: a negative probability: [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  derived: {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 11.512925464970227}, "energy": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}
+  [ok] non-vacuous: some target puts zero mass on the realised value at every scored step
+  [ok] non-vacuous: some target has a positive finite log-loss
+  [ok] non-vacuous: some target is missing at every step
+  runtime docker: not usable: not a Docker engine: 'podman version 6.1.2'
+  runtime podman: USABLE: podman 6.1.2 rootless=true cgroup v2 systemd [cpu memory pids]
+  [ok] at least one runtime witnessed (['podman'])
+  [ok] the declared runtime (none declared) is witnessed
+  podman forecaster: [{"episode": 0, "termination": "truncated", "detail": "", "steps": 5, "utility": 0, "prediction": {"health": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 5, "missing": 0, "infinite": 5, "finite_sum": 0.0, "log_loss": "+inf"}, "drink": {"scored": 5, "missing": 0, "infinite": 0, "finite_sum": 11.512925464970227, "log_loss": 1
+  [ok] podman forecaster: one episode of 5 steps, ended by the World
+  [ok] podman forecaster health: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster food: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster drink: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 11.512925464970227, 'log_loss': 11.512925464970227}
+  [ok] podman forecaster energy: recorded {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 5, 'missing': 0, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster wood: recorded {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}, derived {'scored': 5, 'missing': 0, 'infinite': 5, 'finite_sum': 0.0, 'log_loss': '+inf'}
+  [ok] podman forecaster stone: recorded {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}, derived {'scored': 0, 'missing': 5, 'infinite': 0, 'finite_sum': 0.0, 'log_loss': 0.0}
+  [ok] podman forecaster: the recorded calibration equals P13's derivation
+  podman undeclared: [{"episode": 0, "termination": "invalid_reply", "detail": "t=0: prediction: undeclared target 'undeclared'", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0,
+  [ok] podman undeclared: invalid_reply at the first step, before the World advances
+  [ok] podman undeclared: nothing scored
+  podman short: [{"episode": 0, "termination": "invalid_reply", "detail": "t=0: prediction: health: 9 probabilities for a support of 10", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infin
+  [ok] podman short: invalid_reply at the first step, before the World advances
+  [ok] podman short: nothing scored
+  podman zeros: [{"episode": 0, "termination": "invalid_reply", "detail": "t=0: prediction: health: probabilities sum to 0.0", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "f
+  [ok] podman zeros: invalid_reply at the first step, before the World advances
+  [ok] podman zeros: nothing scored
+  podman nan: [{"episode": 0, "termination": "invalid_reply", "detail": "step: not JSON (NaN is not a JSON number)", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "food": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, "drink": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum"
+  [ok] podman nan: invalid_reply at the first step, before the World advances
+  [ok] podman nan: nothing scored
+  podman above_one: [{"episode": 0, "termination": "invalid_reply", "detail": "step: [\"{'jsonrpc': '2.0', 'id': 1, 'result': {'action': 0, 'prediction': {'health': [1.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}} is not valid under any of the given schemas\"]", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0}, 
+  [ok] podman above_one: invalid_reply at the first step, before the World advances
+  [ok] podman above_one: nothing scored
+  podman below_zero: [{"episode": 0, "termination": "invalid_reply", "detail": "step: [\"{'jsonrpc': '2.0', 'id': 1, 'result': {'action': 0, 'prediction': {'health': [-0.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}} is not valid under any of the given schemas\"]", "steps": 0, "utility": 0, "prediction": {"health": {"scored": 0, "missing": 0, "infinite": 0, "finite_sum": 0.0, "log_loss": 0.0},
+  [ok] podman below_zero: invalid_reply at the first step, before the World advances
+  [ok] podman below_zero: nothing scored
+  [ok] podman: no candidate container listed after the cases ([])
+  [ok] podman: every assertion above held (0 failed)
+P7 True
+  [ok] the bound Worlds declare support sizes [10]
+  [ok] support 10: a sum of 1 + 2·10·ε is invalid (t: probabilities sum to 1.0000000000000044)
+  [ok] support 10: a sum of 1 - 2·10·ε is invalid (t: probabilities sum to 0.9999999999999956)
+  [ok] support 10: a sum of 1 + 1·10·ε is valid (None)
+  [ok] support 10: a sum of 1 - 1·10·ε is valid (None)
+  [ok] support 10: the adversarial softmax sums 2.0·ε from one, not exactly one
+  [ok] support 10: the adversarial softmax, 2.0·ε from one, is valid (None)
+P27 True
+[exit 0]
