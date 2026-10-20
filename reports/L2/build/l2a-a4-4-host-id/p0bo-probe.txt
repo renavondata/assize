@@ -1,0 +1,81 @@
+== P0j clean: exit 0
+(no FAIL lines) 
+== P0j incomplete_facts_accepted: exit 1
+  [FAIL] uptime missing: exit non-zero (got 0)
+  [FAIL] cpuset missing: exit non-zero (got 0)
+  [FAIL] cpuset-slice missing: exit non-zero (got 0)
+  [FAIL] cpuset-own missing: exit non-zero (got 0)
+  [FAIL] runner-version missing: exit non-zero (got 0)
+  [FAIL] head missing: exit non-zero (got 0)
+  [FAIL] host-id missing: exit non-zero (got 0)
+  [FAIL] podman-info missing: exit non-zero (got 0) 
+== P0j unpinned_slice_accepted: exit 1
+  [FAIL] cpuset-slice missing: exit non-zero (got 0)
+  [FAIL] cpuset-slice missing: refusal names it ('') 
+== P0j own_cgroup_unchecked: exit 1
+  [FAIL] cpuset-own missing: exit non-zero (got 0)
+  [FAIL] cpuset-own missing: refusal names it ('') 
+== P0j head_unrecorded: exit 1
+  [FAIL] facts record the checked-out head sha (obligation 43)
+  [FAIL] head missing: exit non-zero (got 0)
+  [FAIL] head missing: refusal names it ('') 
+== P0j empty_machine_id_accepted: exit 1
+  [FAIL] host-id missing: exit non-zero (got 0)
+  [FAIL] host-id missing: refusal names it ('') 
+== P0bl clean: exit 0
+(no FAIL lines) measure-head /tmp/assize-p0bl-363gqkke/facts.txt: 0 findings
+facts: head_differs: artefact measured 0123456789abcdef0123456789abcdef01234567, reviewed head is ffffffffffffffffffffffffffffffffffffffff
+measure-head /tmp/assize-p0bl-363gqkke/facts.txt: 1 findings
+
+== P0bl head_unchecked: exit 1
+  [FAIL] another reviewed head is refused head_differs
+  [FAIL] the CLI exits 1 on another head measure-head /tmp/assize-p0bl-vmtqxsua/facts.txt: 0 findings
+measure-head /tmp/assize-p0bl-vmtqxsua/facts.txt: 0 findings
+
+== P0bl two_heads_accepted: exit 1
+  [FAIL] two head facts are refused head_unrecorded measure-head /tmp/assize-p0bl-l1_4xjf_/facts.txt: 0 findings
+facts: head_differs: artefact measured 0123456789abcdef0123456789abcdef01234567, reviewed head is ffffffffffffffffffffffffffffffffffffffff
+measure-head /tmp/assize-p0bl-l1_4xjf_/facts.txt: 1 findings
+
+== P0bo clean: exit 0
+(no FAIL lines) same-host 2 artefacts: 0 findings
+facts: host_differs: 2 hosts: e417138cc89497aee66d96f94ba8a3138cd21f0dd4b211dab7494531bdadd037, ff25d2389ab7917a77cc0c3546331401054d53cb7b2edeedb7b4e7742bb5286d
+same-host 2 artefacts: 1 findings
+
+== P0bo host_unchecked: exit 1
+  [FAIL] artefacts of two hosts are refused host_differs
+  [FAIL] the CLI exits 1 on two hosts same-host 2 artefacts: 0 findings
+same-host 2 artefacts: 0 findings
+
+== P0bo two_host_ids_accepted: exit 1
+  [FAIL] an artefact recording two host ids is refused host_unrecorded same-host 2 artefacts: 0 findings
+facts: host_differs: 2 hosts: e417138cc89497aee66d96f94ba8a3138cd21f0dd4b211dab7494531bdadd037, ff25d2389ab7917a77cc0c3546331401054d53cb7b2edeedb7b4e7742bb5286d
+same-host 2 artefacts: 1 findings
+
+== P0bo host_id_unrecorded: exit 1
+  [FAIL] an artefact records one host id
+  [FAIL] two artefacts of one host are compared
+  [FAIL] artefacts of two hosts are refused host_differs
+  [FAIL] an artefact recording no host id is refused host_unrecorded
+  [FAIL] an artefact recording two host ids is refused host_unrecorded
+  [FAIL] the CLI exits 0 on one host /tmp/assize-p0bo-1bcck_4d/first.txt: host_unrecorded: 0 host-id facts, expected exactly one
+/tmp/assize-p0bo-1bcck_4d/second.txt: host_unrecorded: 0 host-id facts, expected exactly one
+same-host 2 artefacts: 2 findings
+/tmp/assize-p0bo-1bcck_4d/first.txt: host_unrecorded: 0 host-id facts, expected exactly one
+/tmp/assize-p0bo-1bcck_4d/other.txt: host_unrecorded: 0 host-id facts, expected exactly one
+same-host 2 artefacts: 2 findings
+
+== P0bo raw_machine_id_recorded: exit 1
+  [FAIL] an artefact records one host id
+  [FAIL] the raw machine-id is not written into the facts
+  [FAIL] two artefacts of one host are compared
+  [FAIL] artefacts of two hosts are refused host_differs
+  [FAIL] an artefact recording no host id is refused host_unrecorded
+  [FAIL] an artefact recording two host ids is refused host_unrecorded
+  [FAIL] the CLI exits 0 on one host /tmp/assize-p0bo-8hhixcoy/first.txt: host_unrecorded: 0 host-id facts, expected exactly one
+/tmp/assize-p0bo-8hhixcoy/second.txt: host_unrecorded: 0 host-id facts, expected exactly one
+same-host 2 artefacts: 2 findings
+/tmp/assize-p0bo-8hhixcoy/first.txt: host_unrecorded: 0 host-id facts, expected exactly one
+/tmp/assize-p0bo-8hhixcoy/other.txt: host_unrecorded: 0 host-id facts, expected exactly one
+same-host 2 artefacts: 2 findings
+

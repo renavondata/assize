@@ -1,0 +1,5 @@
+# P0bo's mutant: host_facts.sh records no host id; no artefact can be bound to the host it measured (brief 2 A4 item 4).
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "require host-id host_id \"$machine_id_file\"\n"
+new = "require host-id true\n"

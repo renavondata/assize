@@ -1,0 +1,5 @@
+# P0j's mutant: an empty machine-id still yields a host id (the hash of nothing); the artefact names no host (brief 2 A4 item 4).
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "  [ -n \"$id\" ] || { echo \"$1 is empty\"; return 1; }\n"
+new = ""

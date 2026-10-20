@@ -4,13 +4,16 @@
 # podman runtime line is not a measurement, so this script exits non-zero if any of those four probes fails.
 # It records the checked-out head sha as a fact too (obligation 43), so a verifier can bind the artefact to a head.
 # It also refuses unless both the user slice and the measuring process's own cgroup have a non-empty cpuset.cpus (obligation 42).
-# CPUSET_FILE, RUNNER_DIR and SELF_CGROUP_DIR say where to read three of them; they default to the paths the brief names.
+# It records a stable host id (brief 2 A4 item 4), so measurements are compared only between artefacts of one host.
+# CPUSET_FILE, RUNNER_DIR, SELF_CGROUP_DIR and MACHINE_ID_FILE say where to read four of them; they default to the
+# paths the brief names and the system's machine-id.
 set -uo pipefail
-out="${1:?usage: host_facts.sh OUT_DIR [CPUSET_FILE] [RUNNER_DIR]}"
+out="${1:?usage: host_facts.sh OUT_DIR [CPUSET_FILE] [RUNNER_DIR] [SELF_CGROUP_DIR] [MACHINE_ID_FILE]}"
 cpuset_file="${2:-/sys/fs/cgroup/user.slice/user-$(id -u).slice/cpuset.cpus.effective}"
 runner_dir="${3:-$HOME/actions-runner}"
 # The cgroup directory the measuring process itself runs in (R 70d26b83818e F2); default from /proc/self/cgroup.
 self_cgroup_dir="${4:-/sys/fs/cgroup$(sed -n 's/^0:://p' /proc/self/cgroup)}"
+machine_id_file="${5:-/etc/machine-id}"
 mkdir -p "$out"
 facts="$out/facts.txt"
 : > "$facts"
@@ -54,6 +57,14 @@ pinned_cpus() {
   echo "$1 cpuset.cpus=[$own] cpuset.cpus.effective=[$effective]"
   [ -n "$own" ]
 }
+# The host id is the SHA-256 of the machine-id, which is stable across boots; the raw machine-id, which systemd asks be
+# kept confidential, is never written. A missing or empty machine-id fails.
+host_id() {
+  local id
+  id=$(tr -d '[:space:]' < "$1") || return 1
+  [ -n "$id" ] || { echo "$1 is empty"; return 1; }
+  printf '%s' "$id" | sha256sum | cut -d' ' -f1
+}
 probe date date -u +%Y-%m-%dT%H:%M:%SZ
 probe whoami whoami
 probe lscpu lscpu
@@ -72,6 +83,9 @@ require runner-version runner_version "$runner_dir"
 # The head this artefact measured: a host witness is admissible only if it equals the head the Reviewer reproduced
 # (obligation 43, R 7498b94a505b F1; `python -m harness.claims measure-head`).
 require head git rev-parse HEAD
+# The host this artefact was measured on: no throughput or time-to-learn is compared across two ids, and a second
+# measurement host carries its own verdicts (brief 2 A4 item 4; `python -m harness.claims same-host`).
+require host-id host_id "$machine_id_file"
 require podman-info podman info --format '{{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}'
 if [ "${#missing[@]}" -gt 0 ]; then
   echo "NOT A MEASUREMENT: required facts missing: ${missing[*]}" >> "$facts"

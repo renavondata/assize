@@ -1,0 +1,5 @@
+# P0bo's mutant: the verifier never compares host ids; artefacts of two hosts are compared (brief 2 A4 item 4).
+[[edit]]
+path = "harness/claims.py"
+old = "               if len(hosts) > 1 else [])\n"
+new = "               if False else [])\n"

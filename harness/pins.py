@@ -599,8 +599,10 @@ def p0i_no_stale_bytecode() -> bool:
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
-REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "podman-info")
+REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "host-id",
+                  "podman-info")
 STUB_HEAD = "0123456789abcdef0123456789abcdef01234567"
+STUB_MACHINE_IDS = ("a1b2c3d4e5f60718293a4b5c6d7e8f90", "0f9e8d7c6b5a49382716051f2e3d4c5b")
 STUB = "#!/bin/sh\n{body}\n"
 STUB_OK = {"uptime": 'echo " 12:00:00 up 1 day,  load average: 0.10, 0.20, 0.30"',
            "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"',
@@ -609,8 +611,10 @@ STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo 
              "git": "exit 128"}
 
 
-def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
-    """Run host_facts.sh against stubbed probes, with the one fact named by `lacking` failing."""
+def _host_facts(work: Path, case: str, lacking: str | None,
+                machine_id: str = STUB_MACHINE_IDS[0]) -> tuple[int, str]:
+    """Run host_facts.sh against stubbed probes on a host whose machine-id is `machine_id`, with the one fact named
+    by `lacking` failing."""
     root = work / case
     stubs, runner, out = root / "bin", root / "runner", root / "out"
     for d in (stubs, runner):
@@ -632,8 +636,12 @@ def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
         cpuset.unlink()
     if lacking != "runner-version":
         (runner / ".runner").write_text('{"agentName": "stub"}')
+    # host-id: the machine-id file is empty.
+    machine_id_file = root / "machine-id"
+    machine_id_file.write_text("" if lacking == "host-id" else f"{machine_id}\n")
     env = os.environ | {"PATH": f"{stubs}:{os.environ['PATH']}"}
-    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner), str(own_dir)], env=env,
+    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner), str(own_dir),
+                        str(machine_id_file)], env=env,
                        capture_output=True, text=True, timeout=60, preexec_fn=proc.setup(False))
     facts = out / "facts.txt"
     return r.returncode, facts.read_text() if facts.is_file() else ""
@@ -688,6 +696,38 @@ def p0bl_measure_bound_to_head() -> bool:
     path.write_text(facts)
     expect(claims.main(["measure-head", str(path), STUB_HEAD]) == 0, "the CLI exits 0 on the measured head")
     expect(claims.main(["measure-head", str(path), other]) == 1, "the CLI exits 1 on another head")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def p0bo_one_host_compared() -> bool:
+    """Measurements are compared only between artefacts of one host (brief 2 A4 item 4): host_facts.sh records a
+    host id that is the same on every run of one host, differs between hosts and does not publish the raw machine-id;
+    `claims same-host` accepts two artefacts of one host and refuses, by name, two hosts, an artefact recording no id
+    and one recording two."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bo-", dir=context.scratch))
+    a, b = STUB_MACHINE_IDS
+    _, first = _host_facts(work, "a-first", None, a)
+    _, second = _host_facts(work, "a-second", None, a)
+    _, other = _host_facts(work, "b", None, b)
+    _, bare = _host_facts(work, "lacks-host-id", "host-id", a)
+    expect(len(claims.HOST_FACT.findall(first)) == 1, "an artefact records one host id")
+    expect(a not in first and b not in other, "the raw machine-id is not written into the facts")
+    expect(not claims.same_host_findings({"first": first, "second": second}),
+           "two artefacts of one host are compared")
+    expect(_codes(claims.same_host_findings({"first": first, "other": other})) == {("facts", "host_differs")},
+           "artefacts of two hosts are refused host_differs")
+    expect(_codes(claims.same_host_findings({"first": first, "bare": bare})) == {("bare", "host_unrecorded")},
+           "an artefact recording no host id is refused host_unrecorded")
+    forged = first + f"### host-id\n$ host_id /etc/machine-id\n{'e' * 64}\n[exit 0]\n"
+    expect(_codes(claims.same_host_findings({"forged": forged, "first": first})) == {("forged", "host_unrecorded")},
+           "an artefact recording two host ids is refused host_unrecorded")
+    paths = {name: work / f"{name}.txt" for name in ("first", "second", "other")}
+    for name, text in (("first", first), ("second", second), ("other", other)):
+        paths[name].write_text(text)
+    expect(claims.main(["same-host", str(paths["first"]), str(paths["second"])]) == 0, "the CLI exits 0 on one host")
+    expect(claims.main(["same-host", str(paths["first"]), str(paths["other"])]) == 1, "the CLI exits 1 on two hosts")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -6947,11 +6987,18 @@ PINS = [
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
                                   Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
                                   Mutant("own_cgroup_unchecked", _edits("P0j_own_cgroup_unchecked")),
-                                  Mutant("head_unrecorded", _edits("P0j_head_unrecorded"))),
+                                  Mutant("head_unrecorded", _edits("P0j_head_unrecorded")),
+                                  Mutant("empty_machine_id_accepted", _edits("P0j_empty_machine_id_accepted"))),
         ("scripts/**",)),
     Pin("P0bl", "a measure artefact is admissible only for the head it recorded: another head or none is refused",
         p0bl_measure_bound_to_head, (Mutant("head_unchecked", _edits("P0bl_head_unchecked")),
                                      Mutant("two_heads_accepted", _edits("P0bl_two_heads_accepted"))),
+        HARNESS + ("scripts/**",)),
+    Pin("P0bo", "measurements are compared only within one host: two host ids, none or two in one artefact are refused",
+        p0bo_one_host_compared, (Mutant("host_unchecked", _edits("P0bo_host_unchecked")),
+                                 Mutant("two_host_ids_accepted", _edits("P0bo_two_host_ids_accepted")),
+                                 Mutant("host_id_unrecorded", _edits("P0bo_host_id_unrecorded")),
+                                 Mutant("raw_machine_id_recorded", _edits("P0bo_raw_machine_id_recorded"))),
         HARNESS + ("scripts/**",)),
     Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
         "forecast's session, is rejected",
