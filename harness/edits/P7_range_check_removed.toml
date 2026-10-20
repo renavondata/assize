@@ -1,6 +1,6 @@
-# P7's mutant `range_check_removed` (brief 2, audit 8aae43c8c792 finding 5): a prediction is not checked to lie in
-# [0, 1], so [1.5, -0.5] sums to one and is scored: a negative loss on the first value, a judge crash on the second.
+# P7's mutant `range_check_removed` (brief 2, audit 8aae43c8c792 finding 5): a prediction is not checked to be
+# non-negative, so [1.5, -0.5] sums to one and is scored: a negative loss on the first value, a judge crash on the second.
 [[edit]]
 path = "judge/scoring.py"
-old = "        if not all(0 <= x <= 1 for x in p):\n            return f\"{name}: a probability outside [0, 1]: {list(p)!r}\"\n"
+old = "        if not all(x >= 0 for x in p):\n            return f\"{name}: a negative probability: {list(p)!r}\"\n"
 new = ""
