@@ -1,0 +1,22 @@
+# Reviewer probes of P0bm at 8522bc81552b542659eb0fc7eb1bf9b288467b00 (session 720bc359-1107-47d7-b6ef-eb6409764104, run 39397228680)
+# Script: reports/L2/review/8522bc81552b542659eb0fc7eb1bf9b288467b00/probe.py.txt, run from a scratch dir as
+#   .venv/bin/python -I probe.py <repo>; it reads the tree's files into memory and changes none.
+
+$ uv run --frozen python -m harness.trusted check
+harness/trusted_base.toml: equals the declared trusted base; every entry admitted
+exit 0
+
+$ for e in actions/secrets actions/runners actions/variables; do gh api repos/renavondata/assize/$e; done   # as assize-reviewer
+{"message":"Resource not accessible by personal access token",...,"status":"403"}   (all three)
+
+$ python -I probe.py <repo>
+== F1: workflows using actions/checkout with no github.token expression, and their listed tokens
+  build.yml: permissions block=False; listed tokens=['build.yml secrets.ASSIZE_BUILDER_TOKEN', 'build.yml secrets.CLAUDE_CODE_OAUTH_TOKEN']
+  failed.yml: permissions block=True; listed tokens=['failed.yml github.token', 'failed.yml secrets.ASSIZE_BUILDER_TOKEN']
+  measure.yml: permissions block=True; listed tokens=[]
+  pins-master.yml: permissions block=True; listed tokens=['pins-master.yml github.token']
+  pins.yml: permissions block=True; listed tokens=['pins.yml github.token']
+  review.yml: permissions block=False; listed tokens=['review.yml secrets.ASSIZE_REVIEWER_TOKEN', 'review.yml secrets.CLAUDE_CODE_OAUTH_TOKEN']
+== F2: a new secret added to build.yml AND listed citing the existing heading
+  findings: []
+  grown vs current list: ['secret ASSIZE_EXTRA_TOKEN: Audit findings at 8aae43c8c792', 'token build.yml secrets.ASSIZE_EXTRA_TOKEN: Audit findings at 8aae43c8c792']
