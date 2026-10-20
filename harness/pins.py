@@ -6636,7 +6636,12 @@ def p18_pilot() -> bool:
            f"throughput is recorded episodes over the pilot's wall-clock {played.wall_s} s "
            f"({rep['throughput_episodes_per_s']})")
     expect(rep["proposer"] == P18_PARTY, f"the report's proposer is the records' ({rep['proposer']})")
-    rates = [100 * sum(c in r["achievements"] for r in every) / 25 for c in P18_COMPONENTS]
+    # L2a obligation 41 (brief 2 A2): the incumbent's variance is reported as a weak proxy, in the record and in the
+    # rendering a reader sees beside the verdict.
+    text = run.render(rep)
+    expect("weak proxy" in rep["time_to_learn"]["note"] and f"Note: {rep['time_to_learn']['note']}." in text,
+           f"the report states the random incumbent's variance is a weak proxy ({rep['time_to_learn']['note']!r})")
+    rates =[100 * sum(c in r["achievements"] for r in every) / 25 for c in P18_COMPONENTS]
     hafner = math.exp(math.fsum(math.log(1 + s) for s in rates) / len(rates)) - 1
     expect(math.isclose(rep["hafner_score"], hafner), f"Hafner score {rep['hafner_score']} is {hafner}")
     a, b = rep["prediction"]["a"], rep["prediction"]["b"]
@@ -7118,7 +7123,8 @@ PINS = [
                     Mutant("proposer_from_config", _edits("P18_proposer_from_config")),
                     Mutant("mixed_proposers_admitted", _edits("P18_mixed_proposers_admitted")),
                     Mutant("infinite_pooled_finite", _edits("P18_infinite_pooled_finite")),
-                    Mutant("short_request_admitted", _edits("P18_short_request_admitted"))), JUDGE_SIDE),
+                    Mutant("short_request_admitted", _edits("P18_short_request_admitted")),
+                    Mutant("proxy_note_dropped", _edits("P18_proxy_note_dropped"))), JUDGE_SIDE),
     Pin("P34", "`python -m pilot` registers the incumbent under [incumbent].proposer, and a ledger failing verification "
                "makes the pilot STOPPED with exit 1; the report states the hash of pilot/ beside judge_sha256",
         p34_pilot_main, (Mutant("ledger_findings_ignored", _edits("P34_ledger_findings_ignored")),
