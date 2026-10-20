@@ -5918,13 +5918,30 @@ def _verify_in_image(rt, image: str, data: Path, anchor: str) -> tuple[int, str]
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
+def _own_data(data: Path, dest: Path) -> Path:
+    """A copy of the fixture data directory `data` at `dest`, which no other case reads or writes."""
+    shutil.copytree(data, dest)
+    return dest
+
+
+def _altered(led: Path) -> bytes:
+    """The bytes of ledger `led` with one record's utility changed, so that record's digest no longer matches."""
+    good = led.read_bytes()
+    return good.replace(b'"utility": 3', b'"utility": 9', 1).replace(b'"utility":3', b'"utility":9', 1)
+
+
 def p31_image_carries_verify() -> bool:
     """The judge's release image carries `verify` (brief 2 A2, L2a obligation 18; S 2817eb7): `release/Containerfile`
     builds, under every usable runtime offline from the judge's pinned base image (its one FROM is that base) and a
     context of `judge/` alone, an image whose entrypoint is `python -m judge`, so no Worlds' dependency is imported to
     verify. Run with no network and a read-only root over P9's fixture ledger, `verify` exits 0 and prints what the
     host's `python -m judge verify` prints; it exits 1 and says FAILED on the same ledger with a record altered, and on
-    an anchor that is not a signed head."""
+    an anchor that is not a signed head.
+
+    `_each_runtime` runs the runtimes at once, so each verifies its own copy of the fixture data (`_own_data`): one
+    runtime's altered case cannot be what another's pass case reads (PR #275 review F1, run 39467394544 attempt 1).
+    The interleaving is made certain, not timed: before any runtime runs, one more copy is altered and held altered
+    for the whole run, as an altered case of another runtime would hold it; a pass case that reads it fails."""
     from judge import ledger, runtime
 
     expect, ok = _expecter()
@@ -5942,29 +5959,36 @@ def p31_image_carries_verify() -> bool:
         anchor = held[-1][-1]["sha256"]
         host = _verify_cli(led, private, anchor)
         expect(host[0] == 0, f"control: the host's verify passes the fixture ledger ({host})")
+        own = {rt.name: _own_data(data, work / f"data-{rt.name}") for rt in usable}
+        hold = _own_data(data, work / "data-held-altered")
+        (hold / "ledger.jsonl").write_bytes(_altered(hold / "ledger.jsonl"))
+        expect(_verify_cli(hold / "ledger.jsonl", hold / "private", anchor)[0] == 1,
+               "control: the copy held altered fails the host's verify")
 
         def case(rt, expect, say):
+            mine = own[rt.name]
+            mled = mine / "ledger.jsonl"
             try:
                 image = _digest(_build(rt, _release_context(work / f"ctx-{rt.name}")))
             except subprocess.CalledProcessError as e:
                 expect(False, f"{rt.name}: the release image builds offline ({e.stderr.decode(errors='replace')[-400:]})")
                 return
             built.append((rt, image))
-            code, out = _verify_in_image(rt, image, data, anchor)
+            code, out = _verify_in_image(rt, image, mine, anchor)
             say(f"  {rt.name} image {image}: verify -> {code}: {out}")
             expect(code == 0 and (code, out) == host, f"{rt.name}: verify in the image passes the fixture ledger and "
                                                       f"prints what the host's prints (exit {code})")
-            code, out = _verify_in_image(rt, image, data, "0" * 64)
+            code, out = _verify_in_image(rt, image, mine, "0" * 64)
             expect(code == 1 and "FAILED" in out, f"{rt.name}: an anchor that is no signed head fails (exit {code})")
-            good = led.read_bytes()
+            good = mled.read_bytes()
             try:
-                led.write_bytes(good.replace(b'"utility": 3', b'"utility": 9', 1).replace(b'"utility":3', b'"utility":9', 1))
-                altered = led.read_bytes() != good
-                code, out = _verify_in_image(rt, image, data, anchor)
+                mled.write_bytes(_altered(mled))
+                altered = mled.read_bytes() != good
+                code, out = _verify_in_image(rt, image, mine, anchor)
                 expect(altered and code == 1 and "FAILED" in out,
                        f"{rt.name}: a record altered fails (altered {altered}, exit {code})")
             finally:
-                led.write_bytes(good)
+                mled.write_bytes(good)
 
         _each_runtime(usable, case, expect)
     finally:
@@ -7487,7 +7511,8 @@ PINS = [
     Pin("P31", "the judge's release image, built offline from release/Containerfile, runs verify: it passes the fixture "
                "ledger, and fails an altered record and an anchor that is no signed head",
         p31_image_carries_verify, (Mutant("verify_omitted", _edits("P31_verify_omitted")),
-                                   Mutant("eager_imports", _edits("P31_eager_imports"))),
+                                   Mutant("eager_imports", _edits("P31_eager_imports")),
+                                   Mutant("shared_ledger", _edits("P31_shared_ledger"))),
         JUDGE_SIDE + ("release/**",)),
     Pin("P32", "a context's declared runtime must be usable: docker declared where only podman is, an unknown runtime, "
                "and the environment's declaration each fail; a held or absent declaration passes",
