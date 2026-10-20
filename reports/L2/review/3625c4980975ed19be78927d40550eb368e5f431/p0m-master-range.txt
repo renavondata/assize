@@ -1,0 +1,31 @@
+# which range P0m's real-branch check reads on a push to master: pins.yml triggers, pins-master.yml triggers, and _branch_base at HEAD==origin/master. 2026-10-20T12:49:45Z
+## pins.yml 'on:' block
+3:on:
+4-  pull_request:
+5-
+6-# Instruction #54 item 5: P0m, P0q and P0r read the real branch and the GitHub API here, so the checkout is full and the
+7-# job's token can read issues, pull requests and Actions runs.
+8-permissions:
+9-  contents: read
+10-  issues: read
+11-  pull-requests: read
+## pins-master.yml 'on:' block
+8:on:
+9-  pull_request_target:
+10-    types: [opened, synchronize, reopened, labeled]
+11-
+12-permissions:
+13-  contents: read
+14-  issues: read
+15-  pull-requests: read
+16-  actions: read
+## _branch_base on a checkout at origin/master (merge-base HEAD origin/master == HEAD => range empty)
+efcc75b1b5b1
+## commits P0m would read on master: $(merge-base)..origin/master
+0
+## merges on master authored by GitHub for gfrmin (the merge button), last 5
+0d02d34 416374+gfrmin@users.noreply.github.com Merge pull request #242 from renavondata/instr-240-redact-logs
+230d60f 416374+gfrmin@users.noreply.github.com Merge pull request #241 from renavondata/instr-239-mechanism-party
+6955991 416374+gfrmin@users.noreply.github.com Merge pull request #218 from renavondata/l2a-o23-pause-prestarted
+d2b2817 416374+gfrmin@users.noreply.github.com Merge pull request #214 from renavondata/instr-211-cite-from-harness
+846b342 416374+gfrmin@users.noreply.github.com Merge pull request #215 from renavondata/instr-212-pins-master-origin

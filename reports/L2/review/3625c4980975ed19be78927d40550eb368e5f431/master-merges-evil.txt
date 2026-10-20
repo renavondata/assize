@@ -1,0 +1,7 @@
+# every merge reachable from origin/master, read with claims.branch_commits (-c paths) and claims.evil_paths; the Builder's STATUS claims 118 merges, none evil. 2026-10-20T12:49:29Z
+entrenched patterns ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+commits read 686 merges 118 range c80c2dd4f03f ..origin/master
+evil merges 0 []
+merges that -m would call evil (entrenched path differs from some parent): 40 of 118
+merge authors {'416374+gfrmin@users.noreply.github.com': 30, 'guy@publicdatamarket.com': 4, 'assize-builder@gfrm.in': 11, 'assize-reviewer@gfrm.in': 64, 'assize-builder@users.noreply.github.com': 9}
+[exit 0]

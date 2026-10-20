@@ -1,0 +1,18 @@
+# hygiene at the end of the review session, 2026-10-20T12:52:50Z
+## worktree dirty paths before removal: 0
+worktree removed
+## git worktree list
+/home/g/actions-runner/_work/assize/assize 3625c49 [l2a-a4-11-evil-merge]
+## ~/git/worktrees/assize contents: 0 entries
+## /tmp/review-272* entries:
+none
+## /tmp/assize-* entries (with mtimes; any from this session would be after 12:45Z):
+drwx------ 3 g g   60 2026-10-19T14:02:17 /tmp/assize-nested-1_n8rz28
+drwx------ 3 g g   60 2026-10-17T02:14:41 /tmp/assize-nested-8bu_k_wo
+drwx------ 3 g g   60 2026-10-19T14:02:20 /tmp/assize-nested-weoxf6fy
+-rw-r--r-- 1 g g 1889 2026-10-18T12:15:17 /tmp/assize-party.md
+-rw-r--r-- 1 g g 1160 2026-10-18T12:17:37 /tmp/assize-redact.md
+drwx------ 9 g g  180 2026-10-17T08:49:32 /tmp/assize-scratch-jhdgv37n
+## processes matching harness|judge|probe|pins:
+none
+## L0/L1 resolver files (bytes): 0 0
