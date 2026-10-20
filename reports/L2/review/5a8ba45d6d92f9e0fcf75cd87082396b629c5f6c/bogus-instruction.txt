@@ -1,0 +1,16 @@
+# an unsigned commit attributed to guy by its trailer, citing an Instruction: of an issue nobody read, on an entrenched path: what P0m's two readers (claims.commit_findings, claims.signature_check) find at 5a8ba45; 2026-10-20T13:54:42Z
+issues loaded for guy-party commits by _p0m_real_branch: []
+'bogus instruction, guy alone': parties ['guy'] instructions [999] paths ['CLAUDE.md'] ssh 'N' guy_attributed False -> commit_findings [], signature_findings []
+'bogus instruction, guy and builder': parties ['guy', 'builder m s'] instructions [999] paths ['CLAUDE.md'] ssh 'N' guy_attributed False -> commit_findings [], signature_findings []
+'no instruction, guy alone, unsigned': parties ['guy'] instructions [] paths ['CLAUDE.md'] ssh 'N' guy_attributed True -> commit_findings [], signature_findings ['unsigned_guy']
+signature_check over the whole range: [('commit 3a619b54e7d7', 'unsigned_guy'), ('commit 49f110866e8e', 'unsigned_guy'), ('commit b2baec74af81', 'unsigned_guy'), ('commit dd7ea2c50c17', 'unsigned_guy')]
+
+## the openpgp read (second read in read_signatures, no signers file) of the six ssh-signed/unsigned fixture commits: %G? %GK
+c96275e N 
+a9a66bd N 
+b2baec7 N 
+49f1108 N 
+dd7ea2c N 
+ad225a5 N
+[exit 0]
+scratch removed: ls: cannot access '/tmp/review-273-bogus.itiE': No such file or directory

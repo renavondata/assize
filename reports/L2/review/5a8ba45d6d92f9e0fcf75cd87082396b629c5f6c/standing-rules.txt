@@ -1,0 +1,32 @@
+# standing-rule checks at 5a8ba45; 2026-10-20T13:51:10Z
+## git diff --numstat origin/master...HEAD -- reports/ REPORT.md (deletions must be 0)
+95	0	reports/L2/build/l2a-a4-12-signatures/p0m-probe.txt
+25	0	reports/L2/build/l2a-a4-12-signatures/probe.py.txt
+1	0	reports/L2/ci/39427330923.json
+3	0	reports/L2/forecasts/3b780559-556d-46c4-8dc3-dded2fdce99b.jsonl
+18	0	reports/L2/status/l2a-a4-12-signatures.md
+## entrenched paths touched (CLAUDE.md CODEOWNERS .github/ .claude/ judge/ worlds/spec/)
+(end)
+## layer boundary: REPORT.md and docs/briefs/ diff
+(end)
+## claims trailers origin/master..HEAD
+trailers origin/master..HEAD: 0 findings
+[exit 0]
+## claims authors origin/master HEAD
+authors origin/master..HEAD: 0 findings
+[exit 0]
+## claims status-check
+status-check 1 files: 0 findings
+[exit 0]
+## STATUS line count
+18
+## forecast ids = sha256(claim+ts)[:12]
+5e6349b3ac38 5e6349b3ac38 True pins_green 0.7
+bddfe55de71e bddfe55de71e True review_accept 0.6
+332609dbdea1 332609dbdea1 True session_minutes 0.7
+## forecasts present at first pins head 8e3d631
+reports/L2/forecasts/3b780559-556d-46c4-8dc3-dded2fdce99b.jsonl
+## ledger open
+# 434 forecasts at HEAD; 85 open; 2 legacy resolutions read under `resolves` (876d1d05c550, a30e37db1152); 0 rows read as neither (none)
+85
+[exit 0]
