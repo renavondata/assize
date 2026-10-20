@@ -1,0 +1,7 @@
+# P0bn's mutant `cancel_zero_step_ignored_for_unserved_trigger` (brief 2, audit 8aae43c8c792 finding 2): a cancelled run
+# that started no step is dropped whether or not a later run of its trigger succeeded, so a build or review replaced in
+# its concurrency group, with nothing after it, ends with no pull request, issue or label.
+[[edit]]
+path = "harness/route.py"
+old = """    return "nothing" if started == 0 and "success" in later else "issue\""""
+new = """    return "nothing" if started == 0 else "issue\""""

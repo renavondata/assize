@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-audit-8aae43c-f2-cancel-routed (brief 2, audit 8aae43c8c792 finding 2): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "42e8baf1-4921-4957-bc4c-bc5575dc8779"

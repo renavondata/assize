@@ -1,0 +1,6 @@
+# P0bn's mutant `later_failure_serves`: any later run of the trigger, whatever its conclusion, counts as having served
+# it, so a zero-step cancel followed only by a failed run is dropped.
+[[edit]]
+path = "harness/route.py"
+old = """started == 0 and "success" in later else"""
+new = """started == 0 and bool(later) else"""

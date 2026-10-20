@@ -2940,6 +2940,30 @@ TRUSTED_DECLARED = {"workflow": {"a.yml", "b.yml"}, "runner_label": {"self-hoste
                     "codeowners": {"/X @o"}}
 
 
+CANCEL_FIXTURE = (  # (what, steps started, conclusions of later runs of the trigger, decision) -- audit 8aae43c8c792 f2
+    ("mid-session cancel, a later success", 3, ["success"], "issue"),
+    ("replaced run, a later success", 0, ["success"], "nothing"),
+    ("replaced run, no later run", 0, [], "issue"),
+    ("replaced run, a later failure only", 0, ["failure", "cancelled"], "issue"),
+    ("replaced run, a later failure then a success", 0, ["failure", "success"], "nothing"),
+)
+
+
+def p0bn_cancel_routed() -> bool:
+    """A cancelled run that started no step is dropped only when a later run of its trigger succeeded; a trigger no
+    later run served is reported, as is any cancel that started a step (CLAUDE.md Amendment 2 criterion 3; audit
+    8aae43c8c792 finding 2). `harness.route.cancel` is the rule, which `failed.yml` calls."""
+    from harness import route
+    expect, ok = _expecter()
+    for what, started, later, want in CANCEL_FIXTURE:
+        got = route.cancel(started, later)
+        expect(got == want, f"{what}: {got}, want {want}")
+    text = (ROOT / ".github" / "workflows" / "failed.yml").read_text()
+    expect('python3 -m harness.route cancelled "$started"' in text and 'created=">$CREATED"' in text,
+           "failed.yml decides a cancel by harness.route.cancel over the later runs of its workflow, event and branch")
+    return ok()
+
+
 def p0bm_trusted_base() -> bool:
     """The trusted base is listed (CLAUDE.md Amendment 2, audit criterion 7; audit 8aae43c8c792 finding 4):
     `harness/trusted_base.toml` equals the workflows, runner labels, secrets, tokens and CODEOWNERS lines the tree
@@ -7124,6 +7148,13 @@ PINS = [
                             Mutant("growth_unreported", _edits("P0bm_growth_unreported")),
                             Mutant("inherit_unread", _edits("P0bm_inherit_unread"))),
         HARNESS + (".github/workflows/**", "CODEOWNERS", "docs/briefs/**")),
+    Pin("P0bn", "a cancelled run that started no step is dropped only when a later run of its trigger succeeded; an "
+                "unserved trigger is reported",
+        p0bn_cancel_routed, (Mutant("cancel_zero_step_ignored_for_unserved_trigger",
+                                    _edits("P0bn_cancel_zero_step_ignored_for_unserved_trigger")),
+                             Mutant("later_failure_serves", _edits("P0bn_later_failure_serves")),
+                             Mutant("zero_step_exit_unconditional", _edits("P0bn_zero_step_exit_unconditional"))),
+        HARNESS + (".github/workflows/failed.yml",)),
     Pin("P0ba", "a STATUS's header sha and pins citation are printed by the harness from the run's own head_sha, and a "
                 "push of a STATUS P0l would reject is refused",
         p0ba_cite_from_harness, (Mutant("cite_drops_sha", _edits("P0ba_cite_drops_sha")),

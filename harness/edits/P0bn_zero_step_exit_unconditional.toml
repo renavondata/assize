@@ -1,0 +1,8 @@
+# P0bn's mutant `zero_step_exit_unconditional`: failed.yml drops a zero-step cancel without asking harness.route.cancel
+# (the state before audit 8aae43c8c792 finding 2).
+[[edit]]
+path = ".github/workflows/failed.yml"
+old = """            [ "$(python3 -m harness.route cancelled "$started" $later)" = nothing ] && exit 0
+"""
+new = """            [ "$started" -eq 0 ] && exit 0
+"""

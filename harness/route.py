@@ -24,9 +24,21 @@ def decide(event: str, rounds: int, mergeable: str) -> str:
     return "label" if rounds < ROUNDS else "issue"
 
 
+def cancel(started: int, later: list[str]) -> str:
+    """`issue` or `nothing` for a cancelled run, from the steps it started and the conclusions of the later runs of the
+    same workflow on the same trigger (event and branch). A run that started a step died mid-session: always `issue`.
+    A run that started none was replaced in its concurrency group, or never served: `nothing` only when a later run of
+    its trigger succeeded, else its trigger went unserved and the issue is filed (audit 8aae43c8c792 finding 2)."""
+    return "nothing" if started == 0 and "success" in later else "issue"
+
+
 def main(argv: list[str]) -> int:
+    if len(argv) >= 2 and argv[0] == "cancelled":
+        print(cancel(int(argv[1]), argv[2:]))
+        return 0
     if len(argv) != 3:
-        print("usage: python3 -m harness.route <pins_red|pushed> <prior blocked rounds> <mergeable>", file=sys.stderr)
+        print("usage: python3 -m harness.route <pins_red|pushed> <prior blocked rounds> <mergeable>\n"
+              "       python3 -m harness.route cancelled <started steps> [<later run conclusion> ...]", file=sys.stderr)
         return 2
     print(decide(argv[0], int(argv[1]), argv[2]))
     return 0

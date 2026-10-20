@@ -1,0 +1,9 @@
+== clean: exit 0
+(no FAIL lines) 
+== cancel_zero_step_ignored_for_unserved_trigger: exit 1
+  [FAIL] replaced run, no later run: nothing, want issue
+  [FAIL] replaced run, a later failure only: nothing, want issue 
+== later_failure_serves: exit 1
+  [FAIL] replaced run, a later failure only: nothing, want issue 
+== zero_step_exit_unconditional: exit 1
+  [FAIL] failed.yml decides a cancel by harness.route.cancel over the later runs of its workflow, event and branch 

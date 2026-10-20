@@ -27,6 +27,9 @@ jobs:
           WF: ${{ github.event.workflow_run.name }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WF_ID: ${{ github.event.workflow_run.workflow_id }}
+          TRIGGER: ${{ github.event.workflow_run.event }}
+          CREATED: ${{ github.event.workflow_run.created_at }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           URL: ${{ github.event.workflow_run.html_url }}
           SHA: ${{ github.event.workflow_run.head_sha }}
@@ -37,7 +40,12 @@ jobs:
             started=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs" \
               --jq '[.jobs[].steps[]? | select(.started_at != null and .conclusion != "skipped")] | length' \
               | awk '{n += $1} END {print n + 0}')
-            [ "$started" -eq 0 ] && exit 0
+            # Audit 8aae43c8c792 finding 2: a run replaced in its concurrency group starts no step. It is dropped only
+            # when a later run of the same workflow on the same event and branch succeeded (harness.route.cancel);
+            # a trigger no later run served is reported.
+            later=$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/$WF_ID/runs" -f branch="$BRANCH" \
+              -f event="$TRIGGER" -f created=">$CREATED" -F per_page=100 --jq '[.workflow_runs[].conclusion // "none"] | join(" ")')
+            [ "$(python3 -m harness.route cancelled "$started" $later)" = nothing ] && exit 0
           fi
           # Instruction #126 item 1: a red pins run on a pull request goes back to its Builder through the `blocked`
           # path while the pull request's timeline holds fewer than three `labeled blocked` events; from the third

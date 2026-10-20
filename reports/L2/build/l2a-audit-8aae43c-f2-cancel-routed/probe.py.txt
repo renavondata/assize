@@ -1,0 +1,24 @@
+"""Probe P0bn clean and under each of its mutants, each in a disposable copy of the tree."""
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1])
+sys.path.insert(0, str(repo))
+from harness import edits, pins, tree  # noqa: E402
+
+pin = next(p for p in pins.PINS if p.name == "P0bn")
+py = str(repo / ".venv" / "bin" / "python")
+code = "import sys; sys.path.insert(0, '.'); from harness import pins; sys.exit(0 if pins.p0bn_cancel_routed() else 1)"
+for name, rel in [("clean", None)] + [(m.name, m.edits) for m in pin.mutants]:
+    copy = tree.copy_tree(repo)
+    try:
+        if rel:
+            edits.apply(copy, edits.load(rel, repo))
+        r = subprocess.run([py, "-I", "-c", code], cwd=copy, capture_output=True, text=True,
+                           env={"PATH": "/usr/bin:/bin", "PYTHONPATH": str(copy), "PYTHONDONTWRITEBYTECODE": "1"})
+        print(f"== {name}: exit {r.returncode}")
+        print("\n".join(l for l in r.stdout.splitlines() if "FAIL" in l) or "(no FAIL lines)", r.stderr[-800:])
+    finally:
+        shutil.rmtree(copy.parent)
