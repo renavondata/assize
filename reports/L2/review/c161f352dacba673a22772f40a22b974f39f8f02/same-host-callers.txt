@@ -1,0 +1,22 @@
+# callers of the two measure-artefact verifiers at c161f35 (git grep, whole tree incl. .github and .claude)
+## same-host / same_host, outside harness/{claims,pins,README} and reports/
+scripts/host_facts.sh:87:# measurement host carries its own verdicts (brief 2 A4 item 4; `python -m harness.claims same-host`).
+## measure-head (obligation 43's verifier), same filter, for comparison
+harness/proposer.d/l2a-o43-measure-head.toml:1:# Who built the harness state of branch l2a-o43-measure-head (L2a obligation 43, R 7498b94a505b F1): this pull request's own proposer row.
+scripts/host_facts.sh:84:# (obligation 43, R 7498b94a505b F1; `python -m harness.claims measure-head`).
+## host_verdict args in the resolver (no host field)
+306:def _host_verdict(args: Mapping, f: Mapping, observe: Observe, now: str) -> Outcome | None:
+307-    """The layer's last verdict line in REPORT.md carries `verdict` as a word in its bold verdict (the line if none)."""
+308-    line = _layer_line(str(observe("report")), layer_id(args["layer"]))
+309-    if line is None:
+310-        return None
+311-    bold = re.search(r"\*\*(.+?)\*\*", line)
+312-    said = bold.group(1) if bold else line
+313-    return re.search(rf"\b{re.escape(str(args['verdict']))}\b", said) is not None, f"REPORT.md: {said}"
+314-
+315-
+316-GUY = "gfrmin"
+317-
+318-
+## host id in REPORT.md verdict lines
+0

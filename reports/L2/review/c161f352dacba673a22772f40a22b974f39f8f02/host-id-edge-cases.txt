@@ -1,0 +1,14 @@
+=== uninit
+exit 1
+### host-id
+$ host_id /tmp/review-271/uninit-machine-id
+c35fc5870fa929ad33e774d9945c362333f1b785e99ac8964a96a226bcf08d53
+[exit 0]
+NOT A MEASUREMENT: required facts missing: cpuset-slice cpuset-own runner-version head
+=== blank
+exit 1
+### host-id
+$ host_id /tmp/review-271/blank-machine-id
+/tmp/review-271/blank-machine-id is empty
+[exit 1]
+NOT A MEASUREMENT: required facts missing: cpuset-slice cpuset-own runner-version head host-id

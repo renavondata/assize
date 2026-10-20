@@ -1,0 +1,6 @@
+# reports/L0/forecasts/39415019970.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39415019970.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39415019970.jsonl: 85 open, 79 typed; resolved 3, unreadable 0
+resolved cec81930bcf4 True — reports/L2/review-8522bc81552b542659eb0fc7eb1bf9b288467b00.md at e1120d1b8f7a: ACCEPT WITH OBLIGATIONS
+resolved 78882770d6bf True — run 39408751030: 54.3 minutes, bound 90
+resolved ebe4084ed09e True — pins run 39409461320 attempt 1 on cfe23e275005: success
