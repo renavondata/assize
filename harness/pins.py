@@ -598,6 +598,63 @@ def p0i_no_stale_bytecode() -> bool:
     return ok
 
 
+STAMPED = "harness/fixtures/stamped.py"
+STAMPED_READ = "from harness.fixtures import stamped; print(stamped.VALUE, stamped.__file__)"
+
+
+def _stale_stamped_pyc(tree_root: Path) -> Path:
+    """Compile `tree_root`'s unedited stamped.py into its in-tree cache as an unchecked-hash pyc: the importer takes it
+    without reading the source, as it takes a timestamp pyc whose recorded second and size a same-length edit matches.
+    Unchecked makes that coincidence certain rather than timed. The path is built by hand: this check runs under
+    PYTHONPYCACHEPREFIX, which importlib.util.cache_from_source would honour."""
+    src = tree_root / STAMPED
+    pyc = src.parent / "__pycache__" / f"stamped.{sys.implementation.cache_tag}.pyc"
+    py_compile.compile(str(src), cfile=str(pyc), doraise=True,
+                       invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+    return pyc
+
+
+def p0bp_stale_bytecode_verdict() -> bool:
+    """P0i through the runner's verdict path (brief 2 A4 item 7): a tree whose cache holds stale bytecode for a module
+    is handed to a nested orchestrator, whose registry's one mutant is a same-length edit to that module; the
+    runner's rows must record the mutant KILLED with its twin passing. Control: the cache is armed, a plain Python
+    without a cache prefix reads the stale value after the same edit."""
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bp-", dir=context.scratch))
+    ok = True
+
+    def expect(cond: bool, what: str) -> None:
+        nonlocal ok
+        print(f"  [{'ok' if cond else 'FAIL'}] {what}")
+        ok = ok and cond
+
+    ctl = work / "ctl"
+    for rel in ("harness/__init__.py", "harness/fixtures/__init__.py", STAMPED):
+        (ctl / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / rel, ctl / rel)
+    pyc = _stale_stamped_pyc(ctl)
+    edits.apply(ctl, edits.load("harness/fixtures/edits/stamped_same_length.toml"))
+    out = subprocess.run(proc.python("-c", STAMPED_READ), cwd=ctl, env=_without_prefix(proc.child_env(work)),
+                         capture_output=True, text=True, preexec_fn=proc.setup(False))
+    got = out.stdout.strip() or out.stderr.strip()
+    expect(got == f"4 {ctl / STAMPED}", f"control: {pyc.relative_to(work)} armed; after the same-length edit a Python "
+                                         f"without a cache prefix reads the stale value ({got!r})")
+    armed: list[Path] = []
+    n = run_nested("stale-bytecode", "fixture.stamp", "all", prepare=lambda copy: armed.append(_stale_stamped_pyc(copy)))
+    n.expect(len(armed) == 1, f"the nested tree carried stale bytecode for {STAMPED} ({armed})")
+    mut = n.run("fixture/stamp", "fixture/stamp/same_length", "mutant")
+    twin = n.run("fixture/stamp", "fixture/stamp/same_length", "twin")
+    n.expect(n.run("fixture/stamp").get("verdict") == "ok", "clean run in the nested tree passes")
+    n.expect(mut.get("observed") == "fail" and twin.get("observed") == "pass",
+             f"mutant run fails, twin passes (mutant {mut.get('observed')}, twin {twin.get('observed')}; "
+             f"{mut.get('transcript')})")
+    n.expect(mut.get("verdict") == "KILLED", f"the runner records the same-length edit KILLED ({mut.get('verdict')})")
+    s = n.summary
+    n.expect(s.get("mutants_total") == 1 == s.get("killed") and n.exit_code == 0,
+             f"denominator: 1 mutant, {s.get('killed')} killed, exit {n.exit_code}")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok and n.ok
+
+
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
 REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "host-id",
                   "podman-info")
@@ -7069,6 +7126,8 @@ PINS = [
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
+    Pin("P0bp", "a same-length edit to a module with stale cached bytecode is KILLED through the runner's verdict path",
+        p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),), HARNESS),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
                                   Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
