@@ -1,0 +1,5 @@
+# P0j's mutant: the checked-out head is not recorded; a measure artefact binds to no head (R 7498b94a505b F1).
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "require head git rev-parse HEAD\n"
+new = "require head true\n"

@@ -2,6 +2,7 @@
 # Record measurement-host facts. Every probe is recorded with its exit status; none is dropped.
 # Brief 1 A4 item 8: a measurement whose facts lack load averages, the runner's cpuset, the runner version or the
 # podman runtime line is not a measurement, so this script exits non-zero if any of those four probes fails.
+# It records the checked-out head sha as a fact too (obligation 43), so a verifier can bind the artefact to a head.
 # It also refuses unless both the user slice and the measuring process's own cgroup have a non-empty cpuset.cpus (obligation 42).
 # CPUSET_FILE, RUNNER_DIR and SELF_CGROUP_DIR say where to read three of them; they default to the paths the brief names.
 set -uo pipefail
@@ -68,6 +69,9 @@ require cpuset cat "$cpuset_file"
 require cpuset-slice pinned_cpus "$(dirname "$cpuset_file")"
 require cpuset-own pinned_cpus "$self_cgroup_dir"
 require runner-version runner_version "$runner_dir"
+# The head this artefact measured: a host witness is admissible only if it equals the head the Reviewer reproduced
+# (obligation 43, R 7498b94a505b F1; `python -m harness.claims measure-head`).
+require head git rev-parse HEAD
 require podman-info podman info --format '{{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}'
 if [ "${#missing[@]}" -gt 0 ]; then
   echo "NOT A MEASUREMENT: required facts missing: ${missing[*]}" >> "$facts"

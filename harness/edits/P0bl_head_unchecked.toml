@@ -1,0 +1,5 @@
+# P0bl's mutant: the verifier accepts an artefact whose recorded head differs from the reviewed head (R 7498b94a505b F1).
+[[edit]]
+path = "harness/claims.py"
+old = "    if heads[0] != reviewed:\n"
+new = "    if False:\n"

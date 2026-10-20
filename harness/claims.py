@@ -225,6 +225,20 @@ def status_check(root: Path, paths: Sequence[Path]) -> list[Finding]:
     return [f for p in paths for f in status_findings(str(p), p.read_text(), runs)]
 
 
+HEAD_FACT = re.compile(r"^### head\n\$ git rev-parse HEAD\n([0-9a-f]{40})\n\[exit 0\]$", re.M)
+
+
+def measure_head_findings(facts: str, reviewed: str) -> list[Finding]:
+    """A `measure-host` artefact is admissible as a host witness only if the head it recorded is the head the
+    Reviewer reproduced (obligation 43, R 7498b94a505b F1). An artefact recording no head, or another, is refused."""
+    heads = HEAD_FACT.findall(facts)
+    if len(heads) != 1:
+        return [Finding("facts", "head_unrecorded", f"{len(heads)} head facts, expected exactly one")]
+    if heads[0] != reviewed:
+        return [Finding("facts", "head_differs", f"artefact measured {heads[0]}, reviewed head is {reviewed}")]
+    return []
+
+
 # ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
 
 # Instruction #239 item 1: `mechanism <tool> <run id>`, the resolver's party (Amendment 4 rule 3), with `<tool>` a
@@ -902,8 +916,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     (instruction #110 Part C). `next <item>...`: the first item no open pull request holds (Part A item 2).
     `status-check <path>...`: exits non-zero if P0l would reject a STATUS file (instruction #211 item 2).
     `authors <base> [<head>]`: exits non-zero if a commit's author is not the account its proposer acts through
-    (review ef1e03c F7)."""
-    ap = argparse.ArgumentParser(prog="python -m harness.claims")
+    (review ef1e03c F7). `measure-head <facts> <sha>`: exits non-zero unless the artefact measured that head
+    (obligation 43)."""
+    ap =argparse.ArgumentParser(prog="python -m harness.claims")
     sub = ap.add_subparsers(dest="cmd", required=True)
     w = sub.add_parser("authors", help="refuse commits authored by an account other than the one their proposer uses")
     w.add_argument("base")
@@ -925,7 +940,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     c = sub.add_parser("status-check", help="refuse a STATUS whose header or citation P0l would reject")
     c.add_argument("paths", type=Path, nargs="+")
     c.add_argument("--repo", type=Path, default=Path("."), help="the tree whose reports/L*/ci/*.json records are read")
+    h = sub.add_parser("measure-head", help="refuse a measure-host facts.txt that did not measure the reviewed head")
+    h.add_argument("facts", type=Path)
+    h.add_argument("reviewed", help="the head sha the Reviewer reproduced")
     a = ap.parse_args(argv)
+    if a.cmd == "measure-head":
+        found = measure_head_findings(a.facts.read_text(), a.reviewed)
+        for f in found:
+            print(f, file=sys.stderr)
+        print(f"measure-head {a.facts}: {len(found)} findings", file=sys.stderr)
+        return 1 if found else 0
     if a.cmd == "authors":
         found = author_check(a.repo, a.base, a.head)
         for f in found:
