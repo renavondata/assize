@@ -1,0 +1,4 @@
+# reports/L0/forecasts/39455387745.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39455387745.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39455387745.jsonl: 84 open, 78 typed; resolved 1, unreadable 0
+resolved a11b926946d3 True — pins run 39455375416 attempt 1 on 1f6bc2cecc36: success
