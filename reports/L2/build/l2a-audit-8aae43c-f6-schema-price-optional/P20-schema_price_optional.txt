@@ -1,0 +1,8 @@
+Installed 12 packages in 237ms
+  fixture Worlds in a copy of the tree: {"bound": ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"], "refused": {"crafter": "unknown_runtime", "fx": "unknown_runtime", "unpriced": "unpriced", "bare": "unknown_world", "borrowed": "underived", "rederived": "unknown_runtime", "undelta": "underived"}, "fx_binding": "fx", "seed_stores": []}
+  [ok] evaluate('unpriced') refused unpriced (unpriced)
+  [ok] evaluate('fx') refused unknown_runtime (unknown_runtime)
+  [ok] no seed issued to a refused request ([])
+  [ok] crafter/manifest.json commits a price and conforms to manifest.schema.json
+  [FAIL] manifest.schema.json rejects crafter/manifest.json without its price
+P20 False
