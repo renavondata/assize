@@ -4643,7 +4643,10 @@ def p10_container_teardown() -> bool:
 
 
 # P7's malformed predictors (brief 1 section 2): each must end its episode invalid_reply at its first step, unscored.
-MALFORMED = ("undeclared", "short", "zeros", "nan")
+# `above_one` and `below_zero` sum to one with an entry outside [0, 1] (audit 8aae43c8c792 finding 5).
+MALFORMED = ("undeclared", "short", "zeros", "nan", "above_one", "below_zero")
+# The entries of `above_one`, before its zeros; `below_zero` is them reversed.
+OUT_OF_RANGE = (1.5, -0.5)
 
 
 def _forecaster_observations() -> list[dict]:
@@ -4775,13 +4778,20 @@ def p7_infinite_loss() -> bool:
     World's next observation: zero mass on the realised value is recorded +inf and counted, never clipped; an omitted
     target is recorded missing, never imputed; every record equals the one derived independently by replaying the
     episode. A prediction naming an undeclared target, of the wrong length, not summing to one, or carrying NaN ends
-    its episode invalid_reply before the World advances (brief 1 section 2)."""
+    its episode invalid_reply before the World advances (brief 1 section 2). So does one summing to one with an entry
+    above one and one below zero, either way round, with no negative loss and no exception (audit 8aae43c8c792
+    finding 5); the judge's `invalid` refuses both lists directly too, whatever runtime is usable."""
     from harness.fixtures import candidates
-    from judge import episodes
+    from judge import episodes, scoring
     from worlds.crafter import binding
 
     expect, ok = _expecter()
     m = binding.manifest()
+    first = m["targets"][0]
+    for p in (list(OUT_OF_RANGE), list(reversed(OUT_OF_RANGE))):
+        p = p + [0.0] * (len(first["support"]) - len(p))
+        why = scoring.invalid({first["name"]: p}, m["targets"])
+        expect(math.fsum(p) == 1 and why is not None, f"{first['name']} {p}: sums to one, refused: {why}")
     want = _forecaster_summary(m["targets"])
     calibration = _forecaster_calibration(m["targets"], episodes.calibration_bins())
     print(f"  derived: {json.dumps(want)}")
@@ -4803,7 +4813,11 @@ def p7_infinite_loss() -> bool:
         cal = records[0].get("calibration") if records else None
         expect(cal == calibration, f"{rt.name} forecaster: the recorded calibration equals P13's derivation")
         for behaviour in MALFORMED:
-            records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            try:
+                records = episodes.run(rt, image, _short_crafter(1), m, command=candidates.command(behaviour))
+            except Exception as e:  # noqa: BLE001 - a judge that raises on a reply has failed this case
+                records = []
+                expect(False, f"{rt.name} {behaviour}: the judge raised {e!r}")
             say(f"  {rt.name} {behaviour}: {json.dumps(records)}")
             expect([(r["termination"], r["steps"]) for r in records] == [("invalid_reply", 0)],
                    f"{rt.name} {behaviour}: invalid_reply at the first step, before the World advances")
@@ -7132,7 +7146,8 @@ PINS = [
     Pin("P7", "zero mass on a realised outcome is recorded +inf, never clipped; missing is never imputed",
         p7_infinite_loss, (Mutant("clipped", _edits("P7_clipped")),
                            Mutant("missing_imputed", _edits("P7_missing_imputed")),
-                           Mutant("sum_unchecked", _edits("P7_sum_unchecked"))), JUDGE_SIDE),
+                           Mutant("sum_unchecked", _edits("P7_sum_unchecked")),
+                           Mutant("range_check_removed", _edits("P7_range_check_removed"))), JUDGE_SIDE),
     Pin("P13", "every scored step, +inf included, enters each support value's reliability row; entropy is never imputed",
         p13_calibration, (Mutant("infinite_dropped", _edits("P13_infinite_dropped")),
                           Mutant("realised_row_only", _edits("P13_realised_row_only")),

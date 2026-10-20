@@ -98,6 +98,14 @@ BEHAVIOUR = {
     # P7: predicts the first target with NaN probabilities, which Python's json writes and JSON does not admit.
     "nan": ('n = len(targets[0]["support"])\n'
             '    reply(msg["id"], {"action": p["legal_actions"][0], "prediction": {targets[0]["name"]: [float("nan")] * n}})'),
+    # P7: predicts the first target [1.5, -0.5, 0, ...], which sums to one with an entry above one and one below zero.
+    "above_one": ('n = len(targets[0]["support"])\n'
+                  '    reply(msg["id"], {"action": p["legal_actions"][0],\n'
+                  '                      "prediction": {targets[0]["name"]: [1.5, -0.5] + [0.0] * (n - 2)}})'),
+    # P7: predicts the first target [-0.5, 1.5, 0, ...], the same entries the other way round.
+    "below_zero": ('n = len(targets[0]["support"])\n'
+                   '    reply(msg["id"], {"action": p["legal_actions"][0],\n'
+                   '                      "prediction": {targets[0]["name"]: [-0.5, 1.5] + [0.0] * (n - 2)}})'),
     # P4: at every step, fills and frees BUSY_MIB MiB, then busy-loops until its own CPU time has advanced BUSY_S seconds
     # since the step began, and self-reports zero CPU on stderr, which the judge never reads.
     "busy": ("t0 = time.process_time()\n"
