@@ -1,0 +1,7 @@
+# P18's mutant `proxy_note_dropped` (L2a obligation 41, S 571ee56; brief 2 A2: "the random incumbent's variance is
+# reported as a weak proxy"): the report's time-to-learn block carries an empty note, so the verdict reads as if the
+# incumbent's variance were a competent agent's.
+[[edit]]
+path = "pilot/run.py"
+old = """"note": PROXY, "config": dict(ttl),"""
+new = """"note": "", "config": dict(ttl),"""
