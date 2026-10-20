@@ -2931,6 +2931,45 @@ def p0az_pins_master_unprivileged() -> bool:
     return ok()
 
 
+TRUSTED_FLOWS = {"a.yml": "jobs:\n  j:\n    runs-on: [self-hosted, x]\n    env:\n      T: ${{ secrets.S }}\n"
+                          "      G: ${{ github.token }}\n",
+                 "b.yml": "jobs:\n  j:\n    uses: o/r/.github/workflows/w.yml@v1\n    secrets: inherit\n"
+                          "  k:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo secrets step\n"}
+TRUSTED_DECLARED = {"workflow": {"a.yml", "b.yml"}, "runner_label": {"self-hosted", "x", "ubuntu-latest"},
+                    "secret": {"S", "*"}, "token": {"a.yml github.token", "a.yml secrets.S", "b.yml secrets.*"},
+                    "codeowners": {"/X @o"}}
+
+
+def p0bm_trusted_base() -> bool:
+    """The trusted base is listed (CLAUDE.md Amendment 2, audit criterion 7; audit 8aae43c8c792 finding 4):
+    `harness/trusted_base.toml` equals the workflows, runner labels, secrets, tokens and CODEOWNERS lines the tree
+    declares, and every entry names an audit-dated amendment present in a brief; growth since a sha is reported."""
+    from harness import trusted
+    expect, ok = _expecter()
+    decl = trusted.declared_from(TRUSTED_FLOWS, "# owners\n/X   @o\n")
+    expect({k: set(v) for k, v in decl.items()} == TRUSTED_DECLARED,
+           f"fixture: the declared set is read from the expressions, `secrets: inherit` as `*` ({decl})")
+    adm = "Audit findings at " + "a" * 12
+    listed = {k: dict.fromkeys(v, adm) for k, v in TRUSTED_DECLARED.items()}
+    expect(trusted.findings(listed, decl, frozenset({adm})) == [], "fixture: the exact, admitted list passes")
+    cases = (("a secret unlisted", {**listed, "secret": {"*": adm}}, ["unlisted secret S"]),
+             ("an entry the tree no longer declares", {**listed, "workflow": {**listed["workflow"], "c.yml": adm}},
+              ["stale workflow c.yml"]),
+             ("an entry no amendment admits", {**listed, "runner_label": {**listed["runner_label"], "x": "Wish #1"}},
+              ["unadmitted runner_label x: 'Wish #1'"]),
+             ("a kind the law does not name", {**listed, "account": {"g": adm}}, ["unknown kind account"]))
+    for what, case, want in cases:
+        got = trusted.findings(case, decl, frozenset({adm}))
+        expect(got == want, f"fixture: {what} is refused ({got}, want {want})")
+    expect(trusted.grown({"secret": {"S": adm}}, {"secret": {"S": adm, "U": adm}}) == [f"secret U: {adm}"],
+           "fixture: an entry absent from the earlier list is growth")
+    expect(trusted.grown({}, {"secret": {"S": adm}}) == [f"secret S: {adm}"],
+           "fixture: against no earlier list, every entry is growth")
+    found = trusted.check(ROOT)
+    expect(found == [], f"{trusted.LIST_PATH} equals the tree's declared trusted base, every entry admitted ({found})")
+    return ok()
+
+
 def _session_branch(git, repo: Path, base: str, branch: str, session: str, date: str) -> str:
     """A synthetic branch off `base` doing what one Builder session does: a forecast, a STATUS and a proposer row, each
     at the path `claims.session_files` gives. Returns the branch's name."""
@@ -7078,6 +7117,13 @@ PINS = [
         p0az_pins_master_unprivileged, (Mutant("pins_master_privileged", _edits("P0az_pins_master_privileged")),
                                         Mutant("pins_master_secret", _edits("P0az_pins_master_secret"))),
         HARNESS + (".github/workflows/pins-master.yml",)),
+    Pin("P0bm", "the trusted base is listed: the list equals the workflows, runner labels, secrets, tokens and "
+                "CODEOWNERS lines the tree declares, each admitted by an audit-dated amendment; growth is reported",
+        p0bm_trusted_base, (Mutant("unlisted_secret_added", _edits("P0bm_unlisted_secret_added")),
+                            Mutant("admission_unchecked", _edits("P0bm_admission_unchecked")),
+                            Mutant("growth_unreported", _edits("P0bm_growth_unreported")),
+                            Mutant("inherit_unread", _edits("P0bm_inherit_unread"))),
+        HARNESS + (".github/workflows/**", "CODEOWNERS", "docs/briefs/**")),
     Pin("P0ba", "a STATUS's header sha and pins citation are printed by the harness from the run's own head_sha, and a "
                 "push of a STATUS P0l would reject is refused",
         p0ba_cite_from_harness, (Mutant("cite_drops_sha", _edits("P0ba_cite_drops_sha")),

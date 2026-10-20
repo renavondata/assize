@@ -1,0 +1,6 @@
+# P0bm's mutant `admission_unchecked`: an entry citing no audit-dated amendment is admitted, so the list can grow by
+# any entry a session writes into it.
+[[edit]]
+path = "harness/trusted.py"
+old = "               if a not in admitted])"
+new = "               if a is None])"

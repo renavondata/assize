@@ -1,0 +1,6 @@
+# P0bm's mutant `inherit_unread`: a reusable-workflow call's `secrets: inherit`, which hands it every secret, is not
+# read as a reference, so a workflow reaches the whole set while the declared set shows none.
+[[edit]]
+path = "harness/trusted.py"
+old = '(["*"] if INHERIT.search(text) else [])'
+new = "[]"
