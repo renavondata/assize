@@ -1,0 +1,12 @@
+# pins runs on PR #268, read through the Actions API (gh api .../actions/runs?head_sha=...&event=pull_request) and `gh run view --log`
+2f538ec26d8eb5372ddd2d51c1fdf27695483c09: completed success 39392498697 (first pins run of the branch; full, 90 pins)
+8522bc81552b542659eb0fc7eb1bf9b288467b00: completed success 39397224163 (STATUS-only commit; P0bm skipped: no changed path matches since 2f538ec)
+
+From run 39392498697:
+registry harness: 90 pins, 275 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+[clean ] P0bm: observed pass -> ok (0.328s)
+[mutant] P0bm/unlisted_secret_added: mutant fail, twin pass -> KILLED (0.36s + 0.365s)
+[mutant] P0bm/admission_unchecked: mutant fail, twin pass -> KILLED (0.362s + 0.36s)
+[mutant] P0bm/growth_unreported: mutant fail, twin pass -> KILLED (0.31s + 0.411s)
+[mutant] P0bm/inherit_unread: mutant fail, twin pass -> KILLED (0.308s + 0.309s)
+mutants: 275/275 killed, 0/275 survived, 0/275 inconclusive, 0/275 stale, 0/275 non-causal, 0 leaked (clean and mutant)

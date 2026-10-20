@@ -1,0 +1,43 @@
+# The trusted base (CLAUDE.md Amendment 2, audit criterion 7): the things outside every loop. One table per kind; each
+# entry maps its name to the audit-dated amendment that admitted it, a `## Audit findings at <sha>` heading in a brief.
+# P0bm holds this list equal to the set the tree declares (`python -m harness.trusted check`); the Auditor reads its
+# growth since the last audit with `python -m harness.trusted grown <audited sha>`. Repository secrets and runner
+# registrations held by GitHub are not readable by the builder or reviewer token (HTTP 403), so the declared set is
+# what the workflows reach, not what the repository settings hold.
+
+[workflow]
+"build.yml" = "Audit findings at 8aae43c8c792"
+"failed.yml" = "Audit findings at 8aae43c8c792"
+"measure.yml" = "Audit findings at 8aae43c8c792"
+"pins-master.yml" = "Audit findings at 8aae43c8c792"
+"pins.yml" = "Audit findings at 8aae43c8c792"
+"review.yml" = "Audit findings at 8aae43c8c792"
+"stale.yml" = "Audit findings at 8aae43c8c792"
+
+[runner_label]
+"agent" = "Audit findings at 8aae43c8c792"
+"measure" = "Audit findings at 8aae43c8c792"
+"self-hosted" = "Audit findings at 8aae43c8c792"
+"ubuntu-latest" = "Audit findings at 8aae43c8c792"
+
+[secret]
+"ASSIZE_BUILDER_TOKEN" = "Audit findings at 8aae43c8c792"
+"ASSIZE_REVIEWER_TOKEN" = "Audit findings at 8aae43c8c792"
+"CLAUDE_CODE_OAUTH_TOKEN" = "Audit findings at 8aae43c8c792"
+
+[token]
+"build.yml secrets.ASSIZE_BUILDER_TOKEN" = "Audit findings at 8aae43c8c792"
+"build.yml secrets.CLAUDE_CODE_OAUTH_TOKEN" = "Audit findings at 8aae43c8c792"
+"failed.yml github.token" = "Audit findings at 8aae43c8c792"
+"failed.yml secrets.ASSIZE_BUILDER_TOKEN" = "Audit findings at 8aae43c8c792"
+"pins-master.yml github.token" = "Audit findings at 8aae43c8c792"
+"pins.yml github.token" = "Audit findings at 8aae43c8c792"
+"review.yml secrets.ASSIZE_REVIEWER_TOKEN" = "Audit findings at 8aae43c8c792"
+"review.yml secrets.CLAUDE_CODE_OAUTH_TOKEN" = "Audit findings at 8aae43c8c792"
+"stale.yml github.token" = "Audit findings at 8aae43c8c792"
+
+[codeowners]
+"/.claude/ @gfrmin" = "Audit findings at 8aae43c8c792"
+"/.github/ @gfrmin" = "Audit findings at 8aae43c8c792"
+"/CLAUDE.md @gfrmin" = "Audit findings at 8aae43c8c792"
+"/CODEOWNERS @gfrmin" = "Audit findings at 8aae43c8c792"
