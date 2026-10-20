@@ -1,8 +1,10 @@
 """Prediction validation and log-loss scoring (brief 1 section 2).
 
 A step reply's `prediction` maps declared targets to probability lists aligned with each target's declared support.
-One that names an undeclared target, has the wrong length, or does not sum to one is not a prediction: the reply is
-invalid and the episode ends `invalid_reply`. The sum is checked to within `len(support)` machine epsilons, the
+One that names an undeclared target, has the wrong length, puts a probability outside [0, 1], or does not sum to one is
+not a prediction: the reply is invalid and the episode ends `invalid_reply` (a list summing to one with an entry above
+one has another below zero, whose log is undefined, and the one above scores a negative loss; brief 2, audit
+8aae43c8c792 finding 5). The sum is checked to within `len(support)` machine epsilons, the
 rounding a candidate normalising in double precision can accumulate; the bound is derived, not tuned.
 
 Each declared target is scored at every completed step against the World's next observation of its field, as the
@@ -49,6 +51,8 @@ def invalid(prediction: Mapping[str, Sequence[float]], targets: Sequence[Mapping
         n = len(declared[name]["support"])
         if len(p) != n:
             return f"{name}: {len(p)} probabilities for a support of {n}"
+        if not all(0 <= x <= 1 for x in p):
+            return f"{name}: a probability outside [0, 1]: {list(p)!r}"
         if not abs(math.fsum(p) - 1) <= tolerance(n):
             return f"{name}: probabilities sum to {math.fsum(p)!r}"
     return None
