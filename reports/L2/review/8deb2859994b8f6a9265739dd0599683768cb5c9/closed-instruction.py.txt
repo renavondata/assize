@@ -1,0 +1,17 @@
+"""Reviewer's probe for PR #273 at 8deb285: which instruction issues lift the signature requirement of an unsigned
+commit carrying `Proposer: guy`, an `Instruction:` trailer and an entrenched path.
+Usage: python closed-instruction.py <repo>"""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(sys.argv[1]).resolve()))
+from harness import claims, pins  # noqa: E402
+
+unsigned = claims.Signature("N", "N", "")
+for n, why in [(1, "open, signed by gfrmin"), (2, "closed, signed by gfrmin"), (7, "labelled by assize-builder"),
+               (13, "body edited by assize-builder after the signature"), (999, "not read")]:
+    c = claims.Commit("f" * 40, ("guy", "builder m s"), ("CLAUDE.md",), instructions=(n,))
+    codes = [f.code for f in claims.signature_findings(c, unsigned, pins.INSTRUCTION_ISSUES)]
+    print(f"Instruction: #{n} ({why}): guy_attributed {claims.guy_attributed(c, pins.INSTRUCTION_ISSUES)}, "
+          f"signature_findings {codes}, commit_findings "
+          f"{[f.code for f in claims.commit_findings(c, ('CLAUDE.md',), pins.INSTRUCTION_ISSUES)]}")

@@ -1,0 +1,7 @@
+# probe closed-instruction.py.txt on the detached worktree at 8deb285; 2026-10-20T15:10:41Z
+Instruction: #1 (open, signed by gfrmin): guy_attributed False, signature_findings [], commit_findings []
+Instruction: #2 (closed, signed by gfrmin): guy_attributed False, signature_findings [], commit_findings []
+Instruction: #7 (labelled by assize-builder): guy_attributed True, signature_findings ['unsigned_guy'], commit_findings []
+Instruction: #13 (body edited by assize-builder after the signature): guy_attributed True, signature_findings ['unsigned_guy'], commit_findings []
+Instruction: #999 (not read): guy_attributed True, signature_findings ['unsigned_guy'], commit_findings []
+[exit 0]
