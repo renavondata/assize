@@ -1,0 +1,52 @@
+# pins CI run 39427330923 on 8e3d631 (the code head), read through the Actions API, and its pins-report artefact summary; 2026-10-20T13:50:46Z
+pins completed success attempt 1 head 8e3d63109c91f0d478fea956433799275ac6e144 2026-10-20T13:04:32Z -> 2026-10-20T13:42:21Z
+artifact pins-report 12268059913
+registry proposer {'kind': 'builder', 'model': 'claude-sonnet-5-5', 'session': '3b780559-556d-46c4-8dc3-dded2fdce99b'} since 544d10bccd75ff4bd4662642aa3a4250db96becd since_run 39417469305
+summary {"clean_failed": 0, "clean_ok": 91, "clean_total": 91, "exit_code": 0, "inconclusive": 0, "killed": 289, "kind": "summary", "leaked": 0, "mutants_total": 289, "non_causal": 0, "phase": "all", "registry": "harness", "since": "544d10bccd75ff4bd4662642aa3a4250db96becd", "since_run": 39417469305, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 289, "twins_total": 289}
+P0m None ok twin None exit 0 expected pass
+P0m P0m/trailer_check_disabled KILLED twin None exit 1 expected fail
+P0m P0m/trailer_check_disabled ok twin None exit 0 expected pass
+P0m P0m/first_proposer_only KILLED twin None exit 1 expected fail
+P0m P0m/first_proposer_only ok twin None exit 0 expected pass
+P0m P0m/exemption_unkeyed KILLED twin None exit 1 expected fail
+P0m P0m/exemption_unkeyed ok twin None exit 0 expected pass
+P0m P0m/exemption_party_unchecked KILLED twin None exit 1 expected fail
+P0m P0m/exemption_party_unchecked ok twin None exit 0 expected pass
+P0m P0m/unknown_merge_author KILLED twin None exit 1 expected fail
+P0m P0m/unknown_merge_author ok twin None exit 0 expected pass
+P0m P0m/instruction_author_unchecked KILLED twin None exit 1 expected fail
+P0m P0m/instruction_author_unchecked ok twin None exit 0 expected pass
+P0m P0m/instruction_label_unchecked KILLED twin None exit 1 expected fail
+P0m P0m/instruction_label_unchecked ok twin None exit 0 expected pass
+P0m P0m/instruction_labeler_unchecked KILLED twin None exit 1 expected fail
+P0m P0m/instruction_labeler_unchecked ok twin None exit 0 expected pass
+P0m P0m/body_edit_unchecked KILLED twin None exit 1 expected fail
+P0m P0m/body_edit_unchecked ok twin None exit 0 expected pass
+P0m P0m/inert_exemption_admitted KILLED twin None exit 1 expected fail
+P0m P0m/inert_exemption_admitted ok twin None exit 0 expected pass
+P0m P0m/stale_exemption_accepted KILLED twin None exit 1 expected fail
+P0m P0m/stale_exemption_accepted ok twin None exit 0 expected pass
+P0m P0m/mechanism_rejected KILLED twin None exit 1 expected fail
+P0m P0m/mechanism_rejected ok twin None exit 0 expected pass
+P0m P0m/mechanism_as_guy KILLED twin None exit 1 expected fail
+P0m P0m/mechanism_as_guy ok twin None exit 0 expected pass
+P0m P0m/evil_merge_accepted KILLED twin None exit 1 expected fail
+P0m P0m/evil_merge_accepted ok twin None exit 0 expected pass
+P0m P0m/any_parent_evil KILLED twin None exit 1 expected fail
+P0m P0m/any_parent_evil ok twin None exit 0 expected pass
+P0m P0m/unsigned_guy_accepted KILLED twin None exit 1 expected fail
+P0m P0m/unsigned_guy_accepted ok twin None exit 0 expected pass
+P0m P0m/signers_from_branch KILLED twin None exit 1 expected fail
+P0m P0m/signers_from_branch ok twin None exit 0 expected pass
+P0m P0m/any_status_signed KILLED twin None exit 1 expected fail
+P0m P0m/any_status_signed ok twin None exit 0 expected pass
+P0m P0m/instruction_commit_attributed KILLED twin None exit 1 expected fail
+P0m P0m/instruction_commit_attributed ok twin None exit 0 expected pass
+P0m P0m/web_flow_any_key KILLED twin None exit 1 expected fail
+P0m P0m/web_flow_any_key ok twin None exit 0 expected pass
+P0m P0m/web_flow_signs_commits KILLED twin None exit 1 expected fail
+P0m P0m/web_flow_signs_commits ok twin None exit 0 expected pass
+P0m P0m/signers_unentrenched_accepted KILLED twin None exit 1 expected fail
+P0m P0m/signers_unentrenched_accepted ok twin None exit 0 expected pass
+P0m rows 45 KILLED 22
+artefact scratch removed: ls: cannot access '/tmp/review-273-art.oErX': No such file or directory

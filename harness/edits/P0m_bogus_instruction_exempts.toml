@@ -1,0 +1,6 @@
+# P0m's mutant `bogus_instruction_exempts` (review 5a8ba45 F1): the signature requirement is lifted by an `Instruction:`
+# trailer's presence, whatever issue it cites and whether or not that issue authorises.
+[[edit]]
+path = "harness/claims.py"
+old = """return "guy" in c.parties and not any(authorises(issues.get(n)) for n in c.instructions)"""
+new = """return "guy" in c.parties and not c.instructions"""

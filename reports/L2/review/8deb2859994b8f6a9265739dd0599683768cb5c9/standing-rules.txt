@@ -1,0 +1,17 @@
+# standing-rule checks at 8deb285; 2026-10-20T15:11:16Z
+## entrenched paths touched (origin/master...HEAD)
+none
+## REPORT.md / docs/briefs changed
+(end)
+## deletions under reports/ and REPORT.md
+deleted lines: 0
+## claims trailers
+trailers origin/master..HEAD: 0 findings
+[exit 0]
+## claims authors
+authors origin/master..HEAD: 0 findings
+## claims status-check
+status-check 1 files: 0 findings
+## ledger open
+# 434 forecasts at HEAD; 81 open; 2 legacy resolutions read under `resolves` (876d1d05c550, a30e37db1152); 0 rows read as neither (none)
+81

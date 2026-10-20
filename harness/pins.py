@@ -1053,6 +1053,86 @@ def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     return shas + unparsed + instructed + merges, exemptions
 
 
+SIGNATURE_FIXTURE = (  # (label, key signing it or None, Proposer lines, Instruction lines, writes a signers file
+    #                         listing key 2, findings wanted); the base commit's signers file lists key 1 only
+    ("guy, signed by a listed key", "k1", ("guy",), (), False, set()),
+    ("guy, unsigned", None, ("guy",), (), False, {"unsigned_guy"}),
+    ("guy, signed by a key the base does not list", "k2", ("guy",), (), False, {"unsigned_guy"}),
+    ("guy, signed by a key the commit itself lists", "k2", ("guy",), (), True, {"unsigned_guy"}),
+    ("builder, unsigned", None, ("builder m s",), (), False, set()),
+    ("builder carrying guy's instruction, unsigned", None, ("guy", "builder m s"), (5,), False, set()),
+    ("guy, unsigned, citing an issue not read", None, ("guy", "builder m s"), (999,), False, {"unsigned_guy"}),
+    ("guy, unsigned, citing an issue another account labelled", None, ("guy", "builder m s"), (7,), False,
+     {"unsigned_guy"}),
+)
+WEB_FLOW_FIXTURE = (  # (label, merge, gpg letter, gpg key, findings wanted)
+    ("merge verified against the web-flow key", True, "G", claims.WEB_FLOW_KEY, set()),
+    ("merge verified against another key", True, "G", "0123456789ABCDEF", {"unsigned_guy"}),
+    ("merge whose web-flow signature does not verify", True, "E", claims.WEB_FLOW_KEY, {"unsigned_guy"}),
+    ("commit (not a merge) verified against the web-flow key", False, "G", claims.WEB_FLOW_KEY, {"unsigned_guy"}),
+)
+
+
+def _signature_repo(repo: Path, keys: Path) -> str:
+    """A fixture repository: a base commit holding an `allowed_signers` file that lists key 1, then one commit per
+    SIGNATURE_FIXTURE case, signed (ssh) by the key it names. Returns the base's sha."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    for k in ("k1", "k2"):
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(keys / k)], check=True)
+    listed = lambda k: f"guy {(keys / (k + '.pub')).read_text()}"
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    (repo / claims.SIGNERS_PATH).write_text(listed("k1"))
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    for n, (_, key, proposers, cited, widens, _) in enumerate(SIGNATURE_FIXTURE, 1):
+        (repo / "a").write_text(f"{n}\n")
+        if widens:
+            (repo / claims.SIGNERS_PATH).write_text(listed("k1") + listed("k2"))
+        git("add", "-A")
+        message = f"case {n}\n\n" + "".join(f"Instruction: #{i}\n" for i in cited) + \
+            "".join(f"Proposer: {t}\n" for t in proposers)
+        config = ("-c", "gpg.format=ssh", "-c", f"user.signingkey={keys / (key + '.pub')}") if key else ()
+        git(*config, "commit", "-q", *(("-S",) if key else ()), "-m", message)
+    return base
+
+
+def _p0m_signatures(expect) -> None:
+    """Brief 2 A4 item 12: a commit attributed to guy verifies against a key the base's entrenched `allowed_signers`
+    lists; GitHub's own merges verify against its web-flow key."""
+    work = Path(tempfile.mkdtemp(prefix="assize-p0m-sig-", dir=context.scratch))
+    try:
+        base = _signature_repo(work / "repo", work)
+    except (OSError, subprocess.CalledProcessError) as e:
+        expect(False, f"fixture: signed commits cannot be made ({e})")
+        shutil.rmtree(work, ignore_errors=True)
+        return
+    entrenched = ("CLAUDE.md", claims.SIGNERS_PATH)
+    commits = claims.branch_commits(work / "repo", base)
+    signatures = claims.read_signatures(work / "repo", base)
+    expect(len(commits) == len(SIGNATURE_FIXTURE), f"fixture: {len(commits)} signature commits read")
+    for (label, *_, want), c in zip(SIGNATURE_FIXTURE, commits):
+        got = {f.code for f in claims.signature_findings(c, signatures[c.sha], INSTRUCTION_ISSUES)}
+        expect(got == want, f"signature, {label}: ssh {signatures[c.sha].ssh!r}, findings {sorted(got)}, want "
+                            f"{sorted(want)}")
+    for label, merge, letter, key, want in WEB_FLOW_FIXTURE:
+        c = claims.Commit("a" * 40, ("guy",), (), merge=merge)
+        got = {f.code for f in claims.signature_findings(c, claims.Signature(gpg=letter, gpg_key=key))}
+        expect(got == want, f"signature, {label}: findings {sorted(got)}, want {sorted(want)}")
+    checked = {f.code for f in claims.signature_check(work / "repo", base, entrenched)}
+    expect(checked == {"unsigned_guy"}, f"the range check on an entrenched signers file: {sorted(checked)}")
+    open_ = {f.code for f in claims.signature_check(work / "repo", base, ("CLAUDE.md",))}
+    expect(open_ == {"unsigned_guy", "signers_not_entrenched"},
+           f"a signers file CODEOWNERS does not entrench is a finding: {sorted(open_)}")
+    shutil.rmtree(work, ignore_errors=True)
+
+
 def _branch_base(root: Path) -> str | None:
     for ref in ("origin/master", "master"):
         try:
@@ -1073,10 +1153,12 @@ def _p0m_real_branch(expect, root: Path, patterns, exemptions=claims.PROPOSER_EX
     expect(not stale, f"real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range "
                       f"({[str(f) for f in stale]})")
     real = claims.branch_commits(root, base) if base is not None else []
-    # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
-    # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
-    issues = claims.load_issues(root, [n for c in real if claims.needs_guy(c, patterns) for n in c.instructions])
+    # An entrenched commit without a guy party needs its instructions read, and so does a guy-attributed one: its
+    # `Instruction:` lifts the signature requirement only if the issue authorises (pins.yml grants `issues: read`).
+    issues = claims.load_issues(root, [n for c in real if "guy" in c.parties or claims.needs_guy(c, patterns)
+                                       for n in c.instructions])
     found = [f for c in real for f in claims.commit_findings(c, patterns, issues)]
+    found += claims.signature_check(root, base, patterns, issues) if base is not None else []
     for c in real:
         print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
     expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
@@ -1140,6 +1222,7 @@ def p0m_commit_proposers() -> bool:
         expect(got == want and at == want_at, f"timeline, {label}: `instruction` label applied by {got!r} at {at}, "
                                                f"want {want!r} at {want_at}")
 
+    _p0m_signatures(expect)
     _p0m_real_branch(expect, _real_root(), patterns)
     return ok()
 
@@ -7011,7 +7094,8 @@ PINS = [
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),
                         Mutant("obligation_registry_skipped", _edits("P0l_obligation_registry_skipped"))), ALWAYS),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
-        "every party is read; a merge changing an entrenched path relative to both parents is rejected",
+        "every party is read; a merge changing an entrenched path relative to both parents is rejected; a commit "
+        "attributed to guy verifies against the base's entrenched allowed_signers",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
                                 Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
@@ -7026,7 +7110,16 @@ PINS = [
                                 Mutant("mechanism_rejected", _edits("P0m_mechanism_rejected")),
                                 Mutant("mechanism_as_guy", _edits("P0m_mechanism_as_guy")),
                                 Mutant("evil_merge_accepted", _edits("P0m_evil_merge_accepted")),
-                                Mutant("any_parent_evil", _edits("P0m_any_parent_evil"))), ALWAYS),
+                                Mutant("any_parent_evil", _edits("P0m_any_parent_evil")),
+                                Mutant("unsigned_guy_accepted", _edits("P0m_unsigned_guy_accepted")),
+                                Mutant("signers_from_branch", _edits("P0m_signers_from_branch")),
+                                Mutant("any_status_signed", _edits("P0m_any_status_signed")),
+                                Mutant("instruction_commit_attributed", _edits("P0m_instruction_commit_attributed")),
+                                Mutant("bogus_instruction_exempts", _edits("P0m_bogus_instruction_exempts")),
+                                Mutant("web_flow_any_key", _edits("P0m_web_flow_any_key")),
+                                Mutant("web_flow_signs_commits", _edits("P0m_web_flow_signs_commits")),
+                                Mutant("signers_unentrenched_accepted",
+                                       _edits("P0m_signers_unentrenched_accepted"))), ALWAYS),
     Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
         p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),), HARNESS),
     Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",

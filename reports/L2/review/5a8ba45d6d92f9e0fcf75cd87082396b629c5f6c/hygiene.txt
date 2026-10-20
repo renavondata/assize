@@ -1,0 +1,12 @@
+# hygiene at the end of the review session, 2026-10-20T13:57:25Z
+## worktree dirty paths before removal: 0
+worktree removed
+## git worktree list
+/home/g/actions-runner/_work/assize/assize 5a8ba45 [l2a-a4-12-signatures]
+## ~/git/worktrees/assize contents: 0 entries
+## /tmp/review-273* entries:
+none
+## /tmp/assize-* entries newer than this session's start (13:46Z):
+(end)
+## processes matching harness|judge|probe|pins (own shell excluded):
+21 [kprobe-optimizer]

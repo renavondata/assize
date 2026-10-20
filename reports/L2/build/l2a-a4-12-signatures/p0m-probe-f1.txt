@@ -1,0 +1,102 @@
+== P0m clean: exit 1
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-d80uki7p/repo (base None) 
+== P0m trailer_check_disabled: exit 1
+  [FAIL] builder only, CLAUDE.md: parties reported ['builder m s'], instructions [], findings []; want ['builder m s'], [], ['entrenched_without_guy']
+  [FAIL] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings []; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue another account authored, CLAUDE.md: parties reported ['builder m s'], instructions [3], findings []; want ['builder m s'], [3], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md: parties reported ['builder m s'], instructions [4], findings []; want ['builder m s'], [4], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue not read, CLAUDE.md: parties reported ['builder m s'], instructions [9], findings []; want ['builder m s'], [9], ['entrenched_without_guy']
+  [FAIL] builder, malformed Instruction, CLAUDE.md: parties reported ['builder m s'], instructions [], findings []; want ['builder m s'], [], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of a draft the Vizier labelled itself, .claude/: parties reported ['builder m s'], instructions [6], findings []; want ['builder m s'], [6], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md: parties reported ['builder m s'], instructions [7], findings []; want ['builder m s'], [7], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue another account edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [13], findings []; want ['builder m s'], [13], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue whose edits were not read, CLAUDE.md: parties reported ['builder m s'], instructions [15], findings []; want ['builder m s'], [15], ['entrenched_without_guy']
+  [FAIL] merge by assize-reviewer, .github/: parties reported ['reviewer'], instructions [], findings ['evil_merge']; want ['reviewer'], [], ['entrenched_without_guy', 'evil_merge']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-e83p0dxk/repo (base None) 
+== P0m first_proposer_only: exit 1
+  [FAIL] guy then builder, CLAUDE.md: parties reported ['guy'], instructions [], findings []; want ['guy', 'builder m s'], [], []
+  [FAIL] builder then guy, .github/: parties reported ['builder m s'], instructions [], findings ['entrenched_without_guy']; want ['builder m s', 'guy'], [], []
+  [FAIL] fixture: the hook refuses ['commit 19d56d69cdf3', 'commit 5914ade8e170', 'commit bdd46181d3a7', 'commit bf6df8cf845f', 'commit e81ce68a78bb'], P0m's grammar ['commit 19d56d69cdf3', 'commit bdd46181d3a7', 'commit bf6df8cf845f']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-fa92sjfc/repo (base None) 
+== P0m exemption_unkeyed: exit 1
+  [FAIL] body-only Proposer, not exempted: parties reported ['reviewer m s'], instructions [], findings []; want [], [], ['no_proposer']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-tpuinzqk/repo (base None) 
+== P0m exemption_party_unchecked: exit 1
+  [FAIL] body-only Proposer, another party exempted: parties reported ['reviewer m t'], instructions [], findings []; want [], [], ['no_proposer']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-uzjf8pmy/repo (base None) 
+== P0m unknown_merge_author: exit 1
+  [FAIL] merge by an unknown author: parties reported ['guy'], instructions [], findings []; want [], [], ['unknown_merge_author']
+  [FAIL] merge by an unknown author, Proposer: guy trailer: parties reported ['guy'], instructions [], findings []; want [], [], ['unknown_merge_author']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-2qw_jc4v/repo (base None) 
+== P0m instruction_author_unchecked: exit 1
+  [FAIL] builder, Instruction of an issue another account authored, CLAUDE.md: parties reported ['builder m s'], instructions [3], findings []; want ['builder m s'], [3], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-c8skr2io/repo (base None) 
+== P0m instruction_label_unchecked: exit 1
+  [FAIL] builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md: parties reported ['builder m s'], instructions [4], findings []; want ['builder m s'], [4], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-6u57byjh/repo (base None) 
+== P0m instruction_labeler_unchecked: exit 1
+  [FAIL] builder, Instruction of a draft the Vizier labelled itself, .claude/: parties reported ['builder m s'], instructions [6], findings []; want ['builder m s'], [6], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md: parties reported ['builder m s'], instructions [7], findings []; want ['builder m s'], [7], ['entrenched_without_guy']
+  [FAIL] signature, guy, unsigned, citing an issue another account labelled: ssh 'N', findings [], want ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-mhxaxehd/repo (base None) 
+== P0m body_edit_unchecked: exit 1
+  [FAIL] builder, Instruction of an issue another account edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [13], findings []; want ['builder m s'], [13], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue whose edits were not read, CLAUDE.md: parties reported ['builder m s'], instructions [15], findings []; want ['builder m s'], [15], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-8xr5tbgi/repo (base None) 
+== P0m inert_exemption_admitted: exit 1
+  [FAIL] fixture: every exemption reachable from master is inert ([])
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-937c65ll/repo (base None) 
+== P0m stale_exemption_accepted: exit 1
+  [FAIL] fixture: an exemption naming a sha absent from the branch is stale ([])
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-yzrnhs29/repo (base None) 
+== P0m mechanism_rejected: exit 1
+  [FAIL] mechanism, ordinary path: parties reported ['mechanism harness.ledger 39063593787'], instructions [], findings ['bad_party']; want ['mechanism harness.ledger 39063593787'], [], []
+  [FAIL] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings ['bad_party', 'entrenched_without_guy']; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-r6i_tb0c/repo (base None) 
+== P0m mechanism_as_guy: exit 1
+  [FAIL] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings []; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-14hs88wq/repo (base None) 
+== P0m evil_merge_accepted: exit 1
+  [FAIL] merge by gfrmin's own address, CLAUDE.md: parties reported ['guy'], instructions [], findings []; want ['guy'], [], ['evil_merge']
+  [FAIL] merge by assize-reviewer, .github/: parties reported ['reviewer'], instructions [], findings ['entrenched_without_guy']; want ['reviewer'], [], ['entrenched_without_guy', 'evil_merge']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-8bvfl_va/repo (base None) 
+== P0m any_parent_evil: exit 1
+  [FAIL] merge by gfrmin's noreply: parties reported ['guy'], instructions [], findings ['evil_merge']; want ['guy'], [], []
+  [FAIL] merge by assize-builder: parties reported ['builder'], instructions [], findings ['entrenched_without_guy', 'evil_merge']; want ['builder'], [], []
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-eydgodsc/repo (base None) 
+== P0m unsigned_guy_accepted: exit 1
+  [FAIL] signature, guy, unsigned: ssh 'N', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, signed by a key the base does not list: ssh 'U', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, signed by a key the commit itself lists: ssh 'U', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, unsigned, citing an issue not read: ssh 'N', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, unsigned, citing an issue another account labelled: ssh 'N', findings [], want ['unsigned_guy']
+  [FAIL] signature, merge verified against another key: findings [], want ['unsigned_guy']
+  [FAIL] signature, merge whose web-flow signature does not verify: findings [], want ['unsigned_guy']
+  [FAIL] signature, commit (not a merge) verified against the web-flow key: findings [], want ['unsigned_guy']
+  [FAIL] the range check on an entrenched signers file: []
+  [FAIL] a signers file CODEOWNERS does not entrench is a finding: ['signers_not_entrenched']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-8e5_qqmv/repo (base None) 
+== P0m signers_from_branch: exit 1
+  [FAIL] signature, guy, signed by a key the base does not list: ssh 'G', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, signed by a key the commit itself lists: ssh 'G', findings [], want ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-s17m7z3l/repo (base None) 
+== P0m any_status_signed: exit 1
+  [FAIL] signature, guy, signed by a key the base does not list: ssh 'U', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, signed by a key the commit itself lists: ssh 'U', findings [], want ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-3d0qnsa9/repo (base None) 
+== P0m instruction_commit_attributed: exit 1
+  [FAIL] signature, builder carrying guy's instruction, unsigned: ssh 'N', findings ['unsigned_guy'], want []
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-8vzrylru/repo (base None) 
+== P0m bogus_instruction_exempts: exit 1
+  [FAIL] signature, guy, unsigned, citing an issue not read: ssh 'N', findings [], want ['unsigned_guy']
+  [FAIL] signature, guy, unsigned, citing an issue another account labelled: ssh 'N', findings [], want ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-lp9ovmw1/repo (base None) 
+== P0m web_flow_any_key: exit 1
+  [FAIL] signature, merge verified against another key: findings [], want ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-g6z50mz6/repo (base None) 
+== P0m web_flow_signs_commits: exit 1
+  [FAIL] signature, commit (not a merge) verified against the web-flow key: findings [], want ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-d2k7tije/repo (base None) 
+== P0m signers_unentrenched_accepted: exit 1
+  [FAIL] a signers file CODEOWNERS does not entrench is a finding: ['unsigned_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-466tt1ep/repo (base None) 

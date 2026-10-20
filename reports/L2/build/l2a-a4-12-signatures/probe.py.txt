@@ -1,0 +1,25 @@
+"""Probe the named pins clean and under each of their mutants, each in a disposable copy of the tree.
+Usage: python probe.py.txt <repo> <pin>..."""
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1])
+sys.path.insert(0, str(repo))
+from harness import edits, pins, tree  # noqa: E402
+
+py = sys.executable
+for pin in (p for p in pins.PINS if p.name in sys.argv[2:]):
+    code = f"import sys; sys.path.insert(0, '.'); from harness import pins; sys.exit(0 if pins.{pin.check.__name__}() else 1)"
+    for name, rel in [("clean", None)] + [(m.name, m.edits) for m in pin.mutants]:
+        copy = tree.copy_tree(repo)
+        try:
+            if rel:
+                edits.apply(copy, edits.load(rel, repo))
+            r = subprocess.run([py, "-I", "-c", code], cwd=copy, capture_output=True, text=True,
+                               env={"PATH": "/usr/bin:/bin", "PYTHONPATH": str(copy), "PYTHONDONTWRITEBYTECODE": "1"})
+            print(f"== {pin.name} {name}: exit {r.returncode}")
+            print("\n".join(l for l in r.stdout.splitlines() if "FAIL" in l) or "(no FAIL lines)", r.stderr[-800:])
+        finally:
+            shutil.rmtree(copy.parent)

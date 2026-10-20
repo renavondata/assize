@@ -1,0 +1,6 @@
+# P0m's mutant `any_status_signed` (brief 2 A4 item 12): any signature git reports counts, a good one against a listed key
+# or a valid one by a key the base does not list (`U`).
+[[edit]]
+path = "harness/claims.py"
+old = """return s.ssh == "G" or"""
+new = """return s.ssh != "N" or"""
