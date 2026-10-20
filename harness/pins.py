@@ -651,8 +651,25 @@ def p0bp_stale_bytecode_verdict() -> bool:
     s = n.summary
     n.expect(s.get("mutants_total") == 1 == s.get("killed") and n.exit_code == 0,
              f"denominator: 1 mutant, {s.get('killed')} killed, exit {n.exit_code}")
+    # Each defence alone (PR #275 review F2): the combined mutant above is the only one that reaches the rows with both off.
+    # Prefix alone stands: the clean run is made in the tree itself, whose cache is stale against the tree's own edit.
+    def arm_then_edit(copy: Path) -> None:
+        armed.append(_stale_stamped_pyc(copy))
+        edits.apply(copy, edits.load("harness/fixtures/edits/stamped_same_length.toml"))
+
+    head = run_nested("stale-bytecode-head", "fixture.stamphead", "all", prepare=arm_then_edit)
+    head.expect(head.run("fixture/stamp_head").get("verdict") == "ok",
+                f"clean run in a tree whose cache is stale against its own edit passes "
+                f"({head.run('fixture/stamp_head').get('verdict')}): the child's cache prefix stands between them")
+    # Exclusion alone stands: the check's own grandchild carries no cache prefix.
+    bare = run_nested("stale-bytecode-bare", "fixture.stampbare", "all",
+                      prepare=lambda copy: armed.append(_stale_stamped_pyc(copy)))
+    bm = bare.run("fixture/stamp_bare", "fixture/stamp_bare/same_length", "mutant")
+    bare.expect(bm.get("verdict") == "KILLED",
+                f"a same-length edit is KILLED when the check's grandchild has no cache prefix ({bm.get('verdict')}): "
+                f"the copy's exclusion of __pycache__ stands between the cache and the verdict")
     shutil.rmtree(work, ignore_errors=True)
-    return ok and n.ok
+    return ok and n.ok and head.ok and bare.ok
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
@@ -7151,7 +7168,9 @@ PINS = [
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
     Pin("P0bp", "a same-length edit to a module with stale cached bytecode is KILLED through the runner's verdict path",
-        p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),), HARNESS),
+        p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),
+                                      Mutant("prefix_off_alone", _edits("P0bp_prefix_off_alone")),
+                                      Mutant("exclusion_off_alone", _edits("P0bp_exclusion_off_alone"))), HARNESS),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
                                   Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
