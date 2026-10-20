@@ -1,0 +1,6 @@
+# P0j's mutant: the user slice is judged by its effective set alone, so an unpinned slice (empty cpuset.cpus,
+# non-empty cpuset.cpus.effective) passes as pinned (R 70d26b83818e F1).
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "require cpuset-slice pinned_cpus \"$(dirname \"$cpuset_file\")\"\n"
+new = "require cpuset-slice true\n"

@@ -599,7 +599,7 @@ def p0i_no_stale_bytecode() -> bool:
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
-REQUIRED_FACTS = ("uptime", "cpuset", "runner-version", "podman-info")
+REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "podman-info")
 STUB = "#!/bin/sh\n{body}\n"
 STUB_OK = {"uptime": 'echo " 12:00:00 up 1 day,  load average: 0.10, 0.20, 0.30"',
            "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"'}
@@ -617,13 +617,20 @@ def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
         fails = (lacking, name) in (("uptime", "uptime"), ("podman-info", "podman"))
         stub.write_text(STUB.format(body=(STUB_FAIL if fails else STUB_OK)[name]))
         stub.chmod(0o755)
-    cpuset = root / "cpuset.cpus.effective"
-    if lacking != "cpuset":
-        cpuset.write_text("0-3\n")
+    slice_dir, own_dir = root / "slice", root / "own"
+    for d in (slice_dir, own_dir):
+        d.mkdir()
+        (d / "cpuset.cpus.effective").write_text("0-3\n")
+    cpuset = slice_dir / "cpuset.cpus.effective"
+    # cpuset-slice, cpuset-own: the effective set is non-empty but the cgroup's own cpuset.cpus is empty (unpinned).
+    (slice_dir / "cpuset.cpus").write_text("" if lacking == "cpuset-slice" else "0-3\n")
+    (own_dir / "cpuset.cpus").write_text("" if lacking == "cpuset-own" else "0-3\n")
+    if lacking == "cpuset":
+        cpuset.unlink()
     if lacking != "runner-version":
         (runner / ".runner").write_text('{"agentName": "stub"}')
     env = os.environ | {"PATH": f"{stubs}:{os.environ['PATH']}"}
-    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner)], env=env,
+    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner), str(own_dir)], env=env,
                        capture_output=True, text=True, timeout=60, preexec_fn=proc.setup(False))
     facts = out / "facts.txt"
     return r.returncode, facts.read_text() if facts.is_file() else ""
@@ -6855,7 +6862,9 @@ PINS = [
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
-        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),),
+        p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
+                                  Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
+                                  Mutant("own_cgroup_unchecked", _edits("P0j_own_cgroup_unchecked"))),
         ("scripts/**",)),
     Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
         "forecast's session, is rejected",

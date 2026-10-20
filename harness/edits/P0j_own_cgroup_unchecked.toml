@@ -1,0 +1,5 @@
+# P0j's mutant: only the user-slice path is checked; the measuring process's own cgroup may be unpinned (R 70d26b83818e F2).
+[[edit]]
+path = "scripts/host_facts.sh"
+old = "require cpuset-own pinned_cpus \"$self_cgroup_dir\"\n"
+new = "require cpuset-own true\n"
