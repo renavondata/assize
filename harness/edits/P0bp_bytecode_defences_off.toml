@@ -1,0 +1,11 @@
+# P0bp's mutant: both bytecode defences of the verdict path off at once (brief 1 A5 and A6): copies keep nested
+# __pycache__ directories, and child Pythons run without PYTHONPYCACHEPREFIX, so a stale cache in the tree is read.
+[[edit]]
+path = "harness/tree.py"
+old = "EVERY_DEPTH_EXCLUDE = frozenset({\"__pycache__\"})\n"
+new = "EVERY_DEPTH_EXCLUDE = frozenset()\n"
+
+[[edit]]
+path = "harness/proc.py"
+old = "    return inherited | {\"PYTHONDONTWRITEBYTECODE\": \"1\", \"PYTHONPYCACHEPREFIX\": prefix}\n"
+new = "    return inherited | {\"PYTHONDONTWRITEBYTECODE\": \"1\"}\n"
