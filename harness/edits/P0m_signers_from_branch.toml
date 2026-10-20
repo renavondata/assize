@@ -1,0 +1,6 @@
+# P0m's mutant `signers_from_branch` (brief 2 A4 item 12): the signers file is read from the branch's head, not from its
+# base, so a commit that adds its own key to `allowed_signers` verifies itself.
+[[edit]]
+path = "harness/claims.py"
+old = """return _git(repo, "show", f"{base}:{SIGNERS_PATH}")"""
+new = """return _git(repo, "show", f"HEAD:{SIGNERS_PATH}")"""

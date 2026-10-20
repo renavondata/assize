@@ -1,0 +1,6 @@
+# P0m's mutant `instruction_commit_attributed` (brief 2 A4 item 12): a Builder's commit citing an `Instruction:` is
+# attributed to guy, so it must carry Guy's signature, which the instruction flow cannot supply.
+[[edit]]
+path = "harness/claims.py"
+old = """return "guy" in c.parties and not c.instructions"""
+new = """return "guy" in c.parties"""

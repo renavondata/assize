@@ -1,0 +1,5 @@
+# P0m's mutant `web_flow_any_key` (brief 2 A4 item 12): a merge verified by any openpgp key passes as GitHub's own.
+[[edit]]
+path = "harness/claims.py"
+old = """ and s.gpg_key == WEB_FLOW_KEY)"""
+new = """)"""
