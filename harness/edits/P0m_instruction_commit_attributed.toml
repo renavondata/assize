@@ -2,5 +2,5 @@
 # attributed to guy, so it must carry Guy's signature, which the instruction flow cannot supply.
 [[edit]]
 path = "harness/claims.py"
-old = """return "guy" in c.parties and not c.instructions"""
+old = """return "guy" in c.parties and not any(authorises(issues.get(n)) for n in c.instructions)"""
 new = """return "guy" in c.parties"""

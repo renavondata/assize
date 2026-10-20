@@ -1061,6 +1061,9 @@ SIGNATURE_FIXTURE = (  # (label, key signing it or None, Proposer lines, Instruc
     ("guy, signed by a key the commit itself lists", "k2", ("guy",), (), True, {"unsigned_guy"}),
     ("builder, unsigned", None, ("builder m s",), (), False, set()),
     ("builder carrying guy's instruction, unsigned", None, ("guy", "builder m s"), (5,), False, set()),
+    ("guy, unsigned, citing an issue not read", None, ("guy", "builder m s"), (999,), False, {"unsigned_guy"}),
+    ("guy, unsigned, citing an issue another account labelled", None, ("guy", "builder m s"), (7,), False,
+     {"unsigned_guy"}),
 )
 WEB_FLOW_FIXTURE = (  # (label, merge, gpg letter, gpg key, findings wanted)
     ("merge verified against the web-flow key", True, "G", claims.WEB_FLOW_KEY, set()),
@@ -1115,7 +1118,7 @@ def _p0m_signatures(expect) -> None:
     signatures = claims.read_signatures(work / "repo", base)
     expect(len(commits) == len(SIGNATURE_FIXTURE), f"fixture: {len(commits)} signature commits read")
     for (label, *_, want), c in zip(SIGNATURE_FIXTURE, commits):
-        got = {f.code for f in claims.signature_findings(c, signatures[c.sha])}
+        got = {f.code for f in claims.signature_findings(c, signatures[c.sha], INSTRUCTION_ISSUES)}
         expect(got == want, f"signature, {label}: ssh {signatures[c.sha].ssh!r}, findings {sorted(got)}, want "
                             f"{sorted(want)}")
     for label, merge, letter, key, want in WEB_FLOW_FIXTURE:
@@ -1150,11 +1153,12 @@ def _p0m_real_branch(expect, root: Path, patterns, exemptions=claims.PROPOSER_EX
     expect(not stale, f"real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range "
                       f"({[str(f) for f in stale]})")
     real = claims.branch_commits(root, base) if base is not None else []
-    # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
-    # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
-    issues = claims.load_issues(root, [n for c in real if claims.needs_guy(c, patterns) for n in c.instructions])
+    # An entrenched commit without a guy party needs its instructions read, and so does a guy-attributed one: its
+    # `Instruction:` lifts the signature requirement only if the issue authorises (pins.yml grants `issues: read`).
+    issues = claims.load_issues(root, [n for c in real if "guy" in c.parties or claims.needs_guy(c, patterns)
+                                       for n in c.instructions])
     found = [f for c in real for f in claims.commit_findings(c, patterns, issues)]
-    found += claims.signature_check(root, base, patterns) if base is not None else []
+    found += claims.signature_check(root, base, patterns, issues) if base is not None else []
     for c in real:
         print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
     expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
@@ -7111,6 +7115,7 @@ PINS = [
                                 Mutant("signers_from_branch", _edits("P0m_signers_from_branch")),
                                 Mutant("any_status_signed", _edits("P0m_any_status_signed")),
                                 Mutant("instruction_commit_attributed", _edits("P0m_instruction_commit_attributed")),
+                                Mutant("bogus_instruction_exempts", _edits("P0m_bogus_instruction_exempts")),
                                 Mutant("web_flow_any_key", _edits("P0m_web_flow_any_key")),
                                 Mutant("web_flow_signs_commits", _edits("P0m_web_flow_signs_commits")),
                                 Mutant("signers_unentrenched_accepted",

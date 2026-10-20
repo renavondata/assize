@@ -1,5 +1,5 @@
 # P0m's mutant `unsigned_guy_accepted` (brief 2 A4 item 12): a commit attributed to guy needs no verifying signature.
 [[edit]]
 path = "harness/claims.py"
-old = "if guy_attributed(c) and not signature_ok(c, s) else [])"
+old = "if guy_attributed(c, issues) and not signature_ok(c, s) else [])"
 new = "if False else [])"

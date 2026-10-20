@@ -495,8 +495,8 @@ def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Iss
 # A commit attributed to guy verifies against a key in an entrenched `allowed_signers` file, read from the base of the
 # range so a branch cannot add its own key; GitHub's own merges verify against its web-flow key. The check reads git's
 # verdict (`%G?`), never a trailer: `Proposer: guy` on a Builder's instruction commit is Guy's authority by the issue's
-# signature (rule 5 of Amendment 4), not a claim that Guy made the commit, so a commit citing an `Instruction:` is not
-# attributed to guy here.
+# signature (rule 5 of Amendment 4), not a claim that Guy made the commit, so a commit is not attributed to guy here
+# when an issue it cites, as read, authorises; an unread or unsigned one lifts nothing.
 SIGNERS_PATH = "allowed_signers"
 WEB_FLOW_KEY = "B5690EEEBB952194"
 
@@ -510,19 +510,21 @@ class Signature:
     gpg_key: str = ""
 
 
-def guy_attributed(c: Commit) -> bool:
-    return "guy" in c.parties and not c.instructions
+def guy_attributed(c: Commit, issues: Mapping[int, Issue] = {}) -> bool:
+    """A `guy` party none of whose cited issues authorises: the trailer's presence lifts nothing, the issue's signature
+    does (review 5a8ba45 F1)."""
+    return "guy" in c.parties and not any(authorises(issues.get(n)) for n in c.instructions)
 
 
 def signature_ok(c: Commit, s: Signature) -> bool:
     return s.ssh == "G" or (c.merge and s.gpg == "G" and s.gpg_key == WEB_FLOW_KEY)
 
 
-def signature_findings(c: Commit, s: Signature) -> list[Finding]:
+def signature_findings(c: Commit, s: Signature, issues: Mapping[int, Issue] = {}) -> list[Finding]:
     return ([Finding(f"commit {c.sha[:12]}", "unsigned_guy",
                      f"attributed to guy ({list(c.parties)}) but git reports ssh {s.ssh!r}, openpgp {s.gpg!r} "
                      f"key {s.gpg_key!r}; want a verified key of {SIGNERS_PATH} at the base")]
-            if guy_attributed(c) and not signature_ok(c, s) else [])
+            if guy_attributed(c, issues) and not signature_ok(c, s) else [])
 
 
 def signers_findings(text: str | None, patterns: Sequence[str]) -> list[Finding]:
@@ -554,10 +556,11 @@ def read_signatures(repo: Path, base: str, head: str = "HEAD") -> dict[str, Sign
     return {sha: Signature(ssh[sha][0], gpg[sha][0], gpg[sha][1]) for sha in ssh}
 
 
-def signature_check(repo: Path, base: str, patterns: Sequence[str], head: str = "HEAD") -> list[Finding]:
+def signature_check(repo: Path, base: str, patterns: Sequence[str], issues: Mapping[int, Issue] = {},
+                    head: str = "HEAD") -> list[Finding]:
     signatures = read_signatures(repo, base, head)
     return signers_findings(signers_at(repo, base), patterns) + \
-        [f for c in branch_commits(repo, base, head) for f in signature_findings(c, signatures[c.sha])]
+        [f for c in branch_commits(repo, base, head) for f in signature_findings(c, signatures[c.sha], issues)]
 
 
 # Git reads no user or system configuration here, so no local setting (e.g. log.showSignature) can alter what is parsed.
