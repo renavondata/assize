@@ -1,0 +1,15 @@
+# synthetic check of the semantics evil_paths relies on: git diff-tree --name-only -c lists only paths whose merge result differs from EVERY parent. 2026-10-20T12:50:04Z
+## case A: merge taking side's CLAUDE.md verbatim (carried): -c paths =
+
+   -m paths = CLAUDE.md other.md 
+## case B: merge writing CLAUDE.md to content neither parent has (evil): -c paths =
+CLAUDE.md 
+## case C: merge deleting CLAUDE.md, present in both parents (evil): -c paths =
+error: the following file has changes staged in the index:
+    CLAUDE.md
+(use --cached to keep the file, or -f to force removal)
+
+## case D: merge adding .github/x.yml absent from both parents (evil): -c paths =
+.github/x.yml 
+## case C rerun (the first attempt's git rm refused the staged merge result; forced here): merge deleting CLAUDE.md, present in both parents (evil): -c paths =
+CLAUDE.md 

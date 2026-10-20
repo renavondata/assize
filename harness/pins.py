@@ -988,11 +988,13 @@ def _timeline(events: tuple) -> list[dict]:
 
 MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
     ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
-    ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
+    # brief 2 A4 item 11: each merge writes its path anew, so a merge writing an entrenched path is evil, Guy's too
+    ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), {"evil_merge"}),
+    # its tree differs from its second parent (the base) in CLAUDE.md: carried from one parent, not evil
     ("merge by assize-builder", "docs/m.md", "339109611+assize-builder@users.noreply.github.com", (), ("builder",),
      set()),
     ("merge by assize-reviewer, .github/", ".github/m.yml", "assize-reviewer@gfrm.in", (), ("reviewer",),
-     {"entrenched_without_guy"}),
+     {"entrenched_without_guy", "evil_merge"}),
     ("merge by an unknown author", "docs/m.md", "f@f", (), (), {"unknown_merge_author"}),
     ("merge by an unknown author, Proposer: guy trailer", "docs/m.md", "f@f", ("guy",), (), {"unknown_merge_author"}),
 )
@@ -1086,7 +1088,8 @@ def p0m_commit_proposers() -> bool:
     (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
     `Proposer:` line counts only for a commit claims.PROPOSER_EXEMPTIONS lists, and only as the party it names
     (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
-    author is rejected, whatever trailer it carries (brief 1 A9). `Instruction: #<n>` carries Guy's authority on an
+    author is rejected, whatever trailer it carries (brief 1 A9); a merge by any author, gfrmin's included, that
+    changes an entrenched path relative to both of its parents is rejected (brief 2 A4 item 11). `Instruction: #<n>` carries Guy's authority on an
     entrenched path when issue <n>, read through the GitHub API, is authored by gfrmin and labelled `instruction`, open
     or closed (CLAUDE.md A1.5, instruction #38), and only if its timeline shows gfrmin applied the label; a `draft` the
     Vizier posted counts once gfrmin applies it (CLAUDE.md Amendment 3, instruction #49); and only if no account but
@@ -7008,7 +7011,7 @@ PINS = [
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),
                         Mutant("obligation_registry_skipped", _edits("P0l_obligation_registry_skipped"))), ALWAYS),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
-        "every party is read",
+        "every party is read; a merge changing an entrenched path relative to both parents is rejected",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
                                 Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
@@ -7021,7 +7024,9 @@ PINS = [
                                 Mutant("inert_exemption_admitted", _edits("P0m_inert_exemption_admitted")),
                                 Mutant("stale_exemption_accepted", _edits("P0m_stale_exemption_accepted")),
                                 Mutant("mechanism_rejected", _edits("P0m_mechanism_rejected")),
-                                Mutant("mechanism_as_guy", _edits("P0m_mechanism_as_guy"))), ALWAYS),
+                                Mutant("mechanism_as_guy", _edits("P0m_mechanism_as_guy")),
+                                Mutant("evil_merge_accepted", _edits("P0m_evil_merge_accepted")),
+                                Mutant("any_parent_evil", _edits("P0m_any_parent_evil"))), ALWAYS),
     Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
         p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),), HARNESS),
     Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",

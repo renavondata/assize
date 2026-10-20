@@ -1,0 +1,31 @@
+# standing-rule checks at 3625c49 (branch l2a-a4-11-evil-merge), 2026-10-20T12:49:11Z
+## claims trailers origin/master..HEAD
+trailers origin/master..HEAD: 0 findings
+[exit 0]
+## claims authors origin/master HEAD
+authors origin/master..HEAD: 0 findings
+[exit 0]
+## claims status-check
+status-check 1 files: 0 findings
+[exit 0]
+## numstat of reports/ and REPORT.md (additions only, Amendment 4 rule 1)
+65	0	reports/L2/build/l2a-a4-11-evil-merge/p0m-probe.txt
+25	0	reports/L2/build/l2a-a4-11-evil-merge/probe.py.txt
+1	0	reports/L2/ci/39417469305.json
+3	0	reports/L2/forecasts/1fca68e0-74a9-4247-a588-9991963fe20f.jsonl
+20	0	reports/L2/status/l2a-a4-11-evil-merge.md
+## forecasts commit precedes the first pins head (rule 2): 5fb2a6c ancestor of 544d10b?
+yes
+3625c49 2026-10-20T20:44:45+08:00 STATUS for PR #272 at 544d10b: brief 2 A4 item 11 (evil merges); pins CI run 39417469305 success
+544d10b 2026-10-20T19:46:50+08:00 Brief 2 A4 item 11: P0m refuses a merge that changes an entrenched path relative to both parents
+5fb2a6c 2026-10-20T19:45:04+08:00 Forecasts and proposer row for brief 2 A4 item 11 (evil merges), PR #272
+## forecast ids: sha256(claim+ts)[:12]
+c23f65bc3a68 c23f65bc3a68 pins_green
+8d40a9eb4e88 8d40a9eb4e88 review_accept
+c2b87c46ebcf c2b87c46ebcf session_minutes
+## ledger open
+# 431 forecasts at HEAD; 85 open; 2 legacy resolutions read under `resolves` (876d1d05c550, a30e37db1152); 0 rows read as neither (none)
+85
+## entrenched paths touched by the diff
+none
+## REPORT.md changed?

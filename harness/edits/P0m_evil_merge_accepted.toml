@@ -1,0 +1,6 @@
+# P0m's mutant `evil_merge_accepted` (brief 2 A4 item 11): a merge that changes an entrenched path relative to both of
+# its parents is accepted, so a merge by gfrmin's account may author an entrenched change no reviewed commit carries.
+[[edit]]
+path = "harness/claims.py"
+old = "    evil = evil_paths(c, patterns)\n"
+new = "    evil = []\n"
