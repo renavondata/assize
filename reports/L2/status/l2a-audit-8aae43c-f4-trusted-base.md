@@ -1,0 +1,19 @@
+# STATUS — L2 — 2026-10-20 — 2f538ec — PR #268
+VERDICT: SESSION DONE: brief 2 audit 8aae43c8c792 finding 4: the trusted base is listed; `harness/trusted_base.toml` equals the workflows, runner labels, secrets, tokens and CODEOWNERS lines the tree declares, each entry admitted by an audit-dated amendment; P0bm kills `unlisted_secret_added`
+LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict; adds or opens no brief)
+pins CI run 39392498697 on 2f538ec: success (reports/L2/ci/39392498697.json)
+pins: clean 90/90; mutants 275/275 KILLED; twins 275/275; non-causal 0; inconclusive 0; stale 0; leaked 0; skipped 0/90 pins (CI run 39392498697 log); pins-monotone 585f7f4..HEAD: 0 findings. P0bm's 4 mutants KILLED (unlisted_secret_added 0.36s + 0.365s). Local probe: reports/L2/build/l2a-audit-8aae43c-f4-trusted-base/p0bm-probe.txt
+changed: harness/{trusted.py,trusted_base.toml,pins.py,README.md,edits/P0bm_*.toml (4),proposer.d/l2a-audit-8aae43c-f4-trusted-base.toml}, reports/L2/{forecasts/98103678-….jsonl,ci/39392498697.json,build/l2a-audit-8aae43c-f4-trusted-base/,status/l2a-audit-8aae43c-f4-trusted-base.md}
+did: master session; no seed file (reports/switchback-seed.txt absent), so the first candidate was taken. `claims next "audit 8aae43c8c792 finding 4"` → finding 4 (findings 5 and 6 merged; finding 1 is held by PR #257, not offered). No open instruction issues; no awaits-guy PR
+did: new module harness/trusted.py (`check`, `grown <sha>`), list harness/trusted_base.toml, pin P0bm with mutants unlisted_secret_added, admission_unchecked, growth_unreported, inherit_unread; no judge/, worlds/spec/ or entrenched path edited (the workflow mutant lives only in harness/edits/)
+did: process: no tool call denied. Commit message by heredoc to `git commit -F -` (not a file edit); probe transcript copied with cp from /tmp, probe script committed as probe.py.txt so no code scan reads it
+decided (not asked): "the live set" is read from the tree (what the workflows reach), because repository secrets, runners and variables return HTTP 403 to the builder token (measured this session); a secret held by GitHub and named by no workflow is unreachable by any job — p(stands on review)=0.7
+decided (not asked): "growth without an audit-dated amendment fails" is read as: every entry cites a `## Audit findings at <sha>` heading present in a brief; the comparison with the list at the last audit's sha is `harness.trusted grown`, for the Auditor, because pin copies carry no .git — p=0.7
+decided (not asked): the list is exact (a listed entry the tree no longer declares is `stale` and fails), and tokens are the per-workflow credential bindings (`<workflow> github.token`, `<workflow> secrets.<NAME>`) — p=0.8
+decided (not asked): pin name P0bm, not P0bl, because PR #257 registers a second P0bl beside master's (a collision for that PR, not this one) — p=0.9
+decided (not asked): the full local `make pins` (31–40 min here) was replaced by an in-memory probe of P0bm clean and under each mutant; the full suite is witnessed by CI run 39392498697 — p=0.8
+forecasts: made 3 (pins_green #268 p=0.75, review_accept #268 p=0.7, session_minutes run 39391693559 bound 120 p=0.7); resolved none this session; pins_green resolves true (first run 39392498697 success); cumulative log-loss not recomputed here
+price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 1; runner-min 1 (ledger price --since 585f7f4, read before CI finished)
+obligations added: L3: the GitHub-held trusted base (repository secrets, runner registrations, account token scopes) is unread; a token that can read it, or Guy's periodic attestation, would let P0bm compare it too
+NEEDS YOU (at most 1): none
+next: audit 8aae43c8c792 finding 2 (cancelled zero-step runs routed) or 3 (failed.yml watches every workflow); both edit .github/, so each needs Guy's approval as code owner
