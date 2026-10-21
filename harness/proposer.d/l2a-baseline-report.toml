@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-baseline-report (brief 2 A2 deliverable: `reports/L2/REPORT.md` records the L2a baseline): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "ded2a624-c5c2-4844-abf5-a711b1d14eb7"

@@ -1,0 +1,17 @@
+# Reviewer reproduction of `make pins` on PR #293 head 9fe22d0661641f396319121660dc3eca30997331
+# review run 39573877733, session da261b4c-578b-47bb-bb83-431dcf3c42e7, host thinkpad-agent runner (cloud-class; not measurement evidence)
+# scratch: `gh repo clone renavondata/assize /tmp/rv293.1skp` (origin https://github.com/renavondata/assize.git), `git checkout 9fe22d0`
+# started 09:44:03Z, ended 10:36:49Z (53 minutes); full 402-line transcript not committed; its first line and its summary follow verbatim
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+...
+clean: 92/92 passed, 0/92 failed
+mutants: 295/295 killed, 0/295 survived, 0/295 inconclusive, 0/295 stale, 0/295 non-causal, 0 leaked (clean and mutant)
+twins: 295/295 passed
+skipped: 0/92 pins, 0 mutants
+report: out/pins/pins.jsonl
+PINS PASSED
+exit 0
+# out/pins/pins.jsonl last line:
+{"clean_failed": 0, "clean_ok": 92, "clean_total": 92, "exit_code": 0, "inconclusive": 0, "killed": 295, "kind": "summary", "leaked": 0, "mutants_total": 295, "non_causal": 0, "phase": "all", "registry": "harness", "since": null, "since_run": null, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 295, "twins_total": 295}
+# Builder's figure (STATUS, pins CI run 39566415270 on 8e1eb1b): clean 92/92; mutants 295/295 KILLED; twins 295/295. Same verdict: no flake.
+# CI on this head: pins run 39573874665 on 9fe22d0, success.

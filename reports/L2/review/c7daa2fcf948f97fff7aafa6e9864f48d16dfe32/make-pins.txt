@@ -1,0 +1,13 @@
+Reproduction of `make pins` at PR #293 head c7daa2fcf948f97fff7aafa6e9864f48d16dfe32 (reviewer session 7c594cbb-26f4-4515-8b22-655374783f78, review run 39592166232).
+Scratch copy: fresh `git clone https://github.com/renavondata/assize` in /tmp, checked out at c7daa2f, `make pins` run to completion (exit 0). The full ~300-line log is kept in the reviewer's workspace, not committed; these are its summary lines, copied verbatim.
+judge tree 113d9ffd7520f65f57448bf98f617e6d40661a35, worlds/spec tree 079b2084d7d7b6739cf961a189e951567e7a4dbe (match the ids cited in reports/L2/REPORT.md).
+
+clean: 92/92 passed, 0/92 failed
+mutants: 295/295 killed, 0/295 survived, 0/295 inconclusive, 0/295 stale, 0/295 non-causal, 0 leaked (clean and mutant)
+twins: 295/295 passed
+skipped: 0/92 pins, 0 mutants
+report: out/pins/pins.jsonl
+PINS PASSED
+EXIT 0
+
+Note: the bare head registry has 92 pins. The CI runs on the PR merge ref (d0c1d41, cited run 39586915626) report 93 clean and 298 killed; the Builder attributes the difference to master's PR #257. Not verified by this session, and not a verdict difference.

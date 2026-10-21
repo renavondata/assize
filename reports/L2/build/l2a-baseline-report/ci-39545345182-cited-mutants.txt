@@ -1,0 +1,70 @@
+# pins CI run 39545345182 (attempt 1) on 8c317a2, artifact pins-report/pins.jsonl, downloaded with `gh run download 39545345182`.
+# `git diff 8c317a2 8190d4f` is empty: the run's tree is master's tree at 8190d4f.
+# Summary row (the artifact's last line):
+{"clean_failed": 0, "clean_ok": 92, "clean_total": 92, "exit_code": 0, "inconclusive": 0, "killed": 295, "kind": "summary", "leaked": 0, "mutants_total": 295, "non_causal": 0, "phase": "all", "registry": "harness", "since": "0945f38e2dc423cb3bbe54b3db36a43d848f8794", "since_run": 39508269713, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 295, "twins_total": 295}
+# The mutants reports/L2/REPORT.md cites (64 of the 295), one per line: <pin/mutant> <mutant verdict> <twin verdict>.
+# Population: every `kind: run` row of the artifact whose `mutant` is one of these; no other row was read.
+P0bb/pause_not_prestarted KILLED ok
+P0bc/outer_subreaper_not_set KILLED ok
+P0bc/outer_sweep_removed KILLED ok
+P0bd/overlap_unchecked KILLED ok
+P0be/nested_env_inherited KILLED ok
+P0be/spawn_env_inherited KILLED ok
+P0be/under_edits_env_inherited KILLED ok
+P0bf/sigterm_unhandled KILLED ok
+P0bg/base_unguarded KILLED ok
+P0bl/head_unchecked KILLED ok
+P0bl/two_heads_accepted KILLED ok
+P0h/copy_deleted_before_sweep KILLED ok
+P0j/head_unrecorded KILLED ok
+P0j/own_cgroup_unchecked KILLED ok
+P0j/unpinned_slice_accepted KILLED ok
+P0m/stale_exemption_accepted KILLED ok
+P1/csprng_replaced KILLED ok
+P10/leaked_not_recorded KILLED ok
+P10/stray_scope_global KILLED ok
+P11/stream_truncated KILLED ok
+P12/floor_dropped KILLED ok
+P13/bin_exact_rational KILLED ok
+P13/bin_product_rounded KILLED ok
+P14/asymptotic_p KILLED ok
+P14/one_action_dropped KILLED ok
+P14/top_up_dropped KILLED ok
+P15/expected_for_assurance KILLED ok
+P15/first_crossing KILLED ok
+P15/weights_equal KILLED ok
+P18/cap_overrun_admitted KILLED ok
+P18/proxy_note_dropped KILLED ok
+P2/private_storage_mounted KILLED ok
+P20/crafter_price_fallback KILLED ok
+P22/replay_unchecked KILLED ok
+P23/closing_unattributed KILLED ok
+P24/isdigit_guard KILLED ok
+P25/entries_unchecked KILLED ok
+P25/heads_world_readable KILLED ok
+P25/verify_unchecked KILLED ok
+P26/key_version_ignored KILLED ok
+P28/scored_only KILLED ok
+P29/close_untorn KILLED ok
+P29/escape_untorn KILLED ok
+P30/image_id_unchecked KILLED ok
+P31/eager_imports KILLED ok
+P31/verify_omitted KILLED ok
+P32/declaration_env_ignored KILLED ok
+P32/declared_runtime_ignored KILLED ok
+P33/rates_underived KILLED ok
+P33/schema_delta_optional KILLED ok
+P34/ledger_findings_ignored KILLED ok
+P34/pilot_hash_config_omitted KILLED ok
+P34/pilot_hash_is_judge_hash KILLED ok
+P34/registration_unbound KILLED ok
+P4/init_process_rusage KILLED ok
+P5/next_in_begin KILLED ok
+P5/next_in_notice KILLED ok
+P5/next_in_observation KILLED ok
+P6/native_key_in_schema KILLED ok
+P6/pattern_hides_vocabulary KILLED ok
+P27/tolerance_loose KILLED ok
+P27/tolerance_zero KILLED ok
+P9/independent_heads KILLED ok
+P9/opened_for_rewrite KILLED ok

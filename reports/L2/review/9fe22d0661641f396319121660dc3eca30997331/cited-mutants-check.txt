@@ -1,0 +1,11 @@
+# Reviewer check of reports/L2/build/l2a-baseline-report/ci-39545345182-cited-mutants.txt against the run's own artifact.
+# review run 39573877733. Artifact: `gh run download 39545345182 -R renavondata/assize -n pins-report` (artifact 12329407113).
+$ gh api repos/renavondata/assize/actions/runs/39545345182 -q '"\(.head_sha) \(.conclusion)"'
+8c317a2fa53a12a37c7b8673e8d05a4d443d9a4f success
+$ git diff --quiet 8c317a2 8190d4f && echo same-tree
+same-tree
+# Population: the 64 non-comment rows of the cited file; every kind=run row of pins.jsonl with a mutant, keyed by `mutant` (pin/name) and `role`.
+# Result: 295 mutants in artifact; 64 cited; rows whose artifact verdicts differ from (mutant KILLED, twin ok): [] (none)
+# Artifact summary row: killed 295, twins_ok 295, skipped 0.
+# The set of pin/mutant pairs parsed from the table in reports/L2/REPORT.md (rows 1–43, column 3) equals the cited file's set: 64 = 64; table minus cited = {}; cited minus table = {}.
+# L1 obligations 1–43 in reports/L1/REPORT.md lines 137–185 match the table's 43 rows by number and subject.
