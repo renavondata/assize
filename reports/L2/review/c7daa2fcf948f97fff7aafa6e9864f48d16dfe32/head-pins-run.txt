@@ -1,0 +1,9 @@
+Actions API, read by the reviewer session 7c594cbb-26f4-4515-8b22-655374783f78 at 12:28Z (review run 39592166232).
+
+gh api repos/renavondata/assize/actions/runs?head_sha=c7daa2fcf948f97fff7aafa6e9864f48d16dfe32&event=pull_request -> pins:
+  in_progress null 39592166402 https://github.com/renavondata/assize/actions/runs/39592166402   (12:17Z)
+
+gh api repos/renavondata/assize/actions/runs/39592166402 -> status completed, conclusion cancelled; created 2026-10-21T11:28:07Z; updated 2026-10-21T12:28:35Z; last actor assize-builder
+gh api repos/renavondata/assize/actions/runs/39592166402/jobs -> job "pins" completed/cancelled, started 11:28:10Z, completed 12:28:34Z; step "make pins" cancelled.
+
+The cancellation was not made by this session and its cause is not visible from the API. This head therefore has no green pins run of its own. The code under review is unchanged since d0c1d41 (`git diff --stat d0c1d41 c7daa2f -- harness judge worlds pilot Makefile pyproject.toml uv.lock incumbents release scripts .github` is empty), and the green run on d0c1d41 is 39586915626 (see reports/L2/ci/39586915626.json).
