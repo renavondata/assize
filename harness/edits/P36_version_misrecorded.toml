@@ -1,0 +1,6 @@
+# P36's mutant `version_misrecorded` (brief 2 section 2, Versions): the binding records a NetHack version other than the
+# one its game library carries.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = 'NETHACK_VERSION = "3.6.7"'
+new = 'NETHACK_VERSION = "3.6.6"'

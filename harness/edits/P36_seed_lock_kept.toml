@@ -1,0 +1,6 @@
+# P36's mutant `seed_lock_kept` (brief 2 section 2, Determinism): NetHackChallenge's seed lock is left in place, so the
+# issued seed never reaches the game.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = "        delattr(env.nethack, lock)"
+new = "        pass"

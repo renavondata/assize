@@ -1,0 +1,6 @@
+# P36's mutant `moon_from_clock` (brief 2 section 2, Determinism): the game reads its moon phase, Friday the 13th and
+# night from the real date, so a trajectory depends on the day it is played.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = "    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True)"
+new = "    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=False)"

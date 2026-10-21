@@ -1,0 +1,22 @@
+Local witnesses, build session ff8d2cc9-99b9-4cab-a423-1bc227394ea9, on the agent runner (not evidence for a verdict; CI's pins run is the citation).
+
+1. `uv run --frozen python -m harness run --registry harness --phase clean --out /tmp/p36clean/out` (2026-10-21), summary row:
+{"clean_failed": 0, "clean_ok": 95, "clean_total": 95, "exit_code": 0, "inconclusive": 0, "killed": 0, "kind": "summary", "leaked": 0, "mutants_total": 0, "non_causal": 0, "phase": "clean", "registry": "harness", "since": null, "since_run": null, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 0, "twins_total": 0}
+P36 clean row: {"duration_s": 2.225, "exit_code": 0, "expected": "pass", "observed": "pass", "pin": "P36", "role": "clean", "verdict": "ok"}
+
+2. P36's check, run on a copy of the tree and under each mutant applied by `harness.edits` to its own copy (scratch script outside the repository); the first failed expectation of each:
+clean: RESULT True; fails 0
+character_fixed: RESULT False; fails 4; [FAIL] the task is NetHackChallenge with its stock actions, character choice and limits ({'type': 'NetHackChallenge', 'same_actions': True, 'same_character': False, 'same_limits': True, 'locks_left': []})
+moon_from_clock: RESULT False; fails 2; [FAIL] seed 7: trajectory hash 38c88a6148da405c is the committed golden 3c363323144b3c13
+reseed_on: RESULT False; fails 3; [FAIL] seed 1: trajectory hash 546256a1019f6957 is the committed golden 55ea807e58a374c2
+seed_ignored: RESULT False; fails 3; [FAIL] seed 1: trajectory hash a6c3cb1886c56ad3 is the committed golden 55ea807e58a374c2
+seed_lock_kept: RESULT False; fails 6; [FAIL] the task is NetHackChallenge with its stock actions, character choice and limits ({'error': 'RuntimeError: Should not try changing seeds'})
+version_misrecorded: RESULT False; fails 1; [FAIL] installed versions {'nle': '1.3.0', 'nethack': '3.6.7'} are the recorded {'nle': '1.3.0', 'nethack': '3.6.6'}
+
+Clean P36 transcript (seeds 1, 7, 12; 2000-action streams):
+  seed 1: 4 trajectory hashes, 2 per process, 1 distinct ([1785, 1785] steps; game turn 2348; 55ea807e58a374c2); end status 1
+  seed 7: 4 trajectory hashes, 2 per process, 1 distinct ([632, 632] steps; game turn 499; 3c363323144b3c13); end status 1
+  seed 12: 4 trajectory hashes, 2 per process, 1 distinct ([1623, 1623] steps; game turn 1600; 587dba1b18d4bc17); end status 1
+  3 seeds give 3 distinct hashes
+
+Seed choice: seeds 1..119 classified by their opening messages under fix_moon_phase: normal 96 (first 1), new moon 10 (first 7), full moon 13 (first 12).
