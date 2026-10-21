@@ -1,0 +1,27 @@
+copy of /tmp/rv277.wYHd
+  at /tmp/assize-scratch-7lrjjvn2/assize-copy-y9kvo4de/repo
+twin: no edits applied
+pin:       P0bp
+protects:  a same-length edit to a module with stale cached bytecode is KILLED through the runner's verdict path
+role:      twin
+tree:      /tmp/assize-scratch-7lrjjvn2/assize-copy-y9kvo4de/repo
+invoked:   /tmp/rv277.wYHd
+scratch:   /tmp/assize-scratch-7lrjjvn2
+  [ok] control: ctl/harness/fixtures/__pycache__/stamped.cpython-311.pyc armed; after the same-length edit a Python without a cache prefix reads the stale value ('4 /tmp/assize-scratch-7lrjjvn2/assize-p0bp-kz_8ktvr/ctl/harness/fixtures/stamped.py')
+nested stale-bytecode: registry=fixture.stamp phase=all edits=(none) exit=0 rows=/tmp/rv277.wYHd/out/pins/runs/P0bp/prefix_off_alone/twin/nested/stale-bytecode/pins.jsonl
+  [ok] stale-bytecode: seeded edits applied (anchors unique)
+  [ok] stale-bytecode: summary row exit_code equals process exit code
+  [ok] stale-bytecode: the nested tree carried stale bytecode for harness/fixtures/stamped.py ([PosixPath('/tmp/assize-scratch-7lrjjvn2/assize-copy-9i3w0pny/repo/harness/fixtures/__pycache__/stamped.cpython-311.pyc')])
+  [ok] stale-bytecode: clean run in the nested tree passes
+  [ok] stale-bytecode: mutant run fails, twin passes (mutant fail, twin pass; ../../../rv277.wYHd/out/pins/runs/P0bp/prefix_off_alone/twin/nested/stale-bytecode/runs/fixture__stamp/same_length/mutant/transcript.log)
+  [ok] stale-bytecode: the runner records the same-length edit KILLED (KILLED)
+  [ok] stale-bytecode: denominator: 1 mutant, 1 killed, exit 0
+nested stale-bytecode-head: registry=fixture.stamphead phase=all edits=(none) exit=0 rows=/tmp/rv277.wYHd/out/pins/runs/P0bp/prefix_off_alone/twin/nested/stale-bytecode-head/pins.jsonl
+  [ok] stale-bytecode-head: seeded edits applied (anchors unique)
+  [ok] stale-bytecode-head: summary row exit_code equals process exit code
+  [ok] stale-bytecode-head: clean run in a tree whose cache is stale against its own edit passes (ok): the child's cache prefix stands between them
+nested stale-bytecode-bare: registry=fixture.stampbare phase=all edits=(none) exit=0 rows=/tmp/rv277.wYHd/out/pins/runs/P0bp/prefix_off_alone/twin/nested/stale-bytecode-bare/pins.jsonl
+  [ok] stale-bytecode-bare: seeded edits applied (anchors unique)
+  [ok] stale-bytecode-bare: summary row exit_code equals process exit code
+  [ok] stale-bytecode-bare: a same-length edit is KILLED when the check's grandchild has no cache prefix (KILLED): the copy's exclusion of __pycache__ stands between the cache and the verdict
+result:    PASS
