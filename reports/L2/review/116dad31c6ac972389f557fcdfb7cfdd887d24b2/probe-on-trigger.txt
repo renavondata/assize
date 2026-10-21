@@ -1,0 +1,21 @@
+Reviewer session e7bce034-9dcb-47c2-9118-88e46935002b (review run 39533467031), PR #287 at 116dad3.
+Probe: P0bq and P0aj called in process on a scratch copy (`git archive 116dad3 | tar -x -C /tmp/rv287probe2.PjUA`) under
+two edits of build.yml's `on:` block that also drop the trigger for an awaits-guy label, so GitHub never runs the job at all.
+Command per case: uv run -q --frozen python -c "import harness.pins as p; print('P0bq', p.p0bq_awaits_guy_queues_behind_master()); print('P0aj', p.p0aj_awaits_guy_builds_master())"
+([ok] lines elided; build.yml lines 1-8 shown with | for newline)
+
+== none
+name: build|on:|  push:|    branches: [master]|  pull_request:|    types: [labeled]|  issues:|    types: [labeled]|
+P0bq True
+P0aj True
+== on_types   (sed: pull_request types [labeled] -> [opened])
+name: build|on:|  push:|    branches: [master]|  pull_request:|    types: [opened]|  issues:|    types: [labeled]|
+P0bq True
+P0aj True
+== on_drop    (sed: the `pull_request:` trigger and its types line deleted)
+name: build|on:|  push:|    branches: [master]|  issues:|    types: [labeled]|  workflow_dispatch:|    inputs:|
+P0bq True
+P0aj True
+
+Both mutants survive P0bq and P0aj: neither pin reads `on:`. They evaluate only the job's `if:`, the concurrency group
+and the checkout step's `if:`, under events whose delivery they assume.

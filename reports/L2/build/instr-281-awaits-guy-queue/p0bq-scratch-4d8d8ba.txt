@@ -1,0 +1,19 @@
+Builder session 4eac5cf8-ca6a-4bec-a3ad-6335b351f655 (build run 39527005539), branch instr-281-awaits-guy-queue at 4d8d8ba.
+P0bq's check, clean, in process (`uv run --frozen python -c "import harness.pins as p; print(p.p0bq_awaits_guy_queues_behind_master())"`):
+  [ok] the build job's `if:`, its job-level concurrency group, its `cancel-in-progress` and the PR checkout step's `if:` are found
+  [ok] a push to master: starts a Builder on master in queue build-master (must start one on master in queue build-master)
+  [ok] an instruction label on an issue: starts a Builder on master in queue build-master (must start one on master in queue build-master)
+  [ok] a dispatch naming no pull request: starts a Builder on master in queue build-master (must start one on master in queue build-master)
+  [ok] an awaits-guy label on a pull request: starts a Builder on master in queue build-master (must start one on master in queue build-master)
+  [ok] build-master's cancel-in-progress is false (must be false: a Builder in progress on master is waited for, not replaced)
+True
+
+Each mutant's edit applied by `harness.edits.apply` to a scratch copy of build.yml (mktemp -d, discarded), P0bq's check run with ROOT there; [ok] lines elided:
+  [FAIL] an awaits-guy label on a pull request: does not start a Builder on master in queue build-master (must start one on master in queue build-master)
+P0aj_awaits_guy_clause_removed pin FAILS (killed)
+  [FAIL] an awaits-guy label on a pull request: starts a Builder on master in queue build-awaits-guy (must start one on master in queue build-master)
+P0bq_awaits_guy_own_queue pin FAILS (killed)
+  [FAIL] build-master's cancel-in-progress is true (must be false: a Builder in progress on master is waited for, not replaced)
+P0bq_master_cancels_in_progress pin FAILS (killed)
+
+This is a transcript, not a CI citation; the runner's KILLED verdicts and twins are in the pins CI run cited in STATUS.

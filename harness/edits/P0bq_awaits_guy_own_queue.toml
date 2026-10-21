@@ -1,0 +1,6 @@
+# P0bq's mutant (instruction #281 item 2): an `awaits-guy` label's Builder gets a queue of its own, so it starts while
+# another Builder session is in progress on master.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """group: build-${{ (github.event.label.name != 'awaits-guy' && github.event.pull_request.number) || inputs.pr || 'master' }}"""
+new = """group: build-${{ (github.event.label.name == 'awaits-guy' && 'awaits-guy') || github.event.pull_request.number || inputs.pr || 'master' }}"""
