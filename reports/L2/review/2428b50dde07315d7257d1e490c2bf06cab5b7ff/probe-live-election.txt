@@ -1,0 +1,15 @@
+Using CPython 3.11.17
+Creating virtual environment at: .venv
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+entrants audit: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-fable-5-1'] bound 5.0
+draw rows by procedure: {'build': 162, 'review': 150, 'audit': 0, 'vizier': 43}
+latest build draw: 2026-10-21T07:55:03Z run 39565353851 drew claude-opus-5-5
+latest review draw: 2026-10-21T07:52:55Z run 39565096711 drew claude-fable-5-1
+barred(audit): ['claude-fable-5-1', 'claude-opus-5-5']
+barred(build): [] barred(review): []
+audit election at seed 0: rounds 0 (unknown entrant 0, unobserved 0, clipped 0); gamma 0.000000; probabilities claude-sonnet-5-5 1.000000; drew claude-sonnet-5-5
+audit draws over 66 seeds: {'claude-sonnet-5-5': 66}
+refusal with entrants ['claude-opus-5-5', 'claude-fable-5-1'] : refused: audit: every entrant is the model of a procedure it must differ from
+build: drawn over 66 seeds = ['claude-opus-5-5', 'claude-sonnet-5-5'] of entrants ['claude-opus-5-5', 'claude-sonnet-5-5']
+review: drawn over 66 seeds = ['claude-fable-5-1', 'claude-haiku-5-5', 'claude-opus-5-5', 'claude-sonnet-5-5'] of entrants ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-fable-5-1']
+vizier: drawn over 66 seeds = ['claude-haiku-5-5', 'claude-opus-5-5', 'claude-sonnet-5-5'] of entrants ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5']

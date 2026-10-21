@@ -1782,6 +1782,33 @@ def p0bk_unobservable_closed() -> bool:
     return ok()
 
 
+def p0br_auditor_differs() -> bool:
+    """`harness.ledger elect audit` draws only among entrants that are neither the model of the latest recorded build
+    draw nor that of the latest review draw, and refuses when none remains; the other procedures draw among all their
+    entrants (Amendment 2, audit 8aae43c8c792 finding 1)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    three = ELECTION_ENTRANTS
+    ts = ELECTION_TS
+    rows = [_drew("m-c", dict.fromkeys(three, 1 / 3), ts[0], "build"), _drew("m-c", dict.fromkeys(three, 1 / 3), ts[1], "review"),
+            _drew("m-a", dict.fromkeys(three, 1 / 3), ts[2], "build"), _drew("m-b", dict.fromkeys(three, 1 / 3), ts[3], "review")]
+    sweep = range(0, ledger.DRAWS, 997)
+    drawn = {ledger.elect(rows, "audit", three, ELECTION_BOUND, s).model for s in sweep}
+    expect(drawn == {"m-c"}, f"the auditor is neither the latest builder (m-a) nor the latest reviewer (m-b): {drawn}")
+    expect(set(ledger.elect(rows, "audit", three, ELECTION_BOUND, 0).probabilities) == {"m-c"},
+           "the distribution is over the allowed entrant alone")
+    other = {ledger.elect(rows, "review", three, ELECTION_BOUND, s).model for s in sweep}
+    expect(other == set(three), f"another procedure draws among all its entrants: {other}")
+    try:
+        ledger.elect(rows, "audit", ("m-a", "m-b"), ELECTION_BOUND, 0)
+        refused = False
+    except ValueError:
+        refused = True
+    expect(refused, "no entrant left: the election refuses")
+    return ok()
+
+
 T0 = "2026-02-01T00:00:00Z"
 
 
@@ -7181,6 +7208,10 @@ PINS = [
                                    Mutant("layer_prefix_unread", _edits("P0bk_layer_prefix_unread")),
                                    Mutant("issue_unchecked", _edits("P0bk_issue_unchecked")),
                                    Mutant("any_failure_void", _edits("P0bk_any_failure_void"))), HARNESS),
+    Pin("P0br", "an elected auditor is neither the latest builder's model nor the latest reviewer's, and none left is refused",
+        p0br_auditor_differs, (Mutant("elect_ignores_exclusions", _edits("P0br_elect_ignores_exclusions")),
+                               Mutant("first_draw_barred", _edits("P0br_first_draw_barred")),
+                               Mutant("empty_falls_back", _edits("P0br_empty_falls_back"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
