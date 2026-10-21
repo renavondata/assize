@@ -1,0 +1,6 @@
+# P0bq's mutant (instruction #281 item 2): the build queue cancels the run in progress, so an `awaits-guy` label starts
+# a master Builder while another is in progress on master, ending it.
+[[edit]]
+path = ".github/workflows/build.yml"
+old = """      cancel-in-progress: false"""
+new = """      cancel-in-progress: true"""

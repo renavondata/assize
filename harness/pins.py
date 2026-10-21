@@ -2124,6 +2124,42 @@ def p0aj_awaits_guy_builds_master() -> bool:
     return ok()
 
 
+MASTER_BUILD_EVENTS = (  # (what, Actions context) -- every event that starts a Builder on master (instruction #281)
+    ("a push to master", {"github.event_name": "push", "inputs.pr": ""}),
+    ("an instruction label on an issue", {"github.event_name": "issues", "github.event.action": "labeled",
+                                          "github.event.label.name": "instruction", "inputs.pr": ""}),
+    ("a dispatch naming no pull request", {"github.event_name": "workflow_dispatch", "inputs.pr": ""}),
+    ("an awaits-guy label on a pull request", {"github.event_name": "pull_request", "github.event.action": "labeled",
+                                               "github.event.label.name": "awaits-guy",
+                                               "github.event.pull_request.number": BUILD_EVENT_PR, "inputs.pr": ""}),
+)
+
+
+def p0bq_awaits_guy_queues_behind_master() -> bool:
+    """An `awaits-guy` label on a pull request starts the next master Builder, so it does not stop the master queue
+    (instruction #281 item 1), and it does not start one while another Builder session is in progress on master (item
+    2): every event that starts a master Builder checks out no pull request and enters the one queue `build-master`,
+    whose group does not cancel the run in progress, so the new Builder waits for it."""
+    expect, ok = _expecter()
+    text = (ROOT / ".github" / "workflows" / "build.yml").read_text()
+    job, group, checkout = _build_expressions(text)
+    cancel = re.search(r"^    concurrency:\n      group: .*\n      cancel-in-progress: (\S+)$", text, re.M)
+    expect(None not in (job, group, checkout, cancel), "the build job's `if:`, its job-level concurrency group, its "
+                                                       "`cancel-in-progress` and the PR checkout step's `if:` are found")
+    if None in (job, group, checkout, cancel):
+        return ok()
+    for what, ctx in MASTER_BUILD_EVENTS:
+        started, pr_branch, queue = (_github_condition(job, ctx), _github_condition(checkout, ctx),
+                                     _github_value(group, ctx))
+        expect(started and not pr_branch and queue == "master",
+               f"{what}: {'starts' if started else 'does not start'} a Builder on "
+               f"{'the PR branch' if pr_branch else 'master'} in queue build-{queue} (must start one on master in "
+               f"queue build-master)")
+    expect(cancel.group(1) == "false", f"build-master's cancel-in-progress is {cancel.group(1)} (must be false: a "
+                                       f"Builder in progress on master is waited for, not replaced)")
+    return ok()
+
+
 PRICE_BEFORE, PRICE_MERGED, PRICE_AFTER = "2000-01-01T00:00:00Z", "2026-10-11T00:00:00Z", "2999-01-01T00:00:00Z"
 PRICE_N = 200
 PRICE_MERGE_DATE = "2030-01-01T00:00:00+00:00"  # the fixture merge's committer time, later than its branch commit's
@@ -7171,6 +7207,12 @@ PINS = [
         p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),
                                       Mutant("prefix_off_alone", _edits("P0bp_prefix_off_alone")),
                                       Mutant("exclusion_off_alone", _edits("P0bp_exclusion_off_alone"))), HARNESS),
+    Pin("P0bq", "an awaits-guy label starts the next master Builder, queued behind any Builder in progress on master",
+        p0bq_awaits_guy_queues_behind_master,
+        (Mutant("awaits_guy_trigger_dropped", _edits("P0aj_awaits_guy_clause_removed")),
+         Mutant("awaits_guy_own_queue", _edits("P0bq_awaits_guy_own_queue")),
+         Mutant("master_cancels_in_progress", _edits("P0bq_master_cancels_in_progress"))),
+        (".github/workflows/build.yml",)),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
                                   Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
