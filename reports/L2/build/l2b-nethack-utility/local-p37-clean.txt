@@ -1,0 +1,21 @@
+pin:       P37
+protects:  the NetHack utility is BALROG's progression, vendored at a pinned commit with a checksum; one altered table entry fails the checksum
+role:      clean
+tree:      /home/g/actions-runner/_work/assize/assize
+invoked:   /home/g/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-g_jcq0vz
+  [ok] the binding records BALROG b7afe79e3e42 and the committed checksums (b7afe79e3e42)
+  [ok] vendored progress.py: SHA-256 7c267bd24c9a78a1 is the committed 7c267bd24c9a78a1
+  [ok] vendored achievements.json: SHA-256 a582cff2ffcaa341 is the committed a582cff2ffcaa341
+  [ok] vendored LICENSE: SHA-256 4e2bcd21929f977a is the committed 4e2bcd21929f977a
+  [ok] one progression table entry altered: refused
+  [ok] the progression code altered: refused
+  [ok] seed 1: the episode plays with its utility (None)
+  [ok] seed 1: the utility is the vendored NetHackChallenge class (Progress from /home/g/actions-runner/_work/assize/assize/worlds/nethack/balrog/progress.py)
+  [ok] seed 1: utility 0.0 (None) is the golden 0.0 (None)
+  [ok] seed 1: the episode ends and BALROG reads its end ('DEATH: starved to death.')
+  [ok] seed 3: the episode plays with its utility (None)
+  [ok] seed 3: the utility is the vendored NetHackChallenge class (Progress from /home/g/actions-runner/_work/assize/assize/worlds/nethack/balrog/progress.py)
+  [ok] seed 3: utility 0.015392269075361172 (Dlvl:2) is the golden 0.015392269075361172 (Dlvl:2)
+  [ok] seed 3: the episode ends and BALROG reads its end ('DEATH: starved to death.')
+result:    PASS
