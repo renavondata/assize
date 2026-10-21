@@ -1,0 +1,17 @@
+pins-report artefact of CI run 39628931699 (head 6bef0ab, attempt 1, conclusion success), downloaded 2026-10-21T15:54:07Z by reviewer session 40790669
+== summary row
+{"clean_failed": 0, "clean_ok": 12, "clean_total": 12, "exit_code": 0, "inconclusive": 0, "killed": 56, "kind": "summary", "leaked": 0, "mutants_total": 56, "non_causal": 0, "phase": "all", "registry": "harness", "since": "ca29d85ef67a9ed58068b08250a38aa95258d9ef", "since_run": 39619143461, "skipped": 82, "skipped_mutants": 248, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 56, "twins_total": 56}
+== P0ac rows
+{"kind": "run", "pin": "P0ac", "mutant": null, "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/instruction_without_because_admitted", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/instruction_without_because_admitted", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/both_forms_admitted", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/both_forms_admitted", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/draft_without_price_admitted", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/draft_without_price_admitted", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/recording_only_refused", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/recording_only_refused", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/price_unwired", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/price_unwired", "verdict": "ok"}
+== pins run (not skipped)
+[(('P0ac', 'KILLED'), 5), (('P0ac', 'ok'), 6), (('P0ad', 'KILLED'), 5), (('P0ad', 'ok'), 6), (('P0ag', 'KILLED'), 2), (('P0ag', 'ok'), 3), (('P0ar', 'KILLED'), 5), (('P0ar', 'ok'), 6), (('P0bj', 'KILLED'), 4), (('P0bj', 'ok'), 5), (('P0k', 'KILLED'), 2), (('P0k', 'ok'), 3), (('P0l', 'ok'), 1), (('P0m', 'KILLED'), 23), (('P0m', 'ok'), 24), (('P0q', 'KILLED'), 2), (('P0q', 'ok'), 3), (('P0r', 'KILLED'), 1), (('P0r', 'ok'), 2), (('P0x', 'KILLED'), 3), (('P0x', 'ok'), 4), (('P0y', 'KILLED'), 2), (('P0y', 'ok'), 3)]

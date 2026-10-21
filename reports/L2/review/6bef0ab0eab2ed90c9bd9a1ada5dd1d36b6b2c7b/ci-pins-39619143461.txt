@@ -1,0 +1,192 @@
+pins-report artefact of CI run 39619143461 (head ca29d85, attempt 1), downloaded 2026-10-21T15:52:00Z by reviewer session 40790669
+== registry rows for P0ac
+{"kind": "run", "pin": "P0ac", "mutant": null, "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/instruction_without_because_admitted", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/instruction_without_because_admitted", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/both_forms_admitted", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/both_forms_admitted", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/draft_without_price_admitted", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/draft_without_price_admitted", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/recording_only_refused", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/recording_only_refused", "verdict": "ok"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/price_unwired", "verdict": "KILLED"}
+{"kind": "run", "pin": "P0ac", "mutant": "P0ac/price_unwired", "verdict": "ok"}
+== summary row
+{"clean_failed": 0, "clean_ok": 94, "clean_total": 94, "exit_code": 0, "inconclusive": 0, "killed": 304, "kind": "summary", "leaked": 0, "mutants_total": 304, "non_causal": 0, "phase": "all", "registry": "harness", "since": "12f42f08fd6f0bf1f79d96e63c43177e19076d21", "since_run": 39599626638, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 304, "twins_total": 304}
+== P0ac transcripts
+--- runs/P0ac/both_forms_admitted/mutant/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    FAIL
+--- runs/P0ac/both_forms_admitted/twin/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    PASS
+--- runs/P0ac/clean/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    PASS
+--- runs/P0ac/draft_without_price_admitted/mutant/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [FAIL] a draft with no price line: findings [], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    FAIL
+--- runs/P0ac/draft_without_price_admitted/twin/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    PASS
+--- runs/P0ac/instruction_without_because_admitted/mutant/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    FAIL
+--- runs/P0ac/instruction_without_because_admitted/twin/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    PASS
+--- runs/P0ac/price_unwired/mutant/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [FAIL] a draft with no price line: findings [], want ['draft_price_line']
+  [FAIL] a draft with two price lines: findings [], want ['draft_price_line']
+  [FAIL] a draft whose quantity is not one the ledger prices: findings [], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    FAIL
+--- runs/P0ac/price_unwired/twin/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    PASS
+--- runs/P0ac/recording_only_refused/mutant/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [FAIL] a recording-only draft that says so: findings ['draft_price_form'], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    FAIL
+--- runs/P0ac/recording_only_refused/twin/transcript.log
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [ok] a draft with no price line: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    PASS

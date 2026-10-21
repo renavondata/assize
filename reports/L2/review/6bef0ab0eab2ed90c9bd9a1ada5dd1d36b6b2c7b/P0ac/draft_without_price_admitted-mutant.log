@@ -1,0 +1,29 @@
+copy of /tmp/assize-review-6bef0ab0eab2ed90c9bd9a1ada5dd1d36b6b2c7b
+  at /tmp/assize-scratch-qs0wkgli/assize-copy-t7nxb0ar/repo
+applied 1 edit(s) from harness/edits/P0ac_draft_without_price_admitted.toml
+pin:       P0ac
+protects:  a wish is drafted as a brief amendment unless the draft says in one line why it cannot wait
+role:      mutant
+tree:      /tmp/assize-scratch-qs0wkgli/assize-copy-t7nxb0ar/repo
+invoked:   /tmp/assize-review-6bef0ab0eab2ed90c9bd9a1ada5dd1d36b6b2c7b
+scratch:   /tmp/assize-scratch-qs0wkgli
+  [ok] a brief amendment: findings [], want []
+  [ok] an instruction with its reason: findings [], want []
+  [ok] neither form: findings ['no_form'], want ['no_form']
+  [ok] both forms: findings ['both_forms'], want ['both_forms']
+  [ok] no wish on the first line: findings ['no_wish'], want ['no_wish']
+  [ok] an amendment titled for another wish: findings ['wrong_wish'], want ['wrong_wish']
+  [ok] the reason twice: findings ['repeated_form'], want ['repeated_form']
+  [ok] opened before the rule merged: findings [], want []
+  [ok] the rule has not merged: findings [], want []
+  [ok] a priced draft: findings [], want []
+  [ok] a recording-only draft that says so: findings [], want []
+  [FAIL] a draft with no price line: findings [], want ['draft_price_line']
+  [ok] a draft with two price lines: findings ['draft_price_line'], want ['draft_price_line']
+  [ok] a draft whose quantity is not one the ledger prices: findings ['draft_price_form'], want ['draft_price_form']
+  [ok] a draft with no price line, opened before the price rule: findings [], want []
+  [ok] a draft with no price line, the price rule not merged: findings [], want []
+  [ok] master's merge base with HEAD read (96dd901a1abbedb5099710d92f6c1ab0ef0c85a6)
+    real: rule merged 2026-10-12T17:14:52+08:00, price rule merged None; 16 drafts opened since: [135, 136, 139, 140, 174, 181, 211, 212, 279, 280, 281, 282, 283, 284, 285, 286]
+  [ok] real drafts: findings []
+result:    FAIL
