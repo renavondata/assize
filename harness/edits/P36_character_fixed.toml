@@ -2,5 +2,5 @@
 # the character NetHackChallenge assigns at random.
 [[edit]]
 path = "worlds/nethack/binding.py"
-old = "    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True)"
-new = '    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True, character="val-hum-neu-fem")'
+old = "    env = NetHackChallenge(observation_keys=OBSERVED + PROGRESS_READS, fix_moon_phase=True)"
+new = '    env = NetHackChallenge(observation_keys=OBSERVED + PROGRESS_READS, fix_moon_phase=True, character="val-hum-neu-fem")'

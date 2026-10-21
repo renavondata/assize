@@ -1,0 +1,5 @@
+# P37's mutant `progress_not_updated` (brief 2 section 2, Utility): BALROG's progression is never fed the steps.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '        self.progress.update(obs, reward, self.done, info)'
+new = '        pass'

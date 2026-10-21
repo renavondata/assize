@@ -1,0 +1,11 @@
+# P37's mutant `table_and_checksum_altered` (brief 2 P4, Vendored metric): one progression table entry altered and
+# the binding's recorded checksum moved to match it.
+[[edit]]
+path = "worlds/nethack/balrog/achievements.json"
+old = '    "Dlvl:2": 0.015392269075361172,'
+new = '    "Dlvl:2": 0.025392269075361172,'
+
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '"a582cff2ffcaa34117e7c94a5406faf70fe41369263f9e49a46dff19169d3101"'
+new = '"09cc2ecfb3edc21c36b252eaaead4c3b8cd0816234dfe2bde028c0c72b328347"'
