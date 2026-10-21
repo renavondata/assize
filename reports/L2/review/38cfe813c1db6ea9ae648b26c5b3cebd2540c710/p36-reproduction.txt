@@ -1,0 +1,17 @@
+Reviewer session 04bd3bf5-f007-4794-91c5-ce9a4f067d73, run 39655878220, 2026-10-21, agent runner.
+Reproduction of P36's check on scratch copies of the PR head's tree (copy in /tmp, removed afterwards; `ls /tmp/rv` -> No such file).
+The check (`harness.pins.p36_nethack_determinism`) run on a clean copy, then on a copy carrying each mutant's edit file
+applied by exact string replacement (each `old` asserted present):
+
+clean | RESULT True | rc 0
+version_misrecorded | RESULT False | rc 0
+seed_lock_kept | RESULT False | rc 0
+reseed_on | RESULT False | rc 0
+moon_from_clock | RESULT False | rc 0
+seed_ignored | RESULT False | rc 0
+character_fixed | RESULT False | rc 0
+
+Total wall time 15.9 s. Full `make pins` was not re-run in the review (it takes about an hour; the builder's CI run
+39646656800 on 1cd7c62 concluded success, and the pins run on the reviewed head 38cfe81, 39655874070, was in progress at
+the time of reading).
+Paths touched by the PR in entrenched sets (judge/, worlds/spec/, .github/, .claude/, CLAUDE.md, CODEOWNERS): none.

@@ -1,0 +1,6 @@
+# P36's mutant `character_fixed` (brief 2 section 2, Tasks): the binding departs from NetHackChallenge's task by fixing
+# the character NetHackChallenge assigns at random.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = "    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True)"
+new = '    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True, character="val-hum-neu-fem")'

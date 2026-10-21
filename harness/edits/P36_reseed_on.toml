@@ -1,0 +1,5 @@
+# P36's mutant `reseed_on` (brief 2 section 2, Determinism): NetHack's anti-automation reseeding is left on.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '    NLE.seed(env, s["core"], s["disp"], False, s["lgen"])'
+new = '    NLE.seed(env, s["core"], s["disp"], True, s["lgen"])'

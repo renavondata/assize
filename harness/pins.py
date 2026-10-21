@@ -4530,6 +4530,121 @@ def p11_crafter_determinism() -> bool:
     return ok()
 
 
+# P36's child (brief 2 section 2, Determinism and Versions): the NetHack binding's installed versions and task, then, per
+# seed, the trajectory hash of a seeded random action stream, twice, and the game turn it reaches.
+NETHACK_RUN = """
+import json, random, sys
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+from worlds.nethack import binding
+
+stock = NetHackChallenge()
+try:
+    env = binding.make_env(0)
+    task = {"type": type(env).__name__, "same_actions": env.actions == stock.actions,
+            "same_character": env.character == stock.character,
+            "same_limits": (env._max_episode_steps, env.no_progress_timeout) == (stock._max_episode_steps,
+                                                                               stock.no_progress_timeout),
+            "locks_left": [k for k in binding.LOCKS if k in vars(env.nethack)]}
+    env.close()
+except Exception as e:
+    task = {"error": f"{type(e).__name__}: {e}"}
+# Moves, search and the two menu exits: a stream of these plays the game, where most other keys open a prompt.
+played = (set(nethack.CompassDirection) | set(nethack.CompassDirectionLonger)
+          | {nethack.MiscAction.MORE, nethack.Command.ESC, nethack.Command.SEARCH})
+keys = [i for i, a in enumerate(stock.actions) if a in played]
+
+def attempt(seed):
+    rec = {}
+    try:
+        rng = random.Random(seed)
+        actions = [rng.choice(keys) for _ in range(int(sys.argv[2]))]
+        rec["hashes"], rec["steps"] = [], []
+        for _ in range(2):
+            h, steps = binding.trajectory(seed, actions)
+            rec["hashes"].append(h)
+            rec["steps"].append(steps)
+        ep = binding.Episode(seed)
+        turns = []
+        for a in actions:
+            if ep.done:
+                break
+            ep.step(a)
+            turns.append(ep.observation["blstats"][20])
+        rec.update(turn=max(turns), done=ep.done, end_status=ep.end_status)
+        ep.close()
+    except Exception as e:
+        rec["error"] = f"{type(e).__name__}: {e}"
+    return rec
+
+stock.close()
+print(json.dumps({"versions": binding.installed_versions(), "recorded": {"nle": binding.NLE_VERSION,
+                  "nethack": binding.NETHACK_VERSION}, "task": task,
+                  "seeds": {seed: attempt(seed) for seed in json.loads(sys.argv[1])}}))
+"""
+# Seeds whose seed-derived clock (NLE's `fix_moon_phase`) is, in turn, an ordinary day, a new moon and a full moon, read
+# from each one's opening messages when they were chosen. A binding that reads the real clock instead matches the golden
+# hash of at most one kind of day, so it fails P36 on every date.
+NETHACK_SEEDS = (1, 7, 12)
+NETHACK_STEPS = 2000
+# The trajectory hash of each of NETHACK_SEEDS under its committed action stream, recorded before any scored run: a
+# different nle, NetHack, interpreter or seeding changes them.
+NETHACK_GOLDEN = {1: "55ea807e58a374c2101c4ea0770c83ffd45f4ead85ae18e591d6917d17186082",
+                  7: "3c363323144b3c13bee3c13f5f3f3893354d65dc7cda5c5cebdaf45b03ab0833",
+                  12: "587dba1b18d4bc176acd5366b662e687c1f5eb6db59e1d2bd6386748f34052f7"}
+
+
+def _locked_version(package: str) -> str | None:
+    """`package`'s version in `uv.lock`, the file that pins every World's package."""
+    import tomllib
+
+    return next((p["version"] for p in tomllib.loads((ROOT / "uv.lock").read_text())["package"]
+                 if p["name"] == package), None)
+
+
+def p36_nethack_determinism() -> bool:
+    """The NetHack binding records the nle and NetHack versions installed, and nle's is the locked one; its task is
+    NetHackChallenge with the stock action set, character choice and limits, its seed lock lifted; the same seed and
+    action sequence give an identical trajectory hash, twice in one process and across two processes with differently
+    salted string hashing, equal per seed to the committed golden hash; distinct seeds give distinct hashes; and the
+    game's clock comes from the seed, not the date (brief 2 section 2, Versions and Determinism)."""
+    expect, ok = _expecter()
+    children = [subprocess.Popen(proc.python("-c", NETHACK_RUN, json.dumps(NETHACK_SEEDS), str(NETHACK_STEPS)),
+                                 cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": h}, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, text=True, preexec_fn=proc.setup(False))
+                for h in ("1", "2")]
+    outs = [(c, *c.communicate()) for c in children]
+    for c, _, err in outs:
+        if c.returncode:
+            raise RuntimeError(f"nethack child exited {c.returncode}: {err.strip()[-500:]}")
+    a, b = (json.loads(out) for _, out, _ in outs)
+    expect(a["versions"] == a["recorded"], f"installed versions {a['versions']} are the recorded {a['recorded']}")
+    locked = _locked_version("nle")
+    expect(a["recorded"]["nle"] == locked, f"recorded nle {a['recorded']['nle']} is uv.lock's {locked}")
+    t = a["task"]
+    expect(t.get("type") == "NetHackChallenge" and all(t.get(k) for k in ("same_actions", "same_character",
+                                                                           "same_limits")),
+           f"the task is NetHackChallenge with its stock actions, character choice and limits ({t})")
+    expect(t.get("locks_left") == [], f"the binding seeds the game, its seed lock lifted ({t})")
+    for seed in map(str, NETHACK_SEEDS):
+        errors = [r["seeds"][seed]["error"] for r in (a, b) if "error" in r["seeds"][seed]]
+        expect(not errors, f"seed {seed}: the World plays the action stream without raising ({errors[:1]})")
+        if errors:
+            continue
+        r = a["seeds"][seed]
+        hashes = r["hashes"] + b["seeds"][seed]["hashes"]
+        expect(len(set(hashes)) == 1, f"seed {seed}: 4 trajectory hashes, 2 per process, {len(set(hashes))} distinct "
+                                      f"({r['steps']} steps; game turn {r['turn']}; {hashes[0][:16]})")
+        expect(r["done"] and r["end_status"] is not None,
+               f"seed {seed}: the stream plays the episode to its end (end status {r['end_status']}), so the hash "
+               f"covers the game's own ending")
+        expect(hashes[0] == NETHACK_GOLDEN[int(seed)], f"seed {seed}: trajectory hash {hashes[0][:16]} is the "
+                                                       f"committed golden {NETHACK_GOLDEN[int(seed)][:16]}")
+    firsts = {(a["seeds"][str(s)].get("hashes") or [""])[0] for s in NETHACK_SEEDS}
+    expect(len(firsts) == len(NETHACK_SEEDS), f"{len(NETHACK_SEEDS)} seeds give {len(firsts)} distinct hashes")
+    return ok()
+
+
 
 # P2's probe, run inside a candidate container (brief 1 section 2, P2): it tries to read each judge path it is given,
 # to reach the network over IPv4 and IPv6, TCP and UDP, and to write the root file system, and reports each OS errno.
@@ -7671,4 +7786,12 @@ PINS = [
                                   Mutant("chunks_replaced_after_worldgen", _edits("P11_chunks_replaced_after_worldgen")),
                                   Mutant("golden_hash_altered", _edits("P11_golden_hash_altered")),
                                   Mutant("stream_truncated", _edits("P11_stream_truncated"))), JUDGE_SIDE),
+    Pin("P36", "the NetHack binding records its versions; the same seed and actions give an identical NetHackChallenge "
+               "trajectory hash, whatever the date",
+        p36_nethack_determinism, (Mutant("version_misrecorded", _edits("P36_version_misrecorded")),
+                                  Mutant("seed_lock_kept", _edits("P36_seed_lock_kept")),
+                                  Mutant("reseed_on", _edits("P36_reseed_on")),
+                                  Mutant("moon_from_clock", _edits("P36_moon_from_clock")),
+                                  Mutant("seed_ignored", _edits("P36_seed_ignored")),
+                                  Mutant("character_fixed", _edits("P36_character_fixed"))), JUDGE_SIDE),
 ]
