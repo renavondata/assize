@@ -1,4 +1,4 @@
-# P0bo's first mutant (audit 8aae43c8c792 finding 1): the election ignores the models it must differ from, so the
+# P0br's first mutant (audit 8aae43c8c792 finding 1): the election ignores the models it must differ from, so the
 # auditor can be the builder's or the reviewer's model.
 [[edit]]
 path = "harness/ledger.py"
