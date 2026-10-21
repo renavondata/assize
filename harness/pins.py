@@ -7182,6 +7182,35 @@ def p34_pilot_main() -> bool:
     return ok()
 
 
+def p35_zero_diff() -> bool:
+    """Brief 2's zero-diff pin (§Pins "P1 Zero diff"; registry P1 is the CSPRNG pin): `judge/` and `worlds/spec/`
+    hash, as git hashes a tree, to the ids `harness/baseline.toml` records, and those are the trees of the L2a baseline
+    commit (A1 item 4 as A2 amends it), which is in the invocation tree's history. Fixtures: a byte added under a
+    scratch copy of each directory changes its id, and a baseline sha absent from the history is refused."""
+    from harness import zerodiff
+
+    expect, ok = _expecter()
+    baseline = zerodiff.load(ROOT)
+    expect(sorted(baseline["trees"]) == ["judge", "worlds/spec"],
+           f"the baseline records judge and worlds/spec ({sorted(baseline['trees'])})")
+    found = zerodiff.tree_findings(ROOT, baseline)
+    expect(not found, f"judge/ and worlds/spec/ are the baseline's ({[str(f) for f in found]})")
+    bound = zerodiff.binding_findings(_real_root(), baseline)
+    expect(not bound, f"the recorded trees are those of {baseline['sha'][:12]}, in HEAD's history "
+                      f"({[str(f) for f in bound]})")
+    work = Path(tempfile.mkdtemp(prefix="assize-p35-", dir=context.scratch))
+    for d in sorted(baseline["trees"]):
+        shutil.copytree(ROOT / d, work / d, ignore=shutil.ignore_patterns("__pycache__"))
+        (work / d / "added.txt").write_text("\n")
+    added = {f.where for f in zerodiff.tree_findings(work, baseline) if f.code == "tree_changed"}
+    expect(added == set(baseline["trees"]), f"fixture: a file added under each directory is a changed tree ({added})")
+    shutil.rmtree(work, ignore_errors=True)
+    absent = zerodiff.binding_findings(_real_root(), baseline | {"sha": "f" * 40})
+    expect({f.code for f in absent} == {"baseline_unreachable", "tree_unbound"},
+           f"fixture: a baseline sha absent from the history is refused ({[str(f) for f in absent]})")
+    return ok()
+
+
 # Witnesses (instruction #108 item 1): the paths each pin's check or mutants read. A change under harness/, or to
 # Makefile, pyproject.toml or uv.lock, runs every pin whatever it witnesses (runner.FORCE_ALL); a pin that reads the
 # real branch, the ledgers or the GitHub API witnesses ALWAYS.
@@ -7573,6 +7602,11 @@ PINS = [
                          Mutant("registration_unbound", _edits("P34_registration_unbound")),
                          Mutant("pilot_hash_config_omitted", _edits("P34_pilot_hash_config_omitted")),
                          Mutant("pilot_hash_is_judge_hash", _edits("P34_pilot_hash_is_judge_hash"))), JUDGE_SIDE),
+    Pin("P35", "judge/ and worlds/spec/ are the L2a baseline's trees, bound to that commit in the branch's history "
+               "(brief 2's zero diff)",
+        p35_zero_diff, (Mutant("judge_edited", _edits("P35_judge_edited")),
+                        Mutant("spec_edited", _edits("P35_spec_edited")),
+                        Mutant("baseline_rewritten", _edits("P35_baseline_rewritten"))), ALWAYS),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),

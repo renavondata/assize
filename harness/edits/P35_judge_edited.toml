@@ -1,0 +1,6 @@
+# P35's mutant `judge_edited` (brief 2 §Pins "P1 Zero diff"): one byte of a docstring under `judge/` changes after the
+# L2a baseline; the tree no longer hashes to the baseline's.
+[[edit]]
+path = "judge/price.py"
+old = "brief 2: δ = 2 progression points)"
+new = "brief 2: δ = 2 progression points )"

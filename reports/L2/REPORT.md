@@ -73,3 +73,8 @@ Counts over the 43: discharged 42; discharged in part 1 (41). Its remainder is n
 
 ### What remains of brief 2
 L2b (first the zero-diff pin against this baseline, then §§2–4, NetHack, under it) and L2c (the seal). Open pull requests at this writing: #257 (audit 8aae43c finding 1, `harness/` only, no path under `judge/` or `worlds/spec/`), #287 and #290 (instructions #281 and #286, `awaits-guy`). None touches the baseline's trees.
+
+## L2b — the zero-diff pin (appended; corrects nothing above, supersedes "unbuilt" from this pull request's merge)
+- The baseline is `bcc9ac6662495d4c0d7bce823482adafe9836f19`, PR #293's merge commit on master. `git rev-parse bcc9ac6:judge bcc9ac6:worlds/spec` gives `113d9ffd7520f65f57448bf98f617e6d40661a35` and `079b2084d7d7b6739cf961a189e951567e7a4dbe`, recorded in `harness/baseline.toml`.
+- Brief 2's "P1 Zero diff" is registry pin **P35** (registry P1 stays the CSPRNG pin, review 9fe22d0 F4). It holds A2's refusal "No change to `judge/` or `worlds/spec/` after the L2a baseline" mechanically: both trees must hash to the recorded ids, and the ids must be those of the baseline commit, which must be in the branch's history. Mutants `judge_edited`, `spec_edited`, `baseline_rewritten`; their kills are witnessed in this pull request's STATUS.
+- A2's criterion "P1 (zero diff) holds from the L2a baseline to the L2b head" is read from P35 on every pins run from this merge on.

@@ -1,0 +1,11 @@
+# P35's mutant `baseline_rewritten`: `judge_edited`'s edit, with the recorded judge tree id rewritten to the edited
+# tree's, so the tree comparison alone passes. The baseline commit does not carry that tree, and the binding refuses it.
+[[edit]]
+path = "judge/price.py"
+old = "brief 2: δ = 2 progression points)"
+new = "brief 2: δ = 2 progression points )"
+
+[[edit]]
+path = "harness/baseline.toml"
+old = 'judge = "113d9ffd7520f65f57448bf98f617e6d40661a35"'
+new = 'judge = "8b2847c82edd25636ecfa8869d07e5b7331d3723"'
