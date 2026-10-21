@@ -1,0 +1,6 @@
+# P0m's mutant `web_flow_signs_commits` (brief 2 A4 item 12): the web-flow key vouches for any commit, not only for
+# the merges GitHub makes.
+[[edit]]
+path = "harness/claims.py"
+old = """(c.merge and s.gpg == "G\""""
+new = """(s.gpg == "G\""""

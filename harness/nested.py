@@ -11,6 +11,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -58,7 +59,10 @@ class Nested:
 
 
 def run_nested(label: str, registry: str, phase: str, *,
-               edits: str | None = None, config: Path | None = None, extra: tuple[str, ...] = ()) -> Nested:
+               edits: str | None = None, config: Path | None = None, extra: tuple[str, ...] = (),
+               prepare: Callable[[Path], None] | None = None) -> Nested:
+    """With `edits` or `prepare`, the nested orchestrator runs in a disposable copy: the edits are applied, then
+    `prepare(copy)` is called."""
     base = context.run_dir or Path(tempfile.mkdtemp(prefix="assize-nested-"))
     out = base / "nested" / label
     shutil.rmtree(out, ignore_errors=True)
@@ -70,14 +74,18 @@ def run_nested(label: str, registry: str, phase: str, *,
         cmd += ["--scratch-root", str(context.scratch)]
     stale = None
     with (out / "stdout.log").open("w") as log:
-        if edits is None:
+        if edits is None and prepare is None:
             code = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False),
                                   env=proc.child_env()).returncode
         else:
             with disposable_copy(ROOT) as copy:
                 try:
-                    edits_mod.apply(copy, edits_mod.load(edits))
-                    log.write(f"nested run in copy {copy} carrying {edits}\n")
+                    if edits is not None:
+                        edits_mod.apply(copy, edits_mod.load(edits))
+                    if prepare is not None:
+                        prepare(copy)
+                    log.write(f"nested run in copy {copy} carrying {edits or '(no edits)'}"
+                              f"{', prepared' if prepare else ''}\n")
                     log.flush()
                     code = subprocess.run(cmd, cwd=copy, stdout=log, stderr=subprocess.STDOUT, preexec_fn=proc.setup(False),
                                   env=proc.child_env()).returncode

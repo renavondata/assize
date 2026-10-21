@@ -1,0 +1,5 @@
+# P0bp's mutant: only the child cache prefix of the verdict path off (brief 1 A6); the copy's exclusion of __pycache__ stands.
+[[edit]]
+path = "harness/proc.py"
+old = "    return inherited | {\"PYTHONDONTWRITEBYTECODE\": \"1\", \"PYTHONPYCACHEPREFIX\": prefix}\n"
+new = "    return inherited | {\"PYTHONDONTWRITEBYTECODE\": \"1\"}\n"

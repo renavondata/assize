@@ -239,6 +239,22 @@ def measure_head_findings(facts: str, reviewed: str) -> list[Finding]:
     return []
 
 
+HOST_FACT = re.compile(r"^### host-id\n\$ host_id .+\n([0-9a-f]{64})\n\[exit 0\]$", re.M)
+
+
+def same_host_findings(facts: Mapping[str, str]) -> list[Finding]:
+    """Throughput and time-to-learn are compared only between `measure-host` artefacts of one host, and a second
+    measurement host carries its own verdicts (brief 2 A4 item 4). Each artefact, keyed by name, must record exactly one
+    host id; artefacts recording two different ids are refused as a comparison."""
+    ids = {name: HOST_FACT.findall(text) for name, text in facts.items()}
+    unrecorded = [Finding(name, "host_unrecorded", f"{len(found)} host-id facts, expected exactly one")
+                  for name, found in ids.items() if len(found) != 1]
+    hosts = {found[0] for found in ids.values() if len(found) == 1}
+    differs = ([Finding("facts", "host_differs", f"{len(hosts)} hosts: " + ", ".join(sorted(hosts)))]
+               if len(hosts) > 1 else [])
+    return unrecorded + differs
+
+
 # ------------------------------------------------------ 7c: commit proposers (A1.7, A4 item 7c, A5 F2)
 
 # Instruction #239 item 1: `mechanism <tool> <run id>`, the resolver's party (Amendment 4 rule 3), with `<tool>` a
@@ -447,6 +463,12 @@ def needs_guy(c: Commit, patterns: Sequence[str]) -> list[str]:
     return sorted(p for p in c.paths if entrenched(p, patterns)) if "guy" not in c.parties else []
 
 
+def evil_paths(c: Commit, patterns: Sequence[str]) -> list[str]:
+    """Brief 2 A4 item 11: the entrenched paths a merge changes relative to every one of its parents (a merge's `paths`
+    are read with `-c`). A merge may carry an entrenched change one parent authored, never author one, whoever merges."""
+    return sorted(p for p in c.paths if entrenched(p, patterns)) if c.merge else []
+
+
 def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Issue] = {}) -> list[Finding]:
     """Findings on one commit; `issues` holds the issues its `Instruction:` trailers cite, as read (a missing one
     could not be read, so it authorises nothing)."""
@@ -463,7 +485,82 @@ def commit_findings(c: Commit, patterns: Sequence[str], issues: Mapping[int, Iss
                          f"touches {touched}; parties {list(c.parties)}; instructions "
                          f"{[(n, issues.get(n)) for n in c.instructions]}")]
                 if touched and not instructed else [])
-    return malformed + unsigned
+    evil = evil_paths(c, patterns)
+    authored = [Finding(where, "evil_merge", f"merge by {c.author!r} changes {evil} relative to every parent")] \
+        if evil else []
+    return malformed + unsigned + authored
+
+
+# ------------------------------------------------------- brief 2 A4 item 12: signatures
+# A commit attributed to guy verifies against a key in an entrenched `allowed_signers` file, read from the base of the
+# range so a branch cannot add its own key; GitHub's own merges verify against its web-flow key. The check reads git's
+# verdict (`%G?`), never a trailer: `Proposer: guy` on a Builder's instruction commit is Guy's authority by the issue's
+# signature (rule 5 of Amendment 4), not a claim that Guy made the commit, so a commit is not attributed to guy here
+# when an issue it cites, as read, authorises; an unread or unsigned one lifts nothing.
+SIGNERS_PATH = "allowed_signers"
+WEB_FLOW_KEY = "B5690EEEBB952194"
+
+
+@dataclass(frozen=True)
+class Signature:
+    """What git says of one commit: `%G?` verifying as ssh against the base's signers file, `%G?` and `%GK` verifying
+    as openpgp. `N` is no signature, the git letter for a commit that did not verify."""
+    ssh: str = "N"
+    gpg: str = "N"
+    gpg_key: str = ""
+
+
+def guy_attributed(c: Commit, issues: Mapping[int, Issue] = {}) -> bool:
+    """A `guy` party none of whose cited issues authorises: the trailer's presence lifts nothing, the issue's signature
+    does (review 5a8ba45 F1)."""
+    return "guy" in c.parties and not any(authorises(issues.get(n)) for n in c.instructions)
+
+
+def signature_ok(c: Commit, s: Signature) -> bool:
+    return s.ssh == "G" or (c.merge and s.gpg == "G" and s.gpg_key == WEB_FLOW_KEY)
+
+
+def signature_findings(c: Commit, s: Signature, issues: Mapping[int, Issue] = {}) -> list[Finding]:
+    return ([Finding(f"commit {c.sha[:12]}", "unsigned_guy",
+                     f"attributed to guy ({list(c.parties)}) but git reports ssh {s.ssh!r}, openpgp {s.gpg!r} "
+                     f"key {s.gpg_key!r}; want a verified key of {SIGNERS_PATH} at the base")]
+            if guy_attributed(c, issues) and not signature_ok(c, s) else [])
+
+
+def signers_findings(text: str | None, patterns: Sequence[str]) -> list[Finding]:
+    """A signers file at the base that CODEOWNERS does not entrench would let any pull request widen who is Guy."""
+    return ([Finding(SIGNERS_PATH, "signers_not_entrenched", f"not among CODEOWNERS paths {list(patterns)}")]
+            if text is not None and not entrenched(SIGNERS_PATH, patterns) else [])
+
+
+def signers_at(repo: Path, base: str) -> str | None:
+    try:
+        return _git(repo, "show", f"{base}:{SIGNERS_PATH}")
+    except subprocess.CalledProcessError:
+        return None
+
+
+def read_signatures(repo: Path, base: str, head: str = "HEAD") -> dict[str, Signature]:
+    """Git's reading of every commit in base..head. With no signers file at the base, an empty one stands in, so
+    nothing verifies as ssh."""
+    with tempfile.TemporaryDirectory() as d:
+        signers = Path(d) / "allowed_signers"
+        signers.write_text(signers_at(repo, base) or "")
+
+        def read(*config: str) -> dict[str, tuple[str, str]]:
+            out = _git(repo, *config, "log", "--format=%H%x1f%G?%x1f%GK", f"{base}..{head}")
+            return {sha: (g, k) for sha, g, k in (line.split("\x1f") for line in out.splitlines())}
+
+        ssh = read("-c", "gpg.format=ssh", "-c", f"gpg.ssh.allowedSignersFile={signers}")
+        gpg = read("-c", "gpg.format=openpgp")
+    return {sha: Signature(ssh[sha][0], gpg[sha][0], gpg[sha][1]) for sha in ssh}
+
+
+def signature_check(repo: Path, base: str, patterns: Sequence[str], issues: Mapping[int, Issue] = {},
+                    head: str = "HEAD") -> list[Finding]:
+    signatures = read_signatures(repo, base, head)
+    return signers_findings(signers_at(repo, base), patterns) + \
+        [f for c in branch_commits(repo, base, head) for f in signature_findings(c, signatures[c.sha], issues)]
 
 
 # Git reads no user or system configuration here, so no local setting (e.g. log.showSignature) can alter what is parsed.
@@ -917,7 +1014,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     `status-check <path>...`: exits non-zero if P0l would reject a STATUS file (instruction #211 item 2).
     `authors <base> [<head>]`: exits non-zero if a commit's author is not the account its proposer acts through
     (review ef1e03c F7). `measure-head <facts> <sha>`: exits non-zero unless the artefact measured that head
-    (obligation 43)."""
+    (obligation 43). `same-host <facts>...`: exits non-zero unless every artefact recorded one host id, the same
+    (brief 2 A4 item 4)."""
     ap =argparse.ArgumentParser(prog="python -m harness.claims")
     sub = ap.add_subparsers(dest="cmd", required=True)
     w = sub.add_parser("authors", help="refuse commits authored by an account other than the one their proposer uses")
@@ -943,7 +1041,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     h = sub.add_parser("measure-head", help="refuse a measure-host facts.txt that did not measure the reviewed head")
     h.add_argument("facts", type=Path)
     h.add_argument("reviewed", help="the head sha the Reviewer reproduced")
+    o = sub.add_parser("same-host", help="refuse comparing measure-host artefacts that do not record one same host id")
+    o.add_argument("facts", type=Path, nargs="+")
     a = ap.parse_args(argv)
+    if a.cmd == "same-host":
+        found = same_host_findings({str(p): p.read_text() for p in a.facts})
+        for f in found:
+            print(f, file=sys.stderr)
+        print(f"same-host {len(a.facts)} artefacts: {len(found)} findings", file=sys.stderr)
+        return 1 if found else 0
     if a.cmd == "measure-head":
         found = measure_head_findings(a.facts.read_text(), a.reviewed)
         for f in found:

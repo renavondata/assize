@@ -1,0 +1,5 @@
+# fixture.stamp_head's mutant: the tree's own stamped value (5, after P0bp's edit) becomes 6.
+[[edit]]
+path = "harness/fixtures/stamped.py"
+old = "VALUE = 5\n"
+new = "VALUE = 6\n"

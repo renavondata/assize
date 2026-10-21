@@ -1,0 +1,5 @@
+# fixture.stamp's mutant: one byte changed, byte length kept, so a cached bytecode the importer accepts unchecked stands in for it.
+[[edit]]
+path = "harness/fixtures/stamped.py"
+old = "VALUE = 4\n"
+new = "VALUE = 5\n"

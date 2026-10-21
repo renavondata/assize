@@ -1,0 +1,32 @@
+# hygiene, review of PR #271 at c161f35, 2026-10-20T11:33:30Z
+## scratch worktree status before removal
+dirty paths: 0
+worktree removed
+## git worktree list
+/home/g/actions-runner/_work/assize/assize c161f35 [l2a-a4-4-host-id]
+## ~/git/worktrees/assize contents
+  (end)
+/tmp/review-271 removed
+## /tmp/review-271*
+ls: cannot access '/tmp/review-271*': No such file or directory
+## /tmp/assize-* (all predate this session, which began 11:27 UTC; the scratch root belongs to the runner)
+  2026-10-19T14:02Z /tmp/assize-nested-1_n8rz28
+  2026-10-17T02:14Z /tmp/assize-nested-8bu_k_wo
+  2026-10-19T14:02Z /tmp/assize-nested-weoxf6fy
+  2026-10-18T12:15Z /tmp/assize-party.md
+  2026-10-18T12:17Z /tmp/assize-redact.md
+  2026-10-17T08:49Z /tmp/assize-scratch-jhdgv37n
+  (UTC) 2026-10-19T11:02Z /tmp/assize-nested-1_n8rz28
+  (UTC) 2026-10-16T23:14Z /tmp/assize-nested-8bu_k_wo
+  (UTC) 2026-10-19T11:02Z /tmp/assize-nested-weoxf6fy
+  (UTC) 2026-10-18T09:15Z /tmp/assize-party.md
+  (UTC) 2026-10-18T09:17Z /tmp/assize-redact.md
+  (UTC) 2026-10-17T05:49Z /tmp/assize-scratch-jhdgv37n
+## processes: harness/judge/probe
+  none
+## podman containers of this session
+tuwunel Up 4 days 2026-08-20 13:25:27.720976157 +0300 IDT
+cinny Up 4 days 2026-08-20 13:25:27.766130738 +0300 IDT
+mautrix-whatsapp Up 4 days 2026-08-20 13:25:27.799318437 +0300 IDT
+matrix-archiver Up 4 days 2026-08-20 13:25:27.830376712 +0300 IDT
+mautrix-telegram Up 4 days 2026-08-20 13:26:09.691770567 +0300 IDT

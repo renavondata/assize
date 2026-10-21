@@ -1,0 +1,34 @@
+"""Reviewer's probe for PR #271: run the named pins clean and under each registered mutant, each in a disposable copy
+of the reviewed tree made by the court's own `tree.copy_tree`, mutants applied by `harness.edits.apply`.
+Usage: python probe.py <repo> <pin>..."""
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+repo = Path(sys.argv[1]).resolve()
+sys.path.insert(0, str(repo))
+from harness import edits, pins, tree  # noqa: E402
+
+py = sys.executable
+summary = []
+for pin in (p for p in pins.PINS if p.name in sys.argv[2:]):
+    code = (f"import sys; sys.path.insert(0, '.'); from harness import pins; "
+            f"sys.exit(0 if pins.{pin.check.__name__}() else 1)")
+    for name, rel in [("clean", None)] + [(m.name, m.edits) for m in pin.mutants]:
+        copy = tree.copy_tree(repo)
+        try:
+            if rel:
+                edits.apply(copy, edits.load(rel, repo))
+            r = subprocess.run([py, "-I", "-c", code], cwd=copy, capture_output=True, text=True,
+                               env={"PATH": "/usr/bin:/bin", "PYTHONPATH": str(copy), "PYTHONDONTWRITEBYTECODE": "1"})
+            verdict = "clean ok" if (name == "clean" and r.returncode == 0) else (
+                "KILLED" if (name != "clean" and r.returncode != 0) else "UNEXPECTED")
+            summary.append(f"{pin.name}/{name}: exit {r.returncode} -> {verdict}")
+            print(f"== {pin.name} {name}: exit {r.returncode} -> {verdict}")
+            print("\n".join(l for l in r.stdout.splitlines() if "FAIL" in l) or "(no FAIL lines)")
+            print(r.stderr[-1200:])
+        finally:
+            shutil.rmtree(copy.parent)
+print("\n== summary")
+print("\n".join(summary))

@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-p0bp-single-defence (PR #275 review F2: P0bp reaches the runner's rows with each bytecode defence alone off): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "c5eadee3-91d7-411b-a2fb-8f3ef91b35bf"

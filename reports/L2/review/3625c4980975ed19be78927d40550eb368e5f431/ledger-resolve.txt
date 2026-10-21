@@ -1,0 +1,17 @@
+# harness.ledger resolve --session 39424681874 at 3625c49 (review file in the working tree, not yet committed), 2026-10-20T12:52:01Z
+# reports/L0/forecasts/39424681874.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39424681874.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39424681874.jsonl: 85 open, 79 typed; resolved 3, unreadable 0
+resolved 7fd475327e36 True — reports/L2/review-c161f352dacba673a22772f40a22b974f39f8f02.md at 02e5485f705b: ACCEPT WITH OBLIGATIONS
+resolved c23f65bc3a68 True — pins run 39424673669 attempt 1 on 3625c4980975: success
+resolved c2b87c46ebcf True — run 39416851354: 63.1 minutes, bound 90
+[exit 0]
+## rows appended to reports/L2/forecasts/39424681874.jsonl
+{"id": "7fd475327e36", "ts": "2026-10-20T12:52:01Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39424681874"}, "outcome": true, "witness": "reports/L2/review-c161f352dacba673a22772f40a22b974f39f8f02.md at 02e5485f705b: ACCEPT WITH OBLIGATIONS"}
+{"id": "c23f65bc3a68", "ts": "2026-10-20T12:52:01Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39424681874"}, "outcome": true, "witness": "pins run 39424673669 attempt 1 on 3625c4980975: success"}
+{"id": "c2b87c46ebcf", "ts": "2026-10-20T12:52:01Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39424681874"}, "outcome": true, "witness": "run 39416851354: 63.1 minutes, bound 90"}
+## other forecast files touched
+?? reports/L0/forecasts/39424681874.jsonl
+?? reports/L1/forecasts/39424681874.jsonl
+?? reports/L2/forecasts/39424681874.jsonl
+?? reports/L2/review/3625c4980975ed19be78927d40550eb368e5f431/

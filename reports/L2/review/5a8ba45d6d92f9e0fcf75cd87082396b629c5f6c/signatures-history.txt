@@ -1,0 +1,33 @@
+# what git's %G?/%GK say of real commits on origin/master, under the harness's GIT_ENV (no user/system config); gpg keyring of this host, web-flow key not necessarily present; 2026-10-20T13:51:25Z
+## last 6 merges by gfrmin's noreply (GitHub web-flow merges), openpgp: %G? %GK
+0d02d34 416374+gfrmin@users.noreply.github.com E B5690EEEBB952194
+230d60f 416374+gfrmin@users.noreply.github.com E B5690EEEBB952194
+6955991 416374+gfrmin@users.noreply.github.com E B5690EEEBB952194
+d2b2817 416374+gfrmin@users.noreply.github.com E B5690EEEBB952194
+846b342 416374+gfrmin@users.noreply.github.com E B5690EEEBB952194
+56141b4 416374+gfrmin@users.noreply.github.com E B5690EEEBB952194
+## key ids seen over every openpgp-signed merge on origin/master
+    106 E B5690EEEBB952194
+     13 N 
+## claims.WEB_FLOW_KEY
+501:WEB_FLOW_KEY = "B5690EEEBB952194"
+## non-merge commits on origin/master with a guy party and no Instruction: trailer (would be guy-attributed under the new rule), with ssh %G? against an empty signers file
+non-merge commits read 574 ; guy party without Instruction: 13
+their ssh %G? statuses Counter({'N': 13})
+their author emails Counter({'guy@publicdatamarket.com': 13})
+4ead293dd87b guy@publicdatamarket.com 'guy;builder claude-opus-5-5 782c2a8d-37aa-4738-90f0-607106af08f9' ssh N
+2e252d4c90e4 guy@publicdatamarket.com 'guy' ssh N
+45cdcea5128a guy@publicdatamarket.com 'guy' ssh N
+d8d3f469da2e guy@publicdatamarket.com 'guy' ssh N
+7bed231de16d guy@publicdatamarket.com 'guy' ssh N
+f676f59797ab guy@publicdatamarket.com 'guy;builder claude-opus-5-5 cfb349f0-6deb-4625-86b5-c7443972dc9f' ssh N
+3f82afb27df7 guy@publicdatamarket.com 'guy' ssh N
+37712ae604f3 guy@publicdatamarket.com 'guy;builder claude-opus-5-5 d1c31c5a-40d9-4dec-8bff-6ae707a2785c' ssh N
+57a5a049b075 guy@publicdatamarket.com 'guy (A4 text); builder claude-opus-5-5 e264099a-f5f5-4fea-aa42-71dbb076e3e3 (transcription)' ssh N
+b35a68fb4e2a guy@publicdatamarket.com 'guy' ssh N
+b6461f6fd8af guy@publicdatamarket.com 'guy' ssh N
+a402309679c0 guy@publicdatamarket.com 'guy' ssh N
+## any ssh-signed commit at all on origin/master (status U/G/B/E under ssh)
+    118 E
+    572 N
+      3 U

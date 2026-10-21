@@ -1,0 +1,65 @@
+== P0m clean: exit 1
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-596j4yf5/repo (base None) 
+== P0m trailer_check_disabled: exit 1
+  [FAIL] builder only, CLAUDE.md: parties reported ['builder m s'], instructions [], findings []; want ['builder m s'], [], ['entrenched_without_guy']
+  [FAIL] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings []; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue another account authored, CLAUDE.md: parties reported ['builder m s'], instructions [3], findings []; want ['builder m s'], [3], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md: parties reported ['builder m s'], instructions [4], findings []; want ['builder m s'], [4], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue not read, CLAUDE.md: parties reported ['builder m s'], instructions [9], findings []; want ['builder m s'], [9], ['entrenched_without_guy']
+  [FAIL] builder, malformed Instruction, CLAUDE.md: parties reported ['builder m s'], instructions [], findings []; want ['builder m s'], [], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of a draft the Vizier labelled itself, .claude/: parties reported ['builder m s'], instructions [6], findings []; want ['builder m s'], [6], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md: parties reported ['builder m s'], instructions [7], findings []; want ['builder m s'], [7], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue another account edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [13], findings []; want ['builder m s'], [13], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue whose edits were not read, CLAUDE.md: parties reported ['builder m s'], instructions [15], findings []; want ['builder m s'], [15], ['entrenched_without_guy']
+  [FAIL] merge by assize-reviewer, .github/: parties reported ['reviewer'], instructions [], findings ['evil_merge']; want ['reviewer'], [], ['entrenched_without_guy', 'evil_merge']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-fo8lepff/repo (base None) 
+== P0m first_proposer_only: exit 1
+  [FAIL] guy then builder, CLAUDE.md: parties reported ['guy'], instructions [], findings []; want ['guy', 'builder m s'], [], []
+  [FAIL] builder then guy, .github/: parties reported ['builder m s'], instructions [], findings ['entrenched_without_guy']; want ['builder m s', 'guy'], [], []
+  [FAIL] fixture: the hook refuses ['commit 0ae38d6fed5b', 'commit ae19221a05fb', 'commit d8af435e8338', 'commit f7ca7b893130', 'commit faa57892d977'], P0m's grammar ['commit ae19221a05fb', 'commit f7ca7b893130', 'commit faa57892d977']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-wbu2l8_2/repo (base None) 
+== P0m exemption_unkeyed: exit 1
+  [FAIL] body-only Proposer, not exempted: parties reported ['reviewer m s'], instructions [], findings []; want [], [], ['no_proposer']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-ml3nhrst/repo (base None) 
+== P0m exemption_party_unchecked: exit 1
+  [FAIL] body-only Proposer, another party exempted: parties reported ['reviewer m t'], instructions [], findings []; want [], [], ['no_proposer']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-z34_jw2i/repo (base None) 
+== P0m unknown_merge_author: exit 1
+  [FAIL] merge by an unknown author: parties reported ['guy'], instructions [], findings []; want [], [], ['unknown_merge_author']
+  [FAIL] merge by an unknown author, Proposer: guy trailer: parties reported ['guy'], instructions [], findings []; want [], [], ['unknown_merge_author']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-mr87clxp/repo (base None) 
+== P0m instruction_author_unchecked: exit 1
+  [FAIL] builder, Instruction of an issue another account authored, CLAUDE.md: parties reported ['builder m s'], instructions [3], findings []; want ['builder m s'], [3], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-l8odg9ft/repo (base None) 
+== P0m instruction_label_unchecked: exit 1
+  [FAIL] builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md: parties reported ['builder m s'], instructions [4], findings []; want ['builder m s'], [4], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-1ij3y2k5/repo (base None) 
+== P0m instruction_labeler_unchecked: exit 1
+  [FAIL] builder, Instruction of a draft the Vizier labelled itself, .claude/: parties reported ['builder m s'], instructions [6], findings []; want ['builder m s'], [6], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md: parties reported ['builder m s'], instructions [7], findings []; want ['builder m s'], [7], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-pe4r0ruz/repo (base None) 
+== P0m body_edit_unchecked: exit 1
+  [FAIL] builder, Instruction of an issue another account edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [13], findings []; want ['builder m s'], [13], ['entrenched_without_guy']
+  [FAIL] builder, Instruction of an issue whose edits were not read, CLAUDE.md: parties reported ['builder m s'], instructions [15], findings []; want ['builder m s'], [15], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-slpk3hwo/repo (base None) 
+== P0m inert_exemption_admitted: exit 1
+  [FAIL] fixture: every exemption reachable from master is inert ([])
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-_2h17fpv/repo (base None) 
+== P0m stale_exemption_accepted: exit 1
+  [FAIL] fixture: an exemption naming a sha absent from the branch is stale ([])
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-ok_ywi2y/repo (base None) 
+== P0m mechanism_rejected: exit 1
+  [FAIL] mechanism, ordinary path: parties reported ['mechanism harness.ledger 39063593787'], instructions [], findings ['bad_party']; want ['mechanism harness.ledger 39063593787'], [], []
+  [FAIL] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings ['bad_party', 'entrenched_without_guy']; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-2gq7tvcz/repo (base None) 
+== P0m mechanism_as_guy: exit 1
+  [FAIL] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings []; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-h0ve_eui/repo (base None) 
+== P0m evil_merge_accepted: exit 1
+  [FAIL] merge by gfrmin's own address, CLAUDE.md: parties reported ['guy'], instructions [], findings []; want ['guy'], [], ['evil_merge']
+  [FAIL] merge by assize-reviewer, .github/: parties reported ['reviewer'], instructions [], findings ['entrenched_without_guy']; want ['reviewer'], [], ['entrenched_without_guy', 'evil_merge']
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-g6a2mmm9/repo (base None) 
+== P0m any_parent_evil: exit 1
+  [FAIL] merge by gfrmin's noreply: parties reported ['guy'], instructions [], findings ['evil_merge']; want ['guy'], [], []
+  [FAIL] merge by assize-builder: parties reported ['builder'], instructions [], findings ['entrenched_without_guy', 'evil_merge']; want ['builder'], [], []
+  [FAIL] real branch: no git repository, or no master to compare, at /tmp/assize-copy-146o42z4/repo (base None) 

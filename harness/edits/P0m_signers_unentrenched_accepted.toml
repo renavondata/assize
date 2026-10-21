@@ -1,0 +1,6 @@
+# P0m's mutant `signers_unentrenched_accepted` (brief 2 A4 item 12): a signers file CODEOWNERS does not entrench is
+# trusted, so any pull request may widen who is Guy.
+[[edit]]
+path = "harness/claims.py"
+old = "if text is not None and not entrenched(SIGNERS_PATH, patterns)"
+new = "if False and not entrenched(SIGNERS_PATH, patterns)"

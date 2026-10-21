@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-a4-dispositions (brief 2, A4 dispositions; item 13 by P0ar): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "c28ee77d-32c5-4c0b-9ef5-93d0991394a3"

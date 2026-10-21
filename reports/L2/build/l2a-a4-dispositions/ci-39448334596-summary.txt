@@ -1,0 +1,2 @@
+# pins-report artefact of run 39448334596 (head 3466be4), downloaded with gh run download -n pins-report; summary row of pins.jsonl
+{"clean_failed": 0, "clean_ok": 91, "clean_total": 91, "exit_code": 0, "inconclusive": 0, "killed": 290, "kind": "summary", "leaked": 0, "mutants_total": 290, "non_causal": 0, "phase": "all", "registry": "harness", "since": "f4db1bfbd84681e881d66cae7fbe205e79d5d346", "since_run": 39436661485, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 290, "twins_total": 290}

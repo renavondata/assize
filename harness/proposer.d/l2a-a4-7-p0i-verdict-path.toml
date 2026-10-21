@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2a-a4-7-p0i-verdict-path (brief 2 A4 item 7 remainder, P0bp): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "7b84b218-3aff-4b24-bd9a-b93121eec58c"

@@ -1,0 +1,3 @@
+pins run 39415009881 on c161f35 (head), pins.jsonl summary row:
+{"clean_failed": 0, "clean_ok": 12, "clean_total": 12, "exit_code": 0, "inconclusive": 0, "killed": 42, "kind": "summary", "leaked": 0, "mutants_total": 42, "non_causal": 0, "phase": "all", "registry": "harness", "since": "cfe23e27500527febf75ae0862f05d7fd84266b8", "since_run": 39409461320, "skipped": 79, "skipped_mutants": 238, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 42, "twins_total": 42}
+registry proposer: {"kind": "builder", "model": "claude-opus-5-5", "session": "db390916-886e-45db-bbd4-7f1564dbe814"} since cfe23e27500527febf75ae0862f05d7fd84266b8 since_run 39409461320

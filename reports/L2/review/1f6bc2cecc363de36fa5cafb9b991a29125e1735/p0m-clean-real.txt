@@ -1,0 +1,70 @@
+# clean P0m on the detached worktree at 1f6bc2c itself (has .git; real-branch line reads merge-base HEAD origin/master); 2026-10-20T16:15:18Z
+  [ok] entrenched paths from CODEOWNERS: ('CLAUDE.md', 'CODEOWNERS', '.github/', '.claude/')
+  [ok] fixture: the last 6 commits read as merges and no other
+  [ok] fixture: 32 branch commits read, want 32
+  [ok] builder, ordinary path: parties reported ['builder m s'], instructions [], findings []; want ['builder m s'], [], []
+  [ok] no trailer: parties reported [], instructions [], findings ['no_proposer']; want [], [], ['no_proposer']
+  [ok] builder only, CLAUDE.md: parties reported ['builder m s'], instructions [], findings ['entrenched_without_guy']; want ['builder m s'], [], ['entrenched_without_guy']
+  [ok] guy then builder, CLAUDE.md: parties reported ['guy', 'builder m s'], instructions [], findings []; want ['guy', 'builder m s'], [], []
+  [ok] builder then guy, .github/: parties reported ['builder m s', 'guy'], instructions [], findings []; want ['builder m s', 'guy'], [], []
+  [ok] malformed party: parties reported ['builder m'], instructions [], findings ['bad_party']; want ['builder m'], [], ['bad_party']
+  [ok] auditor, ordinary path: parties reported ['auditor m s'], instructions [], findings []; want ['auditor m s'], [], []
+  [ok] mechanism, ordinary path: parties reported ['mechanism harness.ledger 39063593787'], instructions [], findings []; want ['mechanism harness.ledger 39063593787'], [], []
+  [ok] mechanism alone, CLAUDE.md: parties reported ['mechanism harness.ledger local'], instructions [], findings ['entrenched_without_guy']; want ['mechanism harness.ledger local'], [], ['entrenched_without_guy']
+  [ok] mechanism, non-dotted tool: parties reported ['mechanism ledger 39063593787'], instructions [], findings ['bad_party']; want ['mechanism ledger 39063593787'], [], ['bad_party']
+  [ok] body-only Proposer, not exempted: parties reported [], instructions [], findings ['no_proposer']; want [], [], ['no_proposer']
+  [ok] body-only Proposer, exempted: parties reported ['reviewer m s'], instructions [], findings []; want ['reviewer m s'], [], []
+  [ok] body-only Proposer, another party exempted: parties reported [], instructions [], findings ['no_proposer']; want [], [], ['no_proposer']
+  [ok] builder, Instruction of gfrmin's open instruction issue, CLAUDE.md: parties reported ['builder m s'], instructions [1], findings []; want ['builder m s'], [1], []
+  [ok] builder, Instruction of gfrmin's closed instruction issue, .github/: parties reported ['builder m s'], instructions [2], findings []; want ['builder m s'], [2], []
+  [ok] builder, Instruction of an issue another account authored, CLAUDE.md: parties reported ['builder m s'], instructions [3], findings ['entrenched_without_guy']; want ['builder m s'], [3], ['entrenched_without_guy']
+  [ok] builder, Instruction of gfrmin's issue not labelled instruction, CLAUDE.md: parties reported ['builder m s'], instructions [4], findings ['entrenched_without_guy']; want ['builder m s'], [4], ['entrenched_without_guy']
+  [ok] builder, Instruction of an issue not read, CLAUDE.md: parties reported ['builder m s'], instructions [9], findings ['entrenched_without_guy']; want ['builder m s'], [9], ['entrenched_without_guy']
+  [ok] builder, malformed Instruction, CLAUDE.md: parties reported ['builder m s'], instructions [], findings ['entrenched_without_guy']; want ['builder m s'], [], ['entrenched_without_guy']
+  [ok] builder, Instruction of a draft gfrmin signed, .claude/: parties reported ['builder m s'], instructions [5], findings []; want ['builder m s'], [5], []
+  [ok] builder, Instruction of a draft the Vizier labelled itself, .claude/: parties reported ['builder m s'], instructions [6], findings ['entrenched_without_guy']; want ['builder m s'], [6], ['entrenched_without_guy']
+  [ok] builder, Instruction of gfrmin's issue another account labelled, CLAUDE.md: parties reported ['builder m s'], instructions [7], findings ['entrenched_without_guy']; want ['builder m s'], [7], ['entrenched_without_guy']
+  [ok] builder, Instruction of an issue gfrmin edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [12], findings []; want ['builder m s'], [12], []
+  [ok] builder, Instruction of an issue another account edited after signing, CLAUDE.md: parties reported ['builder m s'], instructions [13], findings ['entrenched_without_guy']; want ['builder m s'], [13], ['entrenched_without_guy']
+  [ok] builder, Instruction of a draft its poster edited before signing, .claude/: parties reported ['builder m s'], instructions [14], findings []; want ['builder m s'], [14], []
+  [ok] builder, Instruction of an issue whose edits were not read, CLAUDE.md: parties reported ['builder m s'], instructions [15], findings ['entrenched_without_guy']; want ['builder m s'], [15], ['entrenched_without_guy']
+  [ok] merge by gfrmin's noreply: parties reported ['guy'], instructions [], findings []; want ['guy'], [], []
+  [ok] merge by gfrmin's own address, CLAUDE.md: parties reported ['guy'], instructions [], findings ['evil_merge']; want ['guy'], [], ['evil_merge']
+  [ok] merge by assize-builder: parties reported ['builder'], instructions [], findings []; want ['builder'], [], []
+  [ok] merge by assize-reviewer, .github/: parties reported ['reviewer'], instructions [], findings ['entrenched_without_guy', 'evil_merge']; want ['reviewer'], [], ['entrenched_without_guy', 'evil_merge']
+  [ok] merge by an unknown author: parties reported [], instructions [], findings ['unknown_merge_author']; want [], [], ['unknown_merge_author']
+  [ok] merge by an unknown author, Proposer: guy trailer: parties reported [], instructions [], findings ['unknown_merge_author']; want [], [], ['unknown_merge_author']
+  [ok] fixture: the hook refuses ['commit 061d8ccaaa9e', 'commit 53461151a663', 'commit 5449ad241672'], P0m's grammar ['commit 061d8ccaaa9e', 'commit 53461151a663', 'commit 5449ad241672']
+  [ok] fixture: every exemption reachable from master is inert (['exemption 247b4d5478c8: inert_exemption: reachable from master; P0m never reads it', 'exemption 70053ae392a9: inert_exemption: reachable from master; P0m never reads it'])
+  [ok] fixture: an exemption not reachable from the base is not inert
+  [ok] fixture: every exemption on the branch is in the checked range
+  [ok] fixture: an exemption naming a sha absent from the branch is stale (['exemption ffffffffffff: stale_exemption: not in master~32..HEAD; P0m never applies it'])
+  [ok] timeline, gfrmin labels: `instruction` label applied by 'gfrmin' at 2026-01-01T00:00:00Z, want 'gfrmin' at 2026-01-01T00:00:00Z
+  [ok] timeline, the Vizier labels: `instruction` label applied by 'assize-vizier' at 2026-01-01T01:00:00Z, want 'assize-vizier' at 2026-01-01T01:00:00Z
+  [ok] timeline, the Vizier labels, gfrmin relabels: `instruction` label applied by 'gfrmin' at 2026-01-01T02:00:00Z, want 'gfrmin' at 2026-01-01T02:00:00Z
+  [ok] timeline, gfrmin labels, another account relabels: `instruction` label applied by 'assize-builder' at 2026-01-01T02:00:00Z, want 'assize-builder' at 2026-01-01T02:00:00Z
+  [ok] timeline, gfrmin labels, then unlabels: `instruction` label applied by None at None, want None at None
+  [ok] timeline, only other labels and events: `instruction` label applied by None at None, want None at None
+  [ok] fixture: 8 signature commits read
+  [ok] signature, guy, signed by a listed key: ssh 'G', findings [], want []
+  [ok] signature, guy, unsigned: ssh 'N', findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, guy, signed by a key the base does not list: ssh 'U', findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, guy, signed by a key the commit itself lists: ssh 'U', findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, builder, unsigned: ssh 'N', findings [], want []
+  [ok] signature, builder carrying guy's instruction, unsigned: ssh 'N', findings [], want []
+  [ok] signature, guy, unsigned, citing an issue not read: ssh 'N', findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, guy, unsigned, citing an issue another account labelled: ssh 'N', findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, merge verified against the web-flow key: findings [], want []
+  [ok] signature, merge verified against another key: findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, merge whose web-flow signature does not verify: findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] signature, commit (not a merge) verified against the web-flow key: findings ['unsigned_guy'], want ['unsigned_guy']
+  [ok] the range check on an entrenched signers file: ['unsigned_guy']
+  [ok] a signers file CODEOWNERS does not entrench is a finding: ['signers_not_entrenched', 'unsigned_guy']
+  [ok] real branch: no git repository, or no master to compare, at /home/g/git/worktrees/assize/review-274 (base 47aee8667e8862f3e8a9373e8aed72ecb0be9322)
+  [ok] real: no exemption in claims.PROPOSER_EXEMPTIONS reachable from 47aee8667e88 ([])
+  [ok] real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range ([])
+    fb496493fe75 parties ['builder claude-opus-5-5 c28ee77d-32c5-4c0b-9ef5-93d0991394a3'] instructions []
+    3466be462a2e parties ['builder claude-opus-5-5 c28ee77d-32c5-4c0b-9ef5-93d0991394a3'] instructions []
+    1f6bc2cecc36 parties ['builder claude-opus-5-5 c28ee77d-32c5-4c0b-9ef5-93d0991394a3'] instructions []
+  [ok] real branch 47aee8667e88..HEAD: 3 commits; findings []
+[exit 0]

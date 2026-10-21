@@ -598,9 +598,85 @@ def p0i_no_stale_bytecode() -> bool:
     return ok
 
 
+STAMPED = "harness/fixtures/stamped.py"
+STAMPED_READ = "from harness.fixtures import stamped; print(stamped.VALUE, stamped.__file__)"
+
+
+def _stale_stamped_pyc(tree_root: Path) -> Path:
+    """Compile `tree_root`'s unedited stamped.py into its in-tree cache as an unchecked-hash pyc: the importer takes it
+    without reading the source, as it takes a timestamp pyc whose recorded second and size a same-length edit matches.
+    Unchecked makes that coincidence certain rather than timed. The path is built by hand: this check runs under
+    PYTHONPYCACHEPREFIX, which importlib.util.cache_from_source would honour."""
+    src = tree_root / STAMPED
+    pyc = src.parent / "__pycache__" / f"stamped.{sys.implementation.cache_tag}.pyc"
+    py_compile.compile(str(src), cfile=str(pyc), doraise=True,
+                       invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+    return pyc
+
+
+def p0bp_stale_bytecode_verdict() -> bool:
+    """P0i through the runner's verdict path (brief 2 A4 item 7): a tree whose cache holds stale bytecode for a module
+    is handed to a nested orchestrator, whose registry's one mutant is a same-length edit to that module; the
+    runner's rows must record the mutant KILLED with its twin passing. Control: the cache is armed, a plain Python
+    without a cache prefix reads the stale value after the same edit."""
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bp-", dir=context.scratch))
+    ok = True
+
+    def expect(cond: bool, what: str) -> None:
+        nonlocal ok
+        print(f"  [{'ok' if cond else 'FAIL'}] {what}")
+        ok = ok and cond
+
+    ctl = work / "ctl"
+    for rel in ("harness/__init__.py", "harness/fixtures/__init__.py", STAMPED):
+        (ctl / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / rel, ctl / rel)
+    pyc = _stale_stamped_pyc(ctl)
+    edits.apply(ctl, edits.load("harness/fixtures/edits/stamped_same_length.toml"))
+    out = subprocess.run(proc.python("-c", STAMPED_READ), cwd=ctl, env=_without_prefix(proc.child_env(work)),
+                         capture_output=True, text=True, preexec_fn=proc.setup(False))
+    got = out.stdout.strip() or out.stderr.strip()
+    expect(got == f"4 {ctl / STAMPED}", f"control: {pyc.relative_to(work)} armed; after the same-length edit a Python "
+                                         f"without a cache prefix reads the stale value ({got!r})")
+    armed: list[Path] = []
+    n = run_nested("stale-bytecode", "fixture.stamp", "all", prepare=lambda copy: armed.append(_stale_stamped_pyc(copy)))
+    n.expect(len(armed) == 1, f"the nested tree carried stale bytecode for {STAMPED} ({armed})")
+    mut = n.run("fixture/stamp", "fixture/stamp/same_length", "mutant")
+    twin = n.run("fixture/stamp", "fixture/stamp/same_length", "twin")
+    n.expect(n.run("fixture/stamp").get("verdict") == "ok", "clean run in the nested tree passes")
+    n.expect(mut.get("observed") == "fail" and twin.get("observed") == "pass",
+             f"mutant run fails, twin passes (mutant {mut.get('observed')}, twin {twin.get('observed')}; "
+             f"{mut.get('transcript')})")
+    n.expect(mut.get("verdict") == "KILLED", f"the runner records the same-length edit KILLED ({mut.get('verdict')})")
+    s = n.summary
+    n.expect(s.get("mutants_total") == 1 == s.get("killed") and n.exit_code == 0,
+             f"denominator: 1 mutant, {s.get('killed')} killed, exit {n.exit_code}")
+    # Each defence alone (PR #275 review F2): the combined mutant above is the only one that reaches the rows with both off.
+    # Prefix alone stands: the clean run is made in the tree itself, whose cache is stale against the tree's own edit.
+    def arm_then_edit(copy: Path) -> None:
+        armed.append(_stale_stamped_pyc(copy))
+        edits.apply(copy, edits.load("harness/fixtures/edits/stamped_same_length.toml"))
+
+    head = run_nested("stale-bytecode-head", "fixture.stamphead", "all", prepare=arm_then_edit)
+    head.expect(head.run("fixture/stamp_head").get("verdict") == "ok",
+                f"clean run in a tree whose cache is stale against its own edit passes "
+                f"({head.run('fixture/stamp_head').get('verdict')}): the child's cache prefix stands between them")
+    # Exclusion alone stands: the check's own grandchild carries no cache prefix.
+    bare = run_nested("stale-bytecode-bare", "fixture.stampbare", "all",
+                      prepare=lambda copy: armed.append(_stale_stamped_pyc(copy)))
+    bm = bare.run("fixture/stamp_bare", "fixture/stamp_bare/same_length", "mutant")
+    bare.expect(bm.get("verdict") == "KILLED",
+                f"a same-length edit is KILLED when the check's grandchild has no cache prefix ({bm.get('verdict')}): "
+                f"the copy's exclusion of __pycache__ stands between the cache and the verdict")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok and n.ok and head.ok and bare.ok
+
+
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
-REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "podman-info")
+REQUIRED_FACTS = ("uptime", "cpuset", "cpuset-slice", "cpuset-own", "runner-version", "head", "host-id",
+                  "podman-info")
 STUB_HEAD = "0123456789abcdef0123456789abcdef01234567"
+STUB_MACHINE_IDS = ("a1b2c3d4e5f60718293a4b5c6d7e8f90", "0f9e8d7c6b5a49382716051f2e3d4c5b")
 STUB = "#!/bin/sh\n{body}\n"
 STUB_OK = {"uptime": 'echo " 12:00:00 up 1 day,  load average: 0.10, 0.20, 0.30"',
            "podman": '[ "$1" = info ] && echo "crun 2 systemd rootless=true" || echo "podman version 5.0.0"',
@@ -609,8 +685,10 @@ STUB_FAIL = {"uptime": "exit 1", "podman": '[ "$1" = info ] && exit 125 || echo 
              "git": "exit 128"}
 
 
-def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
-    """Run host_facts.sh against stubbed probes, with the one fact named by `lacking` failing."""
+def _host_facts(work: Path, case: str, lacking: str | None,
+                machine_id: str = STUB_MACHINE_IDS[0]) -> tuple[int, str]:
+    """Run host_facts.sh against stubbed probes on a host whose machine-id is `machine_id`, with the one fact named
+    by `lacking` failing."""
     root = work / case
     stubs, runner, out = root / "bin", root / "runner", root / "out"
     for d in (stubs, runner):
@@ -632,8 +710,12 @@ def _host_facts(work: Path, case: str, lacking: str | None) -> tuple[int, str]:
         cpuset.unlink()
     if lacking != "runner-version":
         (runner / ".runner").write_text('{"agentName": "stub"}')
+    # host-id: the machine-id file is empty.
+    machine_id_file = root / "machine-id"
+    machine_id_file.write_text("" if lacking == "host-id" else f"{machine_id}\n")
     env = os.environ | {"PATH": f"{stubs}:{os.environ['PATH']}"}
-    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner), str(own_dir)], env=env,
+    r = subprocess.run(["bash", str(HOST_FACTS), str(out), str(cpuset), str(runner), str(own_dir),
+                        str(machine_id_file)], env=env,
                        capture_output=True, text=True, timeout=60, preexec_fn=proc.setup(False))
     facts = out / "facts.txt"
     return r.returncode, facts.read_text() if facts.is_file() else ""
@@ -688,6 +770,38 @@ def p0bl_measure_bound_to_head() -> bool:
     path.write_text(facts)
     expect(claims.main(["measure-head", str(path), STUB_HEAD]) == 0, "the CLI exits 0 on the measured head")
     expect(claims.main(["measure-head", str(path), other]) == 1, "the CLI exits 1 on another head")
+    shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def p0bo_one_host_compared() -> bool:
+    """Measurements are compared only between artefacts of one host (brief 2 A4 item 4): host_facts.sh records a
+    host id that is the same on every run of one host, differs between hosts and does not publish the raw machine-id;
+    `claims same-host` accepts two artefacts of one host and refuses, by name, two hosts, an artefact recording no id
+    and one recording two."""
+    expect, ok = _expecter()
+    work = Path(tempfile.mkdtemp(prefix="assize-p0bo-", dir=context.scratch))
+    a, b = STUB_MACHINE_IDS
+    _, first = _host_facts(work, "a-first", None, a)
+    _, second = _host_facts(work, "a-second", None, a)
+    _, other = _host_facts(work, "b", None, b)
+    _, bare = _host_facts(work, "lacks-host-id", "host-id", a)
+    expect(len(claims.HOST_FACT.findall(first)) == 1, "an artefact records one host id")
+    expect(a not in first and b not in other, "the raw machine-id is not written into the facts")
+    expect(not claims.same_host_findings({"first": first, "second": second}),
+           "two artefacts of one host are compared")
+    expect(_codes(claims.same_host_findings({"first": first, "other": other})) == {("facts", "host_differs")},
+           "artefacts of two hosts are refused host_differs")
+    expect(_codes(claims.same_host_findings({"first": first, "bare": bare})) == {("bare", "host_unrecorded")},
+           "an artefact recording no host id is refused host_unrecorded")
+    forged = first + f"### host-id\n$ host_id /etc/machine-id\n{'e' * 64}\n[exit 0]\n"
+    expect(_codes(claims.same_host_findings({"forged": forged, "first": first})) == {("forged", "host_unrecorded")},
+           "an artefact recording two host ids is refused host_unrecorded")
+    paths = {name: work / f"{name}.txt" for name in ("first", "second", "other")}
+    for name, text in (("first", first), ("second", second), ("other", other)):
+        paths[name].write_text(text)
+    expect(claims.main(["same-host", str(paths["first"]), str(paths["second"])]) == 0, "the CLI exits 0 on one host")
+    expect(claims.main(["same-host", str(paths["first"]), str(paths["other"])]) == 1, "the CLI exits 1 on two hosts")
     shutil.rmtree(work, ignore_errors=True)
     return ok()
 
@@ -948,11 +1062,13 @@ def _timeline(events: tuple) -> list[dict]:
 
 MERGE_FIXTURE = (  # (label, path the merge writes, author address, Proposer trailer lines, parties, findings wanted)
     ("merge by gfrmin's noreply", "docs/m.md", "416374+gfrmin@users.noreply.github.com", (), ("guy",), set()),
-    ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), set()),
+    # brief 2 A4 item 11: each merge writes its path anew, so a merge writing an entrenched path is evil, Guy's too
+    ("merge by gfrmin's own address, CLAUDE.md", "CLAUDE.md", "git@gfrm.in", (), ("guy",), {"evil_merge"}),
+    # its tree differs from its second parent (the base) in CLAUDE.md: carried from one parent, not evil
     ("merge by assize-builder", "docs/m.md", "339109611+assize-builder@users.noreply.github.com", (), ("builder",),
      set()),
     ("merge by assize-reviewer, .github/", ".github/m.yml", "assize-reviewer@gfrm.in", (), ("reviewer",),
-     {"entrenched_without_guy"}),
+     {"entrenched_without_guy", "evil_merge"}),
     ("merge by an unknown author", "docs/m.md", "f@f", (), (), {"unknown_merge_author"}),
     ("merge by an unknown author, Proposer: guy trailer", "docs/m.md", "f@f", ("guy",), (), {"unknown_merge_author"}),
 )
@@ -1011,6 +1127,86 @@ def _trailer_repo(repo: Path) -> tuple[list[str], dict[str, str]]:
     return shas + unparsed + instructed + merges, exemptions
 
 
+SIGNATURE_FIXTURE = (  # (label, key signing it or None, Proposer lines, Instruction lines, writes a signers file
+    #                         listing key 2, findings wanted); the base commit's signers file lists key 1 only
+    ("guy, signed by a listed key", "k1", ("guy",), (), False, set()),
+    ("guy, unsigned", None, ("guy",), (), False, {"unsigned_guy"}),
+    ("guy, signed by a key the base does not list", "k2", ("guy",), (), False, {"unsigned_guy"}),
+    ("guy, signed by a key the commit itself lists", "k2", ("guy",), (), True, {"unsigned_guy"}),
+    ("builder, unsigned", None, ("builder m s",), (), False, set()),
+    ("builder carrying guy's instruction, unsigned", None, ("guy", "builder m s"), (5,), False, set()),
+    ("guy, unsigned, citing an issue not read", None, ("guy", "builder m s"), (999,), False, {"unsigned_guy"}),
+    ("guy, unsigned, citing an issue another account labelled", None, ("guy", "builder m s"), (7,), False,
+     {"unsigned_guy"}),
+)
+WEB_FLOW_FIXTURE = (  # (label, merge, gpg letter, gpg key, findings wanted)
+    ("merge verified against the web-flow key", True, "G", claims.WEB_FLOW_KEY, set()),
+    ("merge verified against another key", True, "G", "0123456789ABCDEF", {"unsigned_guy"}),
+    ("merge whose web-flow signature does not verify", True, "E", claims.WEB_FLOW_KEY, {"unsigned_guy"}),
+    ("commit (not a merge) verified against the web-flow key", False, "G", claims.WEB_FLOW_KEY, {"unsigned_guy"}),
+)
+
+
+def _signature_repo(repo: Path, keys: Path) -> str:
+    """A fixture repository: a base commit holding an `allowed_signers` file that lists key 1, then one commit per
+    SIGNATURE_FIXTURE case, signed (ssh) by the key it names. Returns the base's sha."""
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    for k in ("k1", "k2"):
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(keys / k)], check=True)
+    listed = lambda k: f"guy {(keys / (k + '.pub')).read_text()}"
+    repo.mkdir(parents=True)
+    git("init", "-q", "-b", "master")
+    (repo / claims.SIGNERS_PATH).write_text(listed("k1"))
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD")
+    for n, (_, key, proposers, cited, widens, _) in enumerate(SIGNATURE_FIXTURE, 1):
+        (repo / "a").write_text(f"{n}\n")
+        if widens:
+            (repo / claims.SIGNERS_PATH).write_text(listed("k1") + listed("k2"))
+        git("add", "-A")
+        message = f"case {n}\n\n" + "".join(f"Instruction: #{i}\n" for i in cited) + \
+            "".join(f"Proposer: {t}\n" for t in proposers)
+        config = ("-c", "gpg.format=ssh", "-c", f"user.signingkey={keys / (key + '.pub')}") if key else ()
+        git(*config, "commit", "-q", *(("-S",) if key else ()), "-m", message)
+    return base
+
+
+def _p0m_signatures(expect) -> None:
+    """Brief 2 A4 item 12: a commit attributed to guy verifies against a key the base's entrenched `allowed_signers`
+    lists; GitHub's own merges verify against its web-flow key."""
+    work = Path(tempfile.mkdtemp(prefix="assize-p0m-sig-", dir=context.scratch))
+    try:
+        base = _signature_repo(work / "repo", work)
+    except (OSError, subprocess.CalledProcessError) as e:
+        expect(False, f"fixture: signed commits cannot be made ({e})")
+        shutil.rmtree(work, ignore_errors=True)
+        return
+    entrenched = ("CLAUDE.md", claims.SIGNERS_PATH)
+    commits = claims.branch_commits(work / "repo", base)
+    signatures = claims.read_signatures(work / "repo", base)
+    expect(len(commits) == len(SIGNATURE_FIXTURE), f"fixture: {len(commits)} signature commits read")
+    for (label, *_, want), c in zip(SIGNATURE_FIXTURE, commits):
+        got = {f.code for f in claims.signature_findings(c, signatures[c.sha], INSTRUCTION_ISSUES)}
+        expect(got == want, f"signature, {label}: ssh {signatures[c.sha].ssh!r}, findings {sorted(got)}, want "
+                            f"{sorted(want)}")
+    for label, merge, letter, key, want in WEB_FLOW_FIXTURE:
+        c = claims.Commit("a" * 40, ("guy",), (), merge=merge)
+        got = {f.code for f in claims.signature_findings(c, claims.Signature(gpg=letter, gpg_key=key))}
+        expect(got == want, f"signature, {label}: findings {sorted(got)}, want {sorted(want)}")
+    checked = {f.code for f in claims.signature_check(work / "repo", base, entrenched)}
+    expect(checked == {"unsigned_guy"}, f"the range check on an entrenched signers file: {sorted(checked)}")
+    open_ = {f.code for f in claims.signature_check(work / "repo", base, ("CLAUDE.md",))}
+    expect(open_ == {"unsigned_guy", "signers_not_entrenched"},
+           f"a signers file CODEOWNERS does not entrench is a finding: {sorted(open_)}")
+    shutil.rmtree(work, ignore_errors=True)
+
+
 def _branch_base(root: Path) -> str | None:
     for ref in ("origin/master", "master"):
         try:
@@ -1031,10 +1227,12 @@ def _p0m_real_branch(expect, root: Path, patterns, exemptions=claims.PROPOSER_EX
     expect(not stale, f"real: every exemption in claims.PROPOSER_EXEMPTIONS lies in the checked range "
                       f"({[str(f) for f in stale]})")
     real = claims.branch_commits(root, base) if base is not None else []
-    # Only an entrenched commit without a guy party needs its instructions read, so a branch whose commits carry
-    # `Proposer: guy` makes no API call (pins CI holds no token that can read issues).
-    issues = claims.load_issues(root, [n for c in real if claims.needs_guy(c, patterns) for n in c.instructions])
+    # An entrenched commit without a guy party needs its instructions read, and so does a guy-attributed one: its
+    # `Instruction:` lifts the signature requirement only if the issue authorises (pins.yml grants `issues: read`).
+    issues = claims.load_issues(root, [n for c in real if "guy" in c.parties or claims.needs_guy(c, patterns)
+                                       for n in c.instructions])
     found = [f for c in real for f in claims.commit_findings(c, patterns, issues)]
+    found += claims.signature_check(root, base, patterns, issues) if base is not None else []
     for c in real:
         print(f"    {c.sha[:12]} parties {list(c.parties)} instructions {list(c.instructions)}")
     expect(not found, f"real branch {base and base[:12]}..HEAD: {len(real)} commits; findings "
@@ -1046,7 +1244,8 @@ def p0m_commit_proposers() -> bool:
     (CODEOWNERS) without a `guy` party is rejected; every party line is read (brief 1 A4 item 7c, A5 F2). A body-only
     `Proposer:` line counts only for a commit claims.PROPOSER_EXEMPTIONS lists, and only as the party it names
     (review aa993f4 F1). A merge needs no trailer: its one party is its author account's, and a merge by any other
-    author is rejected, whatever trailer it carries (brief 1 A9). `Instruction: #<n>` carries Guy's authority on an
+    author is rejected, whatever trailer it carries (brief 1 A9); a merge by any author, gfrmin's included, that
+    changes an entrenched path relative to both of its parents is rejected (brief 2 A4 item 11). `Instruction: #<n>` carries Guy's authority on an
     entrenched path when issue <n>, read through the GitHub API, is authored by gfrmin and labelled `instruction`, open
     or closed (CLAUDE.md A1.5, instruction #38), and only if its timeline shows gfrmin applied the label; a `draft` the
     Vizier posted counts once gfrmin applies it (CLAUDE.md Amendment 3, instruction #49); and only if no account but
@@ -1097,6 +1296,7 @@ def p0m_commit_proposers() -> bool:
         expect(got == want and at == want_at, f"timeline, {label}: `instruction` label applied by {got!r} at {at}, "
                                                f"want {want!r} at {want_at}")
 
+    _p0m_signatures(expect)
     _p0m_real_branch(expect, _real_root(), patterns)
     return ok()
 
@@ -5762,13 +5962,30 @@ def _verify_in_image(rt, image: str, data: Path, anchor: str) -> tuple[int, str]
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
+def _own_data(data: Path, dest: Path) -> Path:
+    """A copy of the fixture data directory `data` at `dest`, which no other case reads or writes."""
+    shutil.copytree(data, dest)
+    return dest
+
+
+def _altered(led: Path) -> bytes:
+    """The bytes of ledger `led` with one record's utility changed, so that record's digest no longer matches."""
+    good = led.read_bytes()
+    return good.replace(b'"utility": 3', b'"utility": 9', 1).replace(b'"utility":3', b'"utility":9', 1)
+
+
 def p31_image_carries_verify() -> bool:
     """The judge's release image carries `verify` (brief 2 A2, L2a obligation 18; S 2817eb7): `release/Containerfile`
     builds, under every usable runtime offline from the judge's pinned base image (its one FROM is that base) and a
     context of `judge/` alone, an image whose entrypoint is `python -m judge`, so no Worlds' dependency is imported to
     verify. Run with no network and a read-only root over P9's fixture ledger, `verify` exits 0 and prints what the
     host's `python -m judge verify` prints; it exits 1 and says FAILED on the same ledger with a record altered, and on
-    an anchor that is not a signed head."""
+    an anchor that is not a signed head.
+
+    `_each_runtime` runs the runtimes at once, so each verifies its own copy of the fixture data (`_own_data`): one
+    runtime's altered case cannot be what another's pass case reads (PR #275 review F1, run 39467394544 attempt 1).
+    The interleaving is made certain, not timed: before any runtime runs, one more copy is altered and held altered
+    for the whole run, as an altered case of another runtime would hold it; a pass case that reads it fails."""
     from judge import ledger, runtime
 
     expect, ok = _expecter()
@@ -5786,29 +6003,36 @@ def p31_image_carries_verify() -> bool:
         anchor = held[-1][-1]["sha256"]
         host = _verify_cli(led, private, anchor)
         expect(host[0] == 0, f"control: the host's verify passes the fixture ledger ({host})")
+        own = {rt.name: _own_data(data, work / f"data-{rt.name}") for rt in usable}
+        hold = _own_data(data, work / "data-held-altered")
+        (hold / "ledger.jsonl").write_bytes(_altered(hold / "ledger.jsonl"))
+        expect(_verify_cli(hold / "ledger.jsonl", hold / "private", anchor)[0] == 1,
+               "control: the copy held altered fails the host's verify")
 
         def case(rt, expect, say):
+            mine = own[rt.name]
+            mled = mine / "ledger.jsonl"
             try:
                 image = _digest(_build(rt, _release_context(work / f"ctx-{rt.name}")))
             except subprocess.CalledProcessError as e:
                 expect(False, f"{rt.name}: the release image builds offline ({e.stderr.decode(errors='replace')[-400:]})")
                 return
             built.append((rt, image))
-            code, out = _verify_in_image(rt, image, data, anchor)
+            code, out = _verify_in_image(rt, image, mine, anchor)
             say(f"  {rt.name} image {image}: verify -> {code}: {out}")
             expect(code == 0 and (code, out) == host, f"{rt.name}: verify in the image passes the fixture ledger and "
                                                       f"prints what the host's prints (exit {code})")
-            code, out = _verify_in_image(rt, image, data, "0" * 64)
+            code, out = _verify_in_image(rt, image, mine, "0" * 64)
             expect(code == 1 and "FAILED" in out, f"{rt.name}: an anchor that is no signed head fails (exit {code})")
-            good = led.read_bytes()
+            good = mled.read_bytes()
             try:
-                led.write_bytes(good.replace(b'"utility": 3', b'"utility": 9', 1).replace(b'"utility":3', b'"utility":9', 1))
-                altered = led.read_bytes() != good
-                code, out = _verify_in_image(rt, image, data, anchor)
+                mled.write_bytes(_altered(mled))
+                altered = mled.read_bytes() != good
+                code, out = _verify_in_image(rt, image, mine, anchor)
                 expect(altered and code == 1 and "FAILED" in out,
                        f"{rt.name}: a record altered fails (altered {altered}, exit {code})")
             finally:
-                led.write_bytes(good)
+                mled.write_bytes(good)
 
         _each_runtime(usable, case, expect)
     finally:
@@ -6974,15 +7198,26 @@ PINS = [
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
+    Pin("P0bp", "a same-length edit to a module with stale cached bytecode is KILLED through the runner's verdict path",
+        p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),
+                                      Mutant("prefix_off_alone", _edits("P0bp_prefix_off_alone")),
+                                      Mutant("exclusion_off_alone", _edits("P0bp_exclusion_off_alone"))), HARNESS),
     Pin("P0j", "host facts lacking load averages, cpuset, runner version or podman runtime are not a measurement",
         p0j_host_facts_complete, (Mutant("incomplete_facts_accepted", _edits("P0j_incomplete_facts_accepted")),
                                   Mutant("unpinned_slice_accepted", _edits("P0j_unpinned_slice_accepted")),
                                   Mutant("own_cgroup_unchecked", _edits("P0j_own_cgroup_unchecked")),
-                                  Mutant("head_unrecorded", _edits("P0j_head_unrecorded"))),
+                                  Mutant("head_unrecorded", _edits("P0j_head_unrecorded")),
+                                  Mutant("empty_machine_id_accepted", _edits("P0j_empty_machine_id_accepted"))),
         ("scripts/**",)),
     Pin("P0bl", "a measure artefact is admissible only for the head it recorded: another head or none is refused",
         p0bl_measure_bound_to_head, (Mutant("head_unchecked", _edits("P0bl_head_unchecked")),
                                      Mutant("two_heads_accepted", _edits("P0bl_two_heads_accepted"))),
+        HARNESS + ("scripts/**",)),
+    Pin("P0bo", "measurements are compared only within one host: two host ids, none or two in one artefact are refused",
+        p0bo_one_host_compared, (Mutant("host_unchecked", _edits("P0bo_host_unchecked")),
+                                 Mutant("two_host_ids_accepted", _edits("P0bo_two_host_ids_accepted")),
+                                 Mutant("host_id_unrecorded", _edits("P0bo_host_id_unrecorded")),
+                                 Mutant("raw_machine_id_recorded", _edits("P0bo_raw_machine_id_recorded"))),
         HARNESS + ("scripts/**",)),
     Pin("P0k", "a forecasts.jsonl resolution lacking id, ts, proposer or outcome, matching no forecast, or by its "
         "forecast's session, is rejected",
@@ -6992,7 +7227,8 @@ PINS = [
         p0l_ci_claims, (Mutant("sha_comparison_skipped", _edits("P0l_sha_comparison_skipped")),
                         Mutant("obligation_registry_skipped", _edits("P0l_obligation_registry_skipped"))), ALWAYS),
     Pin("P0m", "a commit touching an entrenched path without a guy Proposer or a gfrmin instruction is rejected; "
-        "every party is read",
+        "every party is read; a merge changing an entrenched path relative to both parents is rejected; a commit "
+        "attributed to guy verifies against the base's entrenched allowed_signers",
         p0m_commit_proposers, (Mutant("trailer_check_disabled", _edits("P0m_trailer_check_disabled")),
                                 Mutant("first_proposer_only", _edits("P0m_first_proposer_only")),
                                 Mutant("exemption_unkeyed", _edits("P0m_exemption_unkeyed")),
@@ -7005,7 +7241,18 @@ PINS = [
                                 Mutant("inert_exemption_admitted", _edits("P0m_inert_exemption_admitted")),
                                 Mutant("stale_exemption_accepted", _edits("P0m_stale_exemption_accepted")),
                                 Mutant("mechanism_rejected", _edits("P0m_mechanism_rejected")),
-                                Mutant("mechanism_as_guy", _edits("P0m_mechanism_as_guy"))), ALWAYS),
+                                Mutant("mechanism_as_guy", _edits("P0m_mechanism_as_guy")),
+                                Mutant("evil_merge_accepted", _edits("P0m_evil_merge_accepted")),
+                                Mutant("any_parent_evil", _edits("P0m_any_parent_evil")),
+                                Mutant("unsigned_guy_accepted", _edits("P0m_unsigned_guy_accepted")),
+                                Mutant("signers_from_branch", _edits("P0m_signers_from_branch")),
+                                Mutant("any_status_signed", _edits("P0m_any_status_signed")),
+                                Mutant("instruction_commit_attributed", _edits("P0m_instruction_commit_attributed")),
+                                Mutant("bogus_instruction_exempts", _edits("P0m_bogus_instruction_exempts")),
+                                Mutant("web_flow_any_key", _edits("P0m_web_flow_any_key")),
+                                Mutant("web_flow_signs_commits", _edits("P0m_web_flow_signs_commits")),
+                                Mutant("signers_unentrenched_accepted",
+                                       _edits("P0m_signers_unentrenched_accepted"))), ALWAYS),
     Pin("P0n", "merged pull requests are ranked by the Builder's cumulative log-loss on their forecasts, largest first",
         p0n_surprise_ranking, (Mutant("ranking_reversed", _edits("P0n_ranking_reversed")),), HARNESS),
     Pin("P0o", "a proposer's record per class counts an overturned act as a failure, never a success",
@@ -7314,7 +7561,8 @@ PINS = [
     Pin("P31", "the judge's release image, built offline from release/Containerfile, runs verify: it passes the fixture "
                "ledger, and fails an altered record and an anchor that is no signed head",
         p31_image_carries_verify, (Mutant("verify_omitted", _edits("P31_verify_omitted")),
-                                   Mutant("eager_imports", _edits("P31_eager_imports"))),
+                                   Mutant("eager_imports", _edits("P31_eager_imports")),
+                                   Mutant("shared_ledger", _edits("P31_shared_ledger"))),
         JUDGE_SIDE + ("release/**",)),
     Pin("P32", "a context's declared runtime must be usable: docker declared where only podman is, an unknown runtime, "
                "and the environment's declaration each fail; a held or absent declaration passes",

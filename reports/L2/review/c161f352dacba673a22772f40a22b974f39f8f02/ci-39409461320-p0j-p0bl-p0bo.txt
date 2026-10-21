@@ -1,0 +1,35 @@
+kinds: {'registry': 1, 'run': 651, 'summary': 1}
+registry: {'proposer': {'kind': 'builder', 'model': 'claude-opus-5-5', 'session': 'db390916-886e-45db-bbd4-7f1564dbe814'}, 'since': '2f538ec26d8eb5372ddd2d51c1fdf27695483c09', 'since_run': 39392498697}
+clean: Counter() n= 0
+mutant: Counter() n= 0
+twins: Counter()
+skipped: 0
+summary: {"clean_failed": 0, "clean_ok": 91, "clean_total": 91, "exit_code": 0, "inconclusive": 0, "killed": 280, "kind": "summary", "leaked": 0, "mutants_total": 280, "non_causal": 0, "phase": "all", "registry": "harness", "since": "2f538ec26d8eb5372ddd2d51c1fdf27695483c09", "since_run": 39392498697, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 280, "twins_total": 280}
+run-row keys: ['duration_s', 'exit_code', 'expected', 'kind', 'leaked_processes', 'mutant', 'observed', 'pin', 'registry', 'role', 'run_dir', 'scratch', 'scratch_quiescent', 'scratch_removed', 'transcript', 'tree', 'verdict']
+phases: Counter({None: 651})
+verdicts: Counter({(None, 'ok'): 371, (None, 'KILLED'): 280})
+{"mutant": null, "pin": "P0j", "verdict": "ok"}
+{"mutant": null, "pin": "P0bl", "verdict": "ok"}
+{"mutant": null, "pin": "P0bo", "verdict": "ok"}
+{"mutant": "P0j/incomplete_facts_accepted", "pin": "P0j", "verdict": "KILLED"}
+{"mutant": "P0j/incomplete_facts_accepted", "pin": "P0j", "verdict": "ok"}
+{"mutant": "P0j/unpinned_slice_accepted", "pin": "P0j", "verdict": "KILLED"}
+{"mutant": "P0j/unpinned_slice_accepted", "pin": "P0j", "verdict": "ok"}
+{"mutant": "P0j/own_cgroup_unchecked", "pin": "P0j", "verdict": "KILLED"}
+{"mutant": "P0j/own_cgroup_unchecked", "pin": "P0j", "verdict": "ok"}
+{"mutant": "P0j/head_unrecorded", "pin": "P0j", "verdict": "KILLED"}
+{"mutant": "P0j/head_unrecorded", "pin": "P0j", "verdict": "ok"}
+{"mutant": "P0j/empty_machine_id_accepted", "pin": "P0j", "verdict": "KILLED"}
+{"mutant": "P0j/empty_machine_id_accepted", "pin": "P0j", "verdict": "ok"}
+{"mutant": "P0bl/head_unchecked", "pin": "P0bl", "verdict": "KILLED"}
+{"mutant": "P0bl/head_unchecked", "pin": "P0bl", "verdict": "ok"}
+{"mutant": "P0bl/two_heads_accepted", "pin": "P0bl", "verdict": "KILLED"}
+{"mutant": "P0bl/two_heads_accepted", "pin": "P0bl", "verdict": "ok"}
+{"mutant": "P0bo/host_unchecked", "pin": "P0bo", "verdict": "KILLED"}
+{"mutant": "P0bo/host_unchecked", "pin": "P0bo", "verdict": "ok"}
+{"mutant": "P0bo/two_host_ids_accepted", "pin": "P0bo", "verdict": "KILLED"}
+{"mutant": "P0bo/two_host_ids_accepted", "pin": "P0bo", "verdict": "ok"}
+{"mutant": "P0bo/host_id_unrecorded", "pin": "P0bo", "verdict": "KILLED"}
+{"mutant": "P0bo/host_id_unrecorded", "pin": "P0bo", "verdict": "ok"}
+{"mutant": "P0bo/raw_machine_id_recorded", "pin": "P0bo", "verdict": "KILLED"}
+{"mutant": "P0bo/raw_machine_id_recorded", "pin": "P0bo", "verdict": "ok"}

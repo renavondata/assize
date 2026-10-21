@@ -1,0 +1,11 @@
+copy of /tmp/assize-scratch-jy7ew4pi/assize-copy-dv5lkk2l/repo
+  at /tmp/assize-scratch-jy7ew4pi/assize-scratch-mj4reo0q/assize-copy-5cjw56br/repo
+applied 1 edit(s) from harness/fixtures/edits/stamped_same_length.toml
+pin:       fixture/stamp
+protects:  the stamped value is 4
+role:      mutant
+tree:      /tmp/assize-scratch-jy7ew4pi/assize-scratch-mj4reo0q/assize-copy-5cjw56br/repo
+invoked:   /tmp/assize-scratch-jy7ew4pi/assize-copy-dv5lkk2l/repo
+scratch:   /tmp/assize-scratch-jy7ew4pi/assize-scratch-mj4reo0q
+stamped.VALUE = 4 (/tmp/assize-scratch-jy7ew4pi/assize-scratch-mj4reo0q/assize-copy-5cjw56br/repo/harness/fixtures/stamped.py)
+result:    PASS

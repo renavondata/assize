@@ -1,0 +1,5 @@
+# P0bp's mutant: only the copy's every-depth exclusion of __pycache__ off (brief 1 A5); the child cache prefix stands.
+[[edit]]
+path = "harness/tree.py"
+old = "EVERY_DEPTH_EXCLUDE = frozenset({\"__pycache__\"})\n"
+new = "EVERY_DEPTH_EXCLUDE = frozenset()\n"

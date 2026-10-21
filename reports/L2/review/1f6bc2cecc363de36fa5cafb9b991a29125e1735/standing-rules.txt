@@ -1,0 +1,57 @@
+# standing-rule checks at 1f6bc2c, 2026-10-20T16:15:28Z
+## claims trailers master..HEAD
+trailers master..HEAD: 0 findings
+[exit 0]
+## claims authors master..HEAD
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/g/actions-runner/_work/assize/assize/harness/claims.py", line 1100, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/g/actions-runner/_work/assize/assize/harness/claims.py", line 1060, in main
+    found = author_check(a.repo, a.base, a.head)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/g/actions-runner/_work/assize/assize/harness/claims.py", line 449, in author_check
+    return [f for c in branch_commits(repo, base, head) if bound is None or c.sha in bound for f in author_findings(c)]
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/g/actions-runner/_work/assize/assize/harness/claims.py", line 582, in branch_commits
+    records = [r.strip("\n") for r in _git(repo, "log", "--reverse", f"--format={fmt}", f"{base}..{head}")
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/g/actions-runner/_work/assize/assize/harness/claims.py", line 571, in _git
+    return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/g/.local/share/uv/python/cpython-3.11-linux-x86_64-gnu/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', '-C', '.', 'log', '--reverse', '--format=%H%x1f%P%x1f%ae%x1f%(trailers:key=Proposer,valueonly,separator=%x1e)%x1f%(trailers:key=Instruction,valueonly,separator=%x1e)%x1f%B%x1d', 'master..HEAD..HEAD']' returned non-zero exit status 128.
+[exit 1]
+## claims status-check
+usage: python -m harness.claims status-check [-h] [--repo REPO]
+                                             paths [paths ...]
+python -m harness.claims status-check: error: the following arguments are required: paths
+[exit 2]
+## deleted lines under reports/ and REPORT.md, master...HEAD
+0
+## entrenched paths touched
+none
+## first pins run on branch vs forecast rows (rule 2)
+1f6bc2cecc363de36fa5cafb9b991a29125e1735 2026-10-20T16:12:26Z null 39455375416
+3466be462a2eafd8af80c70cb464c6b5b821ec67 2026-10-20T15:25:57Z success 39448334596
+fb49649 Forecasts and proposer row for brief 2 A4 dispositions (item 13 by P0ar), PR #274
+## ledger open
+# 437 forecasts at HEAD; 84 open; 2 legacy resolutions read under `resolves` (876d1d05c550, a30e37db1152); 0 rows read as neither (none)
+84
+## hygiene
+/home/g/actions-runner/_work/assize/assize 1f6bc2c [l2a-a4-dispositions]
+0
+21 [kprobe-optimizer]
+## corrected invocations, 2026-10-20T16:15:35Z
+## claims authors master HEAD
+authors master..HEAD: 0 findings
+[exit 0]
+## claims status-check reports/L2/status/l2a-a4-dispositions.md
+status-check 1 files: 0 findings
+[exit 0]
+## STATUS header date vs. commit and CI times
+# STATUS — L2 — 2026-10-21 — 3466be4 — PR #274
+commit 1f6bc2c committer date 2026-10-21T00:12:20+08:00

@@ -1,0 +1,7 @@
+# P31's mutant `shared_ledger` (PR #275 review F1): every runtime, and the copy held altered, share the one fixture
+# data directory, as P31 stood when docker's altered case rewrote the ledger podman's pass case was reading. The held
+# copy makes that interleaving certain, so every runtime's pass case reads an altered ledger and fails.
+[[edit]]
+path = "harness/pins.py"
+old = "    shutil.copytree(data, dest)\n    return dest\n"
+new = "    return data\n"
