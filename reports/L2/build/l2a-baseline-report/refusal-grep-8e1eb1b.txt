@@ -1,0 +1,14 @@
+$ git rev-parse HEAD
+8e1eb1b2cc75f8e12b52e4af77af574ffc5ba1a6
+$ grep -rniE 'nethack|autoascend|\bnle\b' judge worlds/spec; echo "grep exit=$?"
+grep exit=1
+$ git rev-parse 8190d4f:judge 8190d4f:worlds/spec HEAD:judge HEAD:worlds/spec
+c31002e369f5f5dec6e0d2d1ea61e3da57ff7665
+079b2084d7d7b6739cf961a189e951567e7a4dbe
+113d9ffd7520f65f57448bf98f617e6d40661a35
+079b2084d7d7b6739cf961a189e951567e7a4dbe
+$ uv run --frozen python -c "from judge.evaluate import judge_hash; print(judge_hash())"   # at 8190d4f, then at HEAD
+c005ecfa7ad7471e31223d15bbe9be9a076c7ed97abb87e24c3c59c525e7864e
+036e92348149879095b121e9d5e4c00826747bbff4c8f571b4674883018ee19c
+# At 8190d4f the same grep printed one line:
+# judge/price.py:7:World's FIT criterion requires the court to detect (brief 1: 0.5 achievements; brief 2: δ = 2 for NetHack), and its
