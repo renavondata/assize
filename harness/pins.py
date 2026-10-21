@@ -7186,8 +7186,10 @@ def p35_zero_diff() -> bool:
     """Brief 2's zero-diff pin (§Pins "P1 Zero diff"; registry P1 is the CSPRNG pin): `judge/` and `worlds/spec/`
     hash, as git hashes a tree, to the ids `harness/baseline.toml` records, and those are the trees of the L2a baseline
     commit (A1 item 4 as A2 amends it), which is in the invocation tree's history and in master's (a baseline only
-    the branch carries is a moved baseline). Fixtures: a byte added under a scratch copy of each directory changes its
-    id, a baseline sha absent from the history is refused, and so is one in the branch's history but not master's.
+    the branch carries is a moved baseline), and master itself still carries them (an older master commit whose trees
+    master has left is a rewound baseline). Fixtures: a byte added under a scratch copy of each directory changes its
+    id, a baseline sha absent from the history is refused, and so is one in the branch's history but not master's,
+    and one in master's history whose trees master no longer has.
     A present-but-untracked file under either directory (a stray backup, a nested cache) reads as `tree_changed`:
     a false red, never a false green."""
     from harness import zerodiff
@@ -7233,9 +7235,16 @@ def p35_zero_diff() -> bool:
     git("commit", "-q", "-am", "judge edit")
     moved = {"sha": git("rev-parse", "HEAD"), "trees": {"judge": git("rev-parse", "HEAD:judge")}}
     got = {f.code for f in zerodiff.binding_findings(repo, moved, base="origin/master")}
-    expect(got == {"baseline_moved"}, f"fixture: a baseline only the branch carries is a moved baseline ({got})")
+    expect(got == {"baseline_moved", "baseline_rewound"},
+           f"fixture: a baseline only the branch carries is a moved baseline ({got})")
     got = {f.code for f in zerodiff.binding_findings(repo, moved, base=None)}
     expect("base_unreadable" in got, f"fixture: no master to read against is named, not passed ({got})")
+    # A rewound baseline: master's judge/ changed after an older master commit, and the baseline records that older
+    # commit and its tree. The commit is in HEAD's and master's history and carries the recorded tree; master does not.
+    git("update-ref", "refs/remotes/origin/master", git("rev-parse", "HEAD"))
+    rewound = {"sha": git("rev-parse", "HEAD~1"), "trees": {"judge": git("rev-parse", "HEAD~1:judge")}}
+    got = {f.code for f in zerodiff.binding_findings(repo, rewound, base="origin/master")}
+    expect(got == {"baseline_rewound"}, f"fixture: a baseline master's trees have left is a rewound baseline ({got})")
     shutil.rmtree(repo, ignore_errors=True)
     return ok()
 
@@ -7636,7 +7645,8 @@ PINS = [
         p35_zero_diff, (Mutant("judge_edited", _edits("P35_judge_edited")),
                         Mutant("spec_edited", _edits("P35_spec_edited")),
                         Mutant("baseline_rewritten", _edits("P35_baseline_rewritten")),
-                        Mutant("baseline_moved", _edits("P35_baseline_moved"))), ALWAYS),
+                        Mutant("baseline_moved", _edits("P35_baseline_moved")),
+                        Mutant("baseline_rewound", _edits("P35_baseline_rewound"))), ALWAYS),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),

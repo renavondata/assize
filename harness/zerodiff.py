@@ -68,7 +68,9 @@ def _git(repo: Path, *args: str) -> subprocess.CompletedProcess:
 def binding_findings(repo: Path, baseline: dict, head: str = "HEAD", base: str | None = None) -> list[Finding]:
     """The baseline commit is in `head`'s history, is in the history of `base` (the merged branch, which a pull
     request cannot move: a baseline only a branch carries is a moved baseline), and carries every recorded tree id,
-    read by git in `repo`. A `base` that is None or unreadable is named, never passed."""
+    read by git in `repo`; and `base` itself carries every recorded tree id, so an older commit of master's history,
+    whose trees master has since left, is a rewound baseline. A `base` that is None or unreadable is named, never
+    passed."""
     sha = baseline["sha"]
     reached = _git(repo, "merge-base", "--is-ancestor", sha, head).returncode == 0
     base_ok = base is not None and _git(repo, "rev-parse", "--verify", "-q", base).returncode == 0
@@ -79,4 +81,7 @@ def binding_findings(repo: Path, baseline: dict, head: str = "HEAD", base: str |
     ) + [
         Finding(d, "tree_unbound", f"recorded {want}, the baseline commit has {got or 'no such tree'}")
         for d, want in sorted(baseline["trees"].items())
-        if (got := _git(repo, "rev-parse", "--verify", "-q", f"{sha}:{d}").stdout.strip()) != want]
+        if (got := _git(repo, "rev-parse", "--verify", "-q", f"{sha}:{d}").stdout.strip()) != want] + [
+        Finding(d, "baseline_rewound", f"recorded {want}, {base} has {got or 'no such tree'}")
+        for d, want in sorted(baseline["trees"].items())
+        if base_ok and (got := _git(repo, "rev-parse", "--verify", "-q", f"{base}:{d}").stdout.strip()) != want]
