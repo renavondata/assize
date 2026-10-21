@@ -1,0 +1,18 @@
+pins CI run 39527397797 on 4d8d8ba (attempt 1), lines copied from `gh run view 39527397797 --log`:
+[clean ] P0x: observed fail -> FAILED (16.99s) out/pins/runs/P0x/clean/transcript.log
+CLEAN FAILED: P0x (observed fail)
+[clean ] P0bq: observed pass -> ok (0.488s) out/pins/runs/P0bq/clean/transcript.log
+[mutant] P0bq/awaits_guy_trigger_dropped: mutant fail, twin pass -> KILLED (0.494s + 0.491s)
+[mutant] P0bq/awaits_guy_own_queue: mutant fail, twin pass -> KILLED (0.492s + 0.492s)
+[mutant] P0bq/master_cancels_in_progress: mutant fail, twin pass -> KILLED (0.493s + 0.491s)
+[mutant] P0x/price_line_dropped: mutant fail, twin fail -> NON-CAUSAL (18.393s + 20.849s)
+[mutant] P0x/none_on_workflow_admitted: mutant fail, twin fail -> NON-CAUSAL (20.3s + 19.595s)
+[mutant] P0x/scoped_by_number: mutant fail, twin fail -> NON-CAUSAL (18.793s + 18.696s)
+clean: 92/93 passed, 1/93 failed
+mutants: 294/297 killed, 0/297 survived, 0/297 inconclusive, 0/297 stale, 3/297 non-causal, 0 leaked (clean and mutant)
+twins: 294/297 passed
+PINS FAILED
+
+P0x's clean failure, reproduced locally (`uv run --frozen python -c "import harness.pins as p; print(p.p0x_price_declared())"`, [ok] lines elided):
+  [FAIL] real instruction issues: findings ['issue #281: price_line: `Price:` lines the instruction: 0, want 1', 'issue #284: price_line: `Price:` lines the instruction: 0, want 1', 'issue #286: price_line: `Price:` lines the instruction: 0, want 1']
+P0x reads the real instruction issues (witnesses ALWAYS); it is red on every head while the three signed issues lack a `Price:` line, and its three mutants are non-causal for the same reason (the twin fails too).
