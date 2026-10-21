@@ -1,0 +1,7 @@
+# P35's mutant `baseline_moved` (review f84ed6f F1): the binding drops its requirement that the baseline commit is in
+# master's history, as it asked only of HEAD's. A baseline moved along with a judge edit then passes; the fixture
+# history, a commit in HEAD's history that master never had, refuses it.
+[[edit]]
+path = "harness/zerodiff.py"
+old = "    merged = base_ok and _git(repo, \"merge-base\", \"--is-ancestor\", sha, base).returncode == 0"
+new = "    merged = True"

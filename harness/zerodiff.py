@@ -65,11 +65,18 @@ def _git(repo: Path, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
 
 
-def binding_findings(repo: Path, baseline: dict, head: str = "HEAD") -> list[Finding]:
-    """The baseline commit is in `head`'s history and carries every recorded tree id, read by git in `repo`."""
+def binding_findings(repo: Path, baseline: dict, head: str = "HEAD", base: str | None = None) -> list[Finding]:
+    """The baseline commit is in `head`'s history, is in the history of `base` (the merged branch, which a pull
+    request cannot move: a baseline only a branch carries is a moved baseline), and carries every recorded tree id,
+    read by git in `repo`. A `base` that is None or unreadable is named, never passed."""
     sha = baseline["sha"]
     reached = _git(repo, "merge-base", "--is-ancestor", sha, head).returncode == 0
-    return ([] if reached else [Finding(sha[:12], "baseline_unreachable", f"not an ancestor of {head}")]) + [
+    base_ok = base is not None and _git(repo, "rev-parse", "--verify", "-q", base).returncode == 0
+    merged = base_ok and _git(repo, "merge-base", "--is-ancestor", sha, base).returncode == 0
+    return ([] if reached else [Finding(sha[:12], "baseline_unreachable", f"not an ancestor of {head}")]) + (
+        [] if merged else [Finding(sha[:12], "baseline_moved" if base_ok else "base_unreadable",
+                                   f"not an ancestor of {base}" if base_ok else f"no ref {base} to read it against")]
+    ) + [
         Finding(d, "tree_unbound", f"recorded {want}, the baseline commit has {got or 'no such tree'}")
         for d, want in sorted(baseline["trees"].items())
         if (got := _git(repo, "rev-parse", "--verify", "-q", f"{sha}:{d}").stdout.strip()) != want]
