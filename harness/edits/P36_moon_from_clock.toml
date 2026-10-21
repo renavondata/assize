@@ -2,5 +2,5 @@
 # night from the real date, so a trajectory depends on the day it is played.
 [[edit]]
 path = "worlds/nethack/binding.py"
-old = "    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True)"
-new = "    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=False)"
+old = "    env = NetHackChallenge(observation_keys=OBSERVED + PROGRESS_READS, fix_moon_phase=True)"
+new = "    env = NetHackChallenge(observation_keys=OBSERVED + PROGRESS_READS, fix_moon_phase=False)"
