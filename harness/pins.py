@@ -1782,6 +1782,33 @@ def p0bk_unobservable_closed() -> bool:
     return ok()
 
 
+def p0br_auditor_differs() -> bool:
+    """`harness.ledger elect audit` draws only among entrants that are neither the model of the latest recorded build
+    draw nor that of the latest review draw, and refuses when none remains; the other procedures draw among all their
+    entrants (Amendment 2, audit 8aae43c8c792 finding 1)."""
+    from harness import ledger
+
+    expect, ok = _expecter()
+    three = ELECTION_ENTRANTS
+    ts = ELECTION_TS
+    rows = [_drew("m-c", dict.fromkeys(three, 1 / 3), ts[0], "build"), _drew("m-c", dict.fromkeys(three, 1 / 3), ts[1], "review"),
+            _drew("m-a", dict.fromkeys(three, 1 / 3), ts[2], "build"), _drew("m-b", dict.fromkeys(three, 1 / 3), ts[3], "review")]
+    sweep = range(0, ledger.DRAWS, 997)
+    drawn = {ledger.elect(rows, "audit", three, ELECTION_BOUND, s).model for s in sweep}
+    expect(drawn == {"m-c"}, f"the auditor is neither the latest builder (m-a) nor the latest reviewer (m-b): {drawn}")
+    expect(set(ledger.elect(rows, "audit", three, ELECTION_BOUND, 0).probabilities) == {"m-c"},
+           "the distribution is over the allowed entrant alone")
+    other = {ledger.elect(rows, "review", three, ELECTION_BOUND, s).model for s in sweep}
+    expect(other == set(three), f"another procedure draws among all its entrants: {other}")
+    try:
+        ledger.elect(rows, "audit", ("m-a", "m-b"), ELECTION_BOUND, 0)
+        refused = False
+    except ValueError:
+        refused = True
+    expect(refused, "no entrant left: the election refuses")
+    return ok()
+
+
 T0 = "2026-02-01T00:00:00Z"
 
 
@@ -3481,7 +3508,9 @@ def _status_with(row: dict, over: list | None = None, chose: str | None = None) 
 def _chose_repo(repo: Path):
     """A fixture history of `chose:` lines: R1 sealed before its line; R2 added in the same commit as its line; R3
     added after its line; R4's line omits a candidate; R5 has no forecast at all; R6's line chose outside the
-    candidates. Returns the git helper and the rows by name."""
+    candidates. R7, R8 and R9 depart from the fixed order (choose #2 over #1): R7 with no fixed-order forecast, R8
+    with one sealed before its line, R9 with one added in the same commit as its line (instruction #284). Returns the
+    git helper and the mixture rows by name."""
     git = _git_fixture(repo)
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
@@ -3509,11 +3538,26 @@ def _chose_repo(repo: Path):
     _commit(git, "forecast R6")
     (repo / status).write_text(_status_with(rows["R6"], chose="#9"))
     _commit(git, "act on R6, choosing outside the candidates")
-    return git, rows
+    departs = {n: _pick("mixture", ["#1", "#2", "#3"], "#2", rid=n) for n in ("R7", "R8", "R9")}
+    fixed = {n: _pick("fixed-order", ["#1", "#2", "#3"], "#1", shown="#2", rid=n) for n in ("R8", "R9")}
+    _append(repo, ledger_path, json.dumps(departs["R7"]) + "\n")
+    _commit(git, "forecast R7, the mixture only")
+    (repo / status).write_text(_status_with(departs["R7"]))
+    _commit(git, "act on R7, departing from the fixed order")
+    _append(repo, ledger_path, json.dumps(departs["R8"]) + "\n" + json.dumps(fixed["R8"]) + "\n")
+    _commit(git, "forecast R8, the mixture and fixed-order")
+    (repo / status).write_text(_status_with(departs["R8"]))
+    _commit(git, "act on R8, departing from the fixed order")
+    _append(repo, ledger_path, json.dumps(departs["R9"]) + "\n")
+    _commit(git, "forecast R9, the mixture only")
+    _append(repo, ledger_path, json.dumps(fixed["R9"]) + "\n")
+    (repo / status).write_text(_status_with(departs["R9"]))
+    _commit(git, "forecast fixed-order and act on R9 together")
+    return git, rows | departs
 
 
 CHOSE_WANT = {"R1": set(), "R2": {"late"}, "R3": {"late"}, "R4": {"candidates"}, "R5": {"no_forecast"},
-              "R6": {"not_a_candidate"}}
+              "R6": {"not_a_candidate"}, "R7": {"unscored_departure"}, "R8": set(), "R9": {"unscored_departure"}}
 
 
 def p0ad_chooser_sealed() -> bool:
@@ -7200,6 +7244,10 @@ PINS = [
                                    Mutant("layer_prefix_unread", _edits("P0bk_layer_prefix_unread")),
                                    Mutant("issue_unchecked", _edits("P0bk_issue_unchecked")),
                                    Mutant("any_failure_void", _edits("P0bk_any_failure_void"))), HARNESS),
+    Pin("P0br", "an elected auditor is neither the latest builder's model nor the latest reviewer's, and none left is refused",
+        p0br_auditor_differs, (Mutant("elect_ignores_exclusions", _edits("P0br_elect_ignores_exclusions")),
+                               Mutant("first_draw_barred", _edits("P0br_first_draw_barred")),
+                               Mutant("empty_falls_back", _edits("P0br_empty_falls_back"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
@@ -7327,7 +7375,8 @@ PINS = [
         p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
                               Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),
                               Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted")),
-                              Mutant("deleted_status_read", _edits("P0ad_deleted_status_read"))),
+                              Mutant("deleted_status_read", _edits("P0ad_deleted_status_read")),
+                              Mutant("departure_unscored_admitted", _edits("P0ad_departure_unscored_admitted"))),
         ALWAYS),
     Pin("P0ae", "Guy's pick is resolved by the labels he applies; silence counts only after a declared exposure, else void",
         p0ae_exposure_and_labels, (Mutant("exposure_inferred", _edits("P0ae_exposure_inferred")),

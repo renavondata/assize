@@ -1,0 +1,5 @@
+# P0br's second mutant: the oldest recorded build and review draws are barred, not the latest.
+[[edit]]
+path = "harness/ledger.py"
+old = "    latest = (max((d for d in draws_of"
+new = "    latest = (min((d for d in draws_of"

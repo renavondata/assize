@@ -1,0 +1,9 @@
+# Registry validation at the scratch merge of the PR head 2428b50 with origin/master 8190d4f (merge d6f11df), 2026-10-21T08:02:49Z
+# git -C /tmp/rv257c.FlCp-merge log -1 --format='%h %p'
+d6f11df 2428b50 8190d4f
+# uv run --frozen python -c 'import harness.pins as p, harness.pin as q; q.validate(p.PINS); print("registry at merge: OK", len(p.PINS), "pins")'
+registry at merge: OK 93 pins
+# P0br and P0ad (master, PR #288) both present at the merge:
+7211:    Pin("P0br", "an elected auditor is neither the latest builder's model nor the latest reviewer's, and none left is refused",
+7233:    Pin("P0bo", "measurements are compared only within one host: two host ids, none or two in one artefact are refused",
+7332:    Pin("P0ad", "the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate",

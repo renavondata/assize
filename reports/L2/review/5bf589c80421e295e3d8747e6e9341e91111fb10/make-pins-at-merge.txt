@@ -1,0 +1,35 @@
+# Reviewer session 7a8c7862-6233-42aa-afdc-ec62d7b8d2d9, run 39557694810, 2026-10-21.
+# Scratch copy: fresh `gh repo clone renavondata/assize` under /tmp/rev257.bYMf, PR head fetched as pull/257/head.
+
+$ git reset -q --hard 5bf589c && git log -1 --format='head %H'
+head 5bf589c80421e295e3d8747e6e9341e91111fb10
+
+$ uv run --frozen python -c 'import harness.pins as p, harness.pin as q; q.validate(p.PINS); print("valid at head")'
+valid at head
+
+$ uv run --frozen python -c 'import harness.pins as p; print("P0bo clean at head:", p.p0bo_auditor_differs())'
+  [ok] the auditor is neither the latest builder (m-a) nor the latest reviewer (m-b): {'m-c'}
+  [ok] the distribution is over the allowed entrant alone
+  [ok] another procedure draws among all its entrants: {'m-b', 'm-c', 'm-a'}
+  [ok] no entrant left: the election refuses
+P0bo clean at head: True
+
+$ git merge -q --no-edit origin/master
+Auto-merging harness/README.md
+Auto-merging harness/pins.py
+merged origin/master 088417add9d96a202bb496e8686bf06a4343e96b -> 7467d972aa8f358cc0502eb858e0f776924c5b97
+
+$ grep -n 'Pin("P0bo"' harness/pins.py
+7194:    Pin("P0bo", "an elected auditor is neither the latest builder's model nor the latest reviewer's, and none left is refused",
+7216:    Pin("P0bo", "measurements are compared only within one host: two host ids, none or two in one artefact are refused",
+
+$ make pins
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+REGISTRY REFUSED: harness: duplicate_pin: P0bo
+make: *** [Makefile:20: pins] Error 4
+exit 2
+
+# Master's P0bo: cfe23e2 "Brief 2 A4 item 4: host_facts.sh records a stable host id; claims same-host refuses
+# cross-host comparison (P0bo)", first on master's first-parent line at efcc75b "Merge pull request #271"
+# (2026-10-20T11:42:16Z). The Builder's cited run 39411064334 on 5bf589c was created 2026-10-20T10:53:08Z,
+# before that merge, so it tested an older master.

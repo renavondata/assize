@@ -1,0 +1,6 @@
+# P0ad's mutant (instruction #284): a `chose:` line that departs from the fixed order (chooses other than its first
+# candidate) with no fixed-order forecast of its round sealed before it is admitted.
+[[edit]]
+path = "harness/chooser.py"
+old = '''        if line["chose"] in over[1:] and not any('''
+new = '''        if False and not any('''
