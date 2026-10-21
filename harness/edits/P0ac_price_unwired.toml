@@ -1,0 +1,5 @@
+# P0ac's wiring mutant (Wish #69): draft_findings does not call the price check.
+[[edit]]
+path = "harness/claims.py"
+old = "    priced = draft_price_findings(n, body, opened_at, price_since)\n"
+new = "    priced = []\n"

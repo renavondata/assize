@@ -3447,6 +3447,23 @@ DRAFT_FIXTURE = (  # (what, body, opened, rule merged, findings wanted) -- instr
     ("opened before the rule merged", "Wish: #12\nDo the thing.\n", DRAFT_BEFORE, DRAFT_SINCE, set()),
     ("the rule has not merged", "Do the thing.\n", DRAFT_AFTER, None, set()),
 )
+DRAFT_PRICE_SINCE, DRAFT_PRICE_AFTER = "2026-03-10T00:00:00Z", "2026-03-11T00:00:00Z"
+DRAFT_PRICED = DRAFT_AMEND.format(w=13, t=13) + "Price: {}\n"
+DRAFT_PRICE_FIXTURE = (  # (what, body, opened, price rule merged, findings wanted) -- Wish #69
+    ("a priced draft", DRAFT_PRICED.format("guy-items; down; 1"), DRAFT_PRICE_AFTER, DRAFT_PRICE_SINCE, set()),
+    ("a recording-only draft that says so", DRAFT_PRICED.format("none (recording-only)"), DRAFT_PRICE_AFTER,
+     DRAFT_PRICE_SINCE, set()),
+    ("a draft with no price line", DRAFT_AMEND.format(w=13, t=13), DRAFT_PRICE_AFTER, DRAFT_PRICE_SINCE,
+     {"draft_price_line"}),
+    ("a draft with two price lines", DRAFT_PRICED.format("guy-items; down; 1") + "Price: none (recording-only)\n",
+     DRAFT_PRICE_AFTER, DRAFT_PRICE_SINCE, {"draft_price_line"}),
+    ("a draft whose quantity is not one the ledger prices", DRAFT_PRICED.format("vibes; down; 1"), DRAFT_PRICE_AFTER,
+     DRAFT_PRICE_SINCE, {"draft_price_form"}),
+    ("a draft with no price line, opened before the price rule", DRAFT_AMEND.format(w=13, t=13), DRAFT_AFTER,
+     DRAFT_PRICE_SINCE, set()),
+    ("a draft with no price line, the price rule not merged", DRAFT_AMEND.format(w=13, t=13), DRAFT_PRICE_AFTER, None,
+     set()),
+)
 
 
 def p0ac_draft_form() -> bool:
@@ -3458,9 +3475,13 @@ def p0ac_draft_form() -> bool:
     for what, body, at, since, want in DRAFT_FIXTURE:
         got = {f.code for f in claims.draft_findings(1, body, at, since)}
         expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
+    for what, body, at, price_since, want in DRAFT_PRICE_FIXTURE:
+        got = {f.code for f in claims.draft_findings(1, body, at, DRAFT_SINCE, price_since)}
+        expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
     root = _real_root()
     base = _branch_base(root)
     since = claims.draft_from(root, base) if base else None
+    price_since = claims.draft_price_from(root, base) if base else None
     expect(base is not None, f"master's merge base with HEAD read ({base})")
     if since is None:
         print("    real: the draft rule has not merged on master's first-parent line; the real-tree check covers no draft")
@@ -3469,8 +3490,9 @@ def p0ac_draft_form() -> bool:
         real = claims.load_drafts(root, since)
     except (OSError, subprocess.SubprocessError) as e:
         real, _ = {}, expect(False, f"real drafts not read ({e})")
-    found = [f for n, (body, at) in sorted(real.items()) for f in claims.draft_findings(n, body, at, since)]
-    print(f"    real: rule merged {since}; {len(real)} drafts opened since: {sorted(real)}")
+    found = [f for n, (body, at) in sorted(real.items())
+             for f in claims.draft_findings(n, body, at, since, price_since)]
+    print(f"    real: rule merged {since}, price rule merged {price_since}; {len(real)} drafts opened since: {sorted(real)}")
     expect(not found, f"real drafts: findings {[str(f) for f in found]}")
     return ok()
 
@@ -7370,7 +7392,10 @@ PINS = [
     Pin("P0ac", "a wish is drafted as a brief amendment unless the draft says in one line why it cannot wait",
         p0ac_draft_form, (Mutant("instruction_without_because_admitted",
                                  _edits("P0ac_instruction_without_because_admitted")),
-                          Mutant("both_forms_admitted", _edits("P0ac_both_forms_admitted"))), ALWAYS),
+                          Mutant("both_forms_admitted", _edits("P0ac_both_forms_admitted")),
+                          Mutant("draft_without_price_admitted", _edits("P0ac_draft_without_price_admitted")),
+                          Mutant("recording_only_refused", _edits("P0ac_recording_only_refused")),
+                          Mutant("price_unwired", _edits("P0ac_price_unwired"))), ALWAYS),
     Pin("P0ad", "the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate",
         p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
                               Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),

@@ -1,0 +1,5 @@
+# P0ac's price mutant (Wish #69): a draft with no `Price:` line is accepted.
+[[edit]]
+path = "harness/claims.py"
+old = "    if len(lines) != 1:\n        return [Finding(where, \"draft_price_line\""
+new = "    if len(lines) > 1:\n        return [Finding(where, \"draft_price_line\""
