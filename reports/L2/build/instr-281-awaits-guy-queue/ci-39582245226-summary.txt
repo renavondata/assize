@@ -1,0 +1,9 @@
+pins CI run 39582245226 on b79cab8 (attempt 1), lines copied from `gh run view 39582245226 --log`:
+[clean ] P0bq: observed pass -> ok (0.488s) out/pins/runs/P0bq/clean/transcript.log
+[mutant] P0bq/awaits_guy_trigger_dropped: mutant fail, twin pass -> KILLED (0.542s + 0.491s)
+[mutant] P0bq/awaits_guy_own_queue: mutant fail, twin pass -> KILLED (0.491s + 0.491s)
+[mutant] P0bq/master_cancels_in_progress: mutant fail, twin pass -> KILLED (0.491s + 0.491s)
+clean: 94/94 passed, 0/94 failed
+mutants: 301/301 killed, 0/301 survived, 0/301 inconclusive, 0/301 stale, 0/301 non-causal, 0 leaked (clean and mutant)
+twins: 301/301 passed
+PINS PASSED
