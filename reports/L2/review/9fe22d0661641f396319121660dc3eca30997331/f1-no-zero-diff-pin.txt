@@ -1,0 +1,36 @@
+# F1 witness: no pin in the registry checks a diff under judge/ or worlds/spec/; the registry's P1 is the CSPRNG pin.
+# Run on the PR branch checkout at 9fe22d0, review run 39573877733.
+$ git rev-parse HEAD
+9fe22d0661641f396319121660dc3eca30997331
+$ grep -n "Pin(\"P1\"," harness/pins.py
+7414:    Pin("P1","evaluation seeds come from a CSPRNG, are recorded privately, and are never reissued or training seeds",
+$ grep -oE "^    Pin\(\"P[0-9]+[a-z]*\"" harness/pins.py | wc -l
+92
+$ git grep -niE "zero.?diff" HEAD -- harness .github Makefile; echo exit=$?
+HEAD:harness/edits/P15_abs_difference.toml:1:# P15's mutant `abs_difference` (brief 1 section 5): posterior mass on any nonzero difference, not on the correct sign.
+exit=0
+# (the only match is an unrelated phrase in a P15 mutant file)
+# Pins whose description mentions judge, spec or diff (all 92 descriptions scanned on the scratch clone at 9fe22d0):
+P0ax | master's harness judges every pull request: the pins-master workflow restores it over the head's, and
+P2 | a candidate container cannot read judge paths or reach the network; root read-only; config limits
+P9 | a ledger record dropped, altered or rechained, a head forged, or the tail truncated, fails the judge's
+P16 | a candidate's proposer comes from the judge-issued credential that registered it, or it is refused
+P24 | the judge's evaluate refuses an episode count that is not a positive ASCII integer, with the code
+P25 | judge-private storage is refused when any file in it, not only its directory, has a group or other
+P31 | the judge's release image, built offline from release/Containerfile, runs verify: it passes the fixture
+# None of them compares judge/ or worlds/spec/ with a baseline.
+# A live edit under judge/ passes the suite: this PR's own judge edit.
+$ git diff --stat 8190d4f HEAD -- judge worlds/spec
+ judge/price.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ gh api repos/renavondata/assize/actions/runs/39566415270 -q ".head_sha, .conclusion"
+8e1eb1b2cc75f8e12b52e4af77af574ffc5ba1a6
+success
+# The report's claim (reports/L2/REPORT.md, §The one judge edit of this branch):
+#   "From the baseline on, P1 holds the refusal: any edit under `judge/` fails it."
+# and the STATUS decision: "no new pin; the report is a cited table, and from the baseline on P1's zero diff holds `judge/` — p=0.65"
+
+# F2 witness: the report says the baseline's tree ids are in this branch's STATUS; they are not.
+$ grep -cE "113d9ff|079b208" reports/L2/status/l2a-baseline-report.md
+0
+# They are in reports/L2/build/l2a-baseline-report/refusal-grep-8e1eb1b.txt, which the STATUS cites.
