@@ -1,0 +1,9 @@
+== older-master-baseline: ROOT=/tmp/rv301q.4Kxc real_root=/tmp/rv301q.4Kxc mutant=None
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [ok] judge/ and worlds/spec/ are the baseline's ([])
+  [ok] the recorded trees are those of 96dd901a1abb, in HEAD's and origin/master's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'worlds/spec', 'judge'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'ffffffffffff: baseline_moved: not an ancestor of origin/master', 'judge: tree_unbound: recorded c31002e369f5f5dec6e0d2d1ea61e3da57ff7665, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+  [ok] fixture: a baseline only the branch carries is a moved baseline ({'baseline_moved'})
+  [ok] fixture: no master to read against is named, not passed ({'base_unreadable'})
+== older-master-baseline: p35_zero_diff() -> True (PASS)
