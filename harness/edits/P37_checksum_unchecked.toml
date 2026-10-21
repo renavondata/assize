@@ -1,0 +1,6 @@
+# P37's mutant `checksum_unchecked` (brief 2 P4, Vendored metric): the binding loads the vendored files whatever their
+# checksum.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '    if altered:'
+new = '    if False:'

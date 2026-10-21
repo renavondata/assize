@@ -1,0 +1,5 @@
+# P37's mutant `table_entry_altered` (brief 2 P4, Vendored metric): one progression table entry altered.
+[[edit]]
+path = "worlds/nethack/balrog/achievements.json"
+old = '    "Dlvl:2": 0.015392269075361172,'
+new = '    "Dlvl:2": 0.025392269075361172,'

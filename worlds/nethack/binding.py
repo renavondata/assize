@@ -12,15 +12,22 @@ off, without which no trajectory is reproducible (brief 2 section 2, Determinism
 not read from the date the episode is played on. The action set, character choice, yes/no and mode handling, step and
 no-progress limits are NetHackChallenge's own.
 
-Not yet bound: this directory holds no `manifest.json` until its utility (BALROG's progression, vendored) and its
-prediction targets are committed, so the judge does not bind it (`judge.evaluate.bound`)."""
+The per-episode utility is BALROG's progression (brief 2 section 2, Utility): its `Progress` class and its
+`achievements.json` table, vendored unmodified under `balrog/` from `BALROG_REPO` at `BALROG_COMMIT`, each file
+checked against its recorded SHA-256 before the module is executed, and updated after every step as BALROG's own NLE
+wrapper does. It is never reimplemented here.
+
+Not yet bound: this directory holds no `manifest.json` until its prediction targets and price are committed, so the
+judge does not bind it (`judge.evaluate.bound`)."""
 
 from __future__ import annotations
 
 import hashlib
 import importlib.metadata
+import importlib.util
 import json
 import re
+import sys
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
@@ -39,6 +46,20 @@ OBSERVED = ("glyphs", "message", "blstats")
 STREAMS = ("core", "disp", "lgen")
 # The locks NetHackChallenge sets on its game instance.
 LOCKS = ("set_initial_seeds", "set_current_seeds", "get_current_seeds")
+# BALROG's progression (brief 2 section 2, Utility), vendored under `balrog/`: each file's path at BALROG_COMMIT
+# upstream and its SHA-256, recorded when it was copied byte for byte.
+BALROG_REPO = "https://github.com/balrog-ai/BALROG"
+BALROG_COMMIT = "b7afe79e3e4265811cfa985ed7c95c4d1a11e3f5"
+BALROG_FILES = {
+    "progress.py": ("balrog/environments/nle/progress.py",
+                    "7c267bd24c9a78a15176b53738849cb9ce480849c031c6a77021869e0f5aa8f2"),
+    "achievements.json": ("balrog/environments/nle/achievements.json",
+                          "a582cff2ffcaa34117e7c94a5406faf70fe41369263f9e49a46dff19169d3101"),
+    "LICENSE": ("LICENSE", "4e2bcd21929f977a0b6faae5f5461e6100f0328f959165336e5462348a22a118"),
+}
+BALROG_DIR = Path(__file__).with_name("balrog")
+# What BALROG's progression reads besides the observed keys: the terminal, for its end-of-game reason.
+PROGRESS_READS = ("tty_chars",)
 
 
 def installed_versions() -> dict[str, str]:
@@ -54,9 +75,25 @@ def seeds(seed: int) -> dict[str, int]:
     return {s: int.from_bytes(hashlib.sha256(f"{seed}:{s}".encode()).digest()[:8], "big") >> 1 for s in STREAMS}
 
 
+def balrog(root: Path = BALROG_DIR):
+    """BALROG's vendored `progress` module, loaded from `root` only after every file in BALROG_FILES there has its
+    recorded SHA-256, and only if the table it loaded is the checked one. Raises ValueError otherwise."""
+    data = {name: (root / name).read_bytes() for name in BALROG_FILES}
+    altered = sorted(n for n, (_, sha) in BALROG_FILES.items() if hashlib.sha256(data[n]).hexdigest() != sha)
+    if altered:
+        raise ValueError(f"vendored BALROG files differ from their recorded SHA-256 at {BALROG_COMMIT[:12]}: {altered}")
+    name = f"balrog_progress_{hashlib.sha256(str(root.resolve()).encode()).hexdigest()[:12]}"
+    module = importlib.util.module_from_spec(importlib.util.spec_from_file_location(name, root / "progress.py"))
+    sys.modules[name] = module  # the vendored module's dataclass looks itself up there
+    exec(compile(data["progress.py"], str(root / "progress.py"), "exec"), vars(module))
+    if module.ACHIEVEMENTS != json.loads(data["achievements.json"]):
+        raise ValueError("the progression table loaded is not the checked achievements.json")
+    return module
+
+
 def make_env(seed: int) -> NetHackChallenge:
     """NetHackChallenge with its seed lock lifted and its game seeded from `seed`, before its first reset."""
-    env = NetHackChallenge(observation_keys=OBSERVED, fix_moon_phase=True)
+    env = NetHackChallenge(observation_keys=OBSERVED + PROGRESS_READS, fix_moon_phase=True)
     for lock in LOCKS:
         delattr(env.nethack, lock)
     s = seeds(seed)
@@ -79,6 +116,13 @@ class Episode:
         self.done = False
         self.end_status = None
         self.observation = observe(obs)
+        # The class BALROG's `get_progress_system` gives NetHackChallenge, fresh at reset as in BALROG's NLE wrapper.
+        self.progress = balrog().Progress()
+
+    @property
+    def utility(self) -> float:
+        """BALROG's progression of the episode so far, in [0, 1] (brief 2 section 2, Utility)."""
+        return self.progress.progression
 
     @property
     def legal_actions(self) -> list[int]:
@@ -90,10 +134,11 @@ class Episode:
             raise RuntimeError("step after the episode ended")
         if action not in self.legal_actions:
             raise ValueError(f"illegal action {action!r}")
-        obs, _, terminated, truncated, info = self._env.step(action)
+        obs, reward, terminated, truncated, info = self._env.step(action)
         self.t += 1
         self.done = bool(terminated or truncated)
         self.end_status = int(info["end_status"])
+        self.progress.update(obs, reward, self.done, info)
         self.observation = observe(obs)
         return self.observation
 

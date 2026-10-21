@@ -4645,6 +4645,114 @@ def p36_nethack_determinism() -> bool:
     return ok()
 
 
+# P37's child (brief 2 section 2, Utility; brief 2 P4, Vendored metric): the vendored BALROG files' recorded and present
+# checksums; whether the binding refuses a copy with one progression table entry altered, and one with its code altered;
+# and, per seed, the utility BALROG's progression gives a seeded random action stream, P36's construction, played out.
+BALROG_RUN = """
+import hashlib, json, random, shutil, sys, tempfile
+from pathlib import Path
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+from worlds.nethack import binding
+
+def entry_altered(text):
+    i = text.index('"Dlvl:2": ') + len('"Dlvl:2": ') + 3
+    return text[:i] + str((int(text[i]) + 1) % 10) + text[i + 1:]
+
+def tampered(name, alter):
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "balrog"
+            shutil.copytree(binding.BALROG_DIR, root)
+            (root / name).write_text(alter((root / name).read_text()))
+            try:
+                binding.balrog(root)
+                return "loaded"
+            except ValueError:
+                return "refused"
+    except Exception as e:
+        return f"{type(e).__name__}: {e}"
+
+stock = NetHackChallenge()
+played = (set(nethack.CompassDirection) | set(nethack.CompassDirectionLonger)
+          | {nethack.MiscAction.MORE, nethack.Command.ESC, nethack.Command.SEARCH})
+keys = [i for i, a in enumerate(stock.actions) if a in played]
+stock.close()
+
+def attempt(seed):
+    try:
+        rng = random.Random(seed)
+        ep = binding.Episode(seed)
+        for a in [rng.choice(keys) for _ in range(int(sys.argv[2]))]:
+            if ep.done:
+                break
+            ep.step(a)
+        cls = type(ep.progress)
+        rec = {"utility": ep.utility, "highest": ep.progress.highest_achievement, "done": ep.done,
+               "end_reason": ep.progress.end_reason, "class": cls.__qualname__,
+               "class_file": sys.modules[cls.__module__].__file__}
+        ep.close()
+        return rec
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+
+print(json.dumps({
+    "recorded": {"repo": binding.BALROG_REPO, "commit": binding.BALROG_COMMIT,
+                 "files": {n: list(v) for n, v in binding.BALROG_FILES.items()}},
+    "present": {n: hashlib.sha256((binding.BALROG_DIR / n).read_bytes()).hexdigest() for n in binding.BALROG_FILES},
+    "vendored_file": str(binding.BALROG_DIR / "progress.py"),
+    "tampered": {"table": tampered("achievements.json", entry_altered),
+                 "code": tampered("progress.py", lambda t: t + "\\n# altered\\n")},
+    "seeds": {seed: attempt(seed) for seed in json.loads(sys.argv[1])}}))
+"""
+# BALROG's progression as vendored: the upstream repository, the commit, and each file's upstream path and SHA-256,
+# recorded when the files were copied byte for byte from that commit.
+BALROG_GOLDEN = {
+    "repo": "https://github.com/balrog-ai/BALROG",
+    "commit": "b7afe79e3e4265811cfa985ed7c95c4d1a11e3f5",
+    "files": {"progress.py": ["balrog/environments/nle/progress.py",
+                              "7c267bd24c9a78a15176b53738849cb9ce480849c031c6a77021869e0f5aa8f2"],
+              "achievements.json": ["balrog/environments/nle/achievements.json",
+                                    "a582cff2ffcaa34117e7c94a5406faf70fe41369263f9e49a46dff19169d3101"],
+              "LICENSE": ["LICENSE", "4e2bcd21929f977a0b6faae5f5461e6100f0328f959165336e5462348a22a118"]}}
+# Per seed, the utility and highest achievement of P36's action stream for it, recorded before any scored run: seed 1
+# dies on the first level (progression 0.0), seed 3 reaches the second (the table's `Dlvl:2` entry).
+BALROG_UTILITY_GOLDEN = {1: (0.0, None), 3: (0.015392269075361172, "Dlvl:2")}
+
+
+def p37_nethack_utility() -> bool:
+    """The NetHack binding's utility is BALROG's progression, vendored unmodified: every vendored file has the SHA-256
+    and upstream commit committed here, and the binding records the same; it refuses a copy with one progression table
+    entry altered, and one with the code altered; and an episode's utility is the vendored NetHackChallenge class fed
+    every step, equal per seed to its committed golden value (brief 2 section 2, Utility; brief 2 P4)."""
+    expect, ok = _expecter()
+    child = subprocess.run(proc.python("-c", BALROG_RUN, json.dumps(sorted(BALROG_UTILITY_GOLDEN)),
+                                       str(NETHACK_STEPS)), cwd=ROOT, env=proc.child_env(), capture_output=True,
+                           text=True, preexec_fn=proc.setup(False))
+    if child.returncode:
+        raise RuntimeError(f"balrog child exited {child.returncode}: {child.stderr.strip()[-500:]}")
+    r = json.loads(child.stdout)
+    expect(r["recorded"] == BALROG_GOLDEN, f"the binding records BALROG {BALROG_GOLDEN['commit'][:12]} and the "
+                                           f"committed checksums ({r['recorded']['commit'][:12]})")
+    for name, (_, sha) in BALROG_GOLDEN["files"].items():
+        expect(r["present"][name] == sha, f"vendored {name}: SHA-256 {r['present'][name][:16]} is the committed "
+                                          f"{sha[:16]}")
+    expect(r["tampered"]["table"] == "refused", f"one progression table entry altered: {r['tampered']['table']}")
+    expect(r["tampered"]["code"] == "refused", f"the progression code altered: {r['tampered']['code']}")
+    for seed, (utility, highest) in BALROG_UTILITY_GOLDEN.items():
+        s = r["seeds"][str(seed)]
+        expect("error" not in s, f"seed {seed}: the episode plays with its utility ({s.get('error')})")
+        if "error" in s:
+            continue
+        expect(s["class"] == "Progress" and s["class_file"] == r["vendored_file"],
+               f"seed {seed}: the utility is the vendored NetHackChallenge class ({s['class']} from {s['class_file']})")
+        expect(s["utility"] == utility and s["highest"] == highest,
+               f"seed {seed}: utility {s['utility']} ({s['highest']}) is the golden {utility} ({highest})")
+        expect(s["done"] and bool(s["end_reason"]), f"seed {seed}: the episode ends and BALROG reads its end "
+                                                    f"({s['end_reason']!r})")
+    return ok()
+
+
 
 # P2's probe, run inside a candidate container (brief 1 section 2, P2): it tries to read each judge path it is given,
 # to reach the network over IPv4 and IPv6, TCP and UDP, and to write the root file system, and reports each OS errno.
@@ -7794,4 +7902,11 @@ PINS = [
                                   Mutant("moon_from_clock", _edits("P36_moon_from_clock")),
                                   Mutant("seed_ignored", _edits("P36_seed_ignored")),
                                   Mutant("character_fixed", _edits("P36_character_fixed"))), JUDGE_SIDE),
+    Pin("P37", "the NetHack utility is BALROG's progression, vendored at a pinned commit with a checksum; one altered "
+               "table entry fails the checksum",
+        p37_nethack_utility, (Mutant("table_entry_altered", _edits("P37_table_entry_altered")),
+                              Mutant("table_and_checksum_altered", _edits("P37_table_and_checksum_altered")),
+                              Mutant("checksum_unchecked", _edits("P37_checksum_unchecked")),
+                              Mutant("progress_not_updated", _edits("P37_progress_not_updated")),
+                              Mutant("minihack_progress", _edits("P37_minihack_progress"))), JUDGE_SIDE),
 ]
