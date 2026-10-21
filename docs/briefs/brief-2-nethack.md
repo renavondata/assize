@@ -339,6 +339,14 @@ L2 reaches the seal sooner. A2's criterion "Every OPEN obligation listed in `rep
 ### Deliverables
 `reports/L2/obligations-44-55.md`, the check and its mutant, and the CI run cited.
 
+## Wish #74 (appended; instruction #284)
+
+The next item a Builder takes is chosen by forecast value: gate progress and price quantities moved per session, against Guy's stated budget and priorities. That choice is itself a scored forecast.
+A1.5's fixed order (instructions, then STATUS next, then brief file order) remains the default until a scored choice exists.
+Pre-stated criterion: a chooser that loses to the fixed order on resolved choices is not elected.
+Constitution note: replacing A1.5's order is a CLAUDE.md change and needs a `constitution` pull request; this draft asks only for the scored default and the pin that witnesses it.
+Pin that can fail: a chooser that departs from the fixed order with no recorded forecast fails the pin.
+
 ## Wish #69 (appended; instruction #286)
 
 A draft that changes how work is done states, in its body, the price quantity it expects to move and a forecast of the size of the move, as a pre-stated criterion. A draft that names no price quantity says so and is labelled recording-only.

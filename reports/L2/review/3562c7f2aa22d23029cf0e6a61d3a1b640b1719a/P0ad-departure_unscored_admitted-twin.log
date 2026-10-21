@@ -1,0 +1,24 @@
+pin:       P0ad
+protects:  the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate
+role:      twin
+tree:      /tmp/rv288-mut
+invoked:   /tmp/rv288-mut
+scratch:   /tmp/rv288-logs/scr-twin
+  [ok] R1: findings [], want []
+  [ok] R2: findings ['late'], want ['late']
+  [ok] R3: findings ['late'], want ['late']
+  [ok] R4: findings ['candidates'], want ['candidates']
+  [ok] R5: findings ['no_forecast'], want ['no_forecast']
+  [ok] R6: findings ['not_a_candidate'], want ['not_a_candidate']
+  [ok] R7: findings ['unscored_departure'], want ['unscored_departure']
+  [ok] R8: findings [], want []
+  [ok] R9: findings ['unscored_departure'], want ['unscored_departure']
+  [ok] choose exits 0 and prints two guy_picks rows and a line (0, 2 rows)
+  [ok] the printed rows pass the ledger check
+  [ok] each row's hash is its SHA-256
+  [ok] the line cites the mixture row's hash and lists every candidate
+  [ok] the line names the regime the seed assigns the first choice
+  [ok] the printed rows, committed first, then the line, pass the check, a later commit deleting the STATUS read as no text ([])
+    real: 0 chose lines in history
+  [ok] real chose lines: findings []
+result:    PASS
