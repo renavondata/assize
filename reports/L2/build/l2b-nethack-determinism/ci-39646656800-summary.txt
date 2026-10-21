@@ -1,0 +1,10 @@
+pins CI run 39646656800 on 1cd7c62, attempt 1, `pins-report` artifact, top-level pins.jsonl:
+summary: {"clean_failed": 0, "clean_ok": 95, "clean_total": 95, "exit_code": 0, "inconclusive": 0, "killed": 310, "kind": "summary", "leaked": 0, "mutants_total": 310, "non_causal": 0, "phase": "all", "registry": "harness", "since": "7f919001ec4732117ede4cb2adfeb8c436e6e481", "since_run": 39635835713, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 310, "twins_total": 310}
+P36 rows (mutant, verdict; each mutant row followed by its twin):
+clean ok
+P36/version_misrecorded KILLED, twin ok
+P36/seed_lock_kept KILLED, twin ok
+P36/reseed_on KILLED, twin ok
+P36/moon_from_clock KILLED, twin ok
+P36/seed_ignored KILLED, twin ok
+P36/character_fixed KILLED, twin ok
