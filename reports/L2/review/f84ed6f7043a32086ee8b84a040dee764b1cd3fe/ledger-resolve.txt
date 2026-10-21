@@ -1,0 +1,7 @@
+# reports/L0/forecasts/39641335528.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39641335528.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39641335528.jsonl: 83 open, 77 typed; resolved 4, unreadable 0
+resolved e5c51be4280a True — reports/L2/review-116dad31c6ac972389f557fcdfb7cfdd887d24b2.md at 33ff1d1ef4bd: ACCEPT WITH OBLIGATIONS
+resolved ca510cdbff94 False — #300 is an issue, not a pull request
+resolved cacca7060834 False — #300 is an issue, not a pull request
+resolved fb1319a01ae5 True — run 39630705618: 70.9 minutes, bound 180

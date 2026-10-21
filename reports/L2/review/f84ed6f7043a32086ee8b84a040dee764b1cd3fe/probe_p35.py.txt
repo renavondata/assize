@@ -1,0 +1,37 @@
+"""Review probe for PR #301: run `pins.p35_zero_diff` in memory against a repository tree given on the command line,
+with `ROOT` and `context.invocation_root` pointed at it, printing each assertion as the pin does and the verdict.
+
+Usage: probe_p35.py <repo> <label> [<mutant edits toml relative to repo>]
+
+With a mutant file, the pin runs in a scratch copy of the repository carrying that file's edits (the harness's own
+mechanism, `harness.edits.apply`), while the binding still reads the real repository, as `_real_root()` does under
+the harness. Without one, the pin runs in the repository as it stands."""
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+REPO = Path(sys.argv[1]).resolve()
+LABEL = sys.argv[2]
+MUTANT = sys.argv[3] if len(sys.argv) > 3 else None
+sys.path.insert(0, str(REPO))
+from harness import context, edits, pins  # noqa: E402
+
+scratch = Path(tempfile.mkdtemp(prefix="assize-review-p35-"))
+try:
+    if MUTANT:
+        copy = scratch / "repo"
+        shutil.copytree(REPO, copy, symlinks=True,
+                        ignore=lambda d, names: {n for n in names if n in {".git", ".venv", "out", "reports", "__pycache__"}})
+        edits.apply(copy, edits.load(MUTANT, copy))
+        root = copy
+    else:
+        root = REPO
+    pins.ROOT = root
+    context.invocation_root = REPO
+    context.scratch = scratch
+    print(f"== {LABEL}: ROOT={root} real_root={REPO} mutant={MUTANT}")
+    result = pins.p35_zero_diff()
+    print(f"== {LABEL}: p35_zero_diff() -> {result} ({'PASS' if result else 'FAIL'})")
+finally:
+    shutil.rmtree(scratch, ignore_errors=True)

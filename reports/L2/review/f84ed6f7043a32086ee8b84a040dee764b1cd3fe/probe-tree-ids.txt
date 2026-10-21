@@ -1,0 +1,21 @@
+probe clone /tmp/review-301-ueWprP/probe at f84ed6f7043a (expected f84ed6f7043a)
+  judge: zerodiff 113d9ffd7520f65f57448bf98f617e6d40661a35 git 113d9ffd7520f65f57448bf98f617e6d40661a35 agree
+  worlds/spec: zerodiff 079b2084d7d7b6739cf961a189e951567e7a4dbe git 079b2084d7d7b6739cf961a189e951567e7a4dbe agree
+  worlds: zerodiff 05e40c27cd003ab7b501c74468f093b829e8a1e1 git 05e40c27cd003ab7b501c74468f093b829e8a1e1 agree
+  harness/edits: zerodiff 6b0df04c9ce304fcb595a429c5b5932d26b82ecc git 6b0df04c9ce304fcb595a429c5b5932d26b82ecc agree
+  harness: zerodiff d6d9b972a45a6fd8c1a8186091ba8e15d851dcb5 git d6d9b972a45a6fd8c1a8186091ba8e15d851dcb5 agree
+  pilot: zerodiff f7801076585169b73884b722a87a6778367bd661 git f7801076585169b73884b722a87a6778367bd661 agree
+  scripts: zerodiff a898e79b9e7174d8f5a2fb2fa1aac6b013c2ae3a git a898e79b9e7174d8f5a2fb2fa1aac6b013c2ae3a agree
+  .github: zerodiff 3779d21bb7328852b1f41d5baae4cb7033e534ed git 3779d21bb7328852b1f41d5baae4cb7033e534ed agree
+  incumbents: zerodiff ad862a947c95dea03b13cfcb6b5d91125a39e92c git ad862a947c95dea03b13cfcb6b5d91125a39e92c agree
+  docs: zerodiff 5e2174c34f0c56099ad8e48aa1690a89696df90f git 5e2174c34f0c56099ad8e48aa1690a89696df90f agree
+  release: zerodiff 70ad3790f9f870470a3aaf1a3235d6aa65957317 git 70ad3790f9f870470a3aaf1a3235d6aa65957317 agree
+tree_id agrees with git on 11 directories
+baseline.toml: sha bcc9ac6662495d4c0d7bce823482adafe9836f19 trees {'judge': '113d9ffd7520f65f57448bf98f617e6d40661a35', 'worlds/spec': '079b2084d7d7b6739cf961a189e951567e7a4dbe'}
+  bcc9ac6:judge       113d9ffd7520f65f57448bf98f617e6d40661a35
+  bcc9ac6:worlds/spec 079b2084d7d7b6739cf961a189e951567e7a4dbe
+judge/ with judge_edited applied hashes to 8b2847c82edd25636ecfa8869d07e5b7331d3723
+baseline_rewritten records            judge = "8b2847c82edd25636ecfa8869d07e5b7331d3723"
+baseline_rewritten's id matches the edited tree: True
+tree_findings under the rewritten baseline: []
+binding_findings under the rewritten baseline: ['judge: tree_unbound: recorded 8b2847c82edd25636ecfa8869d07e5b7331d3723, the baseline commit has 113d9ffd7520f65f57448bf98f617e6d40661a35']

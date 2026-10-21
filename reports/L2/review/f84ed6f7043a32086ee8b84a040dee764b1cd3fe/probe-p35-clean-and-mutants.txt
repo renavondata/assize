@@ -1,0 +1,28 @@
+== clean: ROOT=/tmp/review-301-ueWprP/probe real_root=/tmp/review-301-ueWprP/probe mutant=None
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [ok] judge/ and worlds/spec/ are the baseline's ([])
+  [ok] the recorded trees are those of bcc9ac666249, in HEAD's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'judge', 'worlds/spec'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 113d9ffd7520f65f57448bf98f617e6d40661a35, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+== clean: p35_zero_diff() -> True (PASS)
+== judge_edited: ROOT=/tmp/assize-review-p35-teyhp_cx/repo real_root=/tmp/review-301-ueWprP/probe mutant=harness/edits/P35_judge_edited.toml
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [FAIL] judge/ and worlds/spec/ are the baseline's (["judge: tree_changed: tree 8b2847c82edd25636ecfa8869d07e5b7331d3723 differs from the baseline's 113d9ffd7520f65f57448bf98f617e6d40661a35"])
+  [ok] the recorded trees are those of bcc9ac666249, in HEAD's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'worlds/spec', 'judge'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 113d9ffd7520f65f57448bf98f617e6d40661a35, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+== judge_edited: p35_zero_diff() -> False (FAIL)
+== spec_edited: ROOT=/tmp/assize-review-p35-vwpf5ea3/repo real_root=/tmp/review-301-ueWprP/probe mutant=harness/edits/P35_spec_edited.toml
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [FAIL] judge/ and worlds/spec/ are the baseline's (["worlds/spec: tree_changed: tree be9e8f49d0326f1814bc2a2f5163d7575df2d8af differs from the baseline's 079b2084d7d7b6739cf961a189e951567e7a4dbe"])
+  [ok] the recorded trees are those of bcc9ac666249, in HEAD's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'worlds/spec', 'judge'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 113d9ffd7520f65f57448bf98f617e6d40661a35, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+== spec_edited: p35_zero_diff() -> False (FAIL)
+== baseline_rewritten: ROOT=/tmp/assize-review-p35-t4nj72ne/repo real_root=/tmp/review-301-ueWprP/probe mutant=harness/edits/P35_baseline_rewritten.toml
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [ok] judge/ and worlds/spec/ are the baseline's ([])
+  [FAIL] the recorded trees are those of bcc9ac666249, in HEAD's history (['judge: tree_unbound: recorded 8b2847c82edd25636ecfa8869d07e5b7331d3723, the baseline commit has 113d9ffd7520f65f57448bf98f617e6d40661a35'])
+  [ok] fixture: a file added under each directory is a changed tree ({'worlds/spec', 'judge'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 8b2847c82edd25636ecfa8869d07e5b7331d3723, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+== baseline_rewritten: p35_zero_diff() -> False (FAIL)
