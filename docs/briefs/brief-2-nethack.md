@@ -338,3 +338,11 @@ L2 reaches the seal sooner. A2's criterion "Every OPEN obligation listed in `rep
 
 ### Deliverables
 `reports/L2/obligations-44-55.md`, the check and its mutant, and the CI run cited.
+
+## Wish #69 (appended; instruction #286)
+
+A draft that changes how work is done states, in its body, the price quantity it expects to move and a forecast of the size of the move, as a pre-stated criterion. A draft that names no price quantity says so and is labelled recording-only.
+
+Pre-stated criterion: `claims.draft_findings` refuses a process-changing draft with no `price` line, and accepts a recording-only draft that says so.
+
+Pin that can fail: a process-changing draft with no `price` line is accepted by a mutant; the pin must fail on that mutant.
