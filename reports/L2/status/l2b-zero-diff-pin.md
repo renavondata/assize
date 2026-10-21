@@ -1,16 +1,17 @@
-# STATUS — L2 — 2026-10-21 — b2888fe — PR #301
-VERDICT: SESSION DONE: review f84ed6f F1 (BLOCK) answered: P35 now binds the baseline to origin/master's history, not only HEAD's; fourth mutant `baseline_moved` KILLED with a passing twin
+# STATUS — L2 — 2026-10-21 — 7f49b64 — PR #301
+VERDICT: SESSION DONE: review 89c757f F1 (BLOCK) answered: P35 now also requires origin/master to carry the recorded trees; fifth mutant `baseline_rewound` KILLED with a passing twin; the review's rewind composite is refused
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in the root REPORT.md; adds or opens no brief)
-pins CI run 39658284277 on b2888fe: success (reports/L2/ci/39658284277.json)
-pins: clean 96/96; mutants 314/314 KILLED; twins 314/314; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (CI log summary; skipped 0/96 pins, 0 mutants; `pins` workflow, PINS PASSED)
-changed: harness/zerodiff.py, harness/pins.py, harness/edits/P35_baseline_moved.toml, harness/README.md, harness/proposer.d/l2b-zero-diff-pin.toml, reports/L2/REPORT.md, reports/L2/ci/39658284277.json, reports/L2/status/l2b-zero-diff-pin.md
-did: PR-branch session on #301 (local run; newest review f84ed6f is BLOCK, first round); my item was F1 only. `binding_findings` takes `base`: the baseline sha must also be an ancestor of origin/master (`baseline_moved`), an unreadable master is `base_unreadable`. Fixture history in P35 (commit in HEAD's history, not master's) kills `baseline_moved`
-did: F2 and F3 are L3 obligations by the review; F3's note is added to the pin docstring and README. REPORT correction appended (never rewritten). No forecast row appended (branch's first-head rows cover it, P0r); session_minutes posted as a `vizier-ledger:` comment on #301
-did: denials: none. Departures from "Edit/Write only": a no-op python3 heredoc (twice, nothing written), one `sed` on proposer.d, one heredoc `cat >>` on reports/L2/REPORT.md. First push refused by pre-push (Proposer line not in the trailer block); amended own unpushed commit
-decided (not asked): the binding reads `origin/master`, falling back to `master`, as `_branch_base` does — p(stands on review)=0.85
-decided (not asked): REPORT's L2b paragraph is corrected by an appended section, not edited (append-only) — p=0.9
+pins CI run 39684349544 on 7f49b64: success (reports/L2/ci/39684349544.json)
+pins: clean 97/97; mutants 320/320 KILLED; twins 320/320; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (CI artifact pins.jsonl summary row, merge ref with master; skipped 0 pins, 0 mutants). Local `make pins` at 7f49b64 alone: clean 95/95, 306/306 KILLED, twins 306/306, PINS PASSED, exit 0 (reports/L2/build/7f49b64/make-pins.txt)
+changed: harness/zerodiff.py, harness/pins.py, harness/edits/P35_baseline_rewound.toml, harness/README.md, harness/proposer.d/l2b-zero-diff-pin.toml, reports/L2/REPORT.md, reports/L2/ci/39684349544.json, reports/L2/build/7f49b64/make-pins.txt, reports/L2/status/l2b-zero-diff-pin.md
+did: PR-branch session on #301 (build run 39683927976); newest review 89c757f is BLOCK, second round; my item was its F1 only. `binding_findings` adds `baseline_rewound`: `git rev-parse <base>:<dir>` must equal each recorded id, so the baseline's trees are master's as it stands
+did: fixture: the moved-baseline history's master is advanced to the branch commit and the baseline set to its parent (in both histories, carrying its tree; master has left it) → exactly `baseline_rewound`. The moved fixture now expects `baseline_rewound` alongside `baseline_moved`. Probed the review's composite (judge/ from 96dd901, baseline 96dd901/c31002e3) in a scratch copy: refused, `baseline_rewound`
+did: REPORT second correction appended (never rewritten). No forecast row appended (branch's first-head rows cover it, P0r); session_minutes posted as a `vizier-ledger:` comment on #301. Proposer row set to this session
+did: denials: none. Departures from "Edit/Write only": a `sed` on harness/baseline.toml and a probe commit, both in a /tmp scratch copy only; mutant edits applied to /tmp copies by `harness.edits.apply`; `cp` of the local transcript into reports/L2/build/
+decided (not asked): bind to master's current trees (the review's first option) rather than a pre-stated sha constant in code: a master move of judge/ must itself pass P35 on its own PR — p(stands on review)=0.8
+decided (not asked): the moved fixture's expectation widens to {baseline_moved, baseline_rewound} rather than a separate repo; `baseline_moved` is still killed by it (CI above) — p=0.85
 forecasts: made 1 (session_minutes, comment on #301); resolved 0; cumulative log-loss not recomputed here
-price: not computed: `ledger price --since bcc9ac6` exceeded 100 s in this session and produced no output
-obligations added: L3: F2 and F3 of review f84ed6f stand as the review recorded them
+price: guy-items 0; guy-latency median 0.0h max 0.0h; sessions 15; runner-min 2129
+obligations added: none (F2, F3 of review f84ed6f stand as L3 obligations as recorded)
 NEEDS YOU (at most 1): none
-next: if wish #300 is signed as an instruction, L2c (the seal) comes next, under P35; otherwise brief 2 §2 (`worlds/nethack/`) under P35
+next: if this merges, signed instruction #303 (wish #300, the seal precedes NetHack) is the oldest open instruction and the next master item
