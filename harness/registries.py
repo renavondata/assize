@@ -29,6 +29,8 @@ REGISTRIES = {
     "fixture.malformed_edit": "harness.fixtures.malformed_edit",
     "fixture.witness": "harness.fixtures.witness",
     "fixture.stamp": "harness.fixtures.stamp",
+    "fixture.stamphead": "harness.fixtures.stamphead",
+    "fixture.stampbare": "harness.fixtures.stampbare",
 }
 
 
