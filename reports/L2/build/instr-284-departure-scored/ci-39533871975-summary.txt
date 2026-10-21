@@ -1,0 +1,25 @@
+pins CI run 39533871975 on 838df32cfe6adbd71350e6fcb520f48a6271d737 (PR #288), attempt 1: failure. Lines copied from `gh run view 39533871975 --log`:
+
+[clean ] P0x: observed fail -> FAILED (16.584s) out/pins/runs/P0x/clean/transcript.log
+CLEAN FAILED: P0x (observed fail)
+[clean ] P0ad: observed pass -> ok (3.494s) out/pins/runs/P0ad/clean/transcript.log
+[mutant] P0ad/seal_after_act: mutant fail, twin pass -> KILLED (3.446s + 3.445s)
+[mutant] P0ad/seal_same_commit_admitted: mutant fail, twin pass -> KILLED (3.445s + 3.445s)
+[mutant] P0ad/candidate_omitted_admitted: mutant fail, twin pass -> KILLED (3.453s + 3.446s)
+[mutant] P0ad/deleted_status_read: mutant fail, twin pass -> KILLED (1.693s + 3.451s)
+[mutant] P0ad/departure_unscored_admitted: mutant fail, twin pass -> KILLED (3.449s + 3.446s)
+[mutant] P0x/price_line_dropped: mutant fail, twin fail -> NON-CAUSAL (17.839s + 16.385s)
+[mutant] P0x/none_on_workflow_admitted: mutant fail, twin fail -> NON-CAUSAL (15.932s + 16.329s)
+[mutant] P0x/scoped_by_number: mutant fail, twin fail -> NON-CAUSAL (16.429s + 16.532s)
+clean: 91/92 passed, 1/92 failed
+mutants: 292/295 killed, 0/295 survived, 0/295 inconclusive, 0/295 stale, 3/295 non-causal, 0 leaked (clean and mutant)
+twins: 292/295 passed
+skipped: 0/92 pins, 0 mutants since 0945f38 (run 39508269713)
+PINS FAILED
+
+P0x's clean failure, reproduced locally on 838df32 (`python -m harness check --registry harness --pin P0x --role clean`):
+    real: rule merged 2026-10-11T23:45:02+08:00; 25 instruction issues updated since: [68, 70, 102, 108, 110, 111, 112, 113, 126, 132, 135, 136, 139, 140, 162, 174, 176, 181, 211, 212, 239, 240, 281, 284, 286]
+  [FAIL] real instruction issues: findings ['issue #281: price_line: `Price:` lines the instruction: 0, want 1', 'issue #284: price_line: `Price:` lines the instruction: 0, want 1', 'issue #286: price_line: `Price:` lines the instruction: 0, want 1']
+result:    FAIL
+
+The same P0x failure is in PR #287's run 39527397797 on 4d8d8ba (instr-281-awaits-guy-queue); it reads the live issues, not this diff.
