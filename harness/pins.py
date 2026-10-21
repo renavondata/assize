@@ -3445,7 +3445,9 @@ def _status_with(row: dict, over: list | None = None, chose: str | None = None) 
 def _chose_repo(repo: Path):
     """A fixture history of `chose:` lines: R1 sealed before its line; R2 added in the same commit as its line; R3
     added after its line; R4's line omits a candidate; R5 has no forecast at all; R6's line chose outside the
-    candidates. Returns the git helper and the rows by name."""
+    candidates. R7, R8 and R9 depart from the fixed order (choose #2 over #1): R7 with no fixed-order forecast, R8
+    with one sealed before its line, R9 with one added in the same commit as its line (instruction #284). Returns the
+    git helper and the mixture rows by name."""
     git = _git_fixture(repo)
     repo.mkdir(parents=True)
     git("init", "-q", "-b", "master")
@@ -3473,11 +3475,26 @@ def _chose_repo(repo: Path):
     _commit(git, "forecast R6")
     (repo / status).write_text(_status_with(rows["R6"], chose="#9"))
     _commit(git, "act on R6, choosing outside the candidates")
-    return git, rows
+    departs = {n: _pick("mixture", ["#1", "#2", "#3"], "#2", rid=n) for n in ("R7", "R8", "R9")}
+    fixed = {n: _pick("fixed-order", ["#1", "#2", "#3"], "#1", shown="#2", rid=n) for n in ("R8", "R9")}
+    _append(repo, ledger_path, json.dumps(departs["R7"]) + "\n")
+    _commit(git, "forecast R7, the mixture only")
+    (repo / status).write_text(_status_with(departs["R7"]))
+    _commit(git, "act on R7, departing from the fixed order")
+    _append(repo, ledger_path, json.dumps(departs["R8"]) + "\n" + json.dumps(fixed["R8"]) + "\n")
+    _commit(git, "forecast R8, the mixture and fixed-order")
+    (repo / status).write_text(_status_with(departs["R8"]))
+    _commit(git, "act on R8, departing from the fixed order")
+    _append(repo, ledger_path, json.dumps(departs["R9"]) + "\n")
+    _commit(git, "forecast R9, the mixture only")
+    _append(repo, ledger_path, json.dumps(fixed["R9"]) + "\n")
+    (repo / status).write_text(_status_with(departs["R9"]))
+    _commit(git, "forecast fixed-order and act on R9 together")
+    return git, rows | departs
 
 
 CHOSE_WANT = {"R1": set(), "R2": {"late"}, "R3": {"late"}, "R4": {"candidates"}, "R5": {"no_forecast"},
-              "R6": {"not_a_candidate"}}
+              "R6": {"not_a_candidate"}, "R7": {"unscored_departure"}, "R8": set(), "R9": {"unscored_departure"}}
 
 
 def p0ad_chooser_sealed() -> bool:
@@ -7285,7 +7302,8 @@ PINS = [
         p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
                               Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),
                               Mutant("candidate_omitted_admitted", _edits("P0ad_candidate_omitted_admitted")),
-                              Mutant("deleted_status_read", _edits("P0ad_deleted_status_read"))),
+                              Mutant("deleted_status_read", _edits("P0ad_deleted_status_read")),
+                              Mutant("departure_unscored_admitted", _edits("P0ad_departure_unscored_admitted"))),
         ALWAYS),
     Pin("P0ae", "Guy's pick is resolved by the labels he applies; silence counts only after a declared exposure, else void",
         p0ae_exposure_and_labels, (Mutant("exposure_inferred", _edits("P0ae_exposure_inferred")),

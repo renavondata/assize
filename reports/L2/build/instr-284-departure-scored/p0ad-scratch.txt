@@ -1,0 +1,30 @@
+Instruction #284: P0ad run as single checks before the first push (session ca090d46-d131-4dbf-87ee-df2f30430195).
+A transcript, not a CI citation. The CI run on the pull request head is the witness.
+
+1. Clean, in this tree:
+$ uv run --frozen python -m harness check --registry harness --pin P0ad --role clean --invocation-root "$PWD" --run-dir /tmp/p0ad-run --scratch /tmp/p0ad-scr
+  [ok] R1: findings [], want []
+  [ok] R2: findings ['late'], want ['late']
+  [ok] R3: findings ['late'], want ['late']
+  [ok] R4: findings ['candidates'], want ['candidates']
+  [ok] R5: findings ['no_forecast'], want ['no_forecast']
+  [ok] R6: findings ['not_a_candidate'], want ['not_a_candidate']
+  [ok] R7: findings ['unscored_departure'], want ['unscored_departure']
+  [ok] R8: findings [], want []
+  [ok] R9: findings ['unscored_departure'], want ['unscored_departure']
+  [ok] choose exits 0 and prints two guy_picks rows and a line (0, 2 rows)
+  ...
+    real: 0 chose lines in history
+  [ok] real chose lines: findings []
+result:    PASS
+
+An earlier clean run, with the departure condition `line["chose"] != over[0]`, failed R6 (findings
+['not_a_candidate', 'unscored_departure']): a choice outside the candidates is its own finding, so the condition was
+narrowed to `line["chose"] in over[1:]` and the mutant's `old` string with it.
+
+2. Mutant `departure_unscored_admitted`, on a scratch copy of the tree with harness/edits/P0ad_departure_unscored_admitted.toml applied:
+$ uv run --frozen python -m harness check --registry harness --pin P0ad --role clean ... | grep -E "FAIL|result"
+  [FAIL] R7: findings [], want ['unscored_departure']
+  [FAIL] R9: findings [], want ['unscored_departure']
+result:    FAIL
+(KILLED; the twin is run by the harness in CI.)

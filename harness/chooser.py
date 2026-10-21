@@ -250,9 +250,12 @@ def chose_history(repo: Path, head: str = "HEAD") -> list[tuple[str, dict]]:
 
 def chose_findings(repo: Path, head: str = "HEAD") -> list[Finding]:
     """For every `chose:` line in history: its forecast row exists, was committed before the line did (the seal), and
-    lists exactly the candidates the line does; the line names one of them."""
-    rows = {r.get("args", {}).get("hash"): r for r in ledger.ledger_rows(repo, head)
-            if r.get("type") == "guy_picks" and "claim" in r}
+    lists exactly the candidates the line does; the line names one of them. A line that departs from the fixed order
+    (chooses a candidate other than its first, A1.5's) also needs `fixed-order`'s forecast of the same round sealed
+    before it, so the departure is scored against the default it left (instruction #284)."""
+    picks = [r for r in ledger.ledger_rows(repo, head) if r.get("type") == "guy_picks" and "claim" in r]
+    rows = {r.get("args", {}).get("hash"): r for r in picks}
+    fixed = [r.get("args", {}) for r in picks if r.get("args", {}).get("entrant") == FIXED]
     found: list[Finding] = []
     for act_commit, line in chose_history(repo, head):
         where = f"chose {line['hash'][:12]} at {act_commit[:12]}"
@@ -268,6 +271,12 @@ def chose_findings(repo: Path, head: str = "HEAD") -> list[Finding]:
             found.append(Finding(where, "candidates", f"lists {over}; the forecast declares {row['args']['candidates']}"))
         if line["chose"] not in over:
             found.append(Finding(where, "not_a_candidate", f"chose {line['chose']!r}, outside {over}"))
+        rid = row["args"].get("round")
+        if line["chose"] in over[1:] and not any(
+                sealed_before(repo, next(iter(_log(repo, head, a["hash"], claims.LEDGER_GLOBS)), None), act_commit)
+                for a in fixed if a.get("round") == rid):
+            found.append(Finding(where, "unscored_departure", f"departs from {FIXED}'s {over[0]} with no {FIXED} "
+                                                              f"forecast of round {rid} sealed before the act"))
     return found
 
 
