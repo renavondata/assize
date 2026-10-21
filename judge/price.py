@@ -4,7 +4,7 @@ An episode's measured compute (`compute.py`, `episodes.py`) is converted into un
 at the rates the World's manifest commits in its `price` block, with their derivation in its `rationale`, by one rule.
 A World whose manifest commits no price has none: the judge refuses to evaluate it (`Unpriced`), never borrowing
 another World's rates (brief 2 A2, P20). The block commits `delta`, the smallest difference in per-episode utility its
-World's FIT criterion requires the court to detect (brief 1: 0.5 achievements; brief 2: δ = 2 for NetHack), and its
+World's FIT criterion requires the court to detect (brief 1: 0.5 achievements; brief 2: δ = 2 progression points), and its
 rates must be that delta's derivation: an episode exhausting every allowance of `config.toml` is charged `delta`, half
 for each resource. Rates that are not, another World's among them, are refused (`Underived`), so a World is priced in
 its own utility before any scored run (brief 2 A2, L2a obligation 19, P33):
