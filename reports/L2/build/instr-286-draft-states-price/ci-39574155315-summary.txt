@@ -1,0 +1,12 @@
+pins	make pins	2026-10-21T09:56:44.7544776Z [mutant] P6/native_key_in_schema: mutant fail, twin pass -> KILLED (2.01s + 2.11s) out/pins/runs/P6/native_key_in_schema/mutant/transcript.log
+pins	make pins	2026-10-21T09:56:44.7546459Z [mutant] P6/pattern_hides_vocabulary: mutant fail, twin pass -> KILLED (2.011s + 2.01s) out/pins/runs/P6/pattern_hides_vocabulary/mutant/transcript.log
+pins	make pins	2026-10-21T09:56:44.7548136Z [mutant] P11/set_order_restored: mutant fail, twin pass -> KILLED (25.076s + 25.43s) out/pins/runs/P11/set_order_restored/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6348981Z [mutant] P11/seed_ignored: mutant fail, twin pass -> KILLED (26.231s + 25.274s) out/pins/runs/P11/seed_ignored/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6350904Z [mutant] P11/hash_constant: mutant fail, twin pass -> KILLED (25.12s + 24.717s) out/pins/runs/P11/hash_constant/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6361241Z [mutant] P11/field_dropped: mutant fail, twin pass -> KILLED (23.72s + 25.924s) out/pins/runs/P11/field_dropped/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6363274Z [mutant] P11/chunks_replaced_after_worldgen: mutant fail, twin pass -> KILLED (8.232s + 25.224s) out/pins/runs/P11/chunks_replaced_after_worldgen/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6364744Z [mutant] P11/golden_hash_altered: mutant fail, twin pass -> KILLED (25.28s + 25.33s) out/pins/runs/P11/golden_hash_altered/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6366195Z [mutant] P11/stream_truncated: mutant fail, twin pass -> KILLED (20.858s + 25.478s) out/pins/runs/P11/stream_truncated/mutant/transcript.log
+pins	make pins	2026-10-21T10:00:34.6367129Z clean: 92/92 passed, 0/92 failed
+pins	make pins	2026-10-21T10:00:34.6367937Z mutants: 295/295 killed, 0/295 survived, 0/295 inconclusive, 0/295 stale, 0/295 non-causal, 0 leaked (clean and mutant)
+pins	make pins	2026-10-21T10:00:34.6368735Z twins: 295/295 passed

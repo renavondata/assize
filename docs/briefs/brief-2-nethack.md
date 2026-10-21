@@ -346,3 +346,11 @@ A1.5's fixed order (instructions, then STATUS next, then brief file order) remai
 Pre-stated criterion: a chooser that loses to the fixed order on resolved choices is not elected.
 Constitution note: replacing A1.5's order is a CLAUDE.md change and needs a `constitution` pull request; this draft asks only for the scored default and the pin that witnesses it.
 Pin that can fail: a chooser that departs from the fixed order with no recorded forecast fails the pin.
+
+## Wish #69 (appended; instruction #286)
+
+A draft that changes how work is done states, in its body, the price quantity it expects to move and a forecast of the size of the move, as a pre-stated criterion. A draft that names no price quantity says so and is labelled recording-only.
+
+Pre-stated criterion: `claims.draft_findings` refuses a process-changing draft with no `price` line, and accepts a recording-only draft that says so.
+
+Pin that can fail: a process-changing draft with no `price` line is accepted by a mutant; the pin must fail on that mutant.

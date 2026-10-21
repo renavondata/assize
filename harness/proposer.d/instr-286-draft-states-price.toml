@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-286-draft-states-price (instruction #286: Wish #69 brief amendment): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "747c1fbd-515a-4bea-b6c5-a8f64fba852e"

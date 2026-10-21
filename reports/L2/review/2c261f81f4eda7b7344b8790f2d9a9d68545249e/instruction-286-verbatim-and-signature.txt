@@ -1,0 +1,49 @@
+Witness: instruction #286 is signed and its amendment text is appended verbatim (review run 39549514293, 2026-10-21).
+
+1. Signature (CLAUDE.md Amendment 4 rule 5). Timeline of issue #286, `gh api repos/renavondata/assize/issues/286/timeline`:
+   labeled draft by assize-reviewer at 2026-10-21T00:21:00Z
+   labeled needs-draft-check by assize-reviewer at 2026-10-21T00:21:00Z
+   unlabeled needs-draft-check by assize-reviewer at 2026-10-21T00:31:23Z
+   labeled instruction by gfrmin at 2026-10-21T01:23:09Z
+   (then comments and cross-references only; no `unlabeled instruction`)
+   Body edits, GraphQL `issue(number:286){userContentEdits(first:50){nodes{editor{login} editedAt}}}`:
+   {"userContentEdits":{"nodes":[]}}
+   No account edited the body at any time, so the `labeled instruction` event by gfrmin stands at the end of the timeline over an unedited body.
+
+2. Verbatim (CLAUDE.md A1.5: "the diff does what the issue says and nothing else"). The issue body after `titled \`Wish #69\`:` was split into non-empty lines and compared with the lines after the heading `## Wish #69 (appended; instruction #286)` at the PR head 2c261f81f4eda7b7344b8790f2d9a9d68545249e:
+
+   $ gh issue view 286 --json body -q .body > issue286-body.txt
+   $ git show 2c261f81f4eda7b7344b8790f2d9a9d68545249e:docs/briefs/brief-2-nethack.md > brief-head.md
+   $ python3 -I - issue286-body.txt brief-head.md <<'EOF'
+   import sys
+   body = open(sys.argv[1], encoding='utf-8').read().replace('\r\n','\n')
+   brief = open(sys.argv[2], encoding='utf-8').read()
+   marker = 'titled `Wish #69`:'
+   i = body.index(marker) + len(marker)
+   issue_paras = [l.strip() for l in body[i:].strip().split('\n') if l.strip()]
+   sec = brief[brief.index('## Wish #69'):]
+   brief_paras = [l.strip() for l in sec.split('\n')[1:] if l.strip()]
+   print('issue paragraphs:', len(issue_paras)); print('brief paragraphs after heading:', len(brief_paras))
+   for k,(a,b) in enumerate(zip(issue_paras, brief_paras)):
+       print(f'para {k}: {"IDENTICAL" if a==b else "DIFFER"}')
+       if a!=b: print('  issue:', repr(a)); print('  brief:', repr(b))
+   print('extra in brief:', brief_paras[len(issue_paras):]); print('extra in issue:', issue_paras[len(brief_paras):])
+   print('heading line:', repr(sec.split('\n')[0]))
+   EOF
+   issue paragraphs: 3
+   brief paragraphs after heading: 3
+   para 0: IDENTICAL
+   para 1: IDENTICAL
+   para 2: IDENTICAL
+   extra in brief: []
+   extra in issue: []
+   heading line: '## Wish #69 (appended; instruction #286)'
+
+   The heading follows the brief's own form for a wish appended under an instruction: `## Wish #173 (appended; instruction #174)` at line 305 and `## Wish #179 (appended; instruction #181)` at line 312 of the same file.
+
+3. Nothing else. `git diff --stat 088417add9d96a202bb496e8686bf06a4343e96b 2c261f81f4eda7b7344b8790f2d9a9d68545249e`:
+   docs/briefs/brief-2-nethack.md                                  | 8 ++++++++
+   harness/proposer.d/instr-286-draft-states-price.toml            | 4 ++++
+   reports/L2/forecasts/747c1fbd-515a-4bea-b6c5-a8f64fba852e.jsonl | 3 +++
+   3 files changed, 15 insertions(+)
+   The second and third files are the Builder procedure's own rows (CLAUDE.md A1.6, A1.7, Amendment 5), not work beyond the instruction.
