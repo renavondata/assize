@@ -1,21 +1,17 @@
-# STATUS — L2 — 2026-10-21 — 8e1eb1b — PR #293
-VERDICT: SESSION DONE: brief 2 A2's deliverable `reports/L2/REPORT.md` records the L2a baseline (this PR's merge commit) and A2's first criterion over L1 obligations 1–43 (42 discharged, 41 in part, its remainder A2's fourth criterion); `judge/price.py` no longer names NetHack
+# STATUS — L2 — 2026-10-21 — d0c1d41 — PR #293
+VERDICT: SESSION DONE: review 9fe22d0's blocking F1 answered: `reports/L2/REPORT.md` no longer claims a pin holds A2's `judge/` refusal; it states brief 2's zero-diff pin is unbuilt, that only review holds the refusal until it exists, and that building it (under a registry id other than P1) is L2b's first item
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in the root REPORT.md; adds or opens no brief)
-pins CI run 39566415270 on 8e1eb1b: success (reports/L2/ci/39566415270.json)
-pins: clean 92/92; mutants 295/295 KILLED; twins 295/295; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (full run: skipped 0, skipped_mutants 0)
-changed: judge/price.py, harness/proposer.d/l2a-baseline-report.toml, reports/L2/{REPORT.md,build/l2a-baseline-report/,ci/39566415270.json,forecasts/41137b8e-79c3-418b-a9a5-dcaa35eecdc1.jsonl,status/l2a-baseline-report.md}
-did: master session (manual dispatch, ASSIZE_ACK=yes); signed #281 and #286; `claims next '#286' '#281' 'brief 2 A2 deliverable: …'` skipped #286 (PR #290) and #281 (PR #287), printed the A2 deliverable; no switchback seed, so A1.5's order; declaration on #288 (comment 6311006942)
-did: each of obligations 1–43 mapped to a pin and mutant through its STATUS and the PR that first carried the mutant's `harness/edits/` file. All 64 cited mutants are KILLED with a passing twin in run 39545345182 (tree = master): reports/L2/build/l2a-baseline-report/ci-39545345182-cited-mutants.txt
-did: the A2 refusal grep found `judge/price.py:7` "δ = 2 for NetHack"; reworded to "δ = 2 progression points"; grep now empty, trees and judge_sha256 before and after: reports/L2/build/l2a-baseline-report/refusal-grep-8e1eb1b.txt
-did: forecasts pins_green, review_accept, session_minutes in the branch's first commit 8e1eb1b, before the PR opened. Denials: none. Witness files I first wrote with `cp`/`>` were deleted and rewritten with Write (instruction #110)
-decided (not asked): the A2 baseline report is the next brief item although PR #257 (audit finding 1) is open: #257 touches only `harness/`, so it cannot change the baseline's trees — p(stands on review)=0.7
-decided (not asked): the baseline is defined as this PR's merge commit, with this head's `judge/` and `worlds/spec/` tree ids, rather than a sha typed before merging (A2: "the merged L2a commit on master") — p=0.75
-decided (not asked): removing "NetHack" from a `judge/` docstring is in scope: A2's refusal list says "ever", and `judge/` freezes at this baseline — p=0.8
-decided (not asked): obligation 41 is "discharged in part"; its recheck half is A2's own fourth criterion and an L3 obligation, so it is not new work here — p=0.7
-decided (not asked): no new pin; the report is a cited table, and from the baseline on P1's zero diff holds `judge/` — p=0.65
+pins CI run 39586915626 on d0c1d41: success (reports/L2/ci/39586915626.json)
+pins: clean 93/93; mutants 298/298 KILLED; twins 298/298; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (full run at the PR merge with master, which carries #257: skipped 0, skipped_mutants 0)
+changed: reports/L2/REPORT.md, harness/proposer.d/l2a-baseline-report.toml, reports/L2/ci/39586915626.json, reports/L2/status/l2a-baseline-report.md
+did: PR-branch session (build run 39586112053; ASSIZE_ACK=no, no dispatched PR); newest review 9fe22d0 BLOCK, first round; its F1 was the only item. Declaration on #293 (comment 6314038835); session_minutes forecast posted as a `vizier-ledger:` comment on #293, no forecast row appended (PR branch, rule 2 / P0r)
+did: REPORT.md §The one judge edit: replaced "From the baseline on, P1 holds the refusal" with the unbuilt-pin paragraph; §The baseline and §What remains name brief 2's zero-diff pin instead of a bare "P1" (avoids the registry's CSPRNG P1)
+did: proposer row now this session. Denials: none. Edits by Edit/Write only
+decided (not asked): answer F1 by the review's first recommendation (state the gap) rather than building the zero-diff pin here: the pin is L2b's scope by A2 Scope 2 and would add `harness/pins.py` to a Guy-merged milestone — p(stands on review)=0.8
+decided (not asked): F2–F4 (OBLIGATIONs on L3) not worked here; only F4's naming overlaps F1's paragraph, and that part is done — p=0.8
 decided (not asked): auto-merge not enabled; brief 2 A2: "The L2a merge is a layer-internal milestone that Guy merges" — p=0.9
-forecasts: made 3 (788810b6e16b, 19189feb0f7e, f4de4e7daaaf); resolved 0 this session; cumulative log-loss not recomputed here
-price: guy-items 1; guy-latency median 0.0h max 0.0h; sessions 5; runner-min 8 (`ledger price --since 8190d4f`)
-obligations added: L3: none new. Carried: obligation 41's recheck against the first non-random candidate
-NEEDS YOU (at most 1): merge PR #293, the L2a milestone brief 2 A2 reserves to you; its merge commit becomes P1's zero-diff baseline and freezes `judge/` and `worlds/spec/`
-next: after #293 merges, L2b: brief 2 §2 (`worlds/nethack/` binding, AutoAscend as a pinned submodule per A1 item 2), under P1 against the baseline
+forecasts: made 1 (session_minutes, as a PR comment); resolved 0 this session; cumulative log-loss not recomputed here
+price: guy-items 3; guy-latency median 0.6h max 1.7h; sessions 13; runner-min 1208 (`ledger price --since 8190d4f`)
+obligations added: L3: F2 (point at the file carrying the tree ids), F3 (headline carries 42 + 1 in part), F4 (one meaning for "P1"), per review 9fe22d0. L2b: build the zero-diff pin first
+NEEDS YOU (at most 1): merge PR #293, the L2a milestone brief 2 A2 reserves to you; its merge commit becomes the zero-diff baseline and freezes `judge/` and `worlds/spec/` (held by review until L2b builds the pin)
+next: after #293 merges, L2b's first item: brief 2's zero-diff pin against the L2a baseline, with a seeded edit under `judge/` KILLED and a passing twin; then §2 (`worlds/nethack/`)
