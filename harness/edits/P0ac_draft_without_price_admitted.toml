@@ -1,0 +1,5 @@
+# P0ac's price mutant (Wish #69): a draft with no `Price:` line is read as recording-only and accepted.
+[[edit]]
+path = "harness/claims.py"
+old = "    lines = PRICE_LINE.findall(body)\n    if len(lines) != 1:"
+new = "    lines = PRICE_LINE.findall(body) or [PRICE_NONE]\n    if len(lines) != 1:"

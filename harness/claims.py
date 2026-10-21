@@ -893,13 +893,45 @@ def draft_from(repo: Path, base: str) -> str | None:
     return price_from(repo, base, DRAFT_MARK, PRICE_PATH)
 
 
-def draft_findings(n: int, body: str, opened_at: str | None, since: str | None) -> list[Finding]:
-    """Findings on `draft` issue `n` if the rule merged at `since` and the draft was opened after it: the first line is
-    `Wish: #<n>`, and exactly one of an `Instruction because: <sentence>` line and a `Brief amendment to
-    docs/briefs/brief-<l>-<name>.md, titled Wish #<n>:` line that names the same wish."""
+# Wish #69 (brief 2): a draft that changes how work is done states the price quantity it expects to move and by what
+# bound, as a pre-stated criterion; a draft that names none says `Price: none (recording-only)`. Dated from git as
+# `draft_from` dates the form rule, by its own mark, so no draft opened before it is read against it.
+DRAFT_PRICE_MARK = "def draft_price_findings("
+
+
+def draft_price_from(repo: Path, base: str) -> str | None:
+    """When the draft price rule merged onto `base`'s first-parent line, read from git; None before it has."""
+    return price_from(repo, base, DRAFT_PRICE_MARK, PRICE_PATH)
+
+
+def draft_price_findings(n: int, body: str, opened_at: str | None, since: str | None) -> list[Finding]:
+    """Findings on `draft` issue `n` if the price rule merged at `since` and the draft was opened after it: exactly one
+    `Price:` line, of the form `<quantity>; down|up; <bound>` (a quantity of `PRICE_QUANTITIES`) or `none
+    (recording-only)`."""
     where = f"draft #{n}"
     if since is None or opened_at is None or not _after(opened_at, since):
         return []
+    lines = PRICE_LINE.findall(body)
+    if len(lines) != 1:
+        return [Finding(where, "draft_price_line", f"{len(lines)} `Price:` lines, want 1 (`Price: {PRICE_NONE}` if the "
+                                                   f"draft moves no price quantity)")]
+    declared = PRICE_DECLARED.fullmatch(lines[0])
+    if lines[0] != PRICE_NONE and not (declared and declared.group(1) in PRICE_QUANTITIES):
+        return [Finding(where, "draft_price_form", f"`Price: {lines[0]}` is neither `<quantity>; down|up; <bound>` with "
+                                                   f"a quantity of {PRICE_QUANTITIES} nor `{PRICE_NONE}`")]
+    return []
+
+
+def draft_findings(n: int, body: str, opened_at: str | None, since: str | None,
+                   price_since: str | None = None) -> list[Finding]:
+    """Findings on `draft` issue `n` if the rule merged at `since` and the draft was opened after it: the first line is
+    `Wish: #<n>`, and exactly one of an `Instruction because: <sentence>` line and a `Brief amendment to
+    docs/briefs/brief-<l>-<name>.md, titled Wish #<n>:` line that names the same wish; and, if the price rule merged at
+    `price_since`, the findings of `draft_price_findings`."""
+    where = f"draft #{n}"
+    priced = draft_price_findings(n, body, opened_at, price_since)
+    if since is None or opened_at is None or not _after(opened_at, since):
+        return priced
     lines = body.splitlines()
     wish = DRAFT_WISH.fullmatch(lines[0].strip()) if lines else None
     because, amendments = DRAFT_BECAUSE.findall(body), DRAFT_AMENDMENT.findall(body)
@@ -912,7 +944,7 @@ def draft_findings(n: int, body: str, opened_at: str | None, since: str | None) 
         (wish is not None and any(a != wish.group(1) for a in amendments), "wrong_wish",
          "the amendment is titled for another wish than the first line names"),
     )
-    return [Finding(where, code, detail) for broken, code, detail in rules if broken]
+    return [Finding(where, code, detail) for broken, code, detail in rules if broken] + priced
 
 
 def load_drafts(repo: Path, since: str) -> dict[int, tuple[str, str]]:
