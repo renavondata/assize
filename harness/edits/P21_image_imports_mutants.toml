@@ -1,0 +1,11 @@
+# P21's mutant `image_imports_mutants` (brief 2 A2 P21): the sealed layer carries one more module, which imports the
+# harness's mutant switches; the committed digest is that image's, so only P0b's scan of the layer can kill it.
+[[edit]]
+path = "harness/seal.py"
+old = "    ours = layer(judge_files(root))\n"
+new = "    ours = layer(judge_files(root) + [(f\"{PREFIX}/_switch.py\", b\"from harness import mutants\\n\")])\n"
+
+[[edit]]
+path = "release/seal.toml"
+old = "digest = \"sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c\""
+new = "digest = \"sha256:fc7b43a7b40aa7e45547924b922ceb3c2602ff76a4cd2b49b2ab965550995baf\""

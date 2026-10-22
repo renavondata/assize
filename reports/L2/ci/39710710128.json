@@ -1,0 +1,1 @@
+{"conclusion":"failure","created_at":"2026-10-22T02:19:06Z","event":"pull_request","head_branch":"l2c-seal","head_sha":"59fc1c5ce13440423b658ea9e3eb05e926ad213b","html_url":"https://github.com/renavondata/assize/actions/runs/39710710128","id":39710710128,"name":"pins","path":".github/workflows/pins.yml","run_attempt":1,"status":"completed","updated_at":"2026-10-22T03:18:45Z"}

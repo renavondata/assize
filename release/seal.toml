@@ -1,0 +1,4 @@
+# The seal (brief 2 A2 Scope 3, A3 item 2): the manifest digest of the judge's image as `python -m harness.seal`
+# composes it from the L2a baseline's judge/ (tree 113d9ffd7520f65f57448bf98f617e6d40661a35) and the pinned base.
+# reports/L2/REPORT.md records the same digest; P21 holds both.
+digest = "sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c"
