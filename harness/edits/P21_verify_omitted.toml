@@ -1,0 +1,11 @@
+# P21's mutant `verify_omitted` (brief 2 A2 P21): the sealed layer leaves out `judge/__main__.py`, so the image carries
+# nothing that verifies; the recorded digest is that image's, so only the verify case can kill it.
+[[edit]]
+path = "harness/seal.py"
+old = "if p.is_file() and \"__pycache__\" not in p.relative_to(top).parts)"
+new = "if p.is_file() and \"__pycache__\" not in p.relative_to(top).parts and p.name != \"__main__.py\")"
+
+[[edit]]
+path = "reports/L2/REPORT.md"
+old = "- Seal digest: `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c`"
+new = "- Seal digest: `sha256:5d7a667fe125739a778235b853e04640afc740a195dde2c0f4434d3aa4849dec`"

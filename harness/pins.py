@@ -14,6 +14,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import tarfile
 import tempfile
 import textwrap
 import types
@@ -6340,6 +6341,77 @@ def p31_image_carries_verify() -> bool:
     return ok()
 
 
+SEAL_REPORT = ROOT / "reports" / "L2" / "REPORT.md"
+SEAL_LINE = re.compile(r"^- Seal digest: `(sha256:[0-9a-f]{64})`", re.M)
+
+
+def p21_seal() -> bool:
+    """The seal (brief 2 A2 P21, A3 item 2): the judge's image composed by `harness.seal` from the tree's `judge/` and
+    the pinned base has the manifest digest `reports/L2/REPORT.md` records, the one `- Seal digest:` line there, and
+    composing it again gives the same bytes. Loaded under podman, the host's runtime, its image ID is the config digest;
+    run with no network and a read-only root, its `verify` passes P9's fixture ledger as the host's does and fails an
+    altered record; P0b's scan of the files the image adds over the base (its one layer, extracted) finds nothing. The
+    base's own layers are the pinned upstream image, checked against its diff IDs, and are not scanned."""
+    from harness import seal
+    from judge import ledger, runtime
+
+    expect, ok = _expecter()
+    recorded = SEAL_LINE.findall(SEAL_REPORT.read_text())
+    expect(len(recorded) == 1, f"{SEAL_REPORT.relative_to(ROOT)} records one seal digest ({recorded})")
+    base = runtime.candidate_config()["base_image"]
+    froms = [ln.split()[1] for ln in (RELEASE / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
+    expect(froms == [base], f"the release image's one FROM is the judge's pinned base image ({froms}, {base})")
+    usable, _ = _usable_runtimes(expect)
+    podman = [rt for rt in usable if rt.name == "podman"]
+    expect(bool(podman), "podman, the measurement host's runtime, is usable")
+    if not podman:
+        return ok()
+    rt = podman[0]
+    work = Path(tempfile.mkdtemp(prefix="assize-p21-", dir=context.scratch))
+    image = None
+    try:
+        digest, image = seal.seal(rt.binary, base, ROOT, work / "oci")
+        print(f"  composed: manifest {digest}, image {image}")
+        expect(recorded == [digest], f"the composed manifest digest is the recorded seal ({digest}, {recorded})")
+        again = seal.seal(rt.binary, base, ROOT, work / "oci-again")
+        expect(again == (digest, image), f"composed again, the same digests ({again})")
+        loaded = subprocess.run([rt.binary, "pull", "-q", f"oci:{work / 'oci'}"], capture_output=True, text=True)
+        expect(_digest(loaded.stdout.strip()) == image,
+               f"loaded, its image ID is the config digest ({loaded.stdout.strip()}{loaded.stderr.strip()[-300:]})")
+        man = json.loads((work / "oci" / "blobs" / "sha256" / digest.split(":", 1)[1]).read_bytes())
+        added = work / "oci" / "blobs" / "sha256" / man["layers"][-1]["digest"].split(":", 1)[1]
+        layer = work / "layer"
+        layer.mkdir()
+        with tarfile.open(added) as tar:
+            tar.extractall(layer, filter="data")
+        found, scanned = scan.violations(layer / "release")
+        for v in found:
+            print(f"  VIOLATION {v}")
+        expect(scanned > 0 and not found, f"P0b's scan of the added layer: {scanned} code files, {len(found)} violations")
+
+        data = work / "data"
+        data.mkdir()
+        led, private = data / "ledger.jsonl", data / "private"
+        held = [ledger.append(led, private, rid, rows) for rid, rows in P9_REQUESTS]
+        anchor = held[-1][-1]["sha256"]
+        host = _verify_cli(led, private, anchor)
+        expect(host[0] == 0, f"control: the host's verify passes the fixture ledger ({host})")
+        code, out = _verify_in_image(rt, image, data, anchor)
+        print(f"  verify in the sealed image -> {code}: {out}")
+        expect(code == 0 and (code, out) == host, f"verify in the sealed image passes and prints what the host's prints "
+                                                  f"(exit {code})")
+        led.write_bytes(_altered(led))
+        code, out = _verify_in_image(rt, image, data, anchor)
+        expect(code == 1 and "FAILED" in out, f"verify in the sealed image fails an altered record (exit {code})")
+    except (subprocess.CalledProcessError, ValueError) as e:
+        expect(False, f"the seal composes ({e})")
+    finally:
+        if image:
+            subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -7872,6 +7944,12 @@ PINS = [
                                    Mutant("eager_imports", _edits("P31_eager_imports")),
                                    Mutant("shared_ledger", _edits("P31_shared_ledger"))),
         JUDGE_SIDE + ("release/**",)),
+    Pin("P21", "the seal: the judge's image composed from judge/ and the pinned base has the manifest digest "
+               "reports/L2/REPORT.md records; loaded under podman it runs verify; P0b's scan of its layer finds nothing",
+        p21_seal, (Mutant("digest_misrecorded", _edits("P21_digest_misrecorded")),
+                   Mutant("verify_omitted", _edits("P21_verify_omitted")),
+                   Mutant("image_imports_mutants", _edits("P21_image_imports_mutants"))),
+        JUDGE_SIDE + ("release/**", "reports/L2/REPORT.md")),
     Pin("P32", "a context's declared runtime must be usable: docker declared where only podman is, an unknown runtime, "
                "and the environment's declaration each fail; a held or absent declaration passes",
         p32_declared_runtime, (Mutant("declared_runtime_ignored", _edits("P32_declared_runtime_ignored")),
