@@ -3225,6 +3225,20 @@ def p0bm_trusted_base() -> bool:
     for what, case, want in cases:
         got = trusted.findings(case, decl, frozenset({adm}))
         expect(got == want, f"fixture: {what} is refused ({got}, want {want})")
+    # instruction #315: a signed instruction's heading in a brief admits as an audit's does; one no brief carries does not
+    briefs = Path(tempfile.mkdtemp(prefix="assize-p0bm-", dir=context.scratch))
+    (briefs / "docs" / "briefs").mkdir(parents=True)
+    (briefs / "docs" / "briefs" / "brief-9-x.md").write_text("# Brief\n\n## Admitted by instruction #7\n\n- `/X @o`\n")
+    signed = trusted.admissions(briefs)
+    expect(signed == frozenset({"Admitted by instruction #7"}),
+           f"fixture: an `Admitted by instruction #<n>` heading in a brief is an admission ({set(signed)})")
+    by_instruction = {**listed, "codeowners": {"/X @o": "Admitted by instruction #7"}}
+    got = trusted.findings(by_instruction, decl, frozenset({adm}) | signed)
+    expect(got == [], f"fixture: an entry admitted by an instruction heading present in a brief passes ({got})")
+    unheaded = {**listed, "codeowners": {"/X @o": "Admitted by instruction #8"}}
+    got = trusted.findings(unheaded, decl, frozenset({adm}) | signed)
+    want = ["unadmitted codeowners /X @o: 'Admitted by instruction #8'"]
+    expect(got == want, f"fixture: an entry naming an instruction heading no brief carries is refused ({got}, want {want})")
     expect(trusted.grown({"secret": {"S": adm}}, {"secret": {"S": adm, "U": adm}}) == [f"secret U: {adm}"],
            "fixture: an entry absent from the earlier list is growth")
     expect(trusted.grown({}, {"secret": {"S": adm}}) == [f"secret S: {adm}"],
@@ -7802,7 +7816,9 @@ PINS = [
         p0bm_trusted_base, (Mutant("unlisted_secret_added", _edits("P0bm_unlisted_secret_added")),
                             Mutant("admission_unchecked", _edits("P0bm_admission_unchecked")),
                             Mutant("growth_unreported", _edits("P0bm_growth_unreported")),
-                            Mutant("inherit_unread", _edits("P0bm_inherit_unread"))),
+                            Mutant("inherit_unread", _edits("P0bm_inherit_unread")),
+                            Mutant("instruction_admission_ignored", _edits("P0bm_instruction_admission_ignored")),
+                            Mutant("admission_without_heading", _edits("P0bm_admission_without_heading"))),
         HARNESS + (".github/workflows/**", "CODEOWNERS", "docs/briefs/**")),
     Pin("P0ba", "a STATUS's header sha and pins citation are printed by the harness from the run's own head_sha, and a "
                 "push of a STATUS P0l would reject is refused",

@@ -1,0 +1,6 @@
+# P0bm's mutant `admission_without_heading` (instruction #315): an entry naming an instruction heading is admitted
+# whether or not a brief carries that heading, so an issue number on its own admits it.
+[[edit]]
+path = "harness/trusted.py"
+old = "               if a not in admitted])"
+new = "               if a not in admitted and not a.startswith(\"Admitted by instruction #\")])"

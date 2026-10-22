@@ -1,5 +1,6 @@
 # The trusted base (CLAUDE.md Amendment 2, audit criterion 7): the things outside every loop. One table per kind; each
-# entry maps its name to the audit-dated amendment that admitted it, a `## Audit findings at <sha>` heading in a brief.
+# entry maps its name to the amendment that admitted it, a `## Audit findings at <sha>` or (instruction #315)
+# `## Admitted by instruction #<n>` heading in a brief.
 # P0bm holds this list equal to the set the tree declares (`python -m harness.trusted check`); the Auditor reads its
 # growth since the last audit with `python -m harness.trusted grown <audited sha>`. Repository secrets and runner
 # registrations held by GitHub are not readable by the builder or reviewer token (HTTP 403), so the declared set is
@@ -41,3 +42,5 @@
 "/.github/ @gfrmin" = "Audit findings at 8aae43c8c792"
 "/CLAUDE.md @gfrmin" = "Audit findings at 8aae43c8c792"
 "/CODEOWNERS @gfrmin" = "Audit findings at 8aae43c8c792"
+"/judge/ @gfrmin" = "Admitted by instruction #315"
+"/worlds/spec/ @gfrmin" = "Admitted by instruction #315"

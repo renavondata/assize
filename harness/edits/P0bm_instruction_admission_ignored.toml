@@ -1,0 +1,6 @@
+# P0bm's mutant `instruction_admission_ignored` (instruction #315): an `Admitted by instruction #<n>` heading in a brief
+# is not recognised, so Guy's signature cannot admit the CODEOWNERS lines the constitution requires.
+[[edit]]
+path = "harness/trusted.py"
+old = "(Audit findings at [0-9a-f]{12,40}|Admitted by instruction #[0-9]+)"
+new = "(Audit findings at [0-9a-f]{12,40})"
