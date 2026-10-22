@@ -1,0 +1,8 @@
+P19 clean: RESULT True []
+P19 world_table_hardcoded mutant: RESULT False ["  [FAIL] bound: every directory with a manifest and a binding, and only those (['crafter'])", "  [FAIL] fx's own binding is imported (unknown_world)"]
+P38 clean: RESULT True []
+P38 endgame_depths_dropped mutant: RESULT False ['  [FAIL] depth: support [0, 1, 2]...[53] is the derived [-5, -4, -3]...[53]', "  [FAIL] depth: the field's range [0, 53] is its support's bounds"]
+P38 zeroed_xp_dropped mutant: RESULT False ['  [FAIL] xp: support [1, 2, 3]...[30] is the derived [0, 1, 2]...[30]', "  [FAIL] xp: the field's range [1, 30] is its support's bounds"]
+P38 delta_in_points mutant: RESULT False ["  [FAIL] delta 2 is brief 2's 2 progression points (0.02)"]
+P38 observation_raw mutant: RESULT False ["  [FAIL] seed 1: 1785 steps, 53550 manifest departures (['t=1: missing toplines', 't=1: missing x', 't=1: missing y', 't=1: missing str25', 't=1: missing str125'])", '  [FAIL] seed 1: depth realises [1, None], all in its support (outside: [None])']
+P38 achievements_raw mutant: RESULT False ["  [FAIL] seed 1: achievements ['Dlvl:1', 'Xp:1'] are the golden ['dlvl1', 'xp1'], manifest components", "  [FAIL] seed 3: achievements ['Dlvl:1', 'Dlvl:2', 'Xp:1'] are the golden ['dlvl1', 'dlvl2', 'xp1'], manifest components"]

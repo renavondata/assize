@@ -1,0 +1,17 @@
+P6 clean: RESULT True []
+P6 crafter_field_in_schema mutant: RESULT False ["  [FAIL] real schemas: 316 vocabulary tokens from ['crafter/manifest.json', 'nethack/manifest.json']; found in schemas: [('rpc.schema.json', 'semantic')]"]
+P6 native_key_in_schema mutant: RESULT False ['  [FAIL] rpc.schema.json accepts step', "  [FAIL] real schemas: 8 native tokens; found in schemas: [('rpc.schema.json', 'inventory')]"]
+P6 pattern_hides_vocabulary mutant: RESULT False ['  [FAIL] rpc.schema.json accepts step', "  [FAIL] real schemas carry no pattern but the identifier pattern: {'manifest.schema.json': set(), 'rpc.schema.json': {'^(sem|in
+P36 clean: RESULT True []
+P36 version_misrecorded mutant: RESULT False ["  [FAIL] installed versions {'nle': '1.3.0', 'nethack': '3.6.7'} are the recorded {'nle': '1.3.0', 'nethack': '3.6.6'}"]
+P36 seed_lock_kept mutant: RESULT False ["  [FAIL] the task is NetHackChallenge with its stock actions, character choice and limits ({'error': 'RuntimeError: Should not try changing seeds'})", "  [FAIL] the binding seeds
+P36 reseed_on mutant: RESULT False ['  [FAIL] seed 1: trajectory hash 546256a1019f6957 is the committed golden 55ea807e58a374c2', '  [FAIL] seed 7: trajectory hash fb91e6d8a9549167 is the committed golden 3c363323144b3c1
+P36 moon_from_clock mutant: RESULT False ['  [FAIL] seed 7: trajectory hash 38c88a6148da405c is the committed golden 3c363323144b3c13', '  [FAIL] seed 12: trajectory hash 3c82b8a74545b24a is the committed golden 587dba1b
+P36 seed_ignored mutant: RESULT False ['  [FAIL] seed 1: trajectory hash a6c3cb1886c56ad3 is the committed golden 55ea807e58a374c2', '  [FAIL] seed 7: trajectory hash aa5483cc13863568 is the committed golden 3c363323144b
+P36 character_fixed mutant: RESULT False ["  [FAIL] the task is NetHackChallenge with its stock actions, character choice and limits ({'type': 'NetHackChallenge', 'same_actions': True, 'same_character': False, 'same_limi
+P37 clean: RESULT True []
+P37 table_entry_altered mutant: RESULT False ['  [FAIL] vendored achievements.json: SHA-256 09cc2ecfb3edc21c is the committed a582cff2ffcaa341', "  [FAIL] seed 1: the episode plays with its utility (ValueError: vendored 
+P37 table_and_checksum_altered mutant: RESULT False ['  [FAIL] the binding records BALROG b7afe79e3e42 and the committed checksums (b7afe79e3e42)', '  [FAIL] vendored achievements.json: SHA-256 09cc2ecfb3edc21c is the co
+P37 checksum_unchecked mutant: RESULT False ['  [FAIL] one progression table entry altered: loaded', '  [FAIL] the progression code altered: loaded']
+P37 progress_not_updated mutant: RESULT False ['  [FAIL] seed 1: the episode ends and BALROG reads its end (None)', '  [FAIL] seed 3: utility 0.0 (None) is the golden 0.015392269075361172 (Dlvl:2)']
+P37 minihack_progress mutant: RESULT False ["  [FAIL] seed 1: the episode plays with its utility (AttributeError: 'BaseProgress' object has no attribute 'highest_achievement')", "  [FAIL] seed 3: the episode plays with i
