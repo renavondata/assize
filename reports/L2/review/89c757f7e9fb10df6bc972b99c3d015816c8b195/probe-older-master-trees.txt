@@ -1,0 +1,17 @@
+HEAD judge=c31002e369f5f5dec6e0d2d1ea61e3da57ff7665 worlds/spec=079b2084d7d7b6739cf961a189e951567e7a4dbe
+origin/master judge=113d9ffd7520f65f57448bf98f617e6d40661a35 worlds/spec=079b2084d7d7b6739cf961a189e951567e7a4dbe
+96dd901a1abbedb5099710d92f6c1ab0ef0c85a6 judge=c31002e369f5f5dec6e0d2d1ea61e3da57ff7665 worlds/spec=079b2084d7d7b6739cf961a189e951567e7a4dbe
+bcc9ac6662495d4c0d7bce823482adafe9836f19 judge=113d9ffd7520f65f57448bf98f617e6d40661a35 worlds/spec=079b2084d7d7b6739cf961a189e951567e7a4dbe
+diff --git a/judge/price.py b/judge/price.py
+index 585e888..d290e57 100644
+--- a/judge/price.py
++++ b/judge/price.py
+@@ -4,7 +4,7 @@ An episode's measured compute (`compute.py`, `episodes.py`) is converted into un
+ at the rates the World's manifest commits in its `price` block, with their derivation in its `rationale`, by one rule.
+ A World whose manifest commits no price has none: the judge refuses to evaluate it (`Unpriced`), never borrowing
+ another World's rates (brief 2 A2, P20). The block commits `delta`, the smallest difference in per-episode utility its
+-World's FIT criterion requires the court to detect (brief 1: 0.5 achievements; brief 2: δ = 2 progression points), and its
++World's FIT criterion requires the court to detect (brief 1: 0.5 achievements; brief 2: δ = 2 for NetHack), and its
+ rates must be that delta's derivation: an episode exhausting every allowance of `config.toml` is charged `delta`, half
+ for each resource. Rates that are not, another World's among them, are refused (`Underived`), so a World is priced in
+ its own utility before any scored run (brief 2 A2, L2a obligation 19, P33):

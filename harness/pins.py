@@ -7521,6 +7521,73 @@ def p34_pilot_main() -> bool:
     return ok()
 
 
+def p35_zero_diff() -> bool:
+    """Brief 2's zero-diff pin (§Pins "P1 Zero diff"; registry P1 is the CSPRNG pin): `judge/` and `worlds/spec/`
+    hash, as git hashes a tree, to the ids `harness/baseline.toml` records, and those are the trees of the L2a baseline
+    commit (A1 item 4 as A2 amends it), which is in the invocation tree's history and in master's (a baseline only
+    the branch carries is a moved baseline), and master itself still carries them (an older master commit whose trees
+    master has left is a rewound baseline). Fixtures: a byte added under a scratch copy of each directory changes its
+    id, a baseline sha absent from the history is refused, and so is one in the branch's history but not master's,
+    and one in master's history whose trees master no longer has.
+    A present-but-untracked file under either directory (a stray backup, a nested cache) reads as `tree_changed`:
+    a false red, never a false green."""
+    from harness import zerodiff
+
+    expect, ok = _expecter()
+    baseline = zerodiff.load(ROOT)
+    expect(sorted(baseline["trees"]) == ["judge", "worlds/spec"],
+           f"the baseline records judge and worlds/spec ({sorted(baseline['trees'])})")
+    found = zerodiff.tree_findings(ROOT, baseline)
+    expect(not found, f"judge/ and worlds/spec/ are the baseline's ({[str(f) for f in found]})")
+    master = next((r for r in ("origin/master", "master")
+                   if subprocess.run(["git", "-C", str(_real_root()), "rev-parse", "--verify", "-q", r],
+                                     capture_output=True).returncode == 0), None)
+    bound = zerodiff.binding_findings(_real_root(), baseline, base=master)
+    expect(not bound, f"the recorded trees are those of {baseline['sha'][:12]}, in HEAD's and {master}'s history "
+                      f"({[str(f) for f in bound]})")
+    work = Path(tempfile.mkdtemp(prefix="assize-p35-", dir=context.scratch))
+    for d in sorted(baseline["trees"]):
+        shutil.copytree(ROOT / d, work / d, ignore=shutil.ignore_patterns("__pycache__"))
+        (work / d / "added.txt").write_text("\n")
+    added = {f.where for f in zerodiff.tree_findings(work, baseline) if f.code == "tree_changed"}
+    expect(added == set(baseline["trees"]), f"fixture: a file added under each directory is a changed tree ({added})")
+    shutil.rmtree(work, ignore_errors=True)
+    absent = zerodiff.binding_findings(_real_root(), baseline | {"sha": "f" * 40}, base=master)
+    expect({f.code for f in absent} == {"baseline_unreachable", "baseline_moved", "tree_unbound"},
+           f"fixture: a baseline sha absent from the history is refused ({[str(f) for f in absent]})")
+    # A moved baseline: a judge edit committed on the branch, the baseline rewritten to that commit and its tree. The
+    # commit is in HEAD's history and carries the recorded tree, but master never had it.
+    repo = work.parent / "assize-p35-moved"
+    env = os.environ | claims.GIT_ENV | FIXTURE_GIT
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True,
+                              env=env).stdout.strip()
+
+    (repo / "judge").mkdir(parents=True)
+    git("init", "-q", "-b", "branch")
+    (repo / "judge" / "f.py").write_text("a\n")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")
+    git("update-ref", "refs/remotes/origin/master", git("rev-parse", "HEAD"))
+    (repo / "judge" / "f.py").write_text("b\n")
+    git("commit", "-q", "-am", "judge edit")
+    moved = {"sha": git("rev-parse", "HEAD"), "trees": {"judge": git("rev-parse", "HEAD:judge")}}
+    got = {f.code for f in zerodiff.binding_findings(repo, moved, base="origin/master")}
+    expect(got == {"baseline_moved", "baseline_rewound"},
+           f"fixture: a baseline only the branch carries is a moved baseline ({got})")
+    got = {f.code for f in zerodiff.binding_findings(repo, moved, base=None)}
+    expect("base_unreadable" in got, f"fixture: no master to read against is named, not passed ({got})")
+    # A rewound baseline: master's judge/ changed after an older master commit, and the baseline records that older
+    # commit and its tree. The commit is in HEAD's and master's history and carries the recorded tree; master does not.
+    git("update-ref", "refs/remotes/origin/master", git("rev-parse", "HEAD"))
+    rewound = {"sha": git("rev-parse", "HEAD~1"), "trees": {"judge": git("rev-parse", "HEAD~1:judge")}}
+    got = {f.code for f in zerodiff.binding_findings(repo, rewound, base="origin/master")}
+    expect(got == {"baseline_rewound"}, f"fixture: a baseline master's trees have left is a rewound baseline ({got})")
+    shutil.rmtree(repo, ignore_errors=True)
+    return ok()
+
+
 # Witnesses (instruction #108 item 1): the paths each pin's check or mutants read. A change under harness/, or to
 # Makefile, pyproject.toml or uv.lock, runs every pin whatever it witnesses (runner.FORCE_ALL); a pin that reads the
 # real branch, the ledgers or the GitHub API witnesses ALWAYS.
@@ -7915,6 +7982,13 @@ PINS = [
                          Mutant("registration_unbound", _edits("P34_registration_unbound")),
                          Mutant("pilot_hash_config_omitted", _edits("P34_pilot_hash_config_omitted")),
                          Mutant("pilot_hash_is_judge_hash", _edits("P34_pilot_hash_is_judge_hash"))), JUDGE_SIDE),
+    Pin("P35", "judge/ and worlds/spec/ are the L2a baseline's trees, bound to that commit in the branch's and "
+               "master's history (brief 2's zero diff)",
+        p35_zero_diff, (Mutant("judge_edited", _edits("P35_judge_edited")),
+                        Mutant("spec_edited", _edits("P35_spec_edited")),
+                        Mutant("baseline_rewritten", _edits("P35_baseline_rewritten")),
+                        Mutant("baseline_moved", _edits("P35_baseline_moved")),
+                        Mutant("baseline_rewound", _edits("P35_baseline_rewound"))), ALWAYS),
     Pin("P12", "every episode's compute is priced by the committed rule; peak memory's scope is stated and followed",
         p12_compute_price, (Mutant("peak_differenced", _edits("P12_peak_differenced")),
                             Mutant("unmeasured_free", _edits("P12_unmeasured_free")),

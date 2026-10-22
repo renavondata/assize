@@ -1,0 +1,3 @@
+# reports/L0/forecasts/39691524672.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39691524672.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39691524672.jsonl: 79 open, 73 typed; resolved 0, unreadable 0

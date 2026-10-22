@@ -1,0 +1,6 @@
+# P35's mutant `spec_edited` (brief 2 §Pins "P1 Zero diff"): one byte of a file under `worlds/spec/` changes after the
+# L2a baseline; the tree no longer hashes to the baseline's.
+[[edit]]
+path = "worlds/spec/README.md"
+old = "`schema_version` 1.0.0."
+new = "`schema_version` 1.0.0 ."

@@ -1,0 +1,8 @@
+# Brief 2's zero-diff baseline (A1 item 4, as A2 Scope 1 amends it): the merge commit of PR #293 on master, the L2a
+# milestone Guy merged. `reports/L2/REPORT.md` §The baseline names it. Read by `harness.zerodiff` (P35).
+sha = "bcc9ac6662495d4c0d7bce823482adafe9836f19"
+
+# `git rev-parse <sha>:<directory>`
+[trees]
+judge = "113d9ffd7520f65f57448bf98f617e6d40661a35"
+"worlds/spec" = "079b2084d7d7b6739cf961a189e951567e7a4dbe"

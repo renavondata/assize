@@ -1,0 +1,54 @@
+== pins run 39631581320 ==
+pins event=pull_request status=completed conclusion=success head=4bcab3a33a7418e9c4db97522e847f8ec31c4d73 attempt=1 created=2026-10-21T16:05:19Z updated=2026-10-21T17:03:21Z url=https://github.com/renavondata/assize/actions/runs/39631581320
+-- artifact pins-report, summary row:
+{"clean_failed": 0, "clean_ok": 95, "clean_total": 95, "exit_code": 0, "inconclusive": 0, "killed": 304, "kind": "summary", "leaked": 0, "mutants_total": 304, "non_causal": 0, "phase": "all", "registry": "harness", "since": "b0798f93f7229f36d9333a1d94d170469219028f", "since_run": 39602463003, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 304, "twins_total": 304}
+-- P35 rows:
+{"pin": "P35", "role": "clean", "mutant": null, "edits": null, "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "mutant", "mutant": "P35/judge_edited", "edits": "harness/edits/P35_judge_edited.toml", "expected": "fail", "observed": "fail", "twin_observed": "pass", "verdict": "KILLED", "exit_code": 1, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "twin", "mutant": "P35/judge_edited", "edits": "harness/edits/P35_judge_edited.toml", "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "mutant", "mutant": "P35/spec_edited", "edits": "harness/edits/P35_spec_edited.toml", "expected": "fail", "observed": "fail", "twin_observed": "pass", "verdict": "KILLED", "exit_code": 1, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "twin", "mutant": "P35/spec_edited", "edits": "harness/edits/P35_spec_edited.toml", "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "mutant", "mutant": "P35/baseline_rewritten", "edits": "harness/edits/P35_baseline_rewritten.toml", "expected": "fail", "observed": "fail", "twin_observed": "pass", "verdict": "KILLED", "exit_code": 1, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "twin", "mutant": "P35/baseline_rewritten", "edits": "harness/edits/P35_baseline_rewritten.toml", "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+-- P35 clean transcript:
+pin:       P35
+protects:  judge/ and worlds/spec/ are the L2a baseline's trees, bound to that commit in the branch's history (brief 2's zero diff)
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-v183mz4d
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [ok] judge/ and worlds/spec/ are the baseline's ([])
+  [ok] the recorded trees are those of bcc9ac666249, in HEAD's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'judge', 'worlds/spec'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 113d9ffd7520f65f57448bf98f617e6d40661a35, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+result:    PASS
+== pins run 39641325360 ==
+pins event=pull_request status=completed conclusion=success head=f84ed6f7043a32086ee8b84a040dee764b1cd3fe attempt=1 created=2026-10-21T17:09:54Z updated=2026-10-21T17:15:30Z url=https://github.com/renavondata/assize/actions/runs/39641325360
+-- artifact pins-report, summary row:
+{"clean_failed": 0, "clean_ok": 13, "clean_total": 13, "exit_code": 0, "inconclusive": 0, "killed": 56, "kind": "summary", "leaked": 0, "mutants_total": 56, "non_causal": 0, "phase": "all", "registry": "harness", "since": "4bcab3a33a7418e9c4db97522e847f8ec31c4d73", "since_run": 39631581320, "skipped": 82, "skipped_mutants": 248, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 56, "twins_total": 56}
+-- P35 rows:
+{"pin": "P35", "role": "clean", "mutant": null, "edits": null, "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "mutant", "mutant": "P35/judge_edited", "edits": "harness/edits/P35_judge_edited.toml", "expected": "fail", "observed": "fail", "twin_observed": "pass", "verdict": "KILLED", "exit_code": 1, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "twin", "mutant": "P35/judge_edited", "edits": "harness/edits/P35_judge_edited.toml", "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "mutant", "mutant": "P35/spec_edited", "edits": "harness/edits/P35_spec_edited.toml", "expected": "fail", "observed": "fail", "twin_observed": "pass", "verdict": "KILLED", "exit_code": 1, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "twin", "mutant": "P35/spec_edited", "edits": "harness/edits/P35_spec_edited.toml", "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "mutant", "mutant": "P35/baseline_rewritten", "edits": "harness/edits/P35_baseline_rewritten.toml", "expected": "fail", "observed": "fail", "twin_observed": "pass", "verdict": "KILLED", "exit_code": 1, "leaked_processes": 0, "scratch_removed": true}
+{"pin": "P35", "role": "twin", "mutant": "P35/baseline_rewritten", "edits": "harness/edits/P35_baseline_rewritten.toml", "expected": "pass", "observed": "pass", "twin_observed": null, "verdict": "ok", "exit_code": 0, "leaked_processes": 0, "scratch_removed": true}
+-- P35 clean transcript:
+pin:       P35
+protects:  judge/ and worlds/spec/ are the L2a baseline's trees, bound to that commit in the branch's history (brief 2's zero diff)
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-4i0wo24l
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [ok] judge/ and worlds/spec/ are the baseline's ([])
+  [ok] the recorded trees are those of bcc9ac666249, in HEAD's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'judge', 'worlds/spec'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 113d9ffd7520f65f57448bf98f617e6d40661a35, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+result:    PASS
+== git diff 4bcab3a f84ed6f --stat (head vs full-run head) ==
+ reports/L2/ci/39631581320.json         |  1 +
+ reports/L2/status/l2b-zero-diff-pin.md | 20 ++++++++++++++++++++
+ 2 files changed, 21 insertions(+)

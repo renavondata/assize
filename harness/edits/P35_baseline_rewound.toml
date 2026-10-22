@@ -1,0 +1,7 @@
+# P35's mutant `baseline_rewound` (review 89c757f F1): the binding drops its requirement that master carries the
+# recorded trees. A branch that rewinds `judge/` to an older master commit, and the baseline with it, then passes; the
+# fixture history, a master whose `judge/` changed after the recorded commit, refuses it.
+[[edit]]
+path = "harness/zerodiff.py"
+old = "        if base_ok and (got := _git(repo, \"rev-parse\", \"--verify\", \"-q\", f\"{base}:{d}\").stdout.strip()) != want]"
+new = "        if False and (got := _git(repo, \"rev-parse\", \"--verify\", \"-q\", f\"{base}:{d}\").stdout.strip()) != want]"

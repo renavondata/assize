@@ -1,0 +1,29 @@
+== moved-baseline probe: a branch commit edits judge/ and re-records itself as the baseline
+edited judge/price.py (one byte)
+new commit 3ba0af792db73164e2227ab0f85c1e5f8dd9680b judge tree 8b2847c82edd25636ecfa8869d07e5b7331d3723
+# Brief 2's zero-diff baseline (A1 item 4, as A2 Scope 1 amends it): the merge commit of PR #293 on master, the L2a
+# milestone Guy merged. `reports/L2/REPORT.md` §The baseline names it. Read by `harness.zerodiff` (P35).
+sha = "3ba0af792db73164e2227ab0f85c1e5f8dd9680b"
+
+# `git rev-parse <sha>:<directory>`
+[trees]
+judge = "8b2847c82edd25636ecfa8869d07e5b7331d3723"
+"worlds/spec" = "079b2084d7d7b6739cf961a189e951567e7a4dbe"
+
+ harness/baseline.toml | 4 ++--
+ judge/price.py        | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+-- origin/master is bcc9ac6662495d4c0d7bce823482adafe9836f19; is the new baseline on master? merge-base --is-ancestor 3ba0af792db73164e2227ab0f85c1e5f8dd9680b origin/master ->
+no (exit 1)
+-- is bcc9ac6 still judge-identical to HEAD? git diff --stat bcc9ac6 HEAD -- judge worlds/spec:
+ judge/price.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+== moved-baseline: ROOT=/tmp/review-301-ueWprP/probe real_root=/tmp/review-301-ueWprP/probe mutant=None
+  [ok] the baseline records judge and worlds/spec (['judge', 'worlds/spec'])
+  [ok] judge/ and worlds/spec/ are the baseline's ([])
+  [ok] the recorded trees are those of 3ba0af792db7, in HEAD's history ([])
+  [ok] fixture: a file added under each directory is a changed tree ({'judge', 'worlds/spec'})
+  [ok] fixture: a baseline sha absent from the history is refused (['ffffffffffff: baseline_unreachable: not an ancestor of HEAD', 'judge: tree_unbound: recorded 8b2847c82edd25636ecfa8869d07e5b7331d3723, the baseline commit has no such tree', 'worlds/spec: tree_unbound: recorded 079b2084d7d7b6739cf961a189e951567e7a4dbe, the baseline commit has no such tree'])
+== moved-baseline: p35_zero_diff() -> True (PASS)
+-- restore
+restored at f84ed6f, clean

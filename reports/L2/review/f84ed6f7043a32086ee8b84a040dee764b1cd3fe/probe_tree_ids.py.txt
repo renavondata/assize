@@ -1,0 +1,61 @@
+"""Review probe for PR #301 (P35): harness.zerodiff.tree_id agrees with `git rev-parse <sha>:<dir>` on several
+directories of the probe clone, and the `baseline_rewritten` mutant's rewritten judge id is the id of judge/ with
+`judge_edited`'s one-byte edit applied (so that mutant is refused by the binding alone, as the Builder claims)."""
+import shutil
+import subprocess
+import sys
+import tempfile
+import tomllib
+from pathlib import Path
+
+REPO = Path(sys.argv[1]).resolve()
+sys.path.insert(0, str(REPO))
+from harness import zerodiff  # noqa: E402
+
+HEAD = "f84ed6f7043a32086ee8b84a040dee764b1cd3fe"
+
+
+def git(*args: str) -> str:
+    return subprocess.run(["git", "-C", str(REPO), *args], check=True, capture_output=True, text=True).stdout.strip()
+
+
+print(f"probe clone {REPO} at {git('rev-parse', 'HEAD')[:12]} (expected {HEAD[:12]})")
+dirs = ["judge", "worlds/spec", "worlds", "harness/edits", "harness", "pilot", "scripts", ".github", "incumbents",
+        "docs", "release"]
+agree = 0
+for d in dirs:
+    if not (REPO / d).is_dir():
+        print(f"  {d}: absent, skipped")
+        continue
+    want = git("rev-parse", f"{HEAD}:{d}")
+    got = zerodiff.tree_id(REPO / d)
+    mark = "agree" if got == want else "DIFFER"
+    agree += got == want
+    print(f"  {d}: zerodiff {got} git {want} {mark}")
+print(f"tree_id agrees with git on {agree} directories")
+
+baseline = tomllib.loads((REPO / "harness/baseline.toml").read_text())
+print(f"baseline.toml: sha {baseline['sha']} trees {baseline['trees']}")
+print(f"  bcc9ac6:judge       {git('rev-parse', baseline['sha'] + ':judge')}")
+print(f"  bcc9ac6:worlds/spec {git('rev-parse', baseline['sha'] + ':worlds/spec')}")
+
+edit = tomllib.loads((REPO / "harness/edits/P35_judge_edited.toml").read_text())["edit"][0]
+rewritten = tomllib.loads((REPO / "harness/edits/P35_baseline_rewritten.toml").read_text())["edit"]
+work = Path(tempfile.mkdtemp(prefix="assize-review-probe-"))
+try:
+    shutil.copytree(REPO / "judge", work / "judge", ignore=shutil.ignore_patterns("__pycache__"))
+    text = (work / edit["path"]).read_text()
+    assert text.count(edit["old"]) == 1, "anchor not unique"
+    (work / edit["path"]).write_text(text.replace(edit["old"], edit["new"], 1))
+    edited_id = zerodiff.tree_id(work / "judge")
+    recorded = [e for e in rewritten if e["path"] == "harness/baseline.toml"][0]["new"]
+    print(f"judge/ with judge_edited applied hashes to {edited_id}")
+    print(f"baseline_rewritten records            {recorded}")
+    print("baseline_rewritten's id matches the edited tree:", edited_id in recorded)
+    # with the rewritten baseline, the tree check passes and only the binding refuses
+    mutated = dict(baseline, trees=dict(baseline["trees"], judge=edited_id))
+    print("tree_findings under the rewritten baseline:",
+          [str(f) for f in zerodiff.tree_findings(work, {"trees": {"judge": edited_id}})])
+    print("binding_findings under the rewritten baseline:", [str(f) for f in zerodiff.binding_findings(REPO, mutated)])
+finally:
+    shutil.rmtree(work, ignore_errors=True)

@@ -1,0 +1,14 @@
+CI witness, read by the reviewer through the Actions API: run 39691524191 (`pins`, pull_request, on the head 1e38b3c, concluded `success`), artifact `pins-report`, file pins.jsonl, summary row and the P35 rows. The run's `since` is 7f49b64 (run 39684349544), its witness reference; `skipped` is 0.
+
+Summary row (kind summary, phase all, registry harness):
+  clean 97/97 passed, 0 failed; mutants 320/320 killed, 0 survived, 0 inconclusive, 0 stale, 0 non-causal; twins 320/320 passed; leaked 0; skipped 0 pins, 0 mutants; exit_code 0.
+
+P35 rows (kind run, pin P35):
+  clean                       observed pass    verdict ok
+  judge_edited  mutant        observed fail    verdict KILLED    exit 1   twin observed pass, verdict ok
+  spec_edited   mutant        observed fail    verdict KILLED    exit 1   twin observed pass, verdict ok
+  baseline_rewritten mutant   observed fail    verdict KILLED    exit 1   twin observed pass, verdict ok
+  baseline_moved mutant       observed fail    verdict KILLED    exit 1   twin observed pass, verdict ok
+  baseline_rewound mutant     observed fail    verdict KILLED    exit 1   twin observed pass, verdict ok
+
+Artifact on disk for this review only (not committed): /tmp/assize-ci-39691524191-FIPp/pins.jsonl.
