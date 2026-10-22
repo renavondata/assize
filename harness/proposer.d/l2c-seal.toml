@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2c-seal (brief 2 A3 item 2, L2c: the judge's image composed, digest recorded, P21): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "2c0eb055-8009-4c85-9972-968be5749f25"
