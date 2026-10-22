@@ -1,0 +1,12 @@
+# P38's mutant `endgame_depths_dropped` (brief 2 section 2, Prediction targets): the depth support and range leave out
+# the Elemental Planes' negative depths, which no seeded stream reaches, so only the derivation from dungeon.def can
+# find it.
+[[edit]]
+path = "worlds/nethack/manifest.json"
+old = '"support": [-5, -4, -3, -2, -1, 0, 1, 2,'
+new = '"support": [0, 1, 2,'
+
+[[edit]]
+path = "worlds/nethack/manifest.json"
+old = '"range": [-5, 53]'
+new = '"range": [0, 53]'

@@ -1,0 +1,8 @@
+# P38's mutant `observation_raw` (brief 2 section 2, Observations): after each step the episode emits NLE's own
+# observation keys, not the manifest's fields.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '''        self.observation = view(self.nle)
+        return self.observation'''
+new = '''        self.observation = self.nle
+        return self.observation'''

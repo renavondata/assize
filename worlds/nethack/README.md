@@ -30,6 +30,26 @@ L2 — NetHack World binding (brief 2). Empty at L0.
   streams equals its golden (seed 1: 0.0; seed 3: the `Dlvl:2` entry). Mutants `table_entry_altered`,
   `table_and_checksum_altered`, `checksum_unchecked`, `progress_not_updated`, `minihack_progress`.
 
+## Manifest, observations, targets and price (brief 2 section 2)
+- `manifest.json` makes the judge bind this World (`judge.evaluate.bound`) and price it (`judge.price.of`). The
+  binding gives the judge's Episode protocol: `Episode(seed, manifest)`, `world_seed`, `manifest()`, and each episode's
+  `termination` (`truncated` at NetHackChallenge's step limit, else `terminal`) and `achievements`.
+- Observation: `glyphs` (21x79 glyph ids below nle's `MAX_GLYPH`), `toplines` (the 256-byte message line; `message`
+  names a JSON-RPC field of the interface schema, P6), and NLE's 27 bottom-line stats, each its own integer field under
+  NLE's name, with the bounds NLE's observation space declares, but the three target fields, bounded by their support.
+  The trajectory hash (P36) still covers the NLE observation every emitted one is read from.
+- Actions and utility components are NetHackChallenge's keys and BALROG's table keys, each lowercased with every
+  character that is not a letter or digit dropped (`binding.identifier`), so no name splits into an interface token.
+- Targets, one step ahead, committed before any run: `depth` (-5 to 53), `experience_level` (0 to 30) and `hunger`
+  (0 to 6). Each support is derived from NetHack 3.6.7's source and the `dungeon.def` nle ships; 0 is NLE's zeroed
+  observation outside a running game, which an episode's last observation after death is. Derivations are in each
+  target's rationale.
+- Price: `delta` = 0.02, brief 2's FIT effect of 2 progression points in BALROG's [0, 1] units, and the rates its
+  derivation.
+- P38: the manifest's names, bounds and supports are those derived from the installed nle, the vendored table and
+  NetHack's source; the judge binds and prices the World; P36's seeded streams, played through the Episode protocol,
+  emit only declared observations and supported target values and reach their golden achievements. Mutants
+  `endgame_depths_dropped`, `zeroed_xp_dropped`, `delta_in_points`, `observation_raw`, `achievements_raw`.
+
 ## Not yet here
-No `manifest.json`, so the judge does not bind this World (`judge.evaluate.bound`): the prediction targets, the price,
-and the MiniHack ladder come first.
+The MiniHack ladder, AutoAscend, and the version-pooling (P2) and long-episode (P3) pins.
