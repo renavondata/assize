@@ -5751,10 +5751,10 @@ def p19_world_discovery() -> bool:
     """The judge binds a World by its directory alone: a fixture directory with a manifest and a binding, added to a copy
     of the tree with no edit to `judge/`, is bound under its name, its own binding is the one imported, and `evaluate()`
     takes it past the World check to the runtime check; a directory with a binding but no manifest is not bound, and is
-    refused `unknown_world`. Crafter stays bound. No seed is issued to any fixture request (brief 2 A2)."""
+    refused `unknown_world`. Crafter and NetHack stay bound. No seed is issued to any fixture request (brief 2 A2)."""
     expect, ok = _expecter()
     got = _fixture_worlds()
-    expect(got["bound"] == ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"],
+    expect(got["bound"] == ["borrowed", "crafter", "fx", "nethack", "rederived", "undelta", "unpriced"],
            f"bound: every directory with a manifest and a binding, and only those ({got['bound']})")
     expect(got["fx_binding"] == "fx", f"fx's own binding is imported ({got['fx_binding']})")
     for w, want in (("fx", "unknown_runtime"), ("crafter", "unknown_runtime"), ("bare", "unknown_world")):
