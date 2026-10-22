@@ -1,4 +1,4 @@
 # Who built the harness state of branch l2b-zero-diff-pin (brief 2 L2b's first item: the zero-diff pin against the L2a baseline): this pull request's own proposer row.
 kind = "builder"
-model = "claude-opus-5-5"
-session = "544d8625-29e0-4115-8b0a-2c8235fa9604"
+model = "claude-sonnet-5-5"
+session = "9c44f466-4d7d-4e46-9830-9252db4b1e8e"
