@@ -1,6 +1,6 @@
-# P21's mutant `digest_misrecorded` (brief 2 A2 P21): the digest the report records is not the composed image's; one
-# hex digit differs, so the recorded seal names an image nobody can derive from the tree.
+# P21's mutant `digest_misrecorded` (brief 2 A2 P21): the digest the seal commits is not the composed image's; one hex
+# digit differs, so the recorded seal names an image nobody can derive from the tree.
 [[edit]]
-path = "reports/L2/REPORT.md"
-old = "- Seal digest: `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c`"
-new = "- Seal digest: `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259d`"
+path = "release/seal.toml"
+old = "digest = \"sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c\""
+new = "digest = \"sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259d\""

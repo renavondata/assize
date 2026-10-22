@@ -6341,23 +6341,45 @@ def p31_image_carries_verify() -> bool:
     return ok()
 
 
-SEAL_REPORT = ROOT / "reports" / "L2" / "REPORT.md"
+SEAL_TOML = Path("release") / "seal.toml"
+SEAL_REPORT = Path("reports") / "L2" / "REPORT.md"
 SEAL_LINE = re.compile(r"^- Seal digest: `(sha256:[0-9a-f]{64})`", re.M)
+
+
+def _seal_digest(root: Path) -> str:
+    import tomllib
+    return tomllib.loads((root / SEAL_TOML).read_text())["digest"]
+
+
+def seal_report_findings(report: str, digest: str) -> list[str]:
+    """Why the report text `report` does not record `digest` as the seal: it carries exactly one `- Seal digest:` line,
+    and that line names `digest`."""
+    found = SEAL_LINE.findall(report)
+    return [] if found == [digest] else [f"the report records {found}, not [{digest!r}]"]
 
 
 def p21_seal() -> bool:
     """The seal (brief 2 A2 P21, A3 item 2): the judge's image composed by `harness.seal` from the tree's `judge/` and
-    the pinned base has the manifest digest `reports/L2/REPORT.md` records, the one `- Seal digest:` line there, and
-    composing it again gives the same bytes. Loaded under podman, the host's runtime, its image ID is the config digest;
-    run with no network and a read-only root, its `verify` passes P9's fixture ledger as the host's does and fails an
-    altered record; P0b's scan of the files the image adds over the base (its one layer, extracted) finds nothing. The
-    base's own layers are the pinned upstream image, checked against its diff IDs, and are not scanned."""
+    the pinned base has the manifest digest `release/seal.toml` commits, and composing it again gives the same bytes;
+    `reports/L2/REPORT.md` of the invocation tree (reports/ is never copied) records the digest that tree's
+    `release/seal.toml` commits, in one `- Seal digest:` line, a rule shown on fixtures to refuse another digest and a
+    second line. Loaded under podman, the host's runtime, the image's ID is its config digest; run with no network and
+    a read-only root, its `verify` passes P9's fixture ledger as the host's does and fails an altered record; P0b's scan
+    of the files the image adds over the base (its one layer, extracted) finds nothing. The base's own layers are the
+    pinned upstream image, checked against its diff IDs, and are not scanned."""
     from harness import seal
     from judge import ledger, runtime
 
     expect, ok = _expecter()
-    recorded = SEAL_LINE.findall(SEAL_REPORT.read_text())
-    expect(len(recorded) == 1, f"{SEAL_REPORT.relative_to(ROOT)} records one seal digest ({recorded})")
+    a, b = "sha256:" + "a" * 64, "sha256:" + "b" * 64
+    expect(seal_report_findings(f"x\n- Seal digest: `{a}`\n", a) == [], "fixture: one line naming the digest passes")
+    expect(seal_report_findings(f"- Seal digest: `{b}`\n", a) != [], "fixture: a line naming another digest is refused")
+    expect(seal_report_findings(f"- Seal digest: `{a}`\n- Seal digest: `{a}`\n", a) != [],
+           "fixture: a second seal line is refused")
+    real = _real_root()
+    found = seal_report_findings((real / SEAL_REPORT).read_text(), _seal_digest(real))
+    expect(found == [], f"{SEAL_REPORT} records the digest {SEAL_TOML} commits, at {real} ({found})")
+    recorded = [_seal_digest(ROOT)]
     base = runtime.candidate_config()["base_image"]
     froms = [ln.split()[1] for ln in (RELEASE / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
     expect(froms == [base], f"the release image's one FROM is the judge's pinned base image ({froms}, {base})")
@@ -7945,11 +7967,13 @@ PINS = [
                                    Mutant("shared_ledger", _edits("P31_shared_ledger"))),
         JUDGE_SIDE + ("release/**",)),
     Pin("P21", "the seal: the judge's image composed from judge/ and the pinned base has the manifest digest "
-               "reports/L2/REPORT.md records; loaded under podman it runs verify; P0b's scan of its layer finds nothing",
+               "release/seal.toml commits and reports/L2/REPORT.md records; loaded under podman it runs verify; P0b's "
+               "scan of its layer finds nothing",
         p21_seal, (Mutant("digest_misrecorded", _edits("P21_digest_misrecorded")),
+                   Mutant("report_unchecked", _edits("P21_report_unchecked")),
                    Mutant("verify_omitted", _edits("P21_verify_omitted")),
                    Mutant("image_imports_mutants", _edits("P21_image_imports_mutants"))),
-        JUDGE_SIDE + ("release/**", "reports/L2/REPORT.md")),
+        JUDGE_SIDE + ("release/**",)),
     Pin("P32", "a context's declared runtime must be usable: docker declared where only podman is, an unknown runtime, "
                "and the environment's declaration each fail; a held or absent declaration passes",
         p32_declared_runtime, (Mutant("declared_runtime_ignored", _edits("P32_declared_runtime_ignored")),
