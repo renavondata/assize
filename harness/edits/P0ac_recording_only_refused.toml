@@ -1,0 +1,5 @@
+# P0ac's recording-only mutant (Wish #69): a draft that says `Price: none (recording-only)` is refused.
+[[edit]]
+path = "harness/claims.py"
+old = "    if lines[0] != PRICE_NONE and not (declared and declared.group(1) in PRICE_QUANTITIES):\n        return [Finding(where, \"draft_price_form\""
+new = "    if not (declared and declared.group(1) in PRICE_QUANTITIES):\n        return [Finding(where, \"draft_price_form\""

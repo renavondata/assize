@@ -1,0 +1,6 @@
+pins CI run 39619143461 on ca29d85 (make pins, transcript summary lines):
+clean: 94/94 passed, 0/94 failed
+mutants: 304/304 killed, 0/304 survived, 0/304 inconclusive, 0/304 stale, 0/304 non-causal, 0 leaked (clean and mutant)
+twins: 304/304 passed
+PINS PASSED
+attempt 1 on b8799ee (run 39610345883): 303/304 killed, 1 INCONCLUSIVE (P0ac/draft_without_price_admitted raised IndexError); fixed in ca29d85

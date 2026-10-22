@@ -1,0 +1,19 @@
+[clean ] P36: observed pass -> ok (5.306s) out/pins/runs/P36/clean/transcript.log
+[clean ] P37: observed pass -> ok (1.39s) out/pins/runs/P37/clean/transcript.log
+[mutant] P36/version_misrecorded: mutant fail, twin pass -> KILLED (5.47s + 5.468s) out/pins/runs/P36/version_misrecorded/mutant/transcript.log
+[mutant] P36/seed_lock_kept: mutant fail, twin pass -> KILLED (1.551s + 5.47s) out/pins/runs/P36/seed_lock_kept/mutant/transcript.log
+[mutant] P36/reseed_on: mutant fail, twin pass -> KILLED (5.315s + 5.418s) out/pins/runs/P36/reseed_on/mutant/transcript.log
+[mutant] P36/moon_from_clock: mutant fail, twin pass -> KILLED (5.015s + 5.463s) out/pins/runs/P36/moon_from_clock/mutant/transcript.log
+[mutant] P36/seed_ignored: mutant fail, twin pass -> KILLED (4.562s + 5.517s) out/pins/runs/P36/seed_ignored/mutant/transcript.log
+[mutant] P36/character_fixed: mutant fail, twin pass -> KILLED (6.016s + 5.466s) out/pins/runs/P36/character_fixed/mutant/transcript.log
+[mutant] P37/table_entry_altered: mutant fail, twin pass -> KILLED (1.148s + 1.501s) out/pins/runs/P37/table_entry_altered/mutant/transcript.log
+[mutant] P37/table_and_checksum_altered: mutant fail, twin pass -> KILLED (1.498s + 1.498s) out/pins/runs/P37/table_and_checksum_altered/mutant/transcript.log
+[mutant] P37/checksum_unchecked: mutant fail, twin pass -> KILLED (1.497s + 1.498s) out/pins/runs/P37/checksum_unchecked/mutant/transcript.log
+[mutant] P37/progress_not_updated: mutant fail, twin pass -> KILLED (1.448s + 1.498s) out/pins/runs/P37/progress_not_updated/mutant/transcript.log
+[mutant] P37/minihack_progress: mutant fail, twin pass -> KILLED (1.498s + 1.498s) out/pins/runs/P37/minihack_progress/mutant/transcript.log
+clean: 96/96 passed, 0/96 failed
+mutants: 315/315 killed, 0/315 survived, 0/315 inconclusive, 0/315 stale, 0/315 non-causal, 0 leaked (clean and mutant)
+twins: 315/315 passed
+skipped: 0/96 pins, 0 mutants since 1cd7c62 (run 39646656800)
+report: out/pins/pins.jsonl
+PINS PASSED

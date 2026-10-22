@@ -1,0 +1,6 @@
+# P21's mutant `report_unchecked` (brief 2 A2 P21): the report's seal line is not compared with the committed digest,
+# so a report recording another image, or two, passes; P21's fixtures refuse both.
+[[edit]]
+path = "harness/pins.py"
+old = "    return [] if found == [digest] else [f\"the report records {found}, not [{digest!r}]\"]\n"
+new = "    return []\n"

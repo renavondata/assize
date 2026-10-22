@@ -84,3 +84,22 @@ L2b (first the zero-diff pin against this baseline, then §§2–4, NetHack, und
 
 ### L2b second correction (appended; review 89c757f F1)
 - The correction above still let any commit of master's history stand as the baseline, so a branch could rewind `judge/` to an older master commit and record that commit (witness: reports/L2/review/89c757f7e9fb10df6bc972b99c3d015816c8b195/probe-older-master-baseline.txt). From this head P35 also requires master itself to carry every recorded tree id (`git rev-parse origin/master:<directory>`; a difference is `baseline_rewound`), so the trees a branch is compared with are master's as it stands, and its fifth mutant `baseline_rewound` is killed by a fixture history whose master changed `judge/` after the recorded commit. Under that binding the two L2b sentences above, that P35 holds A2's refusal "No change to `judge/` or `worlds/spec/` after the L2a baseline" and A2's criterion "P1 (zero diff) holds from the L2a baseline to the L2b head", read as: the branch's trees equal master's, and master's equal those of a commit of master's history that the record names, `bcc9ac6` today. That master has not moved them since `bcc9ac6` is witnessed by the trees themselves: `harness/baseline.toml` records `bcc9ac6`'s ids, and P35 refuses any master that differs.
+
+## L2c — the seal (brief 2 A2 Scope 3, A3 item 2): digest composed and pinned; CODEOWNERS entry and host verdict outstanding
+
+VERDICT (L2c, a layer-internal milestone, not a layer verdict; the root `REPORT.md` is not touched): **NOT YET SEALED.** The image is composed and its digest recorded below, held by P21. Two of A3 item 2's parts are outstanding: `judge/` and `worlds/spec/` entering CODEOWNERS (blocked, below), and the Crafter host verdict under this image (a `measure` run).
+
+- Seal digest: `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c`
+- Image ID (config digest): `sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d`
+- Built from: `judge/` of the L2a baseline bcc9ac6 (PR #293's merge; tree `113d9ffd7520f65f57448bf98f617e6d40661a35`, the same tree at master 8e49986), over the base `docker.io/library/python@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce` (base image ID `sha256:541096ae9b05d3b850341b78790e2ed31e94d5aa0ea086933c6ff0c09ffa2e63`).
+- Recipe: `python -m harness.seal OUT` writes the image as an OCI layout and prints both digests. The image is composed from bytes, not built (`harness/seal.py`): one uncompressed ustar layer of `judge/` with fixed owner, modes and mtime, a canonical-JSON config and manifest. Its digest is a function of the tree and the pinned base alone, so no runtime or compressor version enters it, and anyone holding the baseline re-derives it.
+
+### Released
+Content-addressed: the digest above is re-derived offline by P21 from the tree on every `pins` run. The image is not yet pushed to a registry. A push must keep the layers uncompressed so the manifest digest stays the same (`skopeo copy oci:OUT docker://<registry>/<name>`). The push credential is Guy's.
+
+### Outstanding
+- CODEOWNERS (A3 item 2, A4 item 8, CLAUDE.md A1.1). P0bm holds `harness/trusted_base.toml` equal to the CODEOWNERS lines, and it admits a line only under an `Audit findings at <sha>` heading in a brief (`harness/trusted.py:29`, `ADMISSION`). No such heading admits `/judge/ @gfrmin` or `/worlds/spec/ @gfrmin`, and Amendment 2's audit criterion 7 says the trusted base "has not grown since the last audit". The lines are therefore not added here. They go in on the same pull request as the seal, once an audit-dated amendment admits them.
+- The Crafter host verdict under the sealed image: a `measure` run at this pull request's head. The `judge/` bytes the run measures are the image's, because the digest is a function of those bytes and P21 re-derives it at the same head.
+
+### Addendum: where P21 reads the recorded digest
+Harness copies carry no `reports/`, so P21's mutants cannot edit this file (CI run 39710710128: P21 clean ok, its three mutants STALE). The digest is therefore also committed in `release/seal.toml`, and P21 checks both: the composed digest against `release/seal.toml`, and this report against `release/seal.toml` at the invocation tree, with a fixture-tested rule (mutant `report_unchecked`). In that same run, P21's clean case passed on GitHub's `ubuntu-latest` runner, which has a different podman, so the digest above was re-derived on a second host.

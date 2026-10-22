@@ -1,0 +1,92 @@
+# P21 run locally on the agent runner (podman 6.1.2), session 2c0eb055-8009-4c85-9972-968be5749f25, after CI run
+# 39710710128 found the three mutants STALE (copies carry no reports/, harness/tree.py TOP_LEVEL_EXCLUDE). Driver:
+# `python -B -m harness check --registry harness --pin P21 --role <role> --invocation-root <tree>` once in the tree
+# (59fc1c5 plus the fix's working changes), then in a copy made by harness.tree.copy_tree per mutant with its edits
+# applied, and in one copy with none (twin). Lines kept: expectations, `composed`, `VIOLATION`, `verify in`,
+# `result:`; dropped: the five lines on FROM, runtimes and the host-verify control, all [ok] in every run.
+# Not a `pins CI run`; the CI run on the head cites.
+== clean (tree 59fc1c5 + working changes)
+  [ok] fixture: one line naming the digest passes
+  [ok] fixture: a line naming another digest is refused
+  [ok] fixture: a second seal line is refused
+  [ok] reports/L2/REPORT.md records the digest release/seal.toml commits, at /home/g/actions-runner/_work/assize/assize ([])
+  composed: manifest sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, image sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d
+  [ok] the composed manifest digest is the recorded seal (sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, ['sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c'])
+  [ok] composed again, the same digests (('sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c', 'sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d'))
+  [ok] loaded, its image ID is the config digest (263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d)
+  [ok] P0b's scan of the added layer: 12 code files, 0 violations
+  verify in the sealed image -> 0: verify: ledger.jsonl: ok (0 findings)
+  [ok] verify in the sealed image passes and prints what the host's prints (exit 0)
+  [ok] verify in the sealed image fails an altered record (exit 1)
+result:    PASS
+== mutant digest_misrecorded
+  [ok] fixture: one line naming the digest passes
+  [ok] fixture: a line naming another digest is refused
+  [ok] fixture: a second seal line is refused
+  [ok] reports/L2/REPORT.md records the digest release/seal.toml commits, at /home/g/actions-runner/_work/assize/assize ([])
+  composed: manifest sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, image sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d
+  [FAIL] the composed manifest digest is the recorded seal (sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, ['sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259d'])
+  [ok] composed again, the same digests (('sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c', 'sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d'))
+  [ok] loaded, its image ID is the config digest (263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d)
+  [ok] P0b's scan of the added layer: 12 code files, 0 violations
+  verify in the sealed image -> 0: verify: ledger.jsonl: ok (0 findings)
+  [ok] verify in the sealed image passes and prints what the host's prints (exit 0)
+  [ok] verify in the sealed image fails an altered record (exit 1)
+result:    FAIL
+== mutant report_unchecked
+  [ok] fixture: one line naming the digest passes
+  [FAIL] fixture: a line naming another digest is refused
+  [FAIL] fixture: a second seal line is refused
+  [ok] reports/L2/REPORT.md records the digest release/seal.toml commits, at /home/g/actions-runner/_work/assize/assize ([])
+  composed: manifest sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, image sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d
+  [ok] the composed manifest digest is the recorded seal (sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, ['sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c'])
+  [ok] composed again, the same digests (('sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c', 'sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d'))
+  [ok] loaded, its image ID is the config digest (263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d)
+  [ok] P0b's scan of the added layer: 12 code files, 0 violations
+  verify in the sealed image -> 0: verify: ledger.jsonl: ok (0 findings)
+  [ok] verify in the sealed image passes and prints what the host's prints (exit 0)
+  [ok] verify in the sealed image fails an altered record (exit 1)
+result:    FAIL
+== mutant verify_omitted
+  [ok] fixture: one line naming the digest passes
+  [ok] fixture: a line naming another digest is refused
+  [ok] fixture: a second seal line is refused
+  [ok] reports/L2/REPORT.md records the digest release/seal.toml commits, at /home/g/actions-runner/_work/assize/assize ([])
+  composed: manifest sha256:5d7a667fe125739a778235b853e04640afc740a195dde2c0f4434d3aa4849dec, image sha256:5397a43a86b5087e7c69d8d7e6e473817b84b6f66567bdd534a191199c74df51
+  [ok] the composed manifest digest is the recorded seal (sha256:5d7a667fe125739a778235b853e04640afc740a195dde2c0f4434d3aa4849dec, ['sha256:5d7a667fe125739a778235b853e04640afc740a195dde2c0f4434d3aa4849dec'])
+  [ok] composed again, the same digests (('sha256:5d7a667fe125739a778235b853e04640afc740a195dde2c0f4434d3aa4849dec', 'sha256:5397a43a86b5087e7c69d8d7e6e473817b84b6f66567bdd534a191199c74df51'))
+  [ok] loaded, its image ID is the config digest (5397a43a86b5087e7c69d8d7e6e473817b84b6f66567bdd534a191199c74df51)
+  [ok] P0b's scan of the added layer: 11 code files, 0 violations
+  verify in the sealed image -> 1: /usr/local/bin/python: No module named judge.__main__; 'judge' is a package and cannot be directly executed
+  [FAIL] verify in the sealed image passes and prints what the host's prints (exit 1)
+  [FAIL] verify in the sealed image fails an altered record (exit 1)
+result:    FAIL
+== mutant image_imports_mutants
+  [ok] fixture: one line naming the digest passes
+  [ok] fixture: a line naming another digest is refused
+  [ok] fixture: a second seal line is refused
+  [ok] reports/L2/REPORT.md records the digest release/seal.toml commits, at /home/g/actions-runner/_work/assize/assize ([])
+  composed: manifest sha256:fc7b43a7b40aa7e45547924b922ceb3c2602ff76a4cd2b49b2ab965550995baf, image sha256:4d3dc2b691f9016bdcb4bcbe12197e7829546cc041e4f6f0e55e8bfa56e330b0
+  [ok] the composed manifest digest is the recorded seal (sha256:fc7b43a7b40aa7e45547924b922ceb3c2602ff76a4cd2b49b2ab965550995baf, ['sha256:fc7b43a7b40aa7e45547924b922ceb3c2602ff76a4cd2b49b2ab965550995baf'])
+  [ok] composed again, the same digests (('sha256:fc7b43a7b40aa7e45547924b922ceb3c2602ff76a4cd2b49b2ab965550995baf', 'sha256:4d3dc2b691f9016bdcb4bcbe12197e7829546cc041e4f6f0e55e8bfa56e330b0'))
+  [ok] loaded, its image ID is the config digest (4d3dc2b691f9016bdcb4bcbe12197e7829546cc041e4f6f0e55e8bfa56e330b0)
+  VIOLATION judge/_switch.py:1: from harness import mutants
+  [FAIL] P0b's scan of the added layer: 13 code files, 1 violations
+  verify in the sealed image -> 0: verify: ledger.jsonl: ok (0 findings)
+  [ok] verify in the sealed image passes and prints what the host's prints (exit 0)
+  [ok] verify in the sealed image fails an altered record (exit 1)
+result:    FAIL
+== twin (copy, no edits)
+  [ok] fixture: one line naming the digest passes
+  [ok] fixture: a line naming another digest is refused
+  [ok] fixture: a second seal line is refused
+  [ok] reports/L2/REPORT.md records the digest release/seal.toml commits, at /home/g/actions-runner/_work/assize/assize ([])
+  composed: manifest sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, image sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d
+  [ok] the composed manifest digest is the recorded seal (sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c, ['sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c'])
+  [ok] composed again, the same digests (('sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c', 'sha256:263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d'))
+  [ok] loaded, its image ID is the config digest (263af24fa713379111cadbc0d206742953d578b1d066f18f745acd3e0529108d)
+  [ok] P0b's scan of the added layer: 12 code files, 0 violations
+  verify in the sealed image -> 0: verify: ledger.jsonl: ok (0 findings)
+  [ok] verify in the sealed image passes and prints what the host's prints (exit 0)
+  [ok] verify in the sealed image fails an altered record (exit 1)
+result:    PASS

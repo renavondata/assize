@@ -14,6 +14,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import tarfile
 import tempfile
 import textwrap
 import types
@@ -3447,6 +3448,23 @@ DRAFT_FIXTURE = (  # (what, body, opened, rule merged, findings wanted) -- instr
     ("opened before the rule merged", "Wish: #12\nDo the thing.\n", DRAFT_BEFORE, DRAFT_SINCE, set()),
     ("the rule has not merged", "Do the thing.\n", DRAFT_AFTER, None, set()),
 )
+DRAFT_PRICE_SINCE, DRAFT_PRICE_AFTER = "2026-03-10T00:00:00Z", "2026-03-11T00:00:00Z"
+DRAFT_PRICED = DRAFT_AMEND.format(w=13, t=13) + "Price: {}\n"
+DRAFT_PRICE_FIXTURE = (  # (what, body, opened, price rule merged, findings wanted) -- Wish #69
+    ("a priced draft", DRAFT_PRICED.format("guy-items; down; 1"), DRAFT_PRICE_AFTER, DRAFT_PRICE_SINCE, set()),
+    ("a recording-only draft that says so", DRAFT_PRICED.format("none (recording-only)"), DRAFT_PRICE_AFTER,
+     DRAFT_PRICE_SINCE, set()),
+    ("a draft with no price line", DRAFT_AMEND.format(w=13, t=13), DRAFT_PRICE_AFTER, DRAFT_PRICE_SINCE,
+     {"draft_price_line"}),
+    ("a draft with two price lines", DRAFT_PRICED.format("guy-items; down; 1") + "Price: none (recording-only)\n",
+     DRAFT_PRICE_AFTER, DRAFT_PRICE_SINCE, {"draft_price_line"}),
+    ("a draft whose quantity is not one the ledger prices", DRAFT_PRICED.format("vibes; down; 1"), DRAFT_PRICE_AFTER,
+     DRAFT_PRICE_SINCE, {"draft_price_form"}),
+    ("a draft with no price line, opened before the price rule", DRAFT_AMEND.format(w=13, t=13), DRAFT_AFTER,
+     DRAFT_PRICE_SINCE, set()),
+    ("a draft with no price line, the price rule not merged", DRAFT_AMEND.format(w=13, t=13), DRAFT_PRICE_AFTER, None,
+     set()),
+)
 
 
 def p0ac_draft_form() -> bool:
@@ -3458,9 +3476,13 @@ def p0ac_draft_form() -> bool:
     for what, body, at, since, want in DRAFT_FIXTURE:
         got = {f.code for f in claims.draft_findings(1, body, at, since)}
         expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
+    for what, body, at, price_since, want in DRAFT_PRICE_FIXTURE:
+        got = {f.code for f in claims.draft_findings(1, body, at, DRAFT_SINCE, price_since)}
+        expect(got == want, f"{what}: findings {sorted(got)}, want {sorted(want)}")
     root = _real_root()
     base = _branch_base(root)
     since = claims.draft_from(root, base) if base else None
+    price_since = claims.draft_price_from(root, base) if base else None
     expect(base is not None, f"master's merge base with HEAD read ({base})")
     if since is None:
         print("    real: the draft rule has not merged on master's first-parent line; the real-tree check covers no draft")
@@ -3469,8 +3491,9 @@ def p0ac_draft_form() -> bool:
         real = claims.load_drafts(root, since)
     except (OSError, subprocess.SubprocessError) as e:
         real, _ = {}, expect(False, f"real drafts not read ({e})")
-    found = [f for n, (body, at) in sorted(real.items()) for f in claims.draft_findings(n, body, at, since)]
-    print(f"    real: rule merged {since}; {len(real)} drafts opened since: {sorted(real)}")
+    found = [f for n, (body, at) in sorted(real.items())
+             for f in claims.draft_findings(n, body, at, since, price_since)]
+    print(f"    real: rule merged {since}, price rule merged {price_since}; {len(real)} drafts opened since: {sorted(real)}")
     expect(not found, f"real drafts: findings {[str(f) for f in found]}")
     return ok()
 
@@ -4505,6 +4528,229 @@ def p11_crafter_determinism() -> bool:
     for sets, want in hafner:
         got = binding.hafner_score(sets, components)
         expect(math.isclose(got, want, abs_tol=1e-9), f"Hafner score of {len(sets)} episodes: {got:.6f}, want {want:.6f}")
+    return ok()
+
+
+# P36's child (brief 2 section 2, Determinism and Versions): the NetHack binding's installed versions and task, then, per
+# seed, the trajectory hash of a seeded random action stream, twice, and the game turn it reaches.
+NETHACK_RUN = """
+import json, random, sys
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+from worlds.nethack import binding
+
+stock = NetHackChallenge()
+try:
+    env = binding.make_env(0)
+    task = {"type": type(env).__name__, "same_actions": env.actions == stock.actions,
+            "same_character": env.character == stock.character,
+            "same_limits": (env._max_episode_steps, env.no_progress_timeout) == (stock._max_episode_steps,
+                                                                               stock.no_progress_timeout),
+            "locks_left": [k for k in binding.LOCKS if k in vars(env.nethack)]}
+    env.close()
+except Exception as e:
+    task = {"error": f"{type(e).__name__}: {e}"}
+# Moves, search and the two menu exits: a stream of these plays the game, where most other keys open a prompt.
+played = (set(nethack.CompassDirection) | set(nethack.CompassDirectionLonger)
+          | {nethack.MiscAction.MORE, nethack.Command.ESC, nethack.Command.SEARCH})
+keys = [i for i, a in enumerate(stock.actions) if a in played]
+
+def attempt(seed):
+    rec = {}
+    try:
+        rng = random.Random(seed)
+        actions = [rng.choice(keys) for _ in range(int(sys.argv[2]))]
+        rec["hashes"], rec["steps"] = [], []
+        for _ in range(2):
+            h, steps = binding.trajectory(seed, actions)
+            rec["hashes"].append(h)
+            rec["steps"].append(steps)
+        ep = binding.Episode(seed)
+        turns = []
+        for a in actions:
+            if ep.done:
+                break
+            ep.step(a)
+            turns.append(ep.observation["blstats"][20])
+        rec.update(turn=max(turns), done=ep.done, end_status=ep.end_status)
+        ep.close()
+    except Exception as e:
+        rec["error"] = f"{type(e).__name__}: {e}"
+    return rec
+
+stock.close()
+print(json.dumps({"versions": binding.installed_versions(), "recorded": {"nle": binding.NLE_VERSION,
+                  "nethack": binding.NETHACK_VERSION}, "task": task,
+                  "seeds": {seed: attempt(seed) for seed in json.loads(sys.argv[1])}}))
+"""
+# Seeds whose seed-derived clock (NLE's `fix_moon_phase`) is, in turn, an ordinary day, a new moon and a full moon, read
+# from each one's opening messages when they were chosen. A binding that reads the real clock instead matches the golden
+# hash of at most one kind of day, so it fails P36 on every date.
+NETHACK_SEEDS = (1, 7, 12)
+NETHACK_STEPS = 2000
+# The trajectory hash of each of NETHACK_SEEDS under its committed action stream, recorded before any scored run: a
+# different nle, NetHack, interpreter or seeding changes them.
+NETHACK_GOLDEN = {1: "55ea807e58a374c2101c4ea0770c83ffd45f4ead85ae18e591d6917d17186082",
+                  7: "3c363323144b3c13bee3c13f5f3f3893354d65dc7cda5c5cebdaf45b03ab0833",
+                  12: "587dba1b18d4bc176acd5366b662e687c1f5eb6db59e1d2bd6386748f34052f7"}
+
+
+def _locked_version(package: str) -> str | None:
+    """`package`'s version in `uv.lock`, the file that pins every World's package."""
+    import tomllib
+
+    return next((p["version"] for p in tomllib.loads((ROOT / "uv.lock").read_text())["package"]
+                 if p["name"] == package), None)
+
+
+def p36_nethack_determinism() -> bool:
+    """The NetHack binding records the nle and NetHack versions installed, and nle's is the locked one; its task is
+    NetHackChallenge with the stock action set, character choice and limits, its seed lock lifted; the same seed and
+    action sequence give an identical trajectory hash, twice in one process and across two processes with differently
+    salted string hashing, equal per seed to the committed golden hash; distinct seeds give distinct hashes; and the
+    game's clock comes from the seed, not the date (brief 2 section 2, Versions and Determinism)."""
+    expect, ok = _expecter()
+    children = [subprocess.Popen(proc.python("-c", NETHACK_RUN, json.dumps(NETHACK_SEEDS), str(NETHACK_STEPS)),
+                                 cwd=ROOT, env=proc.child_env() | {"PYTHONHASHSEED": h}, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, text=True, preexec_fn=proc.setup(False))
+                for h in ("1", "2")]
+    outs = [(c, *c.communicate()) for c in children]
+    for c, _, err in outs:
+        if c.returncode:
+            raise RuntimeError(f"nethack child exited {c.returncode}: {err.strip()[-500:]}")
+    a, b = (json.loads(out) for _, out, _ in outs)
+    expect(a["versions"] == a["recorded"], f"installed versions {a['versions']} are the recorded {a['recorded']}")
+    locked = _locked_version("nle")
+    expect(a["recorded"]["nle"] == locked, f"recorded nle {a['recorded']['nle']} is uv.lock's {locked}")
+    t = a["task"]
+    expect(t.get("type") == "NetHackChallenge" and all(t.get(k) for k in ("same_actions", "same_character",
+                                                                           "same_limits")),
+           f"the task is NetHackChallenge with its stock actions, character choice and limits ({t})")
+    expect(t.get("locks_left") == [], f"the binding seeds the game, its seed lock lifted ({t})")
+    for seed in map(str, NETHACK_SEEDS):
+        errors = [r["seeds"][seed]["error"] for r in (a, b) if "error" in r["seeds"][seed]]
+        expect(not errors, f"seed {seed}: the World plays the action stream without raising ({errors[:1]})")
+        if errors:
+            continue
+        r = a["seeds"][seed]
+        hashes = r["hashes"] + b["seeds"][seed]["hashes"]
+        expect(len(set(hashes)) == 1, f"seed {seed}: 4 trajectory hashes, 2 per process, {len(set(hashes))} distinct "
+                                      f"({r['steps']} steps; game turn {r['turn']}; {hashes[0][:16]})")
+        expect(r["done"] and r["end_status"] is not None,
+               f"seed {seed}: the stream plays the episode to its end (end status {r['end_status']}), so the hash "
+               f"covers the game's own ending")
+        expect(hashes[0] == NETHACK_GOLDEN[int(seed)], f"seed {seed}: trajectory hash {hashes[0][:16]} is the "
+                                                       f"committed golden {NETHACK_GOLDEN[int(seed)][:16]}")
+    firsts = {(a["seeds"][str(s)].get("hashes") or [""])[0] for s in NETHACK_SEEDS}
+    expect(len(firsts) == len(NETHACK_SEEDS), f"{len(NETHACK_SEEDS)} seeds give {len(firsts)} distinct hashes")
+    return ok()
+
+
+# P37's child (brief 2 section 2, Utility; brief 2 P4, Vendored metric): the vendored BALROG files' recorded and present
+# checksums; whether the binding refuses a copy with one progression table entry altered, and one with its code altered;
+# and, per seed, the utility BALROG's progression gives a seeded random action stream, P36's construction, played out.
+BALROG_RUN = """
+import hashlib, json, random, shutil, sys, tempfile
+from pathlib import Path
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+from worlds.nethack import binding
+
+def entry_altered(text):
+    i = text.index('"Dlvl:2": ') + len('"Dlvl:2": ') + 3
+    return text[:i] + str((int(text[i]) + 1) % 10) + text[i + 1:]
+
+def tampered(name, alter):
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "balrog"
+            shutil.copytree(binding.BALROG_DIR, root)
+            (root / name).write_text(alter((root / name).read_text()))
+            try:
+                binding.balrog(root)
+                return "loaded"
+            except ValueError:
+                return "refused"
+    except Exception as e:
+        return f"{type(e).__name__}: {e}"
+
+stock = NetHackChallenge()
+played = (set(nethack.CompassDirection) | set(nethack.CompassDirectionLonger)
+          | {nethack.MiscAction.MORE, nethack.Command.ESC, nethack.Command.SEARCH})
+keys = [i for i, a in enumerate(stock.actions) if a in played]
+stock.close()
+
+def attempt(seed):
+    try:
+        rng = random.Random(seed)
+        ep = binding.Episode(seed)
+        for a in [rng.choice(keys) for _ in range(int(sys.argv[2]))]:
+            if ep.done:
+                break
+            ep.step(a)
+        cls = type(ep.progress)
+        rec = {"utility": ep.utility, "highest": ep.progress.highest_achievement, "done": ep.done,
+               "end_reason": ep.progress.end_reason, "class": cls.__qualname__,
+               "class_file": sys.modules[cls.__module__].__file__}
+        ep.close()
+        return rec
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+
+print(json.dumps({
+    "recorded": {"repo": binding.BALROG_REPO, "commit": binding.BALROG_COMMIT,
+                 "files": {n: list(v) for n, v in binding.BALROG_FILES.items()}},
+    "present": {n: hashlib.sha256((binding.BALROG_DIR / n).read_bytes()).hexdigest() for n in binding.BALROG_FILES},
+    "vendored_file": str(binding.BALROG_DIR / "progress.py"),
+    "tampered": {"table": tampered("achievements.json", entry_altered),
+                 "code": tampered("progress.py", lambda t: t + "\\n# altered\\n")},
+    "seeds": {seed: attempt(seed) for seed in json.loads(sys.argv[1])}}))
+"""
+# BALROG's progression as vendored: the upstream repository, the commit, and each file's upstream path and SHA-256,
+# recorded when the files were copied byte for byte from that commit.
+BALROG_GOLDEN = {
+    "repo": "https://github.com/balrog-ai/BALROG",
+    "commit": "b7afe79e3e4265811cfa985ed7c95c4d1a11e3f5",
+    "files": {"progress.py": ["balrog/environments/nle/progress.py",
+                              "7c267bd24c9a78a15176b53738849cb9ce480849c031c6a77021869e0f5aa8f2"],
+              "achievements.json": ["balrog/environments/nle/achievements.json",
+                                    "a582cff2ffcaa34117e7c94a5406faf70fe41369263f9e49a46dff19169d3101"],
+              "LICENSE": ["LICENSE", "4e2bcd21929f977a0b6faae5f5461e6100f0328f959165336e5462348a22a118"]}}
+# Per seed, the utility and highest achievement of P36's action stream for it, recorded before any scored run: seed 1
+# dies on the first level (progression 0.0), seed 3 reaches the second (the table's `Dlvl:2` entry).
+BALROG_UTILITY_GOLDEN = {1: (0.0, None), 3: (0.015392269075361172, "Dlvl:2")}
+
+
+def p37_nethack_utility() -> bool:
+    """The NetHack binding's utility is BALROG's progression, vendored unmodified: every vendored file has the SHA-256
+    and upstream commit committed here, and the binding records the same; it refuses a copy with one progression table
+    entry altered, and one with the code altered; and an episode's utility is the vendored NetHackChallenge class fed
+    every step, equal per seed to its committed golden value (brief 2 section 2, Utility; brief 2 P4)."""
+    expect, ok = _expecter()
+    child = subprocess.run(proc.python("-c", BALROG_RUN, json.dumps(sorted(BALROG_UTILITY_GOLDEN)),
+                                       str(NETHACK_STEPS)), cwd=ROOT, env=proc.child_env(), capture_output=True,
+                           text=True, preexec_fn=proc.setup(False))
+    if child.returncode:
+        raise RuntimeError(f"balrog child exited {child.returncode}: {child.stderr.strip()[-500:]}")
+    r = json.loads(child.stdout)
+    expect(r["recorded"] == BALROG_GOLDEN, f"the binding records BALROG {BALROG_GOLDEN['commit'][:12]} and the "
+                                           f"committed checksums ({r['recorded']['commit'][:12]})")
+    for name, (_, sha) in BALROG_GOLDEN["files"].items():
+        expect(r["present"][name] == sha, f"vendored {name}: SHA-256 {r['present'][name][:16]} is the committed "
+                                          f"{sha[:16]}")
+    expect(r["tampered"]["table"] == "refused", f"one progression table entry altered: {r['tampered']['table']}")
+    expect(r["tampered"]["code"] == "refused", f"the progression code altered: {r['tampered']['code']}")
+    for seed, (utility, highest) in BALROG_UTILITY_GOLDEN.items():
+        s = r["seeds"][str(seed)]
+        expect("error" not in s, f"seed {seed}: the episode plays with its utility ({s.get('error')})")
+        if "error" in s:
+            continue
+        expect(s["class"] == "Progress" and s["class_file"] == r["vendored_file"],
+               f"seed {seed}: the utility is the vendored NetHackChallenge class ({s['class']} from {s['class_file']})")
+        expect(s["utility"] == utility and s["highest"] == highest,
+               f"seed {seed}: utility {s['utility']} ({s['highest']}) is the golden {utility} ({highest})")
+        expect(s["done"] and bool(s["end_reason"]), f"seed {seed}: the episode ends and BALROG reads its end "
+                                                    f"({s['end_reason']!r})")
     return ok()
 
 
@@ -6095,6 +6341,99 @@ def p31_image_carries_verify() -> bool:
     return ok()
 
 
+SEAL_TOML = Path("release") / "seal.toml"
+SEAL_REPORT = Path("reports") / "L2" / "REPORT.md"
+SEAL_LINE = re.compile(r"^- Seal digest: `(sha256:[0-9a-f]{64})`", re.M)
+
+
+def _seal_digest(root: Path) -> str:
+    import tomllib
+    return tomllib.loads((root / SEAL_TOML).read_text())["digest"]
+
+
+def seal_report_findings(report: str, digest: str) -> list[str]:
+    """Why the report text `report` does not record `digest` as the seal: it carries exactly one `- Seal digest:` line,
+    and that line names `digest`."""
+    found = SEAL_LINE.findall(report)
+    return [] if found == [digest] else [f"the report records {found}, not [{digest!r}]"]
+
+
+def p21_seal() -> bool:
+    """The seal (brief 2 A2 P21, A3 item 2): the judge's image composed by `harness.seal` from the tree's `judge/` and
+    the pinned base has the manifest digest `release/seal.toml` commits, and composing it again gives the same bytes;
+    `reports/L2/REPORT.md` of the invocation tree (reports/ is never copied) records the digest that tree's
+    `release/seal.toml` commits, in one `- Seal digest:` line, a rule shown on fixtures to refuse another digest and a
+    second line. Loaded under podman, the host's runtime, the image's ID is its config digest; run with no network and
+    a read-only root, its `verify` passes P9's fixture ledger as the host's does and fails an altered record; P0b's scan
+    of the files the image adds over the base (its one layer, extracted) finds nothing. The base's own layers are the
+    pinned upstream image, checked against its diff IDs, and are not scanned."""
+    from harness import seal
+    from judge import ledger, runtime
+
+    expect, ok = _expecter()
+    a, b = "sha256:" + "a" * 64, "sha256:" + "b" * 64
+    expect(seal_report_findings(f"x\n- Seal digest: `{a}`\n", a) == [], "fixture: one line naming the digest passes")
+    expect(seal_report_findings(f"- Seal digest: `{b}`\n", a) != [], "fixture: a line naming another digest is refused")
+    expect(seal_report_findings(f"- Seal digest: `{a}`\n- Seal digest: `{a}`\n", a) != [],
+           "fixture: a second seal line is refused")
+    real = _real_root()
+    found = seal_report_findings((real / SEAL_REPORT).read_text(), _seal_digest(real))
+    expect(found == [], f"{SEAL_REPORT} records the digest {SEAL_TOML} commits, at {real} ({found})")
+    recorded = [_seal_digest(ROOT)]
+    base = runtime.candidate_config()["base_image"]
+    froms = [ln.split()[1] for ln in (RELEASE / "Containerfile").read_text().splitlines() if ln.startswith("FROM ")]
+    expect(froms == [base], f"the release image's one FROM is the judge's pinned base image ({froms}, {base})")
+    usable, _ = _usable_runtimes(expect)
+    podman = [rt for rt in usable if rt.name == "podman"]
+    expect(bool(podman), "podman, the measurement host's runtime, is usable")
+    if not podman:
+        return ok()
+    rt = podman[0]
+    work = Path(tempfile.mkdtemp(prefix="assize-p21-", dir=context.scratch))
+    image = None
+    try:
+        digest, image = seal.seal(rt.binary, base, ROOT, work / "oci")
+        print(f"  composed: manifest {digest}, image {image}")
+        expect(recorded == [digest], f"the composed manifest digest is the recorded seal ({digest}, {recorded})")
+        again = seal.seal(rt.binary, base, ROOT, work / "oci-again")
+        expect(again == (digest, image), f"composed again, the same digests ({again})")
+        loaded = subprocess.run([rt.binary, "pull", "-q", f"oci:{work / 'oci'}"], capture_output=True, text=True)
+        expect(_digest(loaded.stdout.strip()) == image,
+               f"loaded, its image ID is the config digest ({loaded.stdout.strip()}{loaded.stderr.strip()[-300:]})")
+        man = json.loads((work / "oci" / "blobs" / "sha256" / digest.split(":", 1)[1]).read_bytes())
+        added = work / "oci" / "blobs" / "sha256" / man["layers"][-1]["digest"].split(":", 1)[1]
+        layer = work / "layer"
+        layer.mkdir()
+        with tarfile.open(added) as tar:
+            tar.extractall(layer, filter="data")
+        found, scanned = scan.violations(layer / "release")
+        for v in found:
+            print(f"  VIOLATION {v}")
+        expect(scanned > 0 and not found, f"P0b's scan of the added layer: {scanned} code files, {len(found)} violations")
+
+        data = work / "data"
+        data.mkdir()
+        led, private = data / "ledger.jsonl", data / "private"
+        held = [ledger.append(led, private, rid, rows) for rid, rows in P9_REQUESTS]
+        anchor = held[-1][-1]["sha256"]
+        host = _verify_cli(led, private, anchor)
+        expect(host[0] == 0, f"control: the host's verify passes the fixture ledger ({host})")
+        code, out = _verify_in_image(rt, image, data, anchor)
+        print(f"  verify in the sealed image -> {code}: {out}")
+        expect(code == 0 and (code, out) == host, f"verify in the sealed image passes and prints what the host's prints "
+                                                  f"(exit {code})")
+        led.write_bytes(_altered(led))
+        code, out = _verify_in_image(rt, image, data, anchor)
+        expect(code == 1 and "FAILED" in out, f"verify in the sealed image fails an altered record (exit {code})")
+    except (subprocess.CalledProcessError, ValueError) as e:
+        expect(False, f"the seal composes ({e})")
+    finally:
+        if image:
+            subprocess.run([rt.binary, "rmi", "-f", image], capture_output=True)
+        shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
 # P9's records (brief 1 A4 item 1): two requests of judge-shaped episode records, an infinite log-loss included, so
 # the canonical serialisation is exercised on the strings and floats a real record carries.
 P9_REQUESTS = (
@@ -7437,7 +7776,10 @@ PINS = [
     Pin("P0ac", "a wish is drafted as a brief amendment unless the draft says in one line why it cannot wait",
         p0ac_draft_form, (Mutant("instruction_without_because_admitted",
                                  _edits("P0ac_instruction_without_because_admitted")),
-                          Mutant("both_forms_admitted", _edits("P0ac_both_forms_admitted"))), ALWAYS),
+                          Mutant("both_forms_admitted", _edits("P0ac_both_forms_admitted")),
+                          Mutant("draft_without_price_admitted", _edits("P0ac_draft_without_price_admitted")),
+                          Mutant("recording_only_refused", _edits("P0ac_recording_only_refused")),
+                          Mutant("price_unwired", _edits("P0ac_price_unwired"))), ALWAYS),
     Pin("P0ad", "the chooser's forecast is committed before the STATUS line that acts on it, and the line lists every candidate",
         p0ad_chooser_sealed, (Mutant("seal_after_act", _edits("P0ad_seal_after_act")),
                               Mutant("seal_same_commit_admitted", _edits("P0ad_seal_same_commit_admitted")),
@@ -7698,6 +8040,14 @@ PINS = [
                                    Mutant("eager_imports", _edits("P31_eager_imports")),
                                    Mutant("shared_ledger", _edits("P31_shared_ledger"))),
         JUDGE_SIDE + ("release/**",)),
+    Pin("P21", "the seal: the judge's image composed from judge/ and the pinned base has the manifest digest "
+               "release/seal.toml commits and reports/L2/REPORT.md records; loaded under podman it runs verify; P0b's "
+               "scan of its layer finds nothing",
+        p21_seal, (Mutant("digest_misrecorded", _edits("P21_digest_misrecorded")),
+                   Mutant("report_unchecked", _edits("P21_report_unchecked")),
+                   Mutant("verify_omitted", _edits("P21_verify_omitted")),
+                   Mutant("image_imports_mutants", _edits("P21_image_imports_mutants"))),
+        JUDGE_SIDE + ("release/**",)),
     Pin("P32", "a context's declared runtime must be usable: docker declared where only podman is, an unknown runtime, "
                "and the environment's declaration each fail; a held or absent declaration passes",
         p32_declared_runtime, (Mutant("declared_runtime_ignored", _edits("P32_declared_runtime_ignored")),
@@ -7720,4 +8070,19 @@ PINS = [
                                   Mutant("chunks_replaced_after_worldgen", _edits("P11_chunks_replaced_after_worldgen")),
                                   Mutant("golden_hash_altered", _edits("P11_golden_hash_altered")),
                                   Mutant("stream_truncated", _edits("P11_stream_truncated"))), JUDGE_SIDE),
+    Pin("P36", "the NetHack binding records its versions; the same seed and actions give an identical NetHackChallenge "
+               "trajectory hash, whatever the date",
+        p36_nethack_determinism, (Mutant("version_misrecorded", _edits("P36_version_misrecorded")),
+                                  Mutant("seed_lock_kept", _edits("P36_seed_lock_kept")),
+                                  Mutant("reseed_on", _edits("P36_reseed_on")),
+                                  Mutant("moon_from_clock", _edits("P36_moon_from_clock")),
+                                  Mutant("seed_ignored", _edits("P36_seed_ignored")),
+                                  Mutant("character_fixed", _edits("P36_character_fixed"))), JUDGE_SIDE),
+    Pin("P37", "the NetHack utility is BALROG's progression, vendored at a pinned commit with a checksum; one altered "
+               "table entry fails the checksum",
+        p37_nethack_utility, (Mutant("table_entry_altered", _edits("P37_table_entry_altered")),
+                              Mutant("table_and_checksum_altered", _edits("P37_table_and_checksum_altered")),
+                              Mutant("checksum_unchecked", _edits("P37_checksum_unchecked")),
+                              Mutant("progress_not_updated", _edits("P37_progress_not_updated")),
+                              Mutant("minihack_progress", _edits("P37_minihack_progress"))), JUDGE_SIDE),
 ]

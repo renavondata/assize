@@ -354,3 +354,12 @@ A draft that changes how work is done states, in its body, the price quantity it
 Pre-stated criterion: `claims.draft_findings` refuses a process-changing draft with no `price` line, and accepts a recording-only draft that says so.
 
 Pin that can fail: a process-changing draft with no `price` line is accepted by a mutant; the pin must fail on that mutant.
+
+## Amendment A3: the seal precedes NetHack (appended; instruction #303)
+
+1. The zero-diff pin (brief 2 A1 item 4, as A2 amends it: zero diff on `judge/` and `worlds/spec/` against the L2a baseline) is built first, before anything else. It is the first item. Its registry id is whatever the registry assigns (PR #301 proposes P35, since registry P1 is the CSPRNG pin); the name "P1" in A1 and A2 means this pin.
+2. L2c follows immediately: the judge image is built from the baseline's `judge/`, released, and pinned by digest; `judge/` and `worlds/spec/` enter CODEOWNERS; `reports/L2/REPORT.md` records the digest and the Crafter host verdict under the sealed image (a host `measure` run, as in L1). This is a layer-internal milestone that Guy merges, like the L2a baseline.
+3. L2b then proceeds under the sealed image. NetHack is a World binding and manifest only (`worlds/<name>/binding.py` plus manifest, per A2). The zero-diff pin and the released digest stay as they are. A NetHack change that would need an edit to `judge/` or `worlds/spec/` is a stop-and-report boundary, not a reason to re-seal.
+4. The L2 verdict line in the root `REPORT.md` is written when item 3 is done, as the ladder requires. The agent repository may use the sealed image from item 2 on.
+
+CLAUDE.md's ladder does not change. L2's exit gate still requires the zero diff, a NetHack verdict on the host, the released image and the freeze. Only the order inside L2 moves, from L2a → L2b → L2c to L2a → L2c → L2b.

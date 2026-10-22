@@ -1,0 +1,5 @@
+# P36's mutant `seed_ignored` (brief 2 section 2, Determinism): every issued seed seeds the game alike.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '    return {s: int.from_bytes(hashlib.sha256(f"{seed}:{s}".encode()).digest()[:8], "big") >> 1 for s in STREAMS}'
+new = '    return {s: int.from_bytes(hashlib.sha256(f"{0}:{s}".encode()).digest()[:8], "big") >> 1 for s in STREAMS}'

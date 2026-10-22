@@ -1,0 +1,6 @@
+# P37's mutant `minihack_progress` (brief 2 section 2, Utility): the full game scored by BALROG's MiniHack progression
+# (success or nothing) instead of the class BALROG gives NetHackChallenge.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '        self.progress = balrog().Progress()'
+new = '        self.progress = balrog().BaseProgress()'
