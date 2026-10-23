@@ -4729,7 +4729,9 @@ BALROG_GOLDEN = {
                               "7c267bd24c9a78a15176b53738849cb9ce480849c031c6a77021869e0f5aa8f2"],
               "achievements.json": ["balrog/environments/nle/achievements.json",
                                     "a582cff2ffcaa34117e7c94a5406faf70fe41369263f9e49a46dff19169d3101"],
-              "LICENSE": ["LICENSE", "4e2bcd21929f977a0b6faae5f5461e6100f0328f959165336e5462348a22a118"]}}
+              "LICENSE": ["LICENSE", "4e2bcd21929f977a0b6faae5f5461e6100f0328f959165336e5462348a22a118"],
+              "config.yaml": ["balrog/config/config.yaml",
+                              "f6af7a94e782a3d9ef88cec2f5b5f2b6ff8ca9e3e1ca5701161f43611a11705d"]}}
 # Per seed, the utility and highest achievement of P36's action stream for it, recorded before any scored run: seed 1
 # dies on the first level (progression 0.0), seed 3 reaches the second (the table's `Dlvl:2` entry).
 BALROG_UTILITY_GOLDEN = {1: (0.0, None), 3: (0.015392269075361172, "Dlvl:2")}
@@ -4936,6 +4938,82 @@ def p38_nethack_manifest() -> bool:
         expect(s["achievements"] == golden and set(golden) <= set(m["utility"]["components"]),
                f"seed {seed}: achievements {s['achievements']} are the golden {golden}, manifest components")
         expect(s["world_seed"] == seed, f"seed {seed}: world_seed {s['world_seed']}")
+    return ok()
+
+
+# P39's child (brief 2 section 2, Tasks): the MiniHack task set the binding records and reads from BALROG's vendored
+# config, and whether it refuses a copy whose config is altered outside the task list, and one whose task list loses a
+# task while the recorded checksum moves to match it.
+MINIHACK_RUN = """
+import hashlib, json, shutil, tempfile
+from pathlib import Path
+from worlds.nethack import binding
+
+def tampered(alter, move_record):
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "balrog"
+            shutil.copytree(binding.BALROG_DIR, root)
+            (root / "config.yaml").write_text(alter((root / "config.yaml").read_text()))
+            record = binding.BALROG_FILES["config.yaml"]
+            if move_record:
+                sha = hashlib.sha256((root / "config.yaml").read_bytes()).hexdigest()
+                binding.BALROG_FILES["config.yaml"] = (record[0], sha)
+            try:
+                binding.minihack_tasks(root)
+                return "loaded"
+            except ValueError:
+                return "refused"
+            finally:
+                binding.BALROG_FILES["config.yaml"] = record
+    except Exception as e:
+        return f"{type(e).__name__}: {e}"
+
+def read():
+    try:
+        return list(binding.minihack_tasks())
+    except Exception as e:
+        return f"{type(e).__name__}: {e}"
+
+print(json.dumps({
+    "recorded": {"repo": binding.BALROG_REPO, "commit": binding.BALROG_COMMIT,
+                 "config": list(binding.BALROG_FILES["config.yaml"]), "tasks": list(binding.MINIHACK_TASKS)},
+    "present": hashlib.sha256((binding.BALROG_DIR / "config.yaml").read_bytes()).hexdigest(),
+    "read": read(),
+    "tampered": {"outside_tasks": tampered(lambda t: t.replace("minihack: 5 ", "minihack: 6 ", 1), False),
+                 "task_dropped": tampered(lambda t: t.replace('    - "MiniHack-Quest-Medium-v0"\\n', "", 1), True)}}))
+"""
+# BALROG's MiniHack ladder, cited: the `tasks.minihack_tasks` list of `balrog/config/config.yaml` in the BALROG
+# repository at the commit P37 vendors, copied byte for byte (git blob f4967ec918dd, as upstream) with its SHA-256.
+MINIHACK_GOLDEN = {
+    "repo": "https://github.com/balrog-ai/BALROG",
+    "commit": "b7afe79e3e4265811cfa985ed7c95c4d1a11e3f5",
+    "config": ["balrog/config/config.yaml", "f6af7a94e782a3d9ef88cec2f5b5f2b6ff8ca9e3e1ca5701161f43611a11705d"],
+    "tasks": ["MiniHack-Boxoban-Hard-v0", "MiniHack-Boxoban-Medium-v0", "MiniHack-MazeWalk-9x9-v0",
+              "MiniHack-MazeWalk-15x15-v0", "MiniHack-Corridor-R3-v0", "MiniHack-CorridorBattle-Dark-v0",
+              "MiniHack-Quest-Easy-v0", "MiniHack-Quest-Medium-v0"]}
+
+
+def p39_minihack_ladder() -> bool:
+    """The MiniHack ladder is the task set BALROG uses, cited and committed: the binding records BALROG's repository,
+    commit, config path and checksum and the eight tasks committed here, the vendored config has that checksum, and the
+    binding reads the task set from it; it refuses a copy altered outside the task list, and a copy that drops a task
+    even with the recorded checksum moved to match (brief 2 section 2, Tasks)."""
+    expect, ok = _expecter()
+    child = subprocess.run(proc.python("-c", MINIHACK_RUN), cwd=ROOT, env=proc.child_env(), capture_output=True,
+                           text=True, preexec_fn=proc.setup(False))
+    if child.returncode:
+        raise RuntimeError(f"minihack child exited {child.returncode}: {child.stderr.strip()[-500:]}")
+    r = json.loads(child.stdout)
+    expect(r["recorded"] == MINIHACK_GOLDEN, f"the binding records BALROG {MINIHACK_GOLDEN['commit'][:12]}'s config and "
+                                             f"MiniHack tasks as committed ({r['recorded']})")
+    expect(r["present"] == MINIHACK_GOLDEN["config"][1], f"vendored config.yaml: SHA-256 {r['present'][:16]} is the "
+                                                         f"committed {MINIHACK_GOLDEN['config'][1][:16]}")
+    expect(r["read"] == MINIHACK_GOLDEN["tasks"], f"the task set read from the vendored config: {r['read']}")
+    expect(r["tampered"]["outside_tasks"] == "refused", f"config altered outside the task list: "
+                                                         f"{r['tampered']['outside_tasks']}")
+    expect(r["tampered"]["task_dropped"] == "refused", f"a task dropped, checksum moved to match: "
+                                                        f"{r['tampered']['task_dropped']}")
     return ok()
 
 
@@ -8279,4 +8357,9 @@ PINS = [
                                Mutant("delta_in_points", _edits("P38_delta_in_points")),
                                Mutant("observation_raw", _edits("P38_observation_raw")),
                                Mutant("achievements_raw", _edits("P38_achievements_raw"))), JUDGE_SIDE),
+    Pin("P39", "the MiniHack ladder is BALROG's MiniHack task set, read from its config vendored at the pinned commit "
+               "with a checksum",
+        p39_minihack_ladder, (Mutant("task_dropped", _edits("P39_task_dropped")),
+                              Mutant("config_unchecked", _edits("P39_config_unchecked")),
+                              Mutant("record_unchecked", _edits("P39_record_unchecked"))), JUDGE_SIDE),
 ]

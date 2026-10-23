@@ -51,5 +51,21 @@ L2 — NetHack World binding (brief 2). Empty at L0.
   emit only declared observations and supported target values and reach their golden achievements. Mutants
   `endgame_depths_dropped`, `zeroed_xp_dropped`, `delta_in_points`, `observation_raw`, `achievements_raw`.
 
+## MiniHack ladder (brief 2 section 2, Tasks)
+- The ladder is the MiniHack task set BALROG evaluates: the `tasks.minihack_tasks` list of BALROG's
+  `balrog/config/config.yaml` at the same commit, vendored byte for byte as `balrog/config.yaml` (git blob
+  `f4967ec918dd`, as upstream) and recorded in `binding.BALROG_FILES` with its SHA-256. In order: Boxoban-Hard,
+  Boxoban-Medium, MazeWalk-9x9, MazeWalk-15x15, Corridor-R3, CorridorBattle-Dark, Quest-Easy, Quest-Medium (each
+  `MiniHack-<name>-v0`). `binding.MINIHACK_TASKS` records them; `binding.minihack_tasks()` reads them from the checked
+  config and refuses a list that is not the recorded one. BALROG's per-task protocol is in the same config
+  (`eval.num_episodes.minihack`, `envs.minihack_kwargs`), and its MiniHack progression is `progress.py`'s
+  `BaseProgress`.
+- P39: the binding records the commit, config path, checksum and the eight tasks committed in the pin, the vendored
+  config has that checksum, and the task set is read from it; a copy altered outside the task list is refused, and so
+  is one that drops a task with the recorded checksum moved to match. Mutants `task_dropped`, `config_unchecked`,
+  `record_unchecked`.
+- The tasks are cited and committed, not yet bound: `minihack` is not installed, and no MiniHack World is played here.
+
 ## Not yet here
-The MiniHack ladder, AutoAscend, and the version-pooling (P2) and long-episode (P3) pins.
+The MiniHack World bindings (installing `minihack`, one World per ladder task), AutoAscend, and the version-pooling
+(P2) and long-episode (P3) pins.

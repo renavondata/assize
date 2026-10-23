@@ -1,0 +1,6 @@
+# P39's mutant `config_unchecked` (brief 2 section 2, Tasks): the binding reads the task set from the vendored config
+# whatever its checksum.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '.load(vendored(root)["config.yaml"])'
+new = '.load((root / "config.yaml").read_bytes())'

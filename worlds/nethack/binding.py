@@ -35,6 +35,7 @@ from pathlib import Path
 import nle
 from nle.env.base import NLE
 from nle.env.tasks import NetHackChallenge
+from ruamel.yaml import YAML
 
 # The versions installed and recorded (brief 2 section 2, Versions): the `nle` distribution, and the NetHack it
 # builds, read from the version banner compiled into the game library it loads.
@@ -57,8 +58,22 @@ BALROG_FILES = {
     "achievements.json": ("balrog/environments/nle/achievements.json",
                           "a582cff2ffcaa34117e7c94a5406faf70fe41369263f9e49a46dff19169d3101"),
     "LICENSE": ("LICENSE", "4e2bcd21929f977a0b6faae5f5461e6100f0328f959165336e5462348a22a118"),
+    "config.yaml": ("balrog/config/config.yaml",
+                    "f6af7a94e782a3d9ef88cec2f5b5f2b6ff8ca9e3e1ca5701161f43611a11705d"),
 }
 BALROG_DIR = Path(__file__).with_name("balrog")
+# The MiniHack ladder (brief 2 section 2, Tasks): the MiniHack task set BALROG evaluates, in the order of the
+# `tasks.minihack_tasks` list of its vendored `config.yaml`, which `minihack_tasks` reads it from.
+MINIHACK_TASKS = (
+    "MiniHack-Boxoban-Hard-v0",
+    "MiniHack-Boxoban-Medium-v0",
+    "MiniHack-MazeWalk-9x9-v0",
+    "MiniHack-MazeWalk-15x15-v0",
+    "MiniHack-Corridor-R3-v0",
+    "MiniHack-CorridorBattle-Dark-v0",
+    "MiniHack-Quest-Easy-v0",
+    "MiniHack-Quest-Medium-v0",
+)
 # What BALROG's progression reads besides the observed keys: the terminal, for its end-of-game reason.
 PROGRESS_READS = ("tty_chars",)
 MANIFEST = Path(__file__).with_name("manifest.json")
@@ -80,13 +95,29 @@ def seeds(seed: int) -> dict[str, int]:
     return {s: int.from_bytes(hashlib.sha256(f"{seed}:{s}".encode()).digest()[:8], "big") >> 1 for s in STREAMS}
 
 
-def balrog(root: Path = BALROG_DIR):
-    """BALROG's vendored `progress` module, loaded from `root` only after every file in BALROG_FILES there has its
-    recorded SHA-256, and only if the table it loaded is the checked one. Raises ValueError otherwise."""
+def vendored(root: Path = BALROG_DIR) -> dict[str, bytes]:
+    """The bytes of every file in BALROG_FILES under `root`, only if each has its recorded SHA-256. Raises ValueError
+    otherwise."""
     data = {name: (root / name).read_bytes() for name in BALROG_FILES}
     altered = sorted(n for n, (_, sha) in BALROG_FILES.items() if hashlib.sha256(data[n]).hexdigest() != sha)
     if altered:
         raise ValueError(f"vendored BALROG files differ from their recorded SHA-256 at {BALROG_COMMIT[:12]}: {altered}")
+    return data
+
+
+def minihack_tasks(root: Path = BALROG_DIR) -> tuple[str, ...]:
+    """The MiniHack task set BALROG evaluates: the `tasks.minihack_tasks` list of the checked vendored `config.yaml`,
+    only if it is MINIHACK_TASKS. Raises ValueError otherwise."""
+    tasks = tuple(YAML(typ="safe").load(vendored(root)["config.yaml"])["tasks"]["minihack_tasks"])
+    if tasks != MINIHACK_TASKS:
+        raise ValueError(f"BALROG's MiniHack task set {list(tasks)} is not the recorded {list(MINIHACK_TASKS)}")
+    return tasks
+
+
+def balrog(root: Path = BALROG_DIR):
+    """BALROG's vendored `progress` module, loaded from `root` only after every file in BALROG_FILES there has its
+    recorded SHA-256, and only if the table it loaded is the checked one. Raises ValueError otherwise."""
+    data = vendored(root)
     name = f"balrog_progress_{hashlib.sha256(str(root.resolve()).encode()).hexdigest()[:12]}"
     module = importlib.util.module_from_spec(importlib.util.spec_from_file_location(name, root / "progress.py"))
     sys.modules[name] = module  # the vendored module's dataclass looks itself up there

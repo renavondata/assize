@@ -1,0 +1,6 @@
+# P39's mutant `record_unchecked` (brief 2 section 2, Tasks): the binding returns whatever task set the checked config
+# lists, without comparing it to the recorded ladder.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '    if tasks != MINIHACK_TASKS:'
+new = '    if False:'

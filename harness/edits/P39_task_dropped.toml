@@ -1,0 +1,5 @@
+# P39's mutant `task_dropped` (brief 2 section 2, Tasks): the binding's MiniHack ladder loses one of BALROG's tasks.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '    "MiniHack-Quest-Medium-v0",'
+new = ''
