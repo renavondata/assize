@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2b-autoascend-feasibility (brief 2 section 3: what AutoAscend needs and what the judge's NetHack observation gives it): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "6a867752-4d4b-4dfe-8943-64837c2becda"
