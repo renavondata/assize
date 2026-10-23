@@ -1,0 +1,5 @@
+# reports/L0/forecasts/39931231437.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/39931231437.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/39931231437.jsonl: 87 open, 81 typed; resolved 2, unreadable 0
+resolved 419d28385d7a True — run 39824504254: 79.0 minutes, bound 150
+resolved 90e47249f9dd True — pins run 39827843820 attempt 1 on 465dd42fc565: success

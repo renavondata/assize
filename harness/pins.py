@@ -4571,7 +4571,7 @@ def attempt(seed):
             if ep.done:
                 break
             ep.step(a)
-            turns.append(ep.observation["blstats"][20])
+            turns.append(ep.observation["time"])
         rec.update(turn=max(turns), done=ep.done, end_status=ep.end_status)
         ep.close()
     except Exception as e:
@@ -4751,6 +4751,177 @@ def p37_nethack_utility() -> bool:
                f"seed {seed}: utility {s['utility']} ({s['highest']}) is the golden {utility} ({highest})")
         expect(s["done"] and bool(s["end_reason"]), f"seed {seed}: the episode ends and BALROG reads its end "
                                                     f"({s['end_reason']!r})")
+    return ok()
+
+
+# P38's child (brief 2 section 2, Observations and Prediction targets): what the NetHack manifest's names and bounds are
+# derived from in the installed nle (its action set, glyph and message shapes, bottom-line stat names and declared
+# bounds, step limit, and the dungeon.def it ships), whether the judge binds and prices the World, and, per seed, P36's
+# seeded random action stream played through the judge's own Episode protocol: every manifest departure of every
+# emitted observation, every value each target's field realises, the termination and the achievements.
+NETHACK_MANIFEST_RUN = """
+import json, random, sys
+from pathlib import Path
+import nle
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+from judge import episodes, evaluate, price
+from worlds.crafter.binding import violations
+from worlds.nethack import binding
+
+m = binding.manifest()
+stock = NetHackChallenge()
+box = stock.observation_space["blstats"]
+out = {"bound": evaluate.bound(), "manifest": m, "endings": sorted(episodes.WORLD_ENDINGS),
+       "nle": binding.NLE_VERSION, "max_steps": stock._max_episode_steps,
+       "actions": [binding.identifier(type(a).__name__ + a.name) for a in stock.actions],
+       "components": [binding.identifier(k) for k in
+                      json.loads((binding.BALROG_DIR / "achievements.json").read_text())],
+       "blstats": [n[len("NLE_BL_"):].lower() for n in sorted((n for n in dir(nethack) if n.startswith("NLE_BL_")),
+                                                              key=lambda n: getattr(nethack, n))],
+       "blstats_box": [int(box.low.min()), int(box.high.max())], "max_glyph": nethack.MAX_GLYPH,
+       "dungeon_shape": list(nethack.DUNGEON_SHAPE), "message_shape": list(nethack.MESSAGE_SHAPE),
+       "dungeon_def": (Path(nle.__file__).with_name("nethackdir") / "dat" / "dungeon.def").read_text()}
+try:
+    price.of(m)
+    out["priced"] = "ok"
+except Exception as e:
+    out["priced"] = f"{type(e).__name__}: {e}"
+played = (set(nethack.CompassDirection) | set(nethack.CompassDirectionLonger)
+          | {nethack.MiscAction.MORE, nethack.Command.ESC, nethack.Command.SEARCH})
+keys = [i for i, a in enumerate(stock.actions) if a in played]
+stock.close()
+
+def attempt(seed):
+    rec = {}
+    try:
+        rng = random.Random(seed)
+        ep = binding.Episode(seed, m)
+        found, realised = [], {t["name"]: set() for t in m["targets"]}
+
+        def see(obs):
+            found.extend(f"t={ep.t}: {v}" for v in violations(obs, m["observation"]))
+            for t in m["targets"]:
+                realised[t["name"]].add(obs.get(t["field"]))
+
+        see(ep.observation)
+        for a in [rng.choice(keys) for _ in range(int(sys.argv[2]))]:
+            if ep.done:
+                break
+            see(ep.step(a))
+        rec.update(violations=found[:5], n_violations=len(found), realised={k: sorted(v, key=str)
+                                                                             for k, v in realised.items()},
+                   termination=ep.termination, achievements=ep.achievements, done=ep.done, steps=ep.t,
+                   world_seed=binding.world_seed(seed))
+        ep.close()
+    except Exception as e:
+        rec["error"] = f"{type(e).__name__}: {e}"
+    return rec
+
+out["seeds"] = {seed: attempt(seed) for seed in json.loads(sys.argv[1])}
+print(json.dumps(out))
+"""
+# The bounds NetHack 3.6.7's source fixes for the two other target fields: u.ulevel's MAXULEV (global.h) and the last
+# of hack.h's hunger_state_types, STARVED. NLE's zeroed observation outside a running game adds 0 to every support.
+NETHACK_MAXULEV = 30
+NETHACK_STARVED = 6
+# Brief 2's FIT effect, delta = 2 progression points (section 4, pre-stated criteria), in the utility's units: BALROG's
+# progression is in [0, 1] and BALROG reports it times 100.
+NETHACK_DELTA = Fraction(2, 100)
+# Per seed, the achievements P36's action stream for it reaches, recorded before any scored run: P37's golden utility
+# (seed 1 stays on the first level, seed 3 reaches the second), in manifest names.
+NETHACK_ACHIEVEMENTS_GOLDEN = {1: ["dlvl1", "xp1"], 3: ["dlvl1", "dlvl2", "xp1"]}
+
+
+def nethack_depths(dungeon_def: str) -> tuple[int, int]:
+    """The shallowest and deepest depth(&u.uz) a game of `dungeon_def` can reach, as dungeon.c's init_dungeons lays
+    the dungeons out: a dungeon of `(base, rand)` has rn1(rand, base), at most base + rand - 1, levels (base when rand
+    is 0); Gehennom starts one level below the Dungeons of Doom's bottom; the Elemental Planes are entered upward from
+    depth 1 at their ENTRY level, counted from their bottom, and shifted one more level up for their dummy level."""
+    dungeons, current = {}, None
+    for line in dungeon_def.splitlines():
+        d = re.match(r'DUNGEON:\s*"([^"]+)"\s*"[^"]*"\s*\((\d+),\s*(\d+)\)', line)
+        if d:
+            current = d.group(1)
+            dungeons[current] = {"levels": int(d.group(2)) + max(int(d.group(3)) - 1, 0), "entry": 0}
+        e = re.match(r"ENTRY:\s*(-?\d+)", line)
+        if e and current:
+            dungeons[current]["entry"] = int(e.group(1))
+    planes = dungeons["The Elemental Planes"]
+    entry = planes["levels"] + planes["entry"] + 1
+    start = (1 - 1) - (entry - 1)
+    start -= planes["levels"] > 1 - start
+    return start, dungeons["The Dungeons of Doom"]["levels"] + dungeons["Gehennom"]["levels"]
+
+
+def p38_nethack_manifest() -> bool:
+    """The judge binds and prices NetHack from its manifest (brief 2 A2, P19, P20): the manifest's actions, utility
+    components and observation names, shapes and bounds are those the installed nle and the vendored BALROG table give;
+    its three targets' supports are the derivation from NetHack's source and the dungeon.def nle ships, with 0 for NLE's
+    zeroed observation; its delta is brief 2's FIT effect; and P36's seeded streams, played through the judge's Episode
+    protocol, emit only observations the manifest declares, realise only supported target values, end with a judge
+    ending, and reach their golden achievements, in manifest names (brief 2 section 2, Observations and Prediction
+    targets)."""
+    expect, ok = _expecter()
+    child = subprocess.run(proc.python("-c", NETHACK_MANIFEST_RUN, json.dumps(sorted(NETHACK_ACHIEVEMENTS_GOLDEN)),
+                                       str(NETHACK_STEPS)), cwd=ROOT, env=proc.child_env(), capture_output=True,
+                           text=True, preexec_fn=proc.setup(False))
+    if child.returncode:
+        raise RuntimeError(f"manifest child exited {child.returncode}: {child.stderr.strip()[-500:]}")
+    r = json.loads(child.stdout)
+    m = r["manifest"]
+    expect("nethack" in r["bound"], f"the judge binds nethack ({r['bound']})")
+    expect(m["world"] == "nethack" and m["source"] == {"package": "nle", "version": r["nle"]},
+           f"the manifest names nethack and nle {r['nle']} ({m['world']}, {m['source']})")
+    expect(m.get("episode_length") == r["max_steps"], f"episode_length {m.get('episode_length')} is "
+                                                       f"NetHackChallenge's step limit {r['max_steps']}")
+    expect(m["actions"] == r["actions"], f"the {len(m['actions'])} actions are NetHackChallenge's "
+                                         f"{len(r['actions'])}, named and ordered by the binding's rule")
+    expect(m["utility"]["components"] == r["components"],
+           f"the {len(m['utility']['components'])} components are the vendored table's {len(r['components'])} keys")
+    fields = {f["name"]: f for f in m["observation"]}
+    expect(list(fields) == ["glyphs", "toplines"] + r["blstats"],
+           f"the observation is glyphs, toplines and NLE's bottom-line stats in order ({list(fields)[:4]}...)")
+    expect(fields.get("glyphs", {}).get("shape") == r["dungeon_shape"]
+           and fields.get("glyphs", {}).get("range") == [0, r["max_glyph"] - 1],
+           f"glyphs: shape {r['dungeon_shape']}, ids below MAX_GLYPH {r['max_glyph']} ({fields.get('glyphs')})")
+    expect(fields.get("toplines", {}).get("shape") == r["message_shape"]
+           and fields.get("toplines", {}).get("range") == [0, 255],
+           f"toplines: shape {r['message_shape']}, bytes ({fields.get('toplines')})")
+    targets = {t["field"]: t for t in m["targets"]}
+    loose = {n: fields[n]["range"] for n in r["blstats"] if n in fields and n not in targets
+             and fields[n]["range"] != r["blstats_box"]}
+    expect(not loose, f"every other bottom-line stat has NLE's declared bounds {r['blstats_box']} ({loose})")
+    shallowest, deepest = nethack_depths(r["dungeon_def"])
+    derived = {"depth": list(range(min(shallowest, 0), deepest + 1)), "xp": list(range(0, NETHACK_MAXULEV + 1)),
+               "hunger": list(range(0, NETHACK_STARVED + 1))}
+    expect(sorted(targets) == sorted(derived), f"the targets are depth, xp and hunger ({sorted(targets)})")
+    for name, want in derived.items():
+        t = targets.get(name, {})
+        expect(t.get("support") == want, f"{name}: support {t.get('support', [])[:3]}...{t.get('support', [])[-1:]} "
+                                         f"is the derived {want[:3]}...{want[-1:]}")
+        expect(fields.get(name, {}).get("range") == [want[0], want[-1]],
+               f"{name}: the field's range {fields.get(name, {}).get('range')} is its support's bounds")
+    expect((shallowest, deepest) == (-5, 53), f"dungeon.def gives depths {shallowest} to {deepest}")
+    expect(r["priced"] == "ok", f"the judge prices the World from its own delta ({r['priced']})")
+    expect(Fraction(m["price"]["delta"]).limit_denominator(10**6) == NETHACK_DELTA,
+           f"delta {m['price']['delta']} is brief 2's 2 progression points ({float(NETHACK_DELTA)})")
+    for seed, golden in NETHACK_ACHIEVEMENTS_GOLDEN.items():
+        s = r["seeds"][str(seed)]
+        expect("error" not in s, f"seed {seed}: the Episode protocol plays the stream ({s.get('error')})")
+        if "error" in s:
+            continue
+        expect(s["n_violations"] == 0, f"seed {seed}: {s['steps']} steps, {s['n_violations']} manifest departures "
+                                       f"({s['violations']})")
+        for t in m["targets"]:
+            off = [v for v in s["realised"][t["name"]] if v not in t["support"]]
+            expect(not off, f"seed {seed}: {t['name']} realises {s['realised'][t['name']]}, all in its support "
+                            f"(outside: {off})")
+        expect(s["done"] and s["termination"] in r["endings"], f"seed {seed}: ends {s['termination']!r}, a judge "
+                                                               f"ending {r['endings']}")
+        expect(s["achievements"] == golden and set(golden) <= set(m["utility"]["components"]),
+               f"seed {seed}: achievements {s['achievements']} are the golden {golden}, manifest components")
+        expect(s["world_seed"] == seed, f"seed {seed}: world_seed {s['world_seed']}")
     return ok()
 
 
@@ -5580,10 +5751,10 @@ def p19_world_discovery() -> bool:
     """The judge binds a World by its directory alone: a fixture directory with a manifest and a binding, added to a copy
     of the tree with no edit to `judge/`, is bound under its name, its own binding is the one imported, and `evaluate()`
     takes it past the World check to the runtime check; a directory with a binding but no manifest is not bound, and is
-    refused `unknown_world`. Crafter stays bound. No seed is issued to any fixture request (brief 2 A2)."""
+    refused `unknown_world`. Crafter and NetHack stay bound. No seed is issued to any fixture request (brief 2 A2)."""
     expect, ok = _expecter()
     got = _fixture_worlds()
-    expect(got["bound"] == ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"],
+    expect(got["bound"] == ["borrowed", "crafter", "fx", "nethack", "rederived", "undelta", "unpriced"],
            f"bound: every directory with a manifest and a binding, and only those ({got['bound']})")
     expect(got["fx_binding"] == "fx", f"fx's own binding is imported ({got['fx_binding']})")
     for w, want in (("fx", "unknown_runtime"), ("crafter", "unknown_runtime"), ("bare", "unknown_world")):
@@ -8085,4 +8256,11 @@ PINS = [
                               Mutant("checksum_unchecked", _edits("P37_checksum_unchecked")),
                               Mutant("progress_not_updated", _edits("P37_progress_not_updated")),
                               Mutant("minihack_progress", _edits("P37_minihack_progress"))), JUDGE_SIDE),
+    Pin("P38", "the judge binds and prices NetHack from a manifest whose names, bounds and target supports are derived "
+               "from nle, BALROG and NetHack's source, and whose observations and targets an episode honours",
+        p38_nethack_manifest, (Mutant("endgame_depths_dropped", _edits("P38_endgame_depths_dropped")),
+                               Mutant("zeroed_xp_dropped", _edits("P38_zeroed_xp_dropped")),
+                               Mutant("delta_in_points", _edits("P38_delta_in_points")),
+                               Mutant("observation_raw", _edits("P38_observation_raw")),
+                               Mutant("achievements_raw", _edits("P38_achievements_raw"))), JUDGE_SIDE),
 ]

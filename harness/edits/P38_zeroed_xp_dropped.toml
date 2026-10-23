@@ -1,0 +1,12 @@
+# P38's mutant `zeroed_xp_dropped` (brief 2 section 2, Prediction targets): the experience-level support and range start
+# at NetHack's level 1 and leave out the 0 of NLE's zeroed observation, which an episode's last observation after
+# death realises.
+[[edit]]
+path = "worlds/nethack/manifest.json"
+old = '"support": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]'
+new = '"support": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]'
+
+[[edit]]
+path = "worlds/nethack/manifest.json"
+old = '"range": [0, 30]'
+new = '"range": [1, 30]'

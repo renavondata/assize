@@ -1,0 +1,10 @@
+# P38's mutant `delta_in_points` (brief 2 section 4, pre-stated criteria): delta is written as 2 progression points
+# rather than in the utility's units, with the rates derived from it, so the judge's derivation check alone accepts it.
+[[edit]]
+path = "worlds/nethack/manifest.json"
+old = '''    "cpu_s": 1.6666666666666667e-05,
+    "memory_gb_s": 1.5522042910257973e-05,
+    "delta": 0.02,'''
+new = '''    "cpu_s": 0.0016666666666666668,
+    "memory_gb_s": 0.0015522042910257974,
+    "delta": 2,'''

@@ -1,0 +1,2 @@
+{"id": "419d28385d7a", "ts": "2026-10-23T10:24:16Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39931231437"}, "outcome": true, "witness": "run 39824504254: 79.0 minutes, bound 150"}
+{"id": "90e47249f9dd", "ts": "2026-10-23T10:24:16Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "39931231437"}, "outcome": true, "witness": "pins run 39827843820 attempt 1 on 465dd42fc565: success"}
