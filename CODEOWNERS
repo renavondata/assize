@@ -3,3 +3,5 @@
 /CODEOWNERS       @gfrmin
 /.github/         @gfrmin
 /.claude/         @gfrmin
+/judge/           @gfrmin
+/worlds/spec/     @gfrmin

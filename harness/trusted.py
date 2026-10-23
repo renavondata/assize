@@ -5,8 +5,9 @@ The declared set is read from the tree alone: the workflow files under `.github/
 `runs-on` names, the repository secrets their expressions read (`secrets.<NAME>`; a bare `secrets`, `secrets[...]` or
 `secrets: inherit` reaches every secret and is declared as `*`), the tokens each workflow binds (`<workflow>
 github.token` and `<workflow> secrets.<NAME>`), and the CODEOWNERS lines. The list must equal it, kind by kind, and every
-entry names the audit-dated amendment that admitted it: a heading `Audit findings at <sha>` present in a brief under
-`docs/briefs/`. Growth without such an amendment fails.
+entry names the amendment that admitted it: a heading `Audit findings at <sha>`, or `Admitted by instruction #<n>`
+(instruction #315: Guy's signature, with the same strength), present in a brief under `docs/briefs/`. The heading is read
+from the tree, never an issue number on its own. Growth without such an amendment fails.
 
 `python -m harness.trusted check`: the findings at the tree, one per line; exit 1 if any.
 `python -m harness.trusted grown <sha>`: the entries listed now and absent from the list at <sha> (every entry, if the
@@ -26,7 +27,7 @@ from harness.pin import ROOT
 LIST_PATH = "harness/trusted_base.toml"
 WORKFLOWS = ".github/workflows"
 KINDS = ("workflow", "runner_label", "secret", "token", "codeowners")
-ADMISSION = re.compile(r"^#+ +(Audit findings at [0-9a-f]{12,40})[ \t]*$", re.M)
+ADMISSION = re.compile(r"^#+ +(Audit findings at [0-9a-f]{12,40}|Admitted by instruction #[0-9]+)[ \t]*$", re.M)
 EXPRESSION = re.compile(r"\$\{\{(.*?)\}\}", re.S)
 SECRET = re.compile(r"\bsecrets\b(?:\.([A-Za-z_]\w*))?")
 INHERIT = re.compile(r"^\s*secrets:\s*inherit\b", re.M)
@@ -73,13 +74,14 @@ def parse(text: str) -> dict[str, dict[str, str]]:
 
 
 def admissions(root: Path = ROOT) -> frozenset[str]:
-    """The audit-dated amendments present in the briefs: each `Audit findings at <sha>` heading."""
+    """The admitting amendments present in the briefs: each `Audit findings at <sha>` or `Admitted by instruction #<n>`
+    heading."""
     return frozenset(h for p in sorted((root / "docs" / "briefs").glob("*.md")) for h in ADMISSION.findall(p.read_text()))
 
 
 def findings(listed: dict[str, dict[str, str]], decl: dict[str, frozenset[str]], admitted: frozenset[str]) -> list[str]:
     """Every way the list fails: a kind it does not know, a declared entry it omits, an entry the tree no longer
-    declares, and an entry no audit-dated amendment present in the briefs admits."""
+    declares, and an entry no admitting amendment present in the briefs admits."""
     return ([f"unknown kind {k}" for k in sorted(set(listed) - set(KINDS))]
             + [f"unlisted {k} {n}" for k in KINDS for n in sorted(decl.get(k, frozenset()) - set(listed.get(k, {})))]
             + [f"stale {k} {n}" for k in KINDS for n in sorted(set(listed.get(k, {})) - decl.get(k, frozenset()))]
