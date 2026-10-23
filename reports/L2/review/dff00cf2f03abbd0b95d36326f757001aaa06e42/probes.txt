@@ -1,0 +1,33 @@
+Reviewer reproduction of PR #327 claims at dff00cf2f03abbd0b95d36326f757001aaa06e42 (session 2be8197b-7471-4590-84fb-11fbf5e7b785, 2026-10-23)
+
+Source: https://github.com/maciej-sypetkowski/autoascend/archive/8527910bd85c4d851c18ad912aae606c92cd516a.tar.gz, extracted to a fresh mktemp directory, removed afterwards.
+
+sha256sum requirements.txt Dockerfile:
+f3a3075d2d0180eb36be5cade92ed2a1bde72bd7bb019876b4495f9ad03d418a  requirements.txt   (matches README)
+ca697cae0fab2d0e1d6181381062fdbd85b2c4ede3a50d6377664a8b2985ea29  Dockerfile         (matches README)
+
+grep -rhoE "obs(ervation)?\[['\"][a-z_]+['\"]\]" autoascend bin | sed ... | sort | uniq -c:
+      4 blstats
+      4 chars
+      7 glyphs
+      1 inv_glyphs
+      1 inv_letters
+      1 inv_oclasses
+      4 inv_strs
+      1 message
+      6 misc
+      3 specials
+      9 tty_chars
+      2 tty_cursor
+(identical to README section 2; 12 keys)
+
+Dockerfile line 16: cd /nle && git checkout v0.7.3        (README section 1)
+autoascend/agent.py:372:        observation, reward, done, info = self.env.step(action)       (README section 3)
+autoascend/env_wrapper.py:322: obs, reward, done, info = self.env.step(self.env._actions.index(action))
+bin/main.py:58: env.env.seed(seed, seed)
+autoascend/env_wrapper.py:189,386: self.env.get_seeds()
+
+Dynamic access the README's regex does not count (README states this limit): autoascend/rl_utils.py:41 observation[key]; autoascend/item/inventory.py:638 self.agent._observation[key].
+Judge side: worlds/nethack/binding.py:41-45 NLE_VERSION "1.3.0", NETHACK_VERSION "3.6.7", OBSERVED = ("glyphs", "message", "blstats").
+
+make pins: not reproduced locally. The diff adds only reports/ files and a harness/proposer.d row; no code, pin or mutant. Witness is the pins CI run on the new head (see the review file).
