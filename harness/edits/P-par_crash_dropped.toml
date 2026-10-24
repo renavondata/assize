@@ -1,0 +1,6 @@
+# P-par's third mutant (brief 2, Wish #134): a task whose worker died is dropped from the record instead of recorded
+# FAILED (clean) or INCONCLUSIVE (mutant), so it leaves the denominator.
+[[edit]]
+path = "harness/runner.py"
+old = "    return _lost(registry, t, out, f\"worker exit {code}, {len(rows)} of {expected} rows; log {log_path}\")\n"
+new = "    return []\n"

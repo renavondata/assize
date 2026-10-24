@@ -22,7 +22,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from harness import claims, config, context, edits, proc, runner, scan, tree
-from harness.fixtures import daemon, escapee, leaky, litter, witness
+from harness.fixtures import daemon, escapee, leaky, litter, par, witness
 from harness.nested import run_nested
 from harness.pin import ALWAYS, ROOT, Mutant, Pin, RegistryError, validate
 
@@ -671,6 +671,64 @@ def p0bp_stale_bytecode_verdict() -> bool:
                 f"the copy's exclusion of __pycache__ stands between the cache and the verdict")
     shutil.rmtree(work, ignore_errors=True)
     return ok and n.ok and head.ok and bare.ok
+
+
+# The fields of a pins record that name the run itself rather than what it found: where it wrote (its out and scratch
+# directories, its copies), how long each child took, and the configuration file and worker count it ran under. Two
+# serial runs of one head differ in all but the last two; nothing else may differ between N=1 and N>1 (P-par).
+RUN_NAMED = frozenset({"duration_s", "scratch", "tree", "run_dir", "transcript", "config", "workers"})
+
+
+def _record_view(n) -> list[dict]:
+    """`n`'s rows in record order, less RUN_NAMED, with each run directory relative to `n`'s out directory and each
+    copy's tree as `copy`."""
+    out = n.out.resolve()
+    return [{k: v for k, v in r.items() if k not in RUN_NAMED}
+            | ({"run_dir": str(Path(r["run_dir"]).relative_to(out))} if "run_dir" in r else {})
+            | ({"tree": r["tree"] if r["tree"] == "invocation" else "copy"} if "tree" in r else {}) for r in n.rows]
+
+
+def _intervals(n) -> list[tuple[float, float]]:
+    return sorted((d["start"], d["end"]) for d in (json.loads(p.read_text()) for p in n.out.rglob(par.INTERVAL)))
+
+
+def _overlapping(spans: list[tuple[float, float]]) -> int:
+    """How many of the (start-sorted) spans begin before an earlier one ends."""
+    return sum(s < max(e for _, e in spans[:i]) for i, (s, _) in enumerate(spans) if i)
+
+
+def p_par_parallel_record() -> bool:
+    """Brief 2, Wish #134 scope 1: the runner on the synthetic registry gives the same record with one worker and with
+    four, the four really running at once; a worker that dies leaves its task recorded, never dropped."""
+    serial = run_nested("par-1", "fixture.par", "all", config=par.PAR1)
+    four = run_nested("par-4", "fixture.par", "all", config=par.PAR4)
+    for n, workers in ((serial, 1), (four, 4)):
+        n.expect(n.registry.get("workers") == workers and n.exit_code == 0,
+                 f"workers {n.registry.get('workers')} (config {n.registry.get('config')}), exit {n.exit_code}")
+    a, b = _record_view(serial), _record_view(four)
+    diff = next((f"row {i}: {x} | {y}" for i, (x, y) in enumerate(zip(a, b)) if x != y), f"{len(a)} vs {len(b)} rows")
+    four.expect(len(a) == 1 + 3 + 6 + 1 and a == b, f"N=1 and N=4 records equal less {sorted(RUN_NAMED)} ({diff})")
+    s1, s4 = _intervals(serial), _intervals(four)
+    serial.expect(len(s1) == 9 and _overlapping(s1) == 0, f"N=1: {len(s1)} checks, {_overlapping(s1)} overlapping")
+    four.expect(len(s4) == 9 and _overlapping(s4) > 0, f"N=4: {len(s4)} checks, {_overlapping(s4)} overlapping")
+    crash = run_nested("par-crash", "fixture.parcrash", "all", config=par.PAR4)
+    lost = crash.run("fixture/par_crash")
+    lm = crash.run("fixture/par_crash", "fixture/par_crash/lost", "mutant")
+    lt = crash.run("fixture/par_crash", "fixture/par_crash/lost", "twin")
+    crash.expect(lost.get("observed") == "lost" and lost.get("verdict") == "FAILED",
+                 f"a clean run whose worker died is recorded FAILED ({lost.get('verdict')}: {lost.get('worker')})")
+    crash.expect(lm.get("verdict") == "INCONCLUSIVE" and lt.get("observed") == "lost",
+                 f"a mutant whose worker died is recorded INCONCLUSIVE, its twin lost ({lm.get('verdict')}, "
+                 f"{lt.get('observed')})")
+    crash.expect(crash.run("fixture/toy").get("verdict") == "ok"
+                 and crash.run("fixture/toy", "fixture/toy/off_by_one", "mutant").get("verdict") == "KILLED",
+                 "the other pin's tasks run on: clean ok, mutant KILLED")
+    s = crash.summary
+    crash.expect(len(crash.of("run")) == 6 and s.get("clean_total") == 2 and s.get("clean_failed") == 1
+                 and s.get("mutants_total") == 2 and s.get("inconclusive") == 1 and crash.exit_code == 1,
+                 f"denominator: {len(crash.of('run'))} rows, clean {s.get('clean_failed')}/{s.get('clean_total')} "
+                 f"failed, {s.get('inconclusive')}/{s.get('mutants_total')} inconclusive, exit {crash.exit_code}")
+    return serial.ok and four.ok and crash.ok
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
@@ -7882,6 +7940,11 @@ PINS = [
         p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),
                                       Mutant("prefix_off_alone", _edits("P0bp_prefix_off_alone")),
                                       Mutant("exclusion_off_alone", _edits("P0bp_exclusion_off_alone"))), HARNESS),
+    Pin("P-par", "the runner gives the same record with one worker and with four, the four running at once; a dead "
+                 "worker's task is recorded, not dropped",
+        p_par_parallel_record, (Mutant("completion_order", _edits("P-par_completion_order")),
+                                Mutant("shared_scratch", _edits("P-par_shared_scratch")),
+                                Mutant("crash_dropped", _edits("P-par_crash_dropped"))), HARNESS),
     Pin("P0bq", "an awaits-guy label starts the next master Builder, queued behind any Builder in progress on master",
         p0bq_awaits_guy_queues_behind_master,
         (Mutant("awaits_guy_trigger_dropped", _edits("P0aj_awaits_guy_clause_removed")),

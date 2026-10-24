@@ -1,4 +1,5 @@
-"""CLI: `python -m harness run ...` (orchestrator) and `python -m harness check ...` (child)."""
+"""CLI: `python -m harness run ...` (orchestrator), `python -m harness task ...` (worker of a parallel run) and
+`python -m harness check ...` (child)."""
 
 from __future__ import annotations
 
@@ -35,7 +36,17 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--invocation-root", type=Path, required=True)
     c.add_argument("--run-dir", type=Path, required=True)
     c.add_argument("--scratch", type=Path, required=True)
+    w = sub.add_parser("task", help="worker: run one clean run, or one mutant and its twin, and write its rows")
+    w.add_argument("--registry", required=True, choices=sorted(REGISTRIES))
+    w.add_argument("--pin", required=True)
+    w.add_argument("--mutant", default=None)
+    w.add_argument("--out", type=Path, required=True)
+    w.add_argument("--config", type=Path, required=True)
+    w.add_argument("--scratch-root", type=Path, default=None)
+    w.add_argument("--rows", type=Path, required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "task":
+        return runner.task(a.registry, a.pin, a.mutant, a.out, a.config, a.scratch_root, a.rows)
     if a.cmd == "run" and a.under_edits:
         return runner.run_under_edits(a.under_edits, a.registry, a.phase, a.out, a.config)
     if a.cmd == "run" and (a.since is None) != (a.since_run is None):

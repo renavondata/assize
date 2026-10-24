@@ -1,0 +1,6 @@
+# Fixture configuration for P-par's parallel runs (brief 2, Wish #134; committed before the runs that use it): par1.toml
+# but for the worker count, which the pre-stated criterion names (N=1 and N=4 on the synthetic registry).
+[harness]
+child_timeout_s = 60
+reap_grace_s = 2
+workers = 4
