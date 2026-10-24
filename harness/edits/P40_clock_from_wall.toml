@@ -1,0 +1,6 @@
+# P40's mutant `clock_from_wall` (brief 2 section 2, Determinism): the game's clock is frozen at the instant the episode is
+# played, not at one the seed names, so a trajectory depends on the day it is played.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = '''    return f"{day.isoformat()} {int.from_bytes(digest[8:16], 'big') % 24:02d}:00:00"'''
+new = '''    return datetime.datetime.now().strftime("%Y-%m-%d %H:00:00")'''

@@ -1,0 +1,6 @@
+# P40's mutant `clock_not_given` (brief 2 section 2, Determinism): the container is not told the instant to freeze its
+# clock at, so the game reads the real date.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = '[f"FAKETIME={clock}", *command]'
+new = "list(command)"

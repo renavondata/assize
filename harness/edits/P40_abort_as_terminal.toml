@@ -1,0 +1,6 @@
+# P40's mutant `abort_as_terminal` (brief 1 section 2, end_episode): an episode the task aborts, at its step limit or
+# for no progress, is reported to the candidate as the game's own end.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = "        self.truncated = self.done and self.end_status == ABORTED"
+new = "        self.truncated = False"

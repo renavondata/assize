@@ -1,0 +1,6 @@
+# P40's mutant `source_misrecorded` (brief 2 section 2, Versions): the manifest names the nle version of the 3.6.7 World
+# for a game that is NetHack 3.6.6.
+[[edit]]
+path = "worlds/nethack366/manifest.json"
+old = '"source": {"package": "nle", "version": "0.7.3"},'
+new = '"source": {"package": "nle", "version": "1.3.0"},'

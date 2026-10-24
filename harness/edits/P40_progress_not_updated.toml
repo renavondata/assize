@@ -1,0 +1,8 @@
+# P40's mutant `progress_not_updated` (brief 2 section 2, Utility): BALROG's progression is not fed the steps, so
+# an episode's utility and achievements stay at their reset.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = '''        self.progress.update({"blstats": self.nle["blstats"], "tty_chars": numpy.array(self.nle["tty_chars"],
+                                                                                         dtype=numpy.uint8)},
+                             0.0, self.done, {"end_status": EndStatus(self.end_status)})'''
+new = "        pass"

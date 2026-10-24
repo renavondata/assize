@@ -1,0 +1,6 @@
+# P40's mutant `container_kept` (brief 1 section 2, A1 item 2): a finished episode's game container is not removed; its
+# client is killed instead, which leaves the container itself behind.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = "        subprocess.run(self._remove, capture_output=True)"
+new = "        self.proc.kill()"

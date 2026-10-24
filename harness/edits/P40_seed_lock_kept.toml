@@ -1,0 +1,6 @@
+# P40's mutant `seed_lock_kept` (brief 2 section 2, Determinism): NetHackChallenge's seed lock is left in place in the
+# game server, so the issued seed never reaches the game.
+[[edit]]
+path = "worlds/nethack366/image/server.py"
+old = "        delattr(env.env, lock)"
+new = "        pass"

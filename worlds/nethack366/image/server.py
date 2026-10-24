@@ -8,7 +8,7 @@ as nested lists.
 
 NetHackChallenge locks its game's seeds on the instance; this deletes the three instance attributes, restoring the
 package's own methods, and seeds through `nle.env.base.NLE.seed` with NetHack's anti-automation reseeding off, as
-`worlds/nethack/binding.py` does for 3.6.7. The game's clock is frozen by `faketime`, the image's entrypoint, at the
+`worlds/nethack/binding.py` does for 3.6.7. The game's clock is frozen by libfaketime, preloaded by the image, at the
 instant the caller names, so moon phase, Friday the 13th and night do not come from the day it is played on."""
 
 import json

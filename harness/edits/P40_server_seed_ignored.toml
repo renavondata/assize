@@ -1,0 +1,6 @@
+# P40's mutant `server_seed_ignored` (brief 2 section 2, Determinism): the game server seeds its game alike whatever the
+# seeds it is sent.
+[[edit]]
+path = "worlds/nethack366/image/server.py"
+old = '    NLE.seed(env, seeds["core"], seeds["disp"], False)'
+new = "    NLE.seed(env, 0, 0, False)"

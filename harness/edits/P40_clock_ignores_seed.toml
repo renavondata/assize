@@ -1,0 +1,6 @@
+# P40's mutant `clock_ignores_seed` (brief 2 section 2, Determinism): every seed freezes the game's clock at the same
+# instant, so no seed's moon phase, Friday the 13th or night is its own.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = '    digest = hashlib.sha256(f"{seed}:clock".encode()).digest()'
+new = '    digest = hashlib.sha256(f"{0}:clock".encode()).digest()'

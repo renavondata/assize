@@ -1,0 +1,6 @@
+# P40's mutant `world_named_nethack` (brief 2 section 3, Version mismatch): the 3.6.6 variant's manifest names the World
+# `nethack`, so its scores would be pooled with the 3.6.7 World's.
+[[edit]]
+path = "worlds/nethack366/manifest.json"
+old = '"world": "nethack366",'
+new = '"world": "nethack",'

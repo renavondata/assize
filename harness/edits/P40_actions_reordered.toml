@@ -1,0 +1,6 @@
+# P40's mutant `actions_reordered` (brief 2 section 2, Observations): the manifest orders two actions otherwise than
+# NetHackChallenge does, so an action index names another key.
+[[edit]]
+path = "worlds/nethack366/manifest.json"
+old = '"commandesc", "commandengrave", '
+new = '"commandengrave", "commandesc", '

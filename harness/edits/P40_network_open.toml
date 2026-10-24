@@ -1,0 +1,6 @@
+# P40's mutant `network_open` (brief 1 section 2, A1 item 2): the game container is given a network.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = "    at = argv.index(image_tag())"
+new = '''    argv = [a for a in argv if a != "--network=none"]
+    at = argv.index(image_tag())'''

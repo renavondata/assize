@@ -1,0 +1,6 @@
+# P40's mutant `root_writable` (brief 1 section 2, A1 item 2): the game container's root file system is not read-only.
+[[edit]]
+path = "worlds/nethack366/binding.py"
+old = "    at = argv.index(image_tag())"
+new = '''    argv = [a for a in argv if a != "--read-only"]
+    at = argv.index(image_tag())'''

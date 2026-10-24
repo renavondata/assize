@@ -1,0 +1,6 @@
+# P40's mutant `reseed_on` (brief 2 section 2, Determinism): NetHack's anti-automation reseeding is left on in the game
+# server.
+[[edit]]
+path = "worlds/nethack366/image/server.py"
+old = '    NLE.seed(env, seeds["core"], seeds["disp"], False)'
+new = '    NLE.seed(env, seeds["core"], seeds["disp"], True)'

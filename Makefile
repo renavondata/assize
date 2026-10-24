@@ -14,9 +14,15 @@ SMOKE_OUT ?= out/smoke
 SMOKE_RUNTIME ?= docker
 SMOKE_EPISODES ?= 10
 
-.PHONY: pins smoke measure
+.PHONY: pins smoke measure nethack366-image
 
-pins:
+# The NetHack 3.6.6 game image (worlds/nethack366/image) is built before the pins run, outside any pin's time limit: a
+# cold build compiles NLE and takes longer than a pin may. The build is cached by the runtime and tagged by the recipe's
+# hash. A failed build is not fatal here: pin P40 then fails on its own, for the one reason.
+nethack366-image:
+	-$(PY) -c "from worlds.nethack366 import binding; print(binding.build())"
+
+pins: nethack366-image
 	$(PY) -m harness run --registry harness --phase all --out $(PINS_OUT) $(PINS_SINCE)
 
 smoke:

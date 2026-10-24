@@ -4939,6 +4939,245 @@ def p38_nethack_manifest() -> bool:
     return ok()
 
 
+# P40's task probe (brief 2 section 3, Version mismatch), run once inside the NetHack 3.6.6 game image: what the manifest
+# of the variant is derived from, as P38's child reads it from the installed nle: NetHackChallenge's action set, step
+# limit, glyph and message shapes, the declared bounds of its bottom-line stats, and the dungeon.def it ships.
+NETHACK366_TASK = """
+import json, re
+from pathlib import Path
+import nle
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+
+env = NetHackChallenge(observation_keys=("glyphs", "message", "blstats", "tty_chars"))
+box = env.observation_space["blstats"]
+print(json.dumps({
+    "actions": [re.sub(r"[^a-z0-9]", "", (type(a).__name__ + a.name).lower()) for a in env._actions],
+    "max_steps": env._max_episode_steps, "blstats_box": [int(box.low.min()), int(box.high.max())],
+    "max_glyph": nethack.MAX_GLYPH, "dungeon_shape": list(nethack.DUNGEON_SHAPE),
+    "message_shape": list(nethack.MESSAGE_SHAPE),
+    "dungeon_def": (Path(nle.__file__).with_name("nethackdir") / "dat" / "dungeon.def").read_text()}))
+"""
+# P40's isolation probe, run once inside a game container: it tries to reach the network and to write the root file
+# system, and reports each OS errno; EROFS and ENETUNREACH name their cause, so they need none.
+NETHACK366_PEEK = """
+import errno, json, os, socket
+
+def attempt(f):
+    try:
+        f()
+        return "ok"
+    except OSError as e:
+        return errno.errorcode.get(e.errno, "timeout" if isinstance(e, TimeoutError) else str(e))
+
+print(json.dumps({"interfaces": sorted(os.listdir("/sys/class/net")),
+                  "network": attempt(lambda: socket.create_connection(("1.1.1.1", 53), timeout=3)),
+                  "root": attempt(lambda: open("/probe", "w"))}))
+"""
+# P40's child: the 3.6.6 image built if absent; what the manifest is derived from, read in it; the isolation and the
+# containers left behind; and, per seed, P36's construction played through the 3.6.6 binding: a seeded random stream of
+# moves, search and the menu exits, its trajectory hash twice (each a fresh container), the second watched through the
+# judge's Episode protocol for the manifest departures, the values each target realises, the first message and the
+# achievements.
+NETHACK366_RUN = """
+import json, random, subprocess, sys
+from judge import episodes, evaluate, price
+from worlds.crafter.binding import violations
+from worlds.nethack366 import binding
+
+m = binding.manifest()
+rt = binding.runtime()
+
+def game_containers():
+    listed = subprocess.run([rt.binary, "ps", "-a", "--filter", "name=^" + binding.CONTAINER_PREFIX, "--format",
+                             "{{.Names}}"], capture_output=True, text=True, check=True)
+    return listed.stdout.split()
+
+before = set(game_containers())
+out = {"bound": evaluate.bound(), "manifest": m, "endings": sorted(episodes.WORLD_ENDINGS), "tag": binding.build(rt),
+       "installed": binding.installed(rt), "task": json.loads(binding.run_in_image(sys.argv[3], rt)),
+       "isolation": json.loads(binding.run_in_image(sys.argv[4], rt)), "world": binding.__file__.split("/")[-2],
+       "recorded": {"nle": binding.NLE_VERSION, "nethack": binding.NETHACK_VERSION, "blstats": list(binding.BLSTATS)}}
+try:
+    price.of(m)
+    out["priced"] = "ok"
+except Exception as e:
+    out["priced"] = f"{type(e).__name__}: {e}"
+named = ("miscactionmore", "commandesc", "commandsearch")
+keys = [i for i, a in enumerate(m["actions"]) if a.startswith("compassdirection") or a in named]
+
+def text(raw):
+    return bytes(b for b in raw if b).decode(errors="replace")
+
+def attempt(seed):
+    rec = {}
+    try:
+        rng = random.Random(seed)
+        actions = [rng.choice(keys) for _ in range(int(sys.argv[2]))]
+        h, steps = binding.trajectory(seed, actions)
+        rec["hashes"], rec["steps"] = [h], [steps]
+        found, realised, seen = [], {t["name"]: set() for t in m["targets"]}, []
+
+        first = []
+
+        def see(ep):
+            if not seen:
+                seen.append(ep)
+                first.append(text(ep.observation["toplines"]))
+            found.extend(f"t={ep.t}: {v}" for v in violations(ep.observation, m["observation"]))
+            for t in m["targets"]:
+                realised[t["name"]].add(ep.observation.get(t["field"]))
+
+        h, steps = binding.trajectory(seed, actions, see)
+        ep = seen[0]
+        rec["hashes"].append(h)
+        rec["steps"].append(steps)
+        rec.update(violations=found[:5], n_violations=len(found), first=first[0], instant=binding.instant(seed),
+                   realised={k: sorted(v, key=str) for k, v in realised.items()}, termination=ep.termination,
+                   achievements=ep.achievements, done=ep.done, utility=ep.utility, end_reason=ep.progress.end_reason,
+                   world_seed=binding.world_seed(seed))
+    except Exception as e:
+        rec["error"] = f"{type(e).__name__}: {e}"
+    return rec
+
+out["seeds"] = {seed: attempt(seed) for seed in json.loads(sys.argv[1])}
+
+# How the World ends an episode, with a stand-in for the container: its reply to a step ends the episode with the
+# end status given, NLE v0.7.3's ABORTED (-1) where the task aborted it, DEATH (1) where the game ended.
+class Stand:
+    status = 0
+
+    def __init__(self, seed, rt=None):
+        self.reply = {"observation": opening, "done": False, "end_status": 0}
+
+    def step(self, action):
+        self.reply = {"observation": opening, "done": True, "end_status": Stand.status}
+        return self.reply
+
+    def close(self):
+        pass
+
+real = binding.Game
+try:
+    ep = binding.Episode(0, m)
+    opening = ep.nle
+    ep.close()
+    binding.Game = Stand
+    for key, status in (("aborted", -1), ("ended", 1)):
+        Stand.status = status
+        stood = binding.Episode(0, m)
+        stood.step(0)
+        out[key] = stood.termination
+except Exception as e:
+    out.update(aborted=f"{type(e).__name__}: {e}", ended="")
+binding.Game = real
+out["left"] = sorted(set(game_containers()) - before)
+print(json.dumps(out))
+"""
+# Seeds whose seed-derived clock (`instant`) is, in turn, an ordinary day (2021-08-26, 10:00), a new moon (2021-09-09,
+# 13:00) and a full moon (2021-11-20, 19:00), by NetHack's phase_of_the_moon, chosen before any run. A binding that
+# reads the real clock instead matches the golden hash of at most one kind of day, so it fails P40 on every date.
+NETHACK366_SEEDS = (2, 11, 17)
+NETHACK366_STEPS = 1000
+# The trajectory hash of each of NETHACK366_SEEDS under its committed action stream, and the achievements it reaches,
+# recorded before any scored run: a different nle, NetHack, image, interpreter or seeding changes them.
+NETHACK366_GOLDEN = {
+    2: {"hash": "15a29707838dd2b7013c3eb928279b58cd3028888a764658534c80e8fcc03b3e", "achievements": ["dlvl1", "xp1"]},
+    11: {"hash": "9a227c08a0860da123c601612c172ef896727588b6c50a3a0c3c1fb6ea2304b7", "achievements": ["dlvl1", "xp1"]},
+    17: {"hash": "710ef3e916cea1b334454a43e849eaa3af151c640223aeb58e955820af207c9a", "achievements": ["dlvl1", "xp1"]}}
+
+
+def p40_nethack366_variant() -> bool:
+    """The NetHack 3.6.6 variant is a World of its own, run in its pinned image: it is bound under its own name, never
+    pooled with `nethack`; its manifest's actions, observation names and bounds, step limit and target supports are
+    what the installed nle v0.7.3 and the vendored BALROG table give; the game container is isolated and removed after
+    each episode; the same seed and actions give an identical trajectory hash across containers, equal per seed to the
+    committed golden, whatever the date; and an episode's observations, targets and achievements are the manifest's
+    (brief 2 section 3, Version mismatch; section 2, Determinism)."""
+    expect, ok = _expecter()
+    child = subprocess.run(proc.python("-c", NETHACK366_RUN, json.dumps(NETHACK366_SEEDS), str(NETHACK366_STEPS),
+                                       NETHACK366_TASK, NETHACK366_PEEK), cwd=ROOT, env=proc.child_env(),
+                           capture_output=True, text=True, preexec_fn=proc.setup(False))
+    if child.returncode:
+        raise RuntimeError(f"nethack366 child exited {child.returncode}: {child.stderr.strip()[-500:]}")
+    r = json.loads(child.stdout)
+    m, t, installed = r["manifest"], r["task"], r["installed"]
+    expect({"nethack", "nethack366"} <= set(r["bound"]), f"the judge binds nethack and nethack366 ({r['bound']})")
+    expect(m["world"] == r["world"] == "nethack366", f"the manifest names the World as its directory does, apart from "
+                                                       f"nethack ({m['world']}, directory {r['world']})")
+    rec = r["recorded"]
+    expect(installed["nle"].startswith(rec["nle"]) and installed["nethack"] == rec["nethack"] == "3.6.6",
+           f"the image holds the recorded versions: nle {installed['nle']}, NetHack {installed['nethack']} "
+           f"(recorded {rec['nle']}, {rec['nethack']})")
+    expect(m["source"] == {"package": "nle", "version": rec["nle"]}, f"the manifest names nle {rec['nle']} "
+                                                                     f"({m['source']})")
+    expect(installed["blstats"] == rec["blstats"], f"the binding names NLE's {len(installed['blstats'])} bottom-line "
+                                                   f"stats in its order")
+    expect(m.get("episode_length") == t["max_steps"], f"episode_length {m.get('episode_length')} is "
+                                                       f"NetHackChallenge's step limit {t['max_steps']}")
+    expect(m["actions"] == t["actions"], f"the {len(m['actions'])} actions are NetHackChallenge's {len(t['actions'])}, "
+                                         f"named and ordered by the binding's rule")
+    fields = {f["name"]: f for f in m["observation"]}
+    expect(list(fields) == ["glyphs", "toplines"] + installed["blstats"],
+           f"the observation is glyphs, toplines and NLE's bottom-line stats in order ({list(fields)[:4]}...)")
+    expect(fields.get("glyphs", {}).get("shape") == t["dungeon_shape"]
+           and fields.get("glyphs", {}).get("range") == [0, t["max_glyph"] - 1],
+           f"glyphs: shape {t['dungeon_shape']}, ids below MAX_GLYPH {t['max_glyph']} ({fields.get('glyphs')})")
+    expect(fields.get("toplines", {}).get("shape") == t["message_shape"]
+           and fields.get("toplines", {}).get("range") == [0, 255],
+           f"toplines: shape {t['message_shape']}, bytes ({fields.get('toplines')})")
+    targets = {x["field"]: x for x in m["targets"]}
+    loose = {n: fields[n]["range"] for n in installed["blstats"] if n in fields and n not in targets
+             and fields[n]["range"] != t["blstats_box"]}
+    expect(not loose, f"every other bottom-line stat has NLE's declared bounds {t['blstats_box']} ({loose})")
+    shallowest, deepest = nethack_depths(t["dungeon_def"])
+    derived = {"depth": list(range(min(shallowest, 0), deepest + 1)), "xp": list(range(0, NETHACK_MAXULEV + 1)),
+               "hunger": list(range(0, NETHACK_STARVED + 1))}
+    expect(sorted(targets) == sorted(derived), f"the targets are depth, xp and hunger ({sorted(targets)})")
+    for name, want in derived.items():
+        x = targets.get(name, {})
+        expect(x.get("support") == want, f"{name}: support {x.get('support', [])[:3]}...{x.get('support', [])[-1:]} "
+                                         f"is the derived {want[:3]}...{want[-1:]}")
+        expect(fields.get(name, {}).get("range") == [want[0], want[-1]],
+               f"{name}: the field's range {fields.get(name, {}).get('range')} is its support's bounds")
+    expect(r["priced"] == "ok", f"the judge prices the World from its own delta ({r['priced']})")
+    expect(Fraction(m["price"]["delta"]).limit_denominator(10**6) == NETHACK_DELTA,
+           f"delta {m['price']['delta']} is brief 2's 2 progression points ({float(NETHACK_DELTA)})")
+    expect(r["isolation"] == {"interfaces": ["lo"], "network": "ENETUNREACH", "root": "EROFS"},
+           f"a game container has the loopback alone, no network and a read-only root ({r['isolation']})")
+    expect(r["aborted"] == "truncated" and r["ended"] == "terminal",
+           f"an episode the task aborts ends {r['aborted']!r}, the game's own end {r['ended']!r}")
+    expect(r["left"] == [], f"no game container is left after the episodes ({r['left']})")
+    firsts = set()
+    for seed in map(str, NETHACK366_SEEDS):
+        s = r["seeds"][seed]
+        expect("error" not in s, f"seed {seed}: the World plays the action stream without raising ({s.get('error')})")
+        if "error" in s:
+            continue
+        firsts.add(s["hashes"][0])
+        golden = NETHACK366_GOLDEN.get(int(seed), {})
+        expect(len(set(s["hashes"])) == 1, f"seed {seed}: 2 trajectory hashes, 2 containers, {len(set(s['hashes']))} "
+                                           f"distinct ({s['steps']} steps; {s['hashes'][0][:16]})")
+        expect(s["hashes"][0] == golden.get("hash"), f"seed {seed}: trajectory hash {s['hashes'][0][:16]} is the "
+                                                     f"committed golden {str(golden.get('hash'))[:16]} (clock "
+                                                     f"{s['instant']}: {s['first']!r})")
+        expect(s["n_violations"] == 0, f"seed {seed}: {s['n_violations']} manifest departures ({s['violations']})")
+        for x in m["targets"]:
+            off = [v for v in s["realised"][x["name"]] if v not in x["support"]]
+            expect(not off, f"seed {seed}: {x['name']} realises {s['realised'][x['name']]}, all in its support "
+                            f"(outside: {off})")
+        expect(s["termination"] in r["endings"], f"seed {seed}: ends {s['termination']!r}, a judge ending "
+                                                 f"{r['endings']}")
+        expect(s["achievements"] == golden.get("achievements") and set(s["achievements"]) <= set(m["utility"]["components"]),
+               f"seed {seed}: achievements {s['achievements']} are the golden {golden.get('achievements')}, manifest "
+               f"components")
+        expect(not s["done"] or bool(s["end_reason"]), f"seed {seed}: ended {s['done']}; BALROG reads the end "
+                                                       f"({s['end_reason']!r})")
+        expect(s["world_seed"] == int(seed), f"seed {seed}: world_seed {s['world_seed']}")
+    expect(len(firsts) == len(NETHACK366_SEEDS), f"{len(NETHACK366_SEEDS)} seeds give {len(firsts)} distinct hashes")
+    return ok()
+
+
 
 # P2's probe, run inside a candidate container (brief 1 section 2, P2): it tries to read each judge path it is given,
 # to reach the network over IPv4 and IPv6, TCP and UDP, and to write the root file system, and reports each OS errno.
@@ -5768,7 +6007,7 @@ def p19_world_discovery() -> bool:
     refused `unknown_world`. Crafter and NetHack stay bound. No seed is issued to any fixture request (brief 2 A2)."""
     expect, ok = _expecter()
     got = _fixture_worlds()
-    expect(got["bound"] == ["borrowed", "crafter", "fx", "nethack", "rederived", "undelta", "unpriced"],
+    expect(got["bound"] == ["borrowed", "crafter", "fx", "nethack", "nethack366", "rederived", "undelta", "unpriced"],
            f"bound: every directory with a manifest and a binding, and only those ({got['bound']})")
     expect(got["fx_binding"] == "fx", f"fx's own binding is imported ({got['fx_binding']})")
     for w, want in (("fx", "unknown_runtime"), ("crafter", "unknown_runtime"), ("bare", "unknown_world")):
@@ -8279,4 +8518,22 @@ PINS = [
                                Mutant("delta_in_points", _edits("P38_delta_in_points")),
                                Mutant("observation_raw", _edits("P38_observation_raw")),
                                Mutant("achievements_raw", _edits("P38_achievements_raw"))), JUDGE_SIDE),
+    Pin("P40", "the NetHack 3.6.6 variant is a World of its own, run in its pinned image: its manifest is derived from "
+               "nle v0.7.3, its game container is isolated and removed, and the same seed and actions give an identical "
+               "trajectory hash, whatever the date",
+        p40_nethack366_variant, (Mutant("seed_ignored", _edits("P40_seed_ignored")),
+                                 Mutant("clock_from_wall", _edits("P40_clock_from_wall")),
+                                 Mutant("clock_ignores_seed", _edits("P40_clock_ignores_seed")),
+                                 Mutant("clock_not_given", _edits("P40_clock_not_given")),
+                                 Mutant("container_kept", _edits("P40_container_kept")),
+                                 Mutant("network_open", _edits("P40_network_open")),
+                                 Mutant("root_writable", _edits("P40_root_writable")),
+                                 Mutant("seed_lock_kept", _edits("P40_seed_lock_kept")),
+                                 Mutant("reseed_on", _edits("P40_reseed_on")),
+                                 Mutant("server_seed_ignored", _edits("P40_server_seed_ignored")),
+                                 Mutant("progress_not_updated", _edits("P40_progress_not_updated")),
+                                 Mutant("abort_as_terminal", _edits("P40_abort_as_terminal")),
+                                 Mutant("actions_reordered", _edits("P40_actions_reordered")),
+                                 Mutant("world_named_nethack", _edits("P40_world_named_nethack")),
+                                 Mutant("source_misrecorded", _edits("P40_source_misrecorded"))), JUDGE_SIDE),
 ]
