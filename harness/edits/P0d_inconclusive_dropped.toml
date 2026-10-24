@@ -1,8 +1,8 @@
 # P0d's mutant: INCONCLUSIVE mutant runs are neither exported nor counted.
 [[edit]]
 path = "harness/runner.py"
-old = "                mrow, trow = _run_mutant(registry, pin, mutant, out, cfg, scratch_root)\n"
-new = """                mrow, trow = _run_mutant(registry, pin, mutant, out, cfg, scratch_root)
-                if mrow["verdict"] == "INCONCLUSIVE":
-                    continue
+old = "                for mrow, trow in (() if mutant is None else zip(rows[::2], rows[1::2])):\n"
+new = """                for mrow, trow in (() if mutant is None else zip(rows[::2], rows[1::2])):
+                    if mrow["verdict"] == "INCONCLUSIVE":
+                        continue
 """

@@ -1,0 +1,6 @@
+# P-par's first mutant (brief 2, Wish #134): a parallel run records each task as its worker finishes, not in registry
+# order, so the record depends on the number of workers.
+[[edit]]
+path = "harness/runner.py"
+old = "            while nxt in done:\n                yield tasks[nxt], done.pop(nxt)\n"
+new = "            for i in list(done):\n                yield tasks[i], done.pop(i)\n"

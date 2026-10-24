@@ -23,7 +23,7 @@ import tempfile
 import time
 import traceback
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from pathlib import Path
 
 from harness import config as config_mod
@@ -213,6 +213,106 @@ TALLY = {"KILLED": "killed", "SURVIVED": "survived", "INCONCLUSIVE": "inconclusi
          "STALE": "stale", "NON-CAUSAL": "non_causal", "LEAKED": "leaked"}
 
 
+# ------------------------------------------------------------- in parallel
+
+# A task is one clean run, or one mutant with its twin: the unit a worker runs at a time (brief 2, Wish #134 scope 1).
+Task = tuple[Pin, Mutant | None]
+
+
+def _tasks(pins: Sequence[Pin], phase: str) -> list[Task]:
+    """Every task of a run, in the order the serial orchestrator runs and records them: clean runs, then mutants."""
+    clean = [(p, None) for p in pins] if phase in ("all", "clean") else []
+    return clean + ([(p, m) for p in pins for m in p.mutants] if phase in ("all", "mutants") else [])
+
+
+def _run_task(registry: str, t: Task, out: Path, cfg, scratch_root: Path | None) -> list[dict]:
+    pin, mutant = t
+    return [_run_clean(registry, pin, out, cfg, scratch_root)] if mutant is None else \
+        list(_run_mutant(registry, pin, mutant, out, cfg, scratch_root))
+
+
+def _lost(registry: str, t: Task, out: Path, detail: str) -> list[dict]:
+    """The rows of a task whose worker died before recording them: a clean run FAILED, a mutant INCONCLUSIVE with its
+    twin FAILED. Counted in the denominator, never dropped."""
+    pin, mutant = t
+    lost = {"observed": "lost", "exit_code": None, "worker": detail}
+    if mutant is None:
+        return [_row(registry, pin, None, "clean", out / "runs" / _slug(pin.name) / "clean")
+                | {"tree": "invocation"} | lost | {"verdict": "FAILED"}]
+    run_dir = out / "runs" / _slug(pin.name) / mutant.name
+    return [_row(registry, pin, mutant, "mutant", run_dir / "mutant") | {"edits": mutant.edits} | lost
+            | {"twin_observed": "lost", "verdict": "INCONCLUSIVE"},
+            _row(registry, pin, mutant, "twin", run_dir / "twin") | {"edits": mutant.edits} | lost
+            | {"verdict": "FAILED"}]
+
+
+def _worker_rows(registry: str, t: Task, out: Path, code: int, rows_path: Path, log_path: Path) -> list[dict]:
+    expected = 1 if t[1] is None else 2
+    try:
+        rows = [json.loads(line) for line in rows_path.read_text().splitlines()]
+    except (OSError, ValueError):
+        rows = []
+    if code == 0 and len(rows) == expected:
+        return rows
+    return _lost(registry, t, out, f"worker exit {code}, {len(rows)} of {expected} rows; log {log_path}")
+
+
+def _parallel(registry: str, tasks: Sequence[Task], out: Path, cfg, scratch_root: Path | None
+              ) -> Iterator[tuple[Task, list[dict]]]:
+    """Run `tasks` across cfg.workers worker processes (`python -m harness task`), each a child subreaper running one
+    task at a time with the serial orchestrator's own code, so each child still runs alone under its worker. Yields
+    each task's rows in task order, whatever order the workers finish in. Closing the generator terminates the workers
+    still running, which sweep their own children first."""
+    pool = _fresh_dir(out / "workers")
+    waiting = list(enumerate(tasks))
+    running: dict[int, tuple[subprocess.Popen, Path, Path, object]] = {}
+    done: dict[int, list[dict]] = {}
+    nxt = 0
+    try:
+        while nxt < len(tasks):
+            while waiting and len(running) < cfg.workers:
+                i, (pin, mutant) = waiting.pop(0)
+                rows_path, log_path = pool / f"{i:05d}.jsonl", pool / f"{i:05d}.log"
+                cmd = proc.python("-m", "harness", "task", "--registry", registry, "--pin", pin.name,
+                                  "--out", str(out.resolve()), "--config", str(cfg.path), "--rows", str(rows_path))
+                cmd += [] if mutant is None else ["--mutant", mutant.name]
+                cmd += [] if scratch_root is None else ["--scratch-root", str(scratch_root)]
+                log = log_path.open("w")
+                running[i] = (subprocess.Popen(cmd, cwd=Path.cwd(), stdout=log, stderr=subprocess.STDOUT,
+                                               preexec_fn=proc.setup(False), env=proc.child_env(pool)),
+                              rows_path, log_path, log)
+            for i, (worker, rows_path, log_path, log) in list(running.items()):
+                if worker.poll() is not None:
+                    log.close()
+                    done[i] = _worker_rows(registry, tasks[i], out, worker.returncode, rows_path, log_path)
+                    del running[i]
+            while nxt in done:
+                yield tasks[nxt], done.pop(nxt)
+                nxt += 1
+            if nxt < len(tasks) and nxt not in done:
+                time.sleep(cfg.poll_step_s)
+    finally:
+        for worker, *_ in running.values():
+            worker.terminate()
+        for worker, _, _, log in running.values():
+            worker.wait()
+            log.close()
+
+
+def task(registry: str, pin_name: str, mutant_name: str | None, out: Path, config_path: Path,
+         scratch_root: Path | None, rows_path: Path) -> int:
+    """Worker: run one task as the serial orchestrator would and write its rows to `rows_path`. A child subreaper, so
+    its child's escaped descendants are reparented to it and swept with the child's run, as in a serial run."""
+    proc.set_subreaper()
+    proc.exit_on_sigterm()
+    cfg = config_mod.load(config_path)
+    pin = {p.name: p for p in registries.load(registry)}[pin_name]
+    mutant = None if mutant_name is None else {m.name: m for m in pin.mutants}[mutant_name]
+    rows = _run_task(registry, (pin, mutant), out, cfg, scratch_root)
+    rows_path.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows))
+    return 0
+
+
 # ------------------------------------------------------- since a green head
 
 # A change to any of these runs every pin: the harness (each pin's own code and its `edits/` file) and the environment
@@ -373,6 +473,7 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
             "config": os.path.relpath(cfg.path, ROOT),
             "child_timeout_s": cfg.child_timeout_s,
             "reap_grace_s": cfg.reap_grace_s,
+            "workers": cfg.workers,
             "invocation_root": str(ROOT),
             "python": sys.version.split()[0],
             "proposer": _proposer(),
@@ -407,33 +508,41 @@ def run(registry: str, phase: str, out: Path, config_path: Path | None, scratch_
             counts["skipped"] += 1
             counts["skipped_mutants"] += len(pin.mutants)
 
-        if phase in ("all", "clean"):
-            for pin in ran:
-                row = _run_clean(registry, pin, out, cfg, scratch_root)
-                emit(row)
-                print(f"[clean ] {pin.name}: observed {row['observed']} -> {row['verdict']} "
-                      f"({row['duration_s']}s) {row['transcript']}")
-                counts["clean_total"] += 1
-                counts["clean_ok" if row["verdict"] == "ok" else "clean_failed"] += 1
-                counts["leaked"] += row["verdict"] == "LEAKED"
-                if row["verdict"] != "ok":
-                    print(f"CLEAN FAILED: {pin.name} (observed {row['observed']})")
-
-        if phase in ("all", "mutants"):
-            for pin, mutant in [(p, m) for p in ran for m in p.mutants]:
-                mrow, trow = _run_mutant(registry, pin, mutant, out, cfg, scratch_root)
-                emit(mrow)
-                emit(trow)
-                label = pin.label(mutant)
-                verdict = mrow["verdict"]
-                print(f"[mutant] {label}: mutant {mrow['observed']}, twin {trow['observed']} -> {verdict} "
-                      f"({mrow['duration_s']}s + {trow['duration_s']}s) {mrow['transcript']}")
-                counts["mutants_total"] += 1
-                counts[TALLY[verdict]] += 1
-                counts["twins_total"] += 1
-                counts["twins_ok" if trow["verdict"] == "ok" else "twins_failed"] += 1
-                if verdict != "KILLED":
-                    print(f"MUTANT {verdict}: {label}")
+        tasks = _tasks(ran, phase)
+        # One worker is the serial orchestrator, in this process; more spread the tasks across worker processes and
+        # record them in the same order (brief 2, Wish #134 scope 1).
+        results = (((t, _run_task(registry, t, out, cfg, scratch_root)) for t in tasks) if cfg.workers == 1
+                   else _parallel(registry, tasks, out, cfg, scratch_root))
+        with closing(results):
+            for (pin, mutant), rows in results:
+                for row in (rows if mutant is None else ()):
+                    emit(row)
+                    print(f"[clean ] {pin.name}: observed {row['observed']} -> {row['verdict']} "
+                          f"({row.get('duration_s')}s) {row['transcript']}")
+                    counts["clean_total"] += 1
+                    counts["clean_ok" if row["verdict"] == "ok" else "clean_failed"] += 1
+                    counts["leaked"] += row["verdict"] == "LEAKED"
+                    if row["verdict"] != "ok":
+                        print(f"CLEAN FAILED: {pin.name} (observed {row['observed']})")
+                for mrow, trow in (() if mutant is None else zip(rows[::2], rows[1::2])):
+                    emit(mrow)
+                    emit(trow)
+                    label = pin.label(mutant)
+                    verdict = mrow["verdict"]
+                    print(f"[mutant] {label}: mutant {mrow['observed']}, twin {trow['observed']} -> {verdict} "
+                          f"({mrow.get('duration_s')}s + {trow.get('duration_s')}s) {mrow['transcript']}")
+                    counts["mutants_total"] += 1
+                    counts[TALLY[verdict]] += 1
+                    counts["twins_total"] += 1
+                    counts["twins_ok" if trow["verdict"] == "ok" else "twins_failed"] += 1
+                    if verdict != "KILLED":
+                        print(f"MUTANT {verdict}: {label}")
+        if cfg.workers > 1:
+            # A worker that died leaves its children to this subreaper; they are swept and counted here.
+            pool_leaked = proc.sweep(cfg.reap_grace_s, cfg.poll_step_s)
+            counts["leaked"] += pool_leaked
+            if pool_leaked:
+                print(f"LEAKED: {pool_leaked} processes of dead workers swept")
 
         bad = sum(counts[k] for k in ("clean_failed", "survived", "inconclusive", "stale", "non_causal", "leaked"))
         code = 0 if bad == 0 else 1

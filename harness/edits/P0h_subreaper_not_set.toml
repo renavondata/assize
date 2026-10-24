@@ -1,5 +1,6 @@
 # P0h's fourth mutant: the orchestrator is not a child subreaper; orphaned descendants escape past it.
+# Anchored on the orchestrator's own call (with the comment that follows it), not the worker's (Wish #134, P-par).
 [[edit]]
 path = "harness/runner.py"
-old = "    proc.set_subreaper()\n"
-new = "    pass\n"
+old = "    proc.set_subreaper()\n    proc.exit_on_sigterm()  # a terminated run"
+new = "    pass\n    proc.exit_on_sigterm()  # a terminated run"

@@ -8,3 +8,7 @@ child_timeout_s = 120
 reap_grace_s = 5
 # Polling interval, in seconds, for every bounded wait (scratch quiescence, process exit).
 poll_step_s = 0.05
+# Worker processes a full run spreads its pins across, each running one task (a clean run, or a mutant and its twin)
+# at a time (brief 2, Wish #134 scope 1). 1 is the serial orchestrator, unchanged. A larger N is adopted only when it
+# beats N=1 on the switch rule (brief 2 A3 section 5), measured on the self-hosted `pins` runner; it is not set by sight.
+workers = 1

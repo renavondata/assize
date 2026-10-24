@@ -31,6 +31,8 @@ REGISTRIES = {
     "fixture.stamp": "harness.fixtures.stamp",
     "fixture.stamphead": "harness.fixtures.stamphead",
     "fixture.stampbare": "harness.fixtures.stampbare",
+    "fixture.par": "harness.fixtures.par",
+    "fixture.parcrash": "harness.fixtures.parcrash",
 }
 
 

@@ -1,0 +1,5 @@
+# Fixture configuration for P-par's serial run (brief 2, Wish #134; committed before the runs that use it).
+[harness]
+child_timeout_s = 60
+reap_grace_s = 2
+workers = 1
