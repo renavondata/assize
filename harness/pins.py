@@ -2629,6 +2629,38 @@ FAILED_EVENTS = (  # (what, workflow, conclusion, selects the report job) -- ins
     ("a pins run concluded success", "pins", "success", False),
     ("a measure run concluded failure", "measure", "failure", False),
 )
+# The workflows failed.yml does not watch, each with its reason (audit 8aae43c8c792 finding 3). `failed` would trigger
+# itself. The other three are debt: watching them edits `.github/`, which a Builder may do only under a signed
+# instruction (P0m), so the list is what the pin holds until that instruction merges; an exemption that failed.yml
+# also watches is stale and fails the pin, so the list can only shrink.
+FAILED_EXEMPT = {"failed": "its own failure would trigger itself",
+                 "measure": "debt: edit of .github/ awaits an instruction",
+                 "pins-master": "debt: edit of .github/ awaits an instruction",
+                 "stale": "debt: edit of .github/ awaits an instruction"}
+
+
+def p0bs_failed_watches_every_workflow() -> bool:
+    """Every workflow under `.github/workflows/` is named in `failed.yml`'s `workflow_run` list or in the stated
+    exemption list, and every exemption names a workflow that exists, so a session or job of any workflow that ends
+    red routes to an issue (Amendment 2 criterion 3; audit 8aae43c8c792 finding 3)."""
+    expect, ok = _expecter()
+    directory = ROOT / ".github" / "workflows"
+    names = {}
+    for path in sorted(directory.glob("*.yml")):
+        found = re.search(r"^name: (\S+)\s*$", path.read_text(), re.M)
+        expect(found is not None, f"{path.name} names its workflow")
+        if found:
+            names[found.group(1)] = path.name
+    watched = re.search(r"^  workflow_run:\n    workflows: \[([^\]]*)\]", (directory / "failed.yml").read_text(), re.M)
+    expect(watched is not None, "failed.yml's workflow_run list is found")
+    listed = {w.strip() for w in watched.group(1).split(",")} if watched else set()
+    for name, file in names.items():
+        expect(name in listed or name in FAILED_EXEMPT, f"{file} ({name}) is watched by failed.yml or exempt")
+    for name in FAILED_EXEMPT:
+        expect(name in names, f"the exemption {name} names a workflow that exists")
+        expect(name not in listed, f"the exemption {name} is not also watched (a watched workflow leaves the list)")
+    expect(not listed - set(names), f"failed.yml watches only workflows that exist ({sorted(listed - set(names))})")
+    return ok()
 
 
 def p0z_red_pins_routes() -> bool:
@@ -7839,6 +7871,10 @@ PINS = [
         p0br_auditor_differs, (Mutant("elect_ignores_exclusions", _edits("P0br_elect_ignores_exclusions")),
                                Mutant("first_draw_barred", _edits("P0br_first_draw_barred")),
                                Mutant("empty_falls_back", _edits("P0br_empty_falls_back"))), HARNESS),
+    Pin("P0bs", "failed.yml watches every workflow but its own, so no workflow's red run routes nowhere",
+        p0bs_failed_watches_every_workflow, (Mutant("workflow_unlisted", _edits("P0bs_workflow_unlisted")),
+                                             Mutant("exemption_stale", _edits("P0bs_exemption_stale"))),
+        (".github/workflows/**",)),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
