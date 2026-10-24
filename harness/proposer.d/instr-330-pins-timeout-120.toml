@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-330-pins-timeout-120 (instruction #330: pins and pins-master timeout 120 minutes): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "2518feec-999a-4ace-9602-f027f6115184"
