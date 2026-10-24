@@ -1,7 +1,7 @@
 name: failed
 on:
   workflow_run:
-    workflows: [build, review, pins]
+    workflows: [build, review, pins, pins-master, stale, measure]
     types: [completed]
   push:
     branches: [master]

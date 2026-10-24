@@ -1,0 +1,8 @@
+# P0bs's first mutant (audit 8aae43c8c792 finding 3): failed.yml does not watch measure, so a red measure run routes
+# nowhere.
+[[edit]]
+path = ".github/workflows/failed.yml"
+old = """    workflows: [build, review, pins, pins-master, stale, measure]
+"""
+new = """    workflows: [build, review, pins, pins-master, stale]
+"""
