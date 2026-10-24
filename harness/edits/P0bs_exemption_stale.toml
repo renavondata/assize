@@ -1,0 +1,6 @@
+# P0bs's second mutant: the exemption names a workflow that no longer exists (the failed workflow renamed), so the
+# exemption list excuses nothing real and the renamed workflow is unwatched.
+[[edit]]
+path = ".github/workflows/failed.yml"
+old = "name: failed\n"
+new = "name: failures\n"

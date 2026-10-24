@@ -1,0 +1,6 @@
+# P0bs's first mutant (audit 8aae43c8c792 finding 3): a workflow is renamed, so it is neither watched by failed.yml nor
+# exempt, and a red run of it routes nowhere.
+[[edit]]
+path = ".github/workflows/pins-master.yml"
+old = "name: pins-master\n"
+new = "name: pins-gate\n"

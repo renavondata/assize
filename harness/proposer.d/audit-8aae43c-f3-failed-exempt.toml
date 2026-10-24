@@ -1,0 +1,4 @@
+# Who built the harness state of branch audit-8aae43c-f3-failed-exempt (audit 8aae43c8c792 finding 3: failed.yml watches every workflow): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "258d4497-328c-43b1-ab66-2cc9d14fb383"
