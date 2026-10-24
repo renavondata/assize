@@ -1,0 +1,6 @@
+# P0bt's mutant (Wish #80's amendment): the evidence bound omits the share term (t - 1) ln(1 / (1 - alpha)), so it is
+# not stated from the chooser's alpha.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    return math.log(max(1, k)) + (t - 1) * -math.log(1 - alpha)'''
+new = '''    return math.log(max(1, k))'''

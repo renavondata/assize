@@ -1,0 +1,6 @@
+# P0bt's mutant (Wish #80's amendment): a pick fixed-order gave no mass is clipped to a finite loss instead of counted
+# as infinite evidence.
+[[edit]]
+path = "harness/chooser.py"
+old = '''        return (math.log(a) if a > 0 else -math.inf) - (math.log(b) if b > 0 else -math.inf)'''
+new = '''        return (math.log(a) if a > 0 else -math.inf) - (math.log(b) if b > 0 else 0.0)'''
