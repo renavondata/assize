@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2-switchback-seed (brief 2, Wish #80: the switchback seed, reports/switchback-seed.txt): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "21e1b395-4ef0-4465-8aeb-e23c763c6592"
