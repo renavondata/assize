@@ -1,0 +1,30 @@
+# The NetHack 3.6.6 game of the World variant AutoAscend needs (brief 2 section 3, Version mismatch;
+# reports/L2/build/autoascend-feasibility/README.md section 4 item 1). NLE v0.7.3 is the 3.6.6 line AutoAscend's
+# Dockerfile builds. Its C does not compile against a current glibc, so it is built here on Debian bullseye
+# (gcc 10, glibc 2.31). Every input is pinned: the base image by digest, NLE by commit with its submodules, each Python
+# package by version. Nothing in NLE or NetHack is patched: the seed lock NetHackChallenge sets on its instance is lifted
+# by `server.py` at run time, as `worlds/nethack/binding.py` does for 3.6.7.
+FROM docker.io/library/python:3.9-bullseye@sha256:5bd3c295ffab8b738108c7705052086d78b036078d5605dfc51e328ab758cc07
+
+# flex and bison build NetHack's level and dungeon compilers; faketime freezes the game's clock (server.py).
+RUN apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends flex bison faketime \
+ && rm -rf /var/lib/apt/lists/*
+
+# cmake from PyPI: bullseye's own depends on a security-pool package its mirror no longer serves, and cmake 4 refuses
+# deboost.context's cmake_minimum_required. numpy and gym are AutoAscend's requirements.txt versions; gym 0.19.0's
+# metadata is refused by later setuptools and wheel, so those two are pinned first and gym built against them.
+RUN pip install --no-cache-dir -q setuptools==57.5.0 wheel==0.37.1 \
+ && pip install --no-cache-dir -q --no-build-isolation cmake==3.27.9 pybind11==2.6.2 numpy==1.21.2 \
+    cloudpickle==1.6.0 gym==0.19.0
+
+ARG NLE_COMMIT=da62293014df5661a75811de931d117424617dbd
+RUN git clone -q --recursive https://github.com/facebookresearch/nle /nle \
+ && cd /nle && git checkout -q "$NLE_COMMIT" && git submodule update -q --init --recursive \
+ && test "$(git rev-parse HEAD)" = "$NLE_COMMIT" \
+ && pip install --no-cache-dir -q --no-build-isolation --no-deps . \
+ && cd / && rm -rf /nle
+
+COPY server.py /server.py
+USER 65534:65534
+ENTRYPOINT ["faketime", "-f"]
