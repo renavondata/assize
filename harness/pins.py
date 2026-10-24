@@ -4002,6 +4002,88 @@ def p0ag_switchback() -> bool:
     return ok()
 
 
+def _round_act(ftype: str, rid: str, args: dict) -> dict:
+    claim = f"{ftype} of round {rid}"
+    return {"id": claims.forecast_id(claim, PICK_TS), "ts": PICK_TS, "claim": claim, "p": 0.5, "type": ftype,
+            "proposer": {"kind": "builder", "model": "m", "session": "p0bt"}, "args": {**args, "round": rid}}
+
+
+def _res(row: dict, outcome: bool, **extra) -> dict:
+    return {"id": row["id"], "ts": PICK_NOW, "proposer": {"kind": "mechanism"}, "outcome": outcome, **extra}
+
+
+def p0bt_switchback_report() -> bool:
+    """The switchback's four outcomes are reported for every regime, with their denominators: guy-items per merged
+    item (unmerged choices priced too), the overturn rate of the seen stratum with the unexposed (void) counted, the
+    wish-to-merge latency with merges citing no wish counted, and the LLR of the mixture against `fixed-order` on the
+    resolved picks, never clipped; the evidence bound is ln K + (T - 1) ln(1 / (1 - alpha)) (Wish #80's amendment)."""
+    from harness import chooser
+
+    expect, ok = _expecter()
+    c1, c2, c3 = ["#11", "#12"], ["#11", "#12"], ["brief item Wish #5 x"]
+    m1 = _pick("mixture", c1, "#11", rid="r1", dist={"#11": 0.5, "#12": 0.5})
+    f1 = _pick("fixed-order", c1, "#11", rid="r1")
+    m2 = _pick("mixture", c2, "#12", rid="r2", dist={"#11": 0.25, "#12": 0.75})
+    f2 = _pick("fixed-order", c2, "#11", rid="r2")
+    m3 = _pick("mixture", c3, c3[0], rid="r3")
+    g1, k1 = _round_act("merged", "r1", {"pr": 21}), _round_act("not_overturned", "r1", {"item": 11})
+    g2, k2 = _round_act("merged", "r2", {"pr": 22}), _round_act("not_overturned", "r2", {"item": 12})
+    g3, k3 = _round_act("merged", "r3", {"pr": 23}), _round_act("not_overturned", "r3", {"item": 23})
+    pick = {"answer": "next"}
+    rows = [m1, f1, m2, f2, m3, g1, k1, g2, k2, g3, k3,
+            _res(m1, True, pick={"kind": "item", "item": "#11"}, **pick),
+            _res(f1, True, pick={"kind": "item", "item": "#11"}, **pick),
+            _res(m2, True, pick={"kind": "item", "item": "#12"}, **pick),
+            _res(f2, False, pick={"kind": "item", "item": "#12"}, **pick),
+            _res(m3, False, void="unexposed"), _res(g1, True), _res(k1, True), _res(g2, False), _res(k2, False),
+            _res(g3, True), _res(k3, False, void="unexposed")]
+    choices = [{"regime": "fixed-order", "chose": "#11", "round": "r1"}, {"regime": "chooser", "chose": "#12", "round": "r2"},
+               {"regime": "chooser", "chose": c3[0], "round": "r3"}, {"regime": "chooser", "chose": "#13", "round": None}]
+    reached = [{"item": 22, "route": "awaits-guy", "at": PICK_WITHIN}, {"item": 11, "route": "assigned", "at": PICK_WITHIN},
+               {"item": 99, "route": "assigned", "at": PICK_WITHIN}, {"item": 23, "route": "elsewhere", "at": PICK_WITHIN}]
+    merged_at = {21: PICK_AFTER, 23: PICK_AFTER}
+    wish_at = {c3[0]: PICK_TS}
+    got = {r.regime: r for r in chooser.switchback_report(choices, rows, reached, merged_at, wish_at)}
+    fixed, chosen = got.get("fixed-order"), got.get("chooser")
+    expect(list(got) == list(chooser.REGIMES), f"every regime is reported, in order: {list(got)}")
+    if fixed is None or chosen is None:
+        return ok()
+    zero = dict.fromkeys(chooser.STATES, 0)
+    expect((fixed.choices, chosen.choices) == (1, 3), f"choices per regime: {fixed.choices}, {chosen.choices}")
+    expect(fixed.merged == zero | {"true": 1} and chosen.merged == zero | {"true": 1, "false": 1, "unfiled": 1},
+           f"merged by state, the unfiled choice counted: {dict(fixed.merged)}, {dict(chosen.merged)}")
+    expect((fixed.guy_items, chosen.guy_items) == (1, 1),
+           f"guy-items on the choices' items, an unmerged choice's priced, an unlisted route not: "
+           f"{fixed.guy_items}, {chosen.guy_items}")
+    expect(fixed.kept == zero | {"true": 1} and chosen.kept == zero | {"false": 1, "void": 1, "unfiled": 1},
+           f"overturns by exposure, void counted: {dict(fixed.kept)}, {dict(chosen.kept)}")
+    expect(fixed.latencies_h == () and fixed.no_wish == 1 and chosen.latencies_h == (360.0,) and chosen.no_wish == 0,
+           f"wish-to-merge: {fixed.latencies_h} (no wish {fixed.no_wish}), {chosen.latencies_h} (no wish {chosen.no_wish})")
+    expect(fixed.picks == zero | {"true": 1} and chosen.picks == zero | {"true": 1, "void": 1, "unfiled": 1},
+           f"picks by state, void counted: {dict(fixed.picks)}, {dict(chosen.picks)}")
+    expect(abs(fixed.llr - math.log(0.5)) < 1e-12 and chosen.llr == math.inf,
+           f"LLR of the mixture against fixed-order, unclipped: {fixed.llr}, {chosen.llr}")
+    only = {r.regime: r for r in chooser.switchback_report(choices[:1], rows, reached, merged_at, wish_at)}
+    text = chooser.report_text(list(only.values()), 2, 1)
+    expect(list(only) == list(chooser.REGIMES) and "regime chooser: choices 0; no resolved outcome" in text,
+           "a regime with no choice is reported as having no resolved outcome, never dropped")
+    for k, t, alpha, want in ((2, 5, 0.25, math.log(2) + 4 * math.log(4 / 3)), (3, 1, 1.0, math.log(3)),
+                              (2, 3, 1.0, math.inf), (2, 0, 0.5, 0.0)):
+        b = chooser.evidence_bound(k, t, alpha)
+        expect(b == want or abs(b - want) < 1e-12, f"evidence bound K={k} T={t} alpha={alpha}: {b}, want {want}")
+    text = chooser.report_text(list(got.values()), 2, 1)
+    expect("over 2 resolved rounds" in text and "at most inf nats (K 2, alpha 1.0000" in text,
+           "two resolved rounds and one change-point: alpha 1, so the report states no bound (inf)")
+    text = chooser.report_text(list(got.values()), 2, 2)
+    expect("over 2 resolved rounds" in text and "at most inf nats" in text, "alpha is capped at 1")
+    tail = chooser.RegimeReport("chooser", 2, zero, 0, zero, (), 0, zero | {"true": 2}, -1.0)
+    text = chooser.report_text([tail, tail], 2, 1)
+    bound = math.log(2) + 3 * math.log(1 / (1 - 1 / 3))
+    expect("-2.0000 nats over 4 resolved rounds" in text and f"at most {bound:.4f} nats (K 2, alpha 0.3333" in text,
+           f"four resolved rounds, one change-point: the bound from alpha 1/3 ({bound:.4f})")
+    return ok()
+
+
 def _observer(answers: dict):
     from harness import ledger
 
@@ -7933,6 +8015,14 @@ PINS = [
         p0bs_failed_watches_every_workflow, (Mutant("workflow_unlisted", _edits("P0bs_workflow_unlisted")),
                                              Mutant("exemption_stale", _edits("P0bs_exemption_stale"))),
         (".github/workflows/**",)),
+    Pin("P0bt", "the switchback's four outcomes are reported for every regime with denominators, voids counted, the LLR "
+                "unclipped and its evidence bound from the derived alpha",
+        p0bt_switchback_report, (Mutant("empty_regime_dropped", _edits("P0bt_empty_regime_dropped")),
+                                 Mutant("void_uncounted", _edits("P0bt_void_uncounted")),
+                                 Mutant("unmerged_unpriced", _edits("P0bt_unmerged_unpriced")),
+                                 Mutant("llr_reversed", _edits("P0bt_llr_reversed")),
+                                 Mutant("llr_clipped", _edits("P0bt_llr_clipped")),
+                                 Mutant("bound_without_alpha", _edits("P0bt_bound_without_alpha"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),

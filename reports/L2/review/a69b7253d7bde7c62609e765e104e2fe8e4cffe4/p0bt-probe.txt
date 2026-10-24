@@ -1,0 +1,30 @@
+# P0bt clean + 6 mutants, scratch copy of a69b7253d7bde7c62609e765e104e2fe8e4cffe4, run 40143654018
+Using CPython 3.11.11
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 17 packages in 58ms
+  [ok] every regime is reported, in order: ['fixed-order', 'chooser']
+  [ok] choices per regime: 1, 3
+  [ok] merged by state, the unfiled choice counted: {'true': 1, 'false': 0, 'void': 0, 'open': 0, 'unfiled': 0}, {'true': 1, 'false': 1, 'void': 0, 'open': 0, 'unfiled': 1}
+  [ok] guy-items on the choices' items, an unmerged choice's priced, an unlisted route not: 1, 1
+  [ok] overturns by exposure, void counted: {'true': 1, 'false': 0, 'void': 0, 'open': 0, 'unfiled': 0}, {'true': 0, 'false': 1, 'void': 1, 'open': 0, 'unfiled': 1}
+  [ok] wish-to-merge: () (no wish 1), (360.0,) (no wish 0)
+  [ok] picks by state, void counted: {'true': 1, 'false': 0, 'void': 0, 'open': 0, 'unfiled': 0}, {'true': 1, 'false': 0, 'void': 1, 'open': 0, 'unfiled': 1}
+  [ok] LLR of the mixture against fixed-order, unclipped: -0.6931471805599453, inf
+  [ok] a regime with no choice is reported as having no resolved outcome, never dropped
+  [ok] evidence bound K=2 T=5 alpha=0.25: 1.843875470367069, want 1.8438754703670686
+  [ok] evidence bound K=3 T=1 alpha=1.0: 1.0986122886681098, want 1.0986122886681098
+  [ok] evidence bound K=2 T=3 alpha=1.0: inf, want inf
+  [ok] evidence bound K=2 T=0 alpha=0.5: 0.0, want 0.0
+  [ok] two resolved rounds and one change-point: alpha 1, so the report states no bound (inf)
+  [ok] alpha is capped at 1
+  [ok] four resolved rounds, one change-point: the bound from alpha 1/3 (1.9095)
+clean True
+mutant empty_regime_dropped: pin returns False
+mutant void_uncounted: pin returns False
+mutant unmerged_unpriced: pin returns False
+mutant llr_reversed: pin returns False
+mutant llr_clipped: pin returns False
+mutant bound_without_alpha: pin returns False

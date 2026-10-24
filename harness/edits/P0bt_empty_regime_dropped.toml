@@ -1,0 +1,6 @@
+# P0bt's mutant (Wish #80's amendment): a regime with no choice is dropped from the report instead of reported as
+# having no resolved outcome.
+[[edit]]
+path = "harness/chooser.py"
+old = '''    return [report(r) for r in REGIMES]'''
+new = '''    return [report(r) for r in REGIMES if any(c["regime"] == r for c in choices)]'''

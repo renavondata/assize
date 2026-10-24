@@ -1,0 +1,6 @@
+# P0bt's mutant (Wish #80's amendment): guy-items are counted only on merged choices, so a regime's unmerged choices
+# reach Guy at no price.
+[[edit]]
+path = "harness/chooser.py"
+old = '''            items |= {n for n in (pr, int(issue.group(1)) if issue else None) if n is not None}'''
+new = '''            items |= {n for n in (pr, int(issue.group(1)) if issue else None) if n is not None and state(m) == "true"}'''
