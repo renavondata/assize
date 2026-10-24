@@ -1,0 +1,103 @@
+=== rerun 1: plain, 13:10:17
+probe root /tmp/assize-probe-338, head 512c9fb4da345bf52f873905d19e907c85b05bfd
+--- clean: want pass, got pass (as expected)
+    RESULT pass
+--- registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe A: measure added to failed.yml's list while still exempt: want fail, got fail (as expected)
+      [FAIL] the exemption measure is not also watched (a watched workflow leaves the list)
+    RESULT fail
+--- probe B: ghost name in failed.yml's list: want fail, got fail (as expected)
+      [FAIL] failed.yml watches only workflows that exist (['ghost'])
+    RESULT fail
+--- probe C1: `not also watched` check deleted, clean tree: want pass, got pass (as expected)
+    RESULT pass
+--- probe C2: check deleted + registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- probe C3: check deleted + registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe C4: check deleted + probe A's edit (exemption also watched): want pass, got pass (as expected)
+    RESULT pass
+--- probe C5: `only existing` check deleted, clean tree: want pass, got pass (as expected)
+    RESULT pass
+--- probe C6: check deleted + registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- probe C7: check deleted + registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe C8: check deleted + probe B's edit (ghost name): want pass, got pass (as expected)
+    RESULT pass
+--- probe D: unwatched .yaml workflow added: want pass, got pass (as expected)
+    RESULT pass
+--- probe D control: the same workflow as .yml: want fail, got fail (as expected)
+      [FAIL] extra.yml (extra) is watched by failed.yml or exempt
+    RESULT fail
+--- probe E: measure removed from FAILED_EXEMPT (the brief's measure_unlisted): want fail, got fail (as expected)
+      [FAIL] measure.yml (measure) is watched by failed.yml or exempt
+    RESULT fail
+done; copy reset to HEAD
+=== rerun 2: __pycache__ removed, PYTHONDONTWRITEBYTECODE=1, 13:10:20
+probe root /tmp/assize-probe-338, head 512c9fb4da345bf52f873905d19e907c85b05bfd
+--- clean: want pass, got pass (as expected)
+    RESULT pass
+--- registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe A: measure added to failed.yml's list while still exempt: want fail, got fail (as expected)
+      [FAIL] the exemption measure is not also watched (a watched workflow leaves the list)
+    RESULT fail
+--- probe B: ghost name in failed.yml's list: want fail, got fail (as expected)
+      [FAIL] failed.yml watches only workflows that exist (['ghost'])
+    RESULT fail
+--- probe C1: `not also watched` check deleted, clean tree: want pass, got pass (as expected)
+    RESULT pass
+--- probe C2: check deleted + registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- probe C3: check deleted + registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe C4: check deleted + probe A's edit (exemption also watched): want pass, got pass (as expected)
+    RESULT pass
+--- probe C5: `only existing` check deleted, clean tree: want pass, got pass (as expected)
+    RESULT pass
+--- probe C6: check deleted + registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- probe C7: check deleted + registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe C8: check deleted + probe B's edit (ghost name): want pass, got pass (as expected)
+    RESULT pass
+--- probe D: unwatched .yaml workflow added: want pass, got pass (as expected)
+    RESULT pass
+--- probe D control: the same workflow as .yml: want fail, got fail (as expected)
+      [FAIL] extra.yml (extra) is watched by failed.yml or exempt
+    RESULT fail
+--- probe E: measure removed from FAILED_EXEMPT (the brief's measure_unlisted): want fail, got fail (as expected)
+      [FAIL] measure.yml (measure) is watched by failed.yml or exempt
+    RESULT fail
+done; copy reset to HEAD
+=== end 13:10:24

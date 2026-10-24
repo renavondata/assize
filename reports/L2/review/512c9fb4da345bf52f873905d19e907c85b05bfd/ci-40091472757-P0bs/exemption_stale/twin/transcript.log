@@ -1,0 +1,34 @@
+copy of /home/runner/work/assize/assize
+  at /tmp/assize-scratch-a6gexjsy/assize-copy-22_jcblh/repo
+twin: no edits applied
+pin:       P0bs
+protects:  failed.yml watches every workflow but its own, so no workflow's red run routes nowhere
+role:      twin
+tree:      /tmp/assize-scratch-a6gexjsy/assize-copy-22_jcblh/repo
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-a6gexjsy
+  [ok] build.yml names its workflow
+  [ok] failed.yml names its workflow
+  [ok] measure.yml names its workflow
+  [ok] pins-master.yml names its workflow
+  [ok] pins.yml names its workflow
+  [ok] review.yml names its workflow
+  [ok] stale.yml names its workflow
+  [ok] failed.yml's workflow_run list is found
+  [ok] build.yml (build) is watched by failed.yml or exempt
+  [ok] failed.yml (failed) is watched by failed.yml or exempt
+  [ok] measure.yml (measure) is watched by failed.yml or exempt
+  [ok] pins-master.yml (pins-master) is watched by failed.yml or exempt
+  [ok] pins.yml (pins) is watched by failed.yml or exempt
+  [ok] review.yml (review) is watched by failed.yml or exempt
+  [ok] stale.yml (stale) is watched by failed.yml or exempt
+  [ok] the exemption failed names a workflow that exists
+  [ok] the exemption failed is not also watched (a watched workflow leaves the list)
+  [ok] the exemption measure names a workflow that exists
+  [ok] the exemption measure is not also watched (a watched workflow leaves the list)
+  [ok] the exemption pins-master names a workflow that exists
+  [ok] the exemption pins-master is not also watched (a watched workflow leaves the list)
+  [ok] the exemption stale names a workflow that exists
+  [ok] the exemption stale is not also watched (a watched workflow leaves the list)
+  [ok] failed.yml watches only workflows that exist ([])
+result:    PASS
