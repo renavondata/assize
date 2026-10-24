@@ -1,0 +1,5 @@
+# P0t's mutant (Wish #134 scope 3): a pins run that did not succeed is left out of the wall-clock report.
+[[edit]]
+path = "harness/ledger.py"
+old = "(r for r in ran if r.get(\"path\") == PINS_WORKFLOW)"
+new = "(r for r in ran if r.get(\"path\") == PINS_WORKFLOW and r.get(\"conclusion\") == \"success\")"

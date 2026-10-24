@@ -1,0 +1,5 @@
+# P0t's mutant (Wish #134 scope 3): the reported pins wall-clock is the mean of the runs, not their median.
+[[edit]]
+path = "harness/ledger.py"
+old = "statistics.median(m for _, m in self.pins_wall)"
+new = "statistics.mean(m for _, m in self.pins_wall)"

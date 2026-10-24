@@ -1,0 +1,5 @@
+# P0t's mutant (Wish #134 scope 3): a run's wall-clock is measured from its creation, so the time it queued is counted.
+[[edit]]
+path = "harness/ledger.py"
+old = "start = r.get(\"run_started_at\") or r.get(\"created_at\")"
+new = "start = r.get(\"created_at\")"

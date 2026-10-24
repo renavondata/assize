@@ -875,6 +875,13 @@ class Price:
     bounded: int = 0  # session_minutes forecasts made in the window, open and void included
     lost_to_limit: int = 0  # session runs whose LIMIT_STEP failed: ended with usage_limit_reached
     models: tuple[ModelPrice, ...] = ()  # sessions, minutes and cost per drawn model (instruction #139)
+    pins_wall: tuple[tuple[int, float], ...] = ()  # (run id, wall-clock minutes) of each pins run, oldest first (Wish #134)
+
+    def pins_wall_lines(self) -> list[str]:
+        """Pins wall-clock per run, its median, alongside `pins CI minutes`: every pins run that ran, failed ones too."""
+        median = f"{statistics.median(m for _, m in self.pins_wall):.1f} min" if self.pins_wall else "none"
+        return [f"pins run {i} wall-clock {m:.1f} min" for i, m in self.pins_wall] \
+            + [f"pins wall-clock median {median} over {len(self.pins_wall)} runs"]
 
     def models_segment(self) -> str:
         return "models " + (", ".join(m.entry() for m in self.models) or "none")
@@ -925,7 +932,9 @@ def price(reached: Sequence[Mapping], actions: Mapping[int, Sequence[str]], runs
                  per.get(PINS_WORKFLOW, 0.0),
                  lost_to_limit=sum(1 for r in sessions if any(s.get("name") == LIMIT_STEP and s.get("conclusion")
                                                               == "failure" for s in r.get("steps") or ())),
-                 models=model_price({int(r["id"]): minutes(r) for r in sessions}, draws, costs))
+                 models=model_price({int(r["id"]): minutes(r) for r in sessions}, draws, costs),
+                 pins_wall=tuple((int(r["id"]), minutes(r)) for r in sorted(
+                     (r for r in ran if r.get("path") == PINS_WORKFLOW), key=lambda r: (_t(r["created_at"]), r["id"]))))
 
 
 LIMIT_STEP = "usage limit"  # the step of build.yml and review.yml that fails when the session hit the usage limit
@@ -1368,6 +1377,7 @@ def main(argv: list[str] | None = None) -> int:
         for w, m in got.runner_min.items():
             print(f"workflow {w} runner-min {m:.0f}")
         print(f"pins CI minutes {got.pins_min:.0f}")
+        print(*got.pins_wall_lines(), sep="\n")
         for m in got.models:
             print(f"model {m.model}: sessions {m.sessions}, runner-min {m.minutes:.0f}, cost ${m.cost_usd:.2f} over "
                   f"{m.sessions - m.cost_unknown} sessions with a cost, cost unknown {m.cost_unknown}")

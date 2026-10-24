@@ -1970,8 +1970,30 @@ def p0t_price() -> bool:
            f"a session run with no draw and no log is one unknown session with cost unknown: {bare}")
     expect(ledger.result_costs([{"type": "result"}, {"type": "result", "total_cost_usd": 0.25}, {"type": "assistant"}])
            == [None, 0.25], "a result event without a cost reads as unknown, not zero")
+    # Wish #134 scope 3: pins wall-clock per run, from the run's start (not its queueing), every run that ran.
+    wall_runs = [{"id": i, "path": claims.PINS_WORKFLOW, "conclusion": c, "created_at": _h(h),
+                  "run_started_at": _h(h + q / 60), "updated_at": _h(h + (q + m) / 60)}
+                 for i, c, h, q, m in PRICE_PINS_RUNS]
+    wall = ledger.price([], {}, wall_runs, T0, _h(PRICE_UNTIL))
+    print(f"    {wall.pins_wall_lines()}")
+    expect(len(wall.pins_wall) == len(PRICE_PINS_WALL) and all(
+        a[0] == b[0] and math.isclose(a[1], b[1]) for a, b in zip(wall.pins_wall, PRICE_PINS_WALL)),
+        f"pins wall-clock {wall.pins_wall}, want {PRICE_PINS_WALL}: from the start not the queue, a failed run kept, "
+        "a skipped run and a run before the window out, oldest first")
+    expect(wall.pins_wall_lines() == ["pins run 201 wall-clock 10.0 min", "pins run 202 wall-clock 20.0 min",
+                                      "pins run 203 wall-clock 60.0 min",
+                                      "pins wall-clock median 20.0 min over 3 runs"],
+           f"pins wall-clock lines {wall.pins_wall_lines()}")
+    expect(ledger.price([], {}, [], T0, _h(PRICE_UNTIL)).pins_wall_lines() == ["pins wall-clock median none over 0 runs"],
+           "no pins run in the window is reported as none, not as zero")
     return ok()
 
+
+# (id, conclusion, created hour, minutes queued before it started, minutes it ran): by the definition the wall-clock is
+# the run's own 10, 20 and 60 minutes, median 20 (their mean is 30); 204 is skipped and 205 is before the window.
+PRICE_PINS_RUNS = ((203, "success", 5, 0, 60), (201, "success", 3, 3, 10), (202, "failure", 4, 0, 20),
+                   (204, "skipped", 6, 0, 1), (205, "success", -3, 0, 99))
+PRICE_PINS_WALL = ((201, 10.0), (202, 20.0), (203, 60.0))
 
 ELECTION_ENTRANTS = ("m-a", "m-b", "m-c")
 ELECTION_BOUND = 2.0
@@ -8024,7 +8046,10 @@ PINS = [
                     Mutant("costless_session_dropped", _edits("P0t_costless_session_dropped")),
                     Mutant("cost_pooled", _edits("P0t_cost_pooled")),
                     Mutant("first_result_charged", _edits("P0t_first_result_charged")),
-                    Mutant("result_per_session", _edits("P0t_result_per_session"))), HARNESS),
+                    Mutant("result_per_session", _edits("P0t_result_per_session")),
+                    Mutant("pins_wall_from_queue", _edits("P0t_pins_wall_from_queue")),
+                    Mutant("pins_wall_failures_dropped", _edits("P0t_pins_wall_failures_dropped")),
+                    Mutant("pins_wall_mean", _edits("P0t_pins_wall_mean"))), HARNESS),
     Pin("P0u", "a procedure's model is drawn by EXP3 over its entrants, weighted by the recorded draw probability",
         p0u_election, (Mutant("argmin_election", _edits("P0u_argmin_election")),
                        Mutant("hedge_election", _edits("P0u_hedge_election")),

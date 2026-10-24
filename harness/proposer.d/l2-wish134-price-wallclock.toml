@@ -1,0 +1,4 @@
+# Who built the harness state of branch l2-wish134-price-wallclock (brief 2, Wish #134 scope 3: `ledger price` reports pins wall-clock per run): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "c95de76e-4475-4a0e-831a-96eacbcfd6c2"
