@@ -1,0 +1,24 @@
+# probe at 9816b3b, fresh GitHub clone /tmp/rv340.qyaP, 2026-10-24T19:21:29Z
+$ git log --format="%h %p %s" -1 f1e88e1
+f1e88e1 b91f0f0 81a6539 Merge pull request #117 from renavondata/instr-111-chooser
+$ git merge-base --is-ancestor 930675f f1e88e1 (930675f appended "Wish #80 — Amendment")
+yes
+$ ledger.probe_seed(repo, "f1e88e1"); chooser.regime_at(seed, 0); committed seed
+81a653972808950cef1be0ab74665561bdf104db fixed-order
+81a653972808950cef1be0ab74665561bdf104db committed
+$ python -m harness.chooser check  (control, committed seed)
+0 chose lines, 0 findings
+exit 0
+$ seed file overwritten with 0000000000000000000000000000000000000000 and committed on a scratch branch; python -m harness.chooser check
+0 chose lines, 0 findings
+exit 0
+$ pins.p0ag_switchback() with the wrong seed committed
+                               --invocation-root INVOCATION_ROOT --run-dir
+                               RUN_DIR --scratch SCRATCH
+python -m harness check: error: the following arguments are required: --scratch
+exit 2
+$ harness check --pin P0ag --role clean, with the wrong seed committed (retry with --scratch)
+    real: 0 chose lines in history
+  [ok] real switchback: findings []
+result:    PASS
+exit 0
