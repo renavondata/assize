@@ -1,0 +1,13 @@
+control: pass
+push_by_tag: FAIL  <- [FAIL] the push keeps digests and pushes by the digest the comparison wrote
+steps_reordered: FAIL  <- [FAIL] steps ('Composed digest equals the seal', 'Push by digest', 'Pulled digest equals the seal') are present, in this order (['Install uv
+paths_release_dropped: FAIL  <- [FAIL] the push trigger watches release/** and judge/**
+paths_judge_dropped: FAIL  <- [FAIL] the push trigger watches release/** and judge/**
+job_permissions_added: FAIL  <- [FAIL] permissions: ['contents: read', 'packages: write'] and nothing else, stated once
+compare_exit_zero: FAIL  <- [FAIL] composed sha256:bbbbbbb against the seal: fails and writes nothing (exit 0)
+pulled_exit_zero: FAIL  <- [FAIL] pulled sha256:bbbbbbb against the seal: fails (exit 0)
+digest_from_elsewhere: FAIL  <- [FAIL] the push keeps digests and pushes by the digest the comparison wrote
+if_on_push: FAIL  <- [FAIL] no step is conditional or allowed to fail
+output_written_on_failure: FAIL  <- [FAIL] composed sha256:bbbbbbb against the seal: fails and writes nothing (exit 1)
+pulled_compares_to_itself: FAIL  <- [FAIL] pulled sha256:bbbbbbb against the seal: fails (exit 0)
+composed_read_from_image_line: FAIL  <- [FAIL] composed sha256:aaaaaaa against the seal: passes and writes (exit 1)
