@@ -1,0 +1,6 @@
+# P0bu's mutant `compare_skipped` (instruction #342 item 3a): release.yml's comparison of the composed digest to the
+# seal no longer compares, so an image that is not the seal is pushed.
+[[edit]]
+path = ".github/workflows/release.yml"
+old = "[ -n \"$sealed\" ] && [ \"$composed\" = \"$sealed\" ] || {"
+new = "[ -n \"$sealed\" ] || {"

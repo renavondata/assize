@@ -1,0 +1,6 @@
+# P0bu's mutant `failure_allowed` (instruction #342 item 3a): a failed comparison no longer ends the job, so the push
+# follows it.
+[[edit]]
+path = ".github/workflows/release.yml"
+old = "        id: seal\n"
+new = "        id: seal\n        continue-on-error: true\n"

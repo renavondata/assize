@@ -1,0 +1,6 @@
+# P0bu's mutant `digests_unpreserved` (instruction #342 item 3a): the push may recompress layers or rewrite the manifest,
+# so the pushed digest need not be the sealed one.
+[[edit]]
+path = ".github/workflows/release.yml"
+old = "skopeo copy --preserve-digests --dest-creds"
+new = "skopeo copy --dest-creds"

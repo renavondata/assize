@@ -1,0 +1,5 @@
+# P0bu's mutant `pulled_unchecked` (instruction #342 item 3a): the digest pulled back is no longer compared to the seal.
+[[edit]]
+path = ".github/workflows/release.yml"
+old = "[ \"$pulled\" = \"$DIGEST\" ] || {"
+new = "[ -n \"$DIGEST\" ] || {"
