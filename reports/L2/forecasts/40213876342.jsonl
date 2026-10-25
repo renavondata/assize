@@ -1,0 +1,3 @@
+{"id": "38e2281e34e9", "ts": "2026-10-25T17:19:55Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40213876342"}, "outcome": true, "witness": "reports/L2/review-bb16260964a5dc17bb6a10150d853b1201c21a2d.md at fcd3889a804b: ACCEPT"}
+{"id": "dca36efd9e1a", "ts": "2026-10-25T17:19:55Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40213876342"}, "void": "unobservable", "outcome": false, "witness": "run local: not an Actions run"}
+{"id": "f63bc964c204", "ts": "2026-10-25T17:19:55Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40213876342"}, "outcome": true, "witness": "pins run 40208386791 attempt 1 on f7abe49dd13d: success"}
