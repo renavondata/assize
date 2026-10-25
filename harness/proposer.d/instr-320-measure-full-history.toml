@@ -1,4 +1,4 @@
 # Who built the harness state of branch instr-320-measure-full-history (instruction #320: measure.yml checks out full history): this pull request's own proposer row.
 kind = "builder"
-model = "claude-sonnet-5-5"
-session = "d3e1551f-07e3-4ad5-8222-ec6cf7fbebbc"
+model = "claude-opus-5-5"
+session = "f1b64787-ff3d-4664-ac58-69eef7efd4c8"
