@@ -1,0 +1,4 @@
+# Who built the harness state of branch instr-342-seal (instruction #342, wish #341: item 3, the seal pull request): this pull request's own proposer row.
+kind = "builder"
+model = "claude-sonnet-5-5"
+session = "5903f3c7-9d6c-48b2-bac4-d129c02e32f6"
