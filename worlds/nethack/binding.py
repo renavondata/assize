@@ -17,8 +17,9 @@ The per-episode utility is BALROG's progression (brief 2 section 2, Utility): it
 checked against its recorded SHA-256 before the module is executed, and updated after every step as BALROG's own NLE
 wrapper does. It is never reimplemented here.
 
-Not yet bound: this directory holds no `manifest.json` until its prediction targets and price are committed, so the
-judge does not bind it (`judge.evaluate.bound`)."""
+The judge binds this World beside its `manifest.json` (`judge.evaluate.bound`). An episode emits the manifest's
+observation: `glyphs`, the message line as `toplines`, and each of NLE's bottom-line stats under its own name, read
+from the same NLE observation the trajectory hash covers."""
 
 from __future__ import annotations
 
@@ -60,6 +61,10 @@ BALROG_FILES = {
 BALROG_DIR = Path(__file__).with_name("balrog")
 # What BALROG's progression reads besides the observed keys: the terminal, for its end-of-game reason.
 PROGRESS_READS = ("tty_chars",)
+MANIFEST = Path(__file__).with_name("manifest.json")
+# NLE's bottom-line stats in `blstats` order, each under NLE's own name for it (`nethack.NLE_BL_<name>`, lowercased).
+BLSTATS = tuple(n[len("NLE_BL_"):].lower() for n in sorted((n for n in dir(nle.nethack) if n.startswith("NLE_BL_")),
+                                                            key=lambda n: getattr(nle.nethack, n)))
 
 
 def installed_versions() -> dict[str, str]:
@@ -106,16 +111,40 @@ def observe(obs: Mapping) -> dict:
     return {k: obs[k].tolist() for k in OBSERVED}
 
 
+def identifier(name: str) -> str:
+    """A manifest name for an nle or BALROG name: lowercased, every character that is not a letter or digit dropped."""
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def manifest() -> dict:
+    return json.loads(MANIFEST.read_text())
+
+
+def world_seed(seed: int) -> int:
+    """The seed from which the World of `seed` generates: `seed` itself, since its game's streams are each a distinct
+    hash of it (`seeds`), so distinct seeds name distinct Worlds."""
+    return seed
+
+
+def view(raw: Mapping) -> dict:
+    """The manifest's observation of an NLE observation (`observe`'s): the map, the message line, and each
+    bottom-line stat under its name."""
+    return {"glyphs": raw["glyphs"], "toplines": raw["message"]} | dict(zip(BLSTATS, raw["blstats"], strict=True))
+
+
 class Episode:
     """One NetHackChallenge episode from `seed`. The seed stays here; nothing it returns carries it."""
 
-    def __init__(self, seed: int):
+    def __init__(self, seed: int, m: Mapping | None = None):
+        self.manifest = m or manifest()
         self._env = make_env(seed)
         obs, _ = self._env.reset()
         self.t = 0
         self.done = False
+        self.truncated = False
         self.end_status = None
-        self.observation = observe(obs)
+        self.nle = observe(obs)
+        self.observation = view(self.nle)
         # The class BALROG's `get_progress_system` gives NetHackChallenge, fresh at reset as in BALROG's NLE wrapper.
         self.progress = balrog().Progress()
 
@@ -123,6 +152,16 @@ class Episode:
     def utility(self) -> float:
         """BALROG's progression of the episode so far, in [0, 1] (brief 2 section 2, Utility)."""
         return self.progress.progression
+
+    @property
+    def achievements(self) -> list[str]:
+        """The progression table's entries the episode reached, depths then experience levels, as manifest names."""
+        return [identifier(k) for k in self.progress.dlvl_list + self.progress.xplvl_list]
+
+    @property
+    def termination(self) -> str:
+        """How the World ended the episode: `truncated` at NetHackChallenge's step limit, else `terminal`."""
+        return "truncated" if self.truncated else "terminal"
 
     @property
     def legal_actions(self) -> list[int]:
@@ -137,9 +176,11 @@ class Episode:
         obs, reward, terminated, truncated, info = self._env.step(action)
         self.t += 1
         self.done = bool(terminated or truncated)
+        self.truncated = bool(truncated) and not terminated
         self.end_status = int(info["end_status"])
         self.progress.update(obs, reward, self.done, info)
-        self.observation = observe(obs)
+        self.nle = observe(obs)
+        self.observation = view(self.nle)
         return self.observation
 
     def close(self) -> None:
@@ -151,16 +192,17 @@ def _line(record: Mapping) -> bytes:
 
 
 def trajectory(seed: int, actions: Iterable[int]) -> tuple[str, int]:
-    """Play `actions` from `seed` until they run out or the episode ends. Returns the SHA-256 over every emitted
-    observation, each action and the done flag, step by step, with the number of steps played."""
+    """Play `actions` from `seed` until they run out or the episode ends. Returns the SHA-256 over every NLE
+    observation the episode's emitted ones are read from (`observe`; each emitted one is its `view`), each action and
+    the done flag, step by step, with the number of steps played."""
     ep = Episode(seed)
     try:
-        h = hashlib.sha256(_line({"t": 0, "observation": ep.observation}))
+        h = hashlib.sha256(_line({"t": 0, "observation": ep.nle}))
         for action in actions:
             if ep.done:
                 break
-            obs = ep.step(action)
-            h.update(_line({"t": ep.t, "action": action, "observation": obs, "done": ep.done}))
+            ep.step(action)
+            h.update(_line({"t": ep.t, "action": action, "observation": ep.nle, "done": ep.done}))
         return h.hexdigest(), ep.t
     finally:
         ep.close()

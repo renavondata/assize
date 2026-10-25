@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "world": "nethack",
+  "source": {"package": "nle", "version": "1.3.0"},
+  "episode_length": 1000000,
+  "observation": [
+    {"name": "glyphs", "type": "integer", "shape": [21, 79], "range": [0, 5975]},
+    {"name": "toplines", "type": "integer", "shape": [256], "range": [0, 255]},
+    {"name": "x", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "y", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "str25", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "str125", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "dex", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "con", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "int", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "wis", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "cha", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "score", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "hp", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "hpmax", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "depth", "type": "integer", "shape": [], "range": [-5, 53]},
+    {"name": "gold", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "ene", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "enemax", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "ac", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "hd", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "xp", "type": "integer", "shape": [], "range": [0, 30]},
+    {"name": "exp", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "time", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "hunger", "type": "integer", "shape": [], "range": [0, 6]},
+    {"name": "cap", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "dnum", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "dlevel", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "condition", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]},
+    {"name": "align", "type": "integer", "shape": [], "range": [-2147483648, 2147483647]}
+  ],
+  "actions": ["compassdirectionn", "compassdirectione", "compassdirections", "compassdirectionw", "compassdirectionne", "compassdirectionse", "compassdirectionsw", "compassdirectionnw", "compassdirectionlongern", "compassdirectionlongere", "compassdirectionlongers", "compassdirectionlongerw", "compassdirectionlongerne", "compassdirectionlongerse", "compassdirectionlongersw", "compassdirectionlongernw", "miscdirectionup", "miscdirectiondown", "miscdirectionwait", "miscactionmore", "commandextcmd", "commandextlist", "commandadjust", "commandannotate", "commandapply", "commandattributes", "commandautopickup", "commandcall", "commandcast", "commandchat", "commandclose", "commandconduct", "commanddip", "commanddrop", "commanddroptype", "commandeat", "commandengrave", "commandenhance", "commandesc", "commandfight", "commandfire", "commandforce", "commandglance", "commandhistory", "commandinventory", "commandinventtype", "commandinvoke", "commandjump", "commandkick", "commandknown", "commandknownclass", "commandlook", "commandloot", "commandmonster", "commandmove", "commandmovefar", "commandoffer", "commandopen", "commandoptions", "commandoverview", "commandpay", "commandpickup", "commandpray", "commandputon", "commandquaff", "commandquit", "commandquiver", "commandread", "commandredraw", "commandremove", "commandride", "commandrub", "commandrush", "commandrush2", "commandsave", "commandsearch", "commandseeall", "commandseeamulet", "commandseearmor", "commandseegold", "commandseerings", "commandseespells", "commandseetools", "commandseetrap", "commandseeweapon", "commandshell", "commandsit", "commandswap", "commandtakeoff", "commandtakeoffall", "commandteleport", "commandthrow", "commandtip", "commandtravel", "commandturn", "commandtwoweapon", "commanduntrap", "commandversion", "commandversionshort", "commandwear", "commandwhatdoes", "commandwhatis", "commandwield", "commandwipe", "commandzap", "textcharactersplus", "textcharactersminus", "textcharactersspace", "textcharactersapos", "textcharactersquote", "textcharactersnum0", "textcharactersnum1", "textcharactersnum2", "textcharactersnum3", "textcharactersnum4", "textcharactersnum5", "textcharactersnum6", "textcharactersnum7", "textcharactersnum8", "textcharactersnum9", "textcharactersdollar"],
+  "targets": [
+    {
+      "name": "depth",
+      "field": "depth",
+      "horizon": 1,
+      "support": [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53],
+      "rationale": "Depth is half of BALROG's progression (its `Dlvl:<depth>` entries), so predicting its change one step ahead tests whether the agent knows when its own action takes it down or up a level, the move the utility pays for. Support: NetHack's depth(&u.uz), as NLE writes it to the bottom line, derived from nle 1.3.0's nethackdir/dat/dungeon.def and dungeon.c's init_dungeons, not chosen. The Dungeons of Doom have rn1(5, 25), 25 to 29, levels from depth 1; Gehennom has rn1(5, 20), 20 to 24, from one below the castle, the Dungeons' bottom, so no level is deeper than 29 + 24 = 53. Every other branch is shallower: the Gnomish Mines reach at most 13, the Quest and Fort Ludios 21, Sokoban and Vlad's Tower lie above the levels they branch from. The Elemental Planes are entered upward from depth 1 at the fifth of their six levels, and dungeon.c shifts them one level up for their dummy level, so the Astral Plane is at depth -5 and the Plane of Earth at -1. 0 is every bottom-line stat in the observation NLE zeroes outside a running game (win/rl/winrl.cc), which an episode's last observation after death is."
+    },
+    {
+      "name": "experience_level",
+      "field": "xp",
+      "horizon": 1,
+      "support": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+      "rationale": "Experience level is the other half of BALROG's progression (its `Xp:<level>` entries); its one-step change, a level gained on a kill or lost to a drain, tests a model of combat. Support: u.ulevel, 1 to MAXULEV = 30 (NetHack 3.6.7's global.h; exper.c's losexp never takes it below 1), and 0 in NLE's zeroed observation outside a running game."
+    },
+    {
+      "name": "hunger",
+      "field": "hunger",
+      "horizon": 1,
+      "support": [0, 1, 2, 3, 4, 5, 6],
+      "rationale": "Hunger is the World's own clock, driven by turns and by eating rather than by progress, as Crafter's vitals are; it is the target whose dynamics the utility does not drive. Support: u.uhs, hack.h's hunger_state_types, Satiated 0, Not Hungry 1, Hungry 2, Weak 3, Fainting 4, Fainted 5, Starved 6; 0 is also NLE's zeroed observation outside a running game."
+    }
+  ],
+  "utility": {
+    "description": "BALROG's progression (brief 2 section 2, Utility), in [0, 1]: the class `Progress` that BALROG gives NetHackChallenge, vendored unmodified under balrog/ at commit b7afe79e3e42 and fed every step; the largest achievements.json value among the dungeon depths and experience levels the episode reached. Components are achievements.json's keys in its order, each lowercased with every character that is not a letter or digit dropped; an episode's achievements are the keys it reached.",
+    "components": ["dlvl1", "dlvl2", "dlvl3", "dlvl4", "dlvl5", "dlvl6", "dlvl7", "dlvl8", "dlvl9", "dlvl10", "dlvl11", "dlvl12", "dlvl13", "dlvl14", "dlvl15", "dlvl16", "dlvl17", "dlvl18", "dlvl19", "dlvl20", "dlvl21", "dlvl22", "dlvl23", "dlvl24", "dlvl25", "dlvl26", "dlvl27", "dlvl28", "dlvl29", "dlvl30", "dlvl31", "dlvl32", "dlvl33", "dlvl34", "dlvl35", "dlvl36", "dlvl37", "dlvl38", "dlvl39", "dlvl40", "dlvl41", "dlvl42", "dlvl43", "dlvl44", "dlvl45", "dlvl46", "dlvl47", "dlvl48", "dlvl49", "dlvl50", "astralplane", "home1", "home2", "home3", "home4", "home5", "xp1", "xp2", "xp3", "xp4", "xp5", "xp6", "xp7", "xp8", "xp9", "xp10", "xp11", "xp12", "xp13", "xp14", "xp15", "xp16", "xp17", "xp18", "xp19", "xp20", "xp21", "xp22", "xp23", "xp24", "xp25", "xp26", "xp27", "xp28", "xp29", "xp30", "youascendt"]
+  },
+  "price": {
+    "cpu_s": 1.6666666666666667e-05,
+    "memory_gb_s": 1.5522042910257973e-05,
+    "delta": 0.02,
+    "rationale": "The exchange rate of compute into this World's per-episode utility (brief 1 A4 item 4), in progression per CPU-second and per gigabyte-second (1e9 bytes) of peak memory. delta = 0.02 is brief 2's FIT effect, delta = 2 progression points (brief 2 section 4 and its pre-stated criteria), in the utility's own units: BALROG's progression is in [0, 1] and BALROG reports it times 100, so one point is 0.01. Committed before the first scored run; never tuned after a score is seen. Derivation, as for Crafter: an episode that exhausts every allowance of judge/config.toml's [candidate] and [timeouts] (cpus = 1.0 CPUs and memory_mib = 1024 MiB for episode_s = 600 s) is charged delta, half for each resource, so cpu_s = (delta / 2) / (cpus * episode_s) = 0.01 / 600 and memory_gb_s = (delta / 2) / (memory_mib * 2**20 / 1e9 * episode_s) = 0.01 / (1.073741824 * 600). The judge refuses rates that are not this derivation from delta (judge/price.py)."
+  },
+  "rationale": "Observation is NLE's glyphs, top-line message and bottom-line stats, as brief 2 section 2 specifies. `glyphs` is the 21x79 map of glyph ids, each below nle's MAX_GLYPH = 5976. `toplines` is the 256-byte message line under NetHack's own name for it (topl.c), since `message` names a JSON-RPC field in the interface schema (P6). The bottom line is NLE's 27 `blstats` entries, each its own integer field under NLE's name for it (`NLE_BL_<name>`, lowercased), in NLE's order; each has the bounds NLE's observation space declares for blstats, [-2**31, 2**31 - 1], except the three target fields, whose range is their support. Actions are NetHackChallenge's 121 keys in its order, each named by its nle enum class and member, lowercased with every character that is not a letter or digit dropped, so no name splits into a token an interface schema uses (P6). Targets are three bottom-line stats one step ahead, each an integer with a finite support NetHack's source fixes, so no binning threshold is chosen: depth and experience level, the two quantities BALROG's progression reads, and hunger, a clock the World drives. Three of 27 keeps the set small, covers the utility and the World, and leaves out stats whose support is unbounded in the source (score, gold, time, experience points) or depends on role and items (hit points, energy, armour class)."
+}

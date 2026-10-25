@@ -1,0 +1,6 @@
+# P38's mutant `achievements_raw` (brief 2 section 2, Utility): an episode's achievements are BALROG's raw table keys,
+# which are not the manifest's component names.
+[[edit]]
+path = "worlds/nethack/binding.py"
+old = '        return [identifier(k) for k in self.progress.dlvl_list + self.progress.xplvl_list]'
+new = '        return list(self.progress.dlvl_list + self.progress.xplvl_list)'

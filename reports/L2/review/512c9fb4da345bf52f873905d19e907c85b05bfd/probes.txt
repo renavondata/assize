@@ -1,0 +1,119 @@
+Using CPython 3.11.17
+Creating virtual environment at: .venv
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 17 packages in 63ms
+probe root /tmp/assize-probe-338, head 512c9fb4da345bf52f873905d19e907c85b05bfd
+--- clean: want pass, got pass (as expected)
+    RESULT pass
+--- registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe A: measure added to failed.yml's list while still exempt: want fail, got fail (as expected)
+      [FAIL] the exemption measure is not also watched (a watched workflow leaves the list)
+    RESULT fail
+--- probe B: ghost name in failed.yml's list: want fail, got fail (as expected)
+      [FAIL] failed.yml watches only workflows that exist (['ghost'])
+    RESULT fail
+--- probe C1: `not also watched` check deleted, clean tree: want pass, got pass (as expected)
+    RESULT pass
+--- probe C2: check deleted + registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- probe C3: check deleted + registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe C4: check deleted + probe A's edit (exemption also watched): want pass, got pass (as expected)
+    RESULT pass
+--- probe C5: `only existing` check deleted, clean tree: want pass, got pass (as expected)
+    RESULT pass
+--- probe C6: check deleted + registry mutant workflow_unlisted: want fail, got fail (as expected)
+      [FAIL] pins-master.yml (pins-gate) is watched by failed.yml or exempt
+      [FAIL] the exemption pins-master names a workflow that exists
+    RESULT fail
+--- probe C7: check deleted + registry mutant exemption_stale: want fail, got fail (as expected)
+      [FAIL] failed.yml (failures) is watched by failed.yml or exempt
+      [FAIL] the exemption failed names a workflow that exists
+    RESULT fail
+--- probe C8: check deleted + probe B's edit (ghost name): want pass, got fail (UNEXPECTED)
+      [FAIL] failed.yml watches only workflows that exist (['ghost'])
+    RESULT fail
+--- probe D: unwatched .yaml workflow added: want pass, got pass (as expected)
+    RESULT pass
+--- probe D control: the same workflow as .yml: want fail, got fail (as expected)
+      [FAIL] extra.yml (extra) is watched by failed.yml or exempt
+    RESULT fail
+--- probe E: measure removed from FAILED_EXEMPT (the brief's measure_unlisted): want fail, got fail (as expected)
+      [FAIL] measure.yml (measure) is watched by failed.yml or exempt
+    RESULT fail
+done; copy reset to HEAD
+before edit: 528321 1792847229 pyc flags=0 mtime=1792847229 size=528245
+after edit: 528204 1792847357 pyc flags=0 mtime=1792847229 size=528245
+line in file after edit: False
+=== run (default) exit 0
+pins module /tmp/assize-probe-338/harness/pins.py cached /tmp/assize-probe-338/harness/__pycache__/pins.cpython-311.pyc
+check line present in source: False
+check line present in loaded function: False
+  [ok] build.yml names its workflow
+  [ok] failed.yml names its workflow
+  [ok] measure.yml names its workflow
+  [ok] pins-master.yml names its workflow
+  [ok] pins.yml names its workflow
+  [ok] review.yml names its workflow
+  [ok] stale.yml names its workflow
+  [ok] failed.yml's workflow_run list is found
+  [ok] build.yml (build) is watched by failed.yml or exempt
+  [ok] failed.yml (failed) is watched by failed.yml or exempt
+  [ok] measure.yml (measure) is watched by failed.yml or exempt
+  [ok] pins-master.yml (pins-master) is watched by failed.yml or exempt
+  [ok] pins.yml (pins) is watched by failed.yml or exempt
+  [ok] review.yml (review) is watched by failed.yml or exempt
+  [ok] stale.yml (stale) is watched by failed.yml or exempt
+  [ok] the exemption failed names a workflow that exists
+  [ok] the exemption failed is not also watched (a watched workflow leaves the list)
+  [ok] the exemption measure names a workflow that exists
+  [ok] the exemption measure is not also watched (a watched workflow leaves the list)
+  [ok] the exemption pins-master names a workflow that exists
+  [ok] the exemption pins-master is not also watched (a watched workflow leaves the list)
+  [ok] the exemption stale names a workflow that exists
+  [ok] the exemption stale is not also watched (a watched workflow leaves the list)
+RESULT pass
+
+=== run (PYTHONDONTWRITEBYTECODE=1 -B) exit 0
+pins module /tmp/assize-probe-338/harness/pins.py cached /tmp/assize-probe-338/harness/__pycache__/pins.cpython-311.pyc
+check line present in source: False
+check line present in loaded function: False
+  [ok] build.yml names its workflow
+  [ok] failed.yml names its workflow
+  [ok] measure.yml names its workflow
+  [ok] pins-master.yml names its workflow
+  [ok] pins.yml names its workflow
+  [ok] review.yml names its workflow
+  [ok] stale.yml names its workflow
+  [ok] failed.yml's workflow_run list is found
+  [ok] build.yml (build) is watched by failed.yml or exempt
+  [ok] failed.yml (failed) is watched by failed.yml or exempt
+  [ok] measure.yml (measure) is watched by failed.yml or exempt
+  [ok] pins-master.yml (pins-master) is watched by failed.yml or exempt
+  [ok] pins.yml (pins) is watched by failed.yml or exempt
+  [ok] review.yml (review) is watched by failed.yml or exempt
+  [ok] stale.yml (stale) is watched by failed.yml or exempt
+  [ok] the exemption failed names a workflow that exists
+  [ok] the exemption failed is not also watched (a watched workflow leaves the list)
+  [ok] the exemption measure names a workflow that exists
+  [ok] the exemption measure is not also watched (a watched workflow leaves the list)
+  [ok] the exemption pins-master names a workflow that exists
+  [ok] the exemption pins-master is not also watched (a watched workflow leaves the list)
+  [ok] the exemption stale names a workflow that exists
+  [ok] the exemption stale is not also watched (a watched workflow leaves the list)
+RESULT pass
+
+reset

@@ -1,0 +1,5 @@
+# P0bt's mutant (Wish #80's amendment): the log-likelihood ratio is taken of fixed-order against the mixture.
+[[edit]]
+path = "harness/chooser.py"
+old = '''        return (math.log(a) if a > 0 else -math.inf) - (math.log(b) if b > 0 else -math.inf)'''
+new = '''        return (math.log(b) if b > 0 else -math.inf) - (math.log(a) if a > 0 else -math.inf)'''

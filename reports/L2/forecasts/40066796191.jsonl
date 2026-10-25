@@ -1,0 +1,4 @@
+{"id": "81dda0d02251", "ts": "2026-10-24T05:40:47Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40066796191"}, "outcome": true, "witness": "reports/L2/review-cb3de4a7e77e934a05feb2fafbbd01294e5bf9ce.md at 96640431841c: ACCEPT WITH OBLIGATIONS"}
+{"id": "c63b02754435", "ts": "2026-10-24T05:40:47Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40066796191"}, "outcome": true, "witness": "pins run 40053798608 attempt 1 on cb3de4a7e77e: success"}
+{"id": "26649c1b6917", "ts": "2026-10-24T05:40:47Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40066796191"}, "outcome": true, "witness": "pins run 40064027492 attempt 1 on 7ad324bcceee: success"}
+{"id": "5059f2a89144", "ts": "2026-10-24T05:40:47Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40066796191"}, "outcome": true, "witness": "run 40062972131: 59.2 minutes, bound 120"}

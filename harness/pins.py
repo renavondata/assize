@@ -22,7 +22,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from harness import claims, config, context, edits, proc, runner, scan, tree
-from harness.fixtures import daemon, escapee, leaky, litter, witness
+from harness.fixtures import daemon, escapee, leaky, litter, par, witness
 from harness.nested import run_nested
 from harness.pin import ALWAYS, ROOT, Mutant, Pin, RegistryError, validate
 
@@ -671,6 +671,64 @@ def p0bp_stale_bytecode_verdict() -> bool:
                 f"the copy's exclusion of __pycache__ stands between the cache and the verdict")
     shutil.rmtree(work, ignore_errors=True)
     return ok and n.ok and head.ok and bare.ok
+
+
+# The fields of a pins record that name the run itself rather than what it found: where it wrote (its out and scratch
+# directories, its copies), how long each child took, and the configuration file and worker count it ran under. Two
+# serial runs of one head differ in all but the last two; nothing else may differ between N=1 and N>1 (P-par).
+RUN_NAMED = frozenset({"duration_s", "scratch", "tree", "run_dir", "transcript", "config", "workers"})
+
+
+def _record_view(n) -> list[dict]:
+    """`n`'s rows in record order, less RUN_NAMED, with each run directory relative to `n`'s out directory and each
+    copy's tree as `copy`."""
+    out = n.out.resolve()
+    return [{k: v for k, v in r.items() if k not in RUN_NAMED}
+            | ({"run_dir": str(Path(r["run_dir"]).relative_to(out))} if "run_dir" in r else {})
+            | ({"tree": r["tree"] if r["tree"] == "invocation" else "copy"} if "tree" in r else {}) for r in n.rows]
+
+
+def _intervals(n) -> list[tuple[float, float]]:
+    return sorted((d["start"], d["end"]) for d in (json.loads(p.read_text()) for p in n.out.rglob(par.INTERVAL)))
+
+
+def _overlapping(spans: list[tuple[float, float]]) -> int:
+    """How many of the (start-sorted) spans begin before an earlier one ends."""
+    return sum(s < max(e for _, e in spans[:i]) for i, (s, _) in enumerate(spans) if i)
+
+
+def p_par_parallel_record() -> bool:
+    """Brief 2, Wish #134 scope 1: the runner on the synthetic registry gives the same record with one worker and with
+    four, the four really running at once; a worker that dies leaves its task recorded, never dropped."""
+    serial = run_nested("par-1", "fixture.par", "all", config=par.PAR1)
+    four = run_nested("par-4", "fixture.par", "all", config=par.PAR4)
+    for n, workers in ((serial, 1), (four, 4)):
+        n.expect(n.registry.get("workers") == workers and n.exit_code == 0,
+                 f"workers {n.registry.get('workers')} (config {n.registry.get('config')}), exit {n.exit_code}")
+    a, b = _record_view(serial), _record_view(four)
+    diff = next((f"row {i}: {x} | {y}" for i, (x, y) in enumerate(zip(a, b)) if x != y), f"{len(a)} vs {len(b)} rows")
+    four.expect(len(a) == 1 + 3 + 6 + 1 and a == b, f"N=1 and N=4 records equal less {sorted(RUN_NAMED)} ({diff})")
+    s1, s4 = _intervals(serial), _intervals(four)
+    serial.expect(len(s1) == 9 and _overlapping(s1) == 0, f"N=1: {len(s1)} checks, {_overlapping(s1)} overlapping")
+    four.expect(len(s4) == 9 and _overlapping(s4) > 0, f"N=4: {len(s4)} checks, {_overlapping(s4)} overlapping")
+    crash = run_nested("par-crash", "fixture.parcrash", "all", config=par.PAR4)
+    lost = crash.run("fixture/par_crash")
+    lm = crash.run("fixture/par_crash", "fixture/par_crash/lost", "mutant")
+    lt = crash.run("fixture/par_crash", "fixture/par_crash/lost", "twin")
+    crash.expect(lost.get("observed") == "lost" and lost.get("verdict") == "FAILED",
+                 f"a clean run whose worker died is recorded FAILED ({lost.get('verdict')}: {lost.get('worker')})")
+    crash.expect(lm.get("verdict") == "INCONCLUSIVE" and lt.get("observed") == "lost",
+                 f"a mutant whose worker died is recorded INCONCLUSIVE, its twin lost ({lm.get('verdict')}, "
+                 f"{lt.get('observed')})")
+    crash.expect(crash.run("fixture/toy").get("verdict") == "ok"
+                 and crash.run("fixture/toy", "fixture/toy/off_by_one", "mutant").get("verdict") == "KILLED",
+                 "the other pin's tasks run on: clean ok, mutant KILLED")
+    s = crash.summary
+    crash.expect(len(crash.of("run")) == 6 and s.get("clean_total") == 2 and s.get("clean_failed") == 1
+                 and s.get("mutants_total") == 2 and s.get("inconclusive") == 1 and crash.exit_code == 1,
+                 f"denominator: {len(crash.of('run'))} rows, clean {s.get('clean_failed')}/{s.get('clean_total')} "
+                 f"failed, {s.get('inconclusive')}/{s.get('mutants_total')} inconclusive, exit {crash.exit_code}")
+    return serial.ok and four.ok and crash.ok
 
 
 HOST_FACTS = ROOT / "scripts" / "host_facts.sh"
@@ -2629,6 +2687,38 @@ FAILED_EVENTS = (  # (what, workflow, conclusion, selects the report job) -- ins
     ("a pins run concluded success", "pins", "success", False),
     ("a measure run concluded failure", "measure", "failure", False),
 )
+# The workflows failed.yml does not watch, each with its reason (audit 8aae43c8c792 finding 3). `failed` would trigger
+# itself. The other three are debt: watching them edits `.github/`, which a Builder may do only under a signed
+# instruction (P0m), so the list is what the pin holds until that instruction merges; an exemption that failed.yml
+# also watches is stale and fails the pin, so the list can only shrink.
+FAILED_EXEMPT = {"failed": "its own failure would trigger itself",
+                 "measure": "debt: edit of .github/ awaits an instruction",
+                 "pins-master": "debt: edit of .github/ awaits an instruction",
+                 "stale": "debt: edit of .github/ awaits an instruction"}
+
+
+def p0bs_failed_watches_every_workflow() -> bool:
+    """Every workflow under `.github/workflows/` is named in `failed.yml`'s `workflow_run` list or in the stated
+    exemption list, and every exemption names a workflow that exists, so a session or job of any workflow that ends
+    red routes to an issue (Amendment 2 criterion 3; audit 8aae43c8c792 finding 3)."""
+    expect, ok = _expecter()
+    directory = ROOT / ".github" / "workflows"
+    names = {}
+    for path in sorted(directory.glob("*.yml")):
+        found = re.search(r"^name: (\S+)\s*$", path.read_text(), re.M)
+        expect(found is not None, f"{path.name} names its workflow")
+        if found:
+            names[found.group(1)] = path.name
+    watched = re.search(r"^  workflow_run:\n    workflows: \[([^\]]*)\]", (directory / "failed.yml").read_text(), re.M)
+    expect(watched is not None, "failed.yml's workflow_run list is found")
+    listed = {w.strip() for w in watched.group(1).split(",")} if watched else set()
+    for name, file in names.items():
+        expect(name in listed or name in FAILED_EXEMPT, f"{file} ({name}) is watched by failed.yml or exempt")
+    for name in FAILED_EXEMPT:
+        expect(name in names, f"the exemption {name} names a workflow that exists")
+        expect(name not in listed, f"the exemption {name} is not also watched (a watched workflow leaves the list)")
+    expect(not listed - set(names), f"failed.yml watches only workflows that exist ({sorted(listed - set(names))})")
+    return ok()
 
 
 def p0z_red_pins_routes() -> bool:
@@ -3225,6 +3315,20 @@ def p0bm_trusted_base() -> bool:
     for what, case, want in cases:
         got = trusted.findings(case, decl, frozenset({adm}))
         expect(got == want, f"fixture: {what} is refused ({got}, want {want})")
+    # instruction #315: a signed instruction's heading in a brief admits as an audit's does; one no brief carries does not
+    briefs = Path(tempfile.mkdtemp(prefix="assize-p0bm-", dir=context.scratch))
+    (briefs / "docs" / "briefs").mkdir(parents=True)
+    (briefs / "docs" / "briefs" / "brief-9-x.md").write_text("# Brief\n\n## Admitted by instruction #7\n\n- `/X @o`\n")
+    signed = trusted.admissions(briefs)
+    expect(signed == frozenset({"Admitted by instruction #7"}),
+           f"fixture: an `Admitted by instruction #<n>` heading in a brief is an admission ({set(signed)})")
+    by_instruction = {**listed, "codeowners": {"/X @o": "Admitted by instruction #7"}}
+    got = trusted.findings(by_instruction, decl, frozenset({adm}) | signed)
+    expect(got == [], f"fixture: an entry admitted by an instruction heading present in a brief passes ({got})")
+    unheaded = {**listed, "codeowners": {"/X @o": "Admitted by instruction #8"}}
+    got = trusted.findings(unheaded, decl, frozenset({adm}) | signed)
+    want = ["unadmitted codeowners /X @o: 'Admitted by instruction #8'"]
+    expect(got == want, f"fixture: an entry naming an instruction heading no brief carries is refused ({got}, want {want})")
     expect(trusted.grown({"secret": {"S": adm}}, {"secret": {"S": adm, "U": adm}}) == [f"secret U: {adm}"],
            "fixture: an entry absent from the earlier list is growth")
     expect(trusted.grown({}, {"secret": {"S": adm}}) == [f"secret S: {adm}"],
@@ -3895,6 +3999,88 @@ def p0ag_switchback() -> bool:
     print(f"    real: {len(chooser.chose_history(root))} chose lines in history")
     expect(not found, f"real switchback: findings {[str(f) for f in found]}")
     shutil.rmtree(work, ignore_errors=True)
+    return ok()
+
+
+def _round_act(ftype: str, rid: str, args: dict) -> dict:
+    claim = f"{ftype} of round {rid}"
+    return {"id": claims.forecast_id(claim, PICK_TS), "ts": PICK_TS, "claim": claim, "p": 0.5, "type": ftype,
+            "proposer": {"kind": "builder", "model": "m", "session": "p0bt"}, "args": {**args, "round": rid}}
+
+
+def _res(row: dict, outcome: bool, **extra) -> dict:
+    return {"id": row["id"], "ts": PICK_NOW, "proposer": {"kind": "mechanism"}, "outcome": outcome, **extra}
+
+
+def p0bt_switchback_report() -> bool:
+    """The switchback's four outcomes are reported for every regime, with their denominators: guy-items per merged
+    item (unmerged choices priced too), the overturn rate of the seen stratum with the unexposed (void) counted, the
+    wish-to-merge latency with merges citing no wish counted, and the LLR of the mixture against `fixed-order` on the
+    resolved picks, never clipped; the evidence bound is ln K + (T - 1) ln(1 / (1 - alpha)) (Wish #80's amendment)."""
+    from harness import chooser
+
+    expect, ok = _expecter()
+    c1, c2, c3 = ["#11", "#12"], ["#11", "#12"], ["brief item Wish #5 x"]
+    m1 = _pick("mixture", c1, "#11", rid="r1", dist={"#11": 0.5, "#12": 0.5})
+    f1 = _pick("fixed-order", c1, "#11", rid="r1")
+    m2 = _pick("mixture", c2, "#12", rid="r2", dist={"#11": 0.25, "#12": 0.75})
+    f2 = _pick("fixed-order", c2, "#11", rid="r2")
+    m3 = _pick("mixture", c3, c3[0], rid="r3")
+    g1, k1 = _round_act("merged", "r1", {"pr": 21}), _round_act("not_overturned", "r1", {"item": 11})
+    g2, k2 = _round_act("merged", "r2", {"pr": 22}), _round_act("not_overturned", "r2", {"item": 12})
+    g3, k3 = _round_act("merged", "r3", {"pr": 23}), _round_act("not_overturned", "r3", {"item": 23})
+    pick = {"answer": "next"}
+    rows = [m1, f1, m2, f2, m3, g1, k1, g2, k2, g3, k3,
+            _res(m1, True, pick={"kind": "item", "item": "#11"}, **pick),
+            _res(f1, True, pick={"kind": "item", "item": "#11"}, **pick),
+            _res(m2, True, pick={"kind": "item", "item": "#12"}, **pick),
+            _res(f2, False, pick={"kind": "item", "item": "#12"}, **pick),
+            _res(m3, False, void="unexposed"), _res(g1, True), _res(k1, True), _res(g2, False), _res(k2, False),
+            _res(g3, True), _res(k3, False, void="unexposed")]
+    choices = [{"regime": "fixed-order", "chose": "#11", "round": "r1"}, {"regime": "chooser", "chose": "#12", "round": "r2"},
+               {"regime": "chooser", "chose": c3[0], "round": "r3"}, {"regime": "chooser", "chose": "#13", "round": None}]
+    reached = [{"item": 22, "route": "awaits-guy", "at": PICK_WITHIN}, {"item": 11, "route": "assigned", "at": PICK_WITHIN},
+               {"item": 99, "route": "assigned", "at": PICK_WITHIN}, {"item": 23, "route": "elsewhere", "at": PICK_WITHIN}]
+    merged_at = {21: PICK_AFTER, 23: PICK_AFTER}
+    wish_at = {c3[0]: PICK_TS}
+    got = {r.regime: r for r in chooser.switchback_report(choices, rows, reached, merged_at, wish_at)}
+    fixed, chosen = got.get("fixed-order"), got.get("chooser")
+    expect(list(got) == list(chooser.REGIMES), f"every regime is reported, in order: {list(got)}")
+    if fixed is None or chosen is None:
+        return ok()
+    zero = dict.fromkeys(chooser.STATES, 0)
+    expect((fixed.choices, chosen.choices) == (1, 3), f"choices per regime: {fixed.choices}, {chosen.choices}")
+    expect(fixed.merged == zero | {"true": 1} and chosen.merged == zero | {"true": 1, "false": 1, "unfiled": 1},
+           f"merged by state, the unfiled choice counted: {dict(fixed.merged)}, {dict(chosen.merged)}")
+    expect((fixed.guy_items, chosen.guy_items) == (1, 1),
+           f"guy-items on the choices' items, an unmerged choice's priced, an unlisted route not: "
+           f"{fixed.guy_items}, {chosen.guy_items}")
+    expect(fixed.kept == zero | {"true": 1} and chosen.kept == zero | {"false": 1, "void": 1, "unfiled": 1},
+           f"overturns by exposure, void counted: {dict(fixed.kept)}, {dict(chosen.kept)}")
+    expect(fixed.latencies_h == () and fixed.no_wish == 1 and chosen.latencies_h == (360.0,) and chosen.no_wish == 0,
+           f"wish-to-merge: {fixed.latencies_h} (no wish {fixed.no_wish}), {chosen.latencies_h} (no wish {chosen.no_wish})")
+    expect(fixed.picks == zero | {"true": 1} and chosen.picks == zero | {"true": 1, "void": 1, "unfiled": 1},
+           f"picks by state, void counted: {dict(fixed.picks)}, {dict(chosen.picks)}")
+    expect(abs(fixed.llr - math.log(0.5)) < 1e-12 and chosen.llr == math.inf,
+           f"LLR of the mixture against fixed-order, unclipped: {fixed.llr}, {chosen.llr}")
+    only = {r.regime: r for r in chooser.switchback_report(choices[:1], rows, reached, merged_at, wish_at)}
+    text = chooser.report_text(list(only.values()), 2, 1)
+    expect(list(only) == list(chooser.REGIMES) and "regime chooser: choices 0; no resolved outcome" in text,
+           "a regime with no choice is reported as having no resolved outcome, never dropped")
+    for k, t, alpha, want in ((2, 5, 0.25, math.log(2) + 4 * math.log(4 / 3)), (3, 1, 1.0, math.log(3)),
+                              (2, 3, 1.0, math.inf), (2, 0, 0.5, 0.0)):
+        b = chooser.evidence_bound(k, t, alpha)
+        expect(b == want or abs(b - want) < 1e-12, f"evidence bound K={k} T={t} alpha={alpha}: {b}, want {want}")
+    text = chooser.report_text(list(got.values()), 2, 1)
+    expect("over 2 resolved rounds" in text and "at most inf nats (K 2, alpha 1.0000" in text,
+           "two resolved rounds and one change-point: alpha 1, so the report states no bound (inf)")
+    text = chooser.report_text(list(got.values()), 2, 2)
+    expect("over 2 resolved rounds" in text and "at most inf nats" in text, "alpha is capped at 1")
+    tail = chooser.RegimeReport("chooser", 2, zero, 0, zero, (), 0, zero | {"true": 2}, -1.0)
+    text = chooser.report_text([tail, tail], 2, 1)
+    bound = math.log(2) + 3 * math.log(1 / (1 - 1 / 3))
+    expect("-2.0000 nats over 4 resolved rounds" in text and f"at most {bound:.4f} nats (K 2, alpha 0.3333" in text,
+           f"four resolved rounds, one change-point: the bound from alpha 1/3 ({bound:.4f})")
     return ok()
 
 
@@ -4571,7 +4757,7 @@ def attempt(seed):
             if ep.done:
                 break
             ep.step(a)
-            turns.append(ep.observation["blstats"][20])
+            turns.append(ep.observation["time"])
         rec.update(turn=max(turns), done=ep.done, end_status=ep.end_status)
         ep.close()
     except Exception as e:
@@ -4751,6 +4937,177 @@ def p37_nethack_utility() -> bool:
                f"seed {seed}: utility {s['utility']} ({s['highest']}) is the golden {utility} ({highest})")
         expect(s["done"] and bool(s["end_reason"]), f"seed {seed}: the episode ends and BALROG reads its end "
                                                     f"({s['end_reason']!r})")
+    return ok()
+
+
+# P38's child (brief 2 section 2, Observations and Prediction targets): what the NetHack manifest's names and bounds are
+# derived from in the installed nle (its action set, glyph and message shapes, bottom-line stat names and declared
+# bounds, step limit, and the dungeon.def it ships), whether the judge binds and prices the World, and, per seed, P36's
+# seeded random action stream played through the judge's own Episode protocol: every manifest departure of every
+# emitted observation, every value each target's field realises, the termination and the achievements.
+NETHACK_MANIFEST_RUN = """
+import json, random, sys
+from pathlib import Path
+import nle
+from nle import nethack
+from nle.env.tasks import NetHackChallenge
+from judge import episodes, evaluate, price
+from worlds.crafter.binding import violations
+from worlds.nethack import binding
+
+m = binding.manifest()
+stock = NetHackChallenge()
+box = stock.observation_space["blstats"]
+out = {"bound": evaluate.bound(), "manifest": m, "endings": sorted(episodes.WORLD_ENDINGS),
+       "nle": binding.NLE_VERSION, "max_steps": stock._max_episode_steps,
+       "actions": [binding.identifier(type(a).__name__ + a.name) for a in stock.actions],
+       "components": [binding.identifier(k) for k in
+                      json.loads((binding.BALROG_DIR / "achievements.json").read_text())],
+       "blstats": [n[len("NLE_BL_"):].lower() for n in sorted((n for n in dir(nethack) if n.startswith("NLE_BL_")),
+                                                              key=lambda n: getattr(nethack, n))],
+       "blstats_box": [int(box.low.min()), int(box.high.max())], "max_glyph": nethack.MAX_GLYPH,
+       "dungeon_shape": list(nethack.DUNGEON_SHAPE), "message_shape": list(nethack.MESSAGE_SHAPE),
+       "dungeon_def": (Path(nle.__file__).with_name("nethackdir") / "dat" / "dungeon.def").read_text()}
+try:
+    price.of(m)
+    out["priced"] = "ok"
+except Exception as e:
+    out["priced"] = f"{type(e).__name__}: {e}"
+played = (set(nethack.CompassDirection) | set(nethack.CompassDirectionLonger)
+          | {nethack.MiscAction.MORE, nethack.Command.ESC, nethack.Command.SEARCH})
+keys = [i for i, a in enumerate(stock.actions) if a in played]
+stock.close()
+
+def attempt(seed):
+    rec = {}
+    try:
+        rng = random.Random(seed)
+        ep = binding.Episode(seed, m)
+        found, realised = [], {t["name"]: set() for t in m["targets"]}
+
+        def see(obs):
+            found.extend(f"t={ep.t}: {v}" for v in violations(obs, m["observation"]))
+            for t in m["targets"]:
+                realised[t["name"]].add(obs.get(t["field"]))
+
+        see(ep.observation)
+        for a in [rng.choice(keys) for _ in range(int(sys.argv[2]))]:
+            if ep.done:
+                break
+            see(ep.step(a))
+        rec.update(violations=found[:5], n_violations=len(found), realised={k: sorted(v, key=str)
+                                                                             for k, v in realised.items()},
+                   termination=ep.termination, achievements=ep.achievements, done=ep.done, steps=ep.t,
+                   world_seed=binding.world_seed(seed))
+        ep.close()
+    except Exception as e:
+        rec["error"] = f"{type(e).__name__}: {e}"
+    return rec
+
+out["seeds"] = {seed: attempt(seed) for seed in json.loads(sys.argv[1])}
+print(json.dumps(out))
+"""
+# The bounds NetHack 3.6.7's source fixes for the two other target fields: u.ulevel's MAXULEV (global.h) and the last
+# of hack.h's hunger_state_types, STARVED. NLE's zeroed observation outside a running game adds 0 to every support.
+NETHACK_MAXULEV = 30
+NETHACK_STARVED = 6
+# Brief 2's FIT effect, delta = 2 progression points (section 4, pre-stated criteria), in the utility's units: BALROG's
+# progression is in [0, 1] and BALROG reports it times 100.
+NETHACK_DELTA = Fraction(2, 100)
+# Per seed, the achievements P36's action stream for it reaches, recorded before any scored run: P37's golden utility
+# (seed 1 stays on the first level, seed 3 reaches the second), in manifest names.
+NETHACK_ACHIEVEMENTS_GOLDEN = {1: ["dlvl1", "xp1"], 3: ["dlvl1", "dlvl2", "xp1"]}
+
+
+def nethack_depths(dungeon_def: str) -> tuple[int, int]:
+    """The shallowest and deepest depth(&u.uz) a game of `dungeon_def` can reach, as dungeon.c's init_dungeons lays
+    the dungeons out: a dungeon of `(base, rand)` has rn1(rand, base), at most base + rand - 1, levels (base when rand
+    is 0); Gehennom starts one level below the Dungeons of Doom's bottom; the Elemental Planes are entered upward from
+    depth 1 at their ENTRY level, counted from their bottom, and shifted one more level up for their dummy level."""
+    dungeons, current = {}, None
+    for line in dungeon_def.splitlines():
+        d = re.match(r'DUNGEON:\s*"([^"]+)"\s*"[^"]*"\s*\((\d+),\s*(\d+)\)', line)
+        if d:
+            current = d.group(1)
+            dungeons[current] = {"levels": int(d.group(2)) + max(int(d.group(3)) - 1, 0), "entry": 0}
+        e = re.match(r"ENTRY:\s*(-?\d+)", line)
+        if e and current:
+            dungeons[current]["entry"] = int(e.group(1))
+    planes = dungeons["The Elemental Planes"]
+    entry = planes["levels"] + planes["entry"] + 1
+    start = (1 - 1) - (entry - 1)
+    start -= planes["levels"] > 1 - start
+    return start, dungeons["The Dungeons of Doom"]["levels"] + dungeons["Gehennom"]["levels"]
+
+
+def p38_nethack_manifest() -> bool:
+    """The judge binds and prices NetHack from its manifest (brief 2 A2, P19, P20): the manifest's actions, utility
+    components and observation names, shapes and bounds are those the installed nle and the vendored BALROG table give;
+    its three targets' supports are the derivation from NetHack's source and the dungeon.def nle ships, with 0 for NLE's
+    zeroed observation; its delta is brief 2's FIT effect; and P36's seeded streams, played through the judge's Episode
+    protocol, emit only observations the manifest declares, realise only supported target values, end with a judge
+    ending, and reach their golden achievements, in manifest names (brief 2 section 2, Observations and Prediction
+    targets)."""
+    expect, ok = _expecter()
+    child = subprocess.run(proc.python("-c", NETHACK_MANIFEST_RUN, json.dumps(sorted(NETHACK_ACHIEVEMENTS_GOLDEN)),
+                                       str(NETHACK_STEPS)), cwd=ROOT, env=proc.child_env(), capture_output=True,
+                           text=True, preexec_fn=proc.setup(False))
+    if child.returncode:
+        raise RuntimeError(f"manifest child exited {child.returncode}: {child.stderr.strip()[-500:]}")
+    r = json.loads(child.stdout)
+    m = r["manifest"]
+    expect("nethack" in r["bound"], f"the judge binds nethack ({r['bound']})")
+    expect(m["world"] == "nethack" and m["source"] == {"package": "nle", "version": r["nle"]},
+           f"the manifest names nethack and nle {r['nle']} ({m['world']}, {m['source']})")
+    expect(m.get("episode_length") == r["max_steps"], f"episode_length {m.get('episode_length')} is "
+                                                       f"NetHackChallenge's step limit {r['max_steps']}")
+    expect(m["actions"] == r["actions"], f"the {len(m['actions'])} actions are NetHackChallenge's "
+                                         f"{len(r['actions'])}, named and ordered by the binding's rule")
+    expect(m["utility"]["components"] == r["components"],
+           f"the {len(m['utility']['components'])} components are the vendored table's {len(r['components'])} keys")
+    fields = {f["name"]: f for f in m["observation"]}
+    expect(list(fields) == ["glyphs", "toplines"] + r["blstats"],
+           f"the observation is glyphs, toplines and NLE's bottom-line stats in order ({list(fields)[:4]}...)")
+    expect(fields.get("glyphs", {}).get("shape") == r["dungeon_shape"]
+           and fields.get("glyphs", {}).get("range") == [0, r["max_glyph"] - 1],
+           f"glyphs: shape {r['dungeon_shape']}, ids below MAX_GLYPH {r['max_glyph']} ({fields.get('glyphs')})")
+    expect(fields.get("toplines", {}).get("shape") == r["message_shape"]
+           and fields.get("toplines", {}).get("range") == [0, 255],
+           f"toplines: shape {r['message_shape']}, bytes ({fields.get('toplines')})")
+    targets = {t["field"]: t for t in m["targets"]}
+    loose = {n: fields[n]["range"] for n in r["blstats"] if n in fields and n not in targets
+             and fields[n]["range"] != r["blstats_box"]}
+    expect(not loose, f"every other bottom-line stat has NLE's declared bounds {r['blstats_box']} ({loose})")
+    shallowest, deepest = nethack_depths(r["dungeon_def"])
+    derived = {"depth": list(range(min(shallowest, 0), deepest + 1)), "xp": list(range(0, NETHACK_MAXULEV + 1)),
+               "hunger": list(range(0, NETHACK_STARVED + 1))}
+    expect(sorted(targets) == sorted(derived), f"the targets are depth, xp and hunger ({sorted(targets)})")
+    for name, want in derived.items():
+        t = targets.get(name, {})
+        expect(t.get("support") == want, f"{name}: support {t.get('support', [])[:3]}...{t.get('support', [])[-1:]} "
+                                         f"is the derived {want[:3]}...{want[-1:]}")
+        expect(fields.get(name, {}).get("range") == [want[0], want[-1]],
+               f"{name}: the field's range {fields.get(name, {}).get('range')} is its support's bounds")
+    expect((shallowest, deepest) == (-5, 53), f"dungeon.def gives depths {shallowest} to {deepest}")
+    expect(r["priced"] == "ok", f"the judge prices the World from its own delta ({r['priced']})")
+    expect(Fraction(m["price"]["delta"]).limit_denominator(10**6) == NETHACK_DELTA,
+           f"delta {m['price']['delta']} is brief 2's 2 progression points ({float(NETHACK_DELTA)})")
+    for seed, golden in NETHACK_ACHIEVEMENTS_GOLDEN.items():
+        s = r["seeds"][str(seed)]
+        expect("error" not in s, f"seed {seed}: the Episode protocol plays the stream ({s.get('error')})")
+        if "error" in s:
+            continue
+        expect(s["n_violations"] == 0, f"seed {seed}: {s['steps']} steps, {s['n_violations']} manifest departures "
+                                       f"({s['violations']})")
+        for t in m["targets"]:
+            off = [v for v in s["realised"][t["name"]] if v not in t["support"]]
+            expect(not off, f"seed {seed}: {t['name']} realises {s['realised'][t['name']]}, all in its support "
+                            f"(outside: {off})")
+        expect(s["done"] and s["termination"] in r["endings"], f"seed {seed}: ends {s['termination']!r}, a judge "
+                                                               f"ending {r['endings']}")
+        expect(s["achievements"] == golden and set(golden) <= set(m["utility"]["components"]),
+               f"seed {seed}: achievements {s['achievements']} are the golden {golden}, manifest components")
+        expect(s["world_seed"] == seed, f"seed {seed}: world_seed {s['world_seed']}")
     return ok()
 
 
@@ -5580,10 +5937,10 @@ def p19_world_discovery() -> bool:
     """The judge binds a World by its directory alone: a fixture directory with a manifest and a binding, added to a copy
     of the tree with no edit to `judge/`, is bound under its name, its own binding is the one imported, and `evaluate()`
     takes it past the World check to the runtime check; a directory with a binding but no manifest is not bound, and is
-    refused `unknown_world`. Crafter stays bound. No seed is issued to any fixture request (brief 2 A2)."""
+    refused `unknown_world`. Crafter and NetHack stay bound. No seed is issued to any fixture request (brief 2 A2)."""
     expect, ok = _expecter()
     got = _fixture_worlds()
-    expect(got["bound"] == ["borrowed", "crafter", "fx", "rederived", "undelta", "unpriced"],
+    expect(got["bound"] == ["borrowed", "crafter", "fx", "nethack", "rederived", "undelta", "unpriced"],
            f"bound: every directory with a manifest and a binding, and only those ({got['bound']})")
     expect(got["fx_binding"] == "fx", f"fx's own binding is imported ({got['fx_binding']})")
     for w, want in (("fx", "unknown_runtime"), ("crafter", "unknown_runtime"), ("bare", "unknown_world")):
@@ -7654,6 +8011,18 @@ PINS = [
         p0br_auditor_differs, (Mutant("elect_ignores_exclusions", _edits("P0br_elect_ignores_exclusions")),
                                Mutant("first_draw_barred", _edits("P0br_first_draw_barred")),
                                Mutant("empty_falls_back", _edits("P0br_empty_falls_back"))), HARNESS),
+    Pin("P0bs", "failed.yml watches every workflow but its own, so no workflow's red run routes nowhere",
+        p0bs_failed_watches_every_workflow, (Mutant("workflow_unlisted", _edits("P0bs_workflow_unlisted")),
+                                             Mutant("exemption_stale", _edits("P0bs_exemption_stale"))),
+        (".github/workflows/**",)),
+    Pin("P0bt", "the switchback's four outcomes are reported for every regime with denominators, voids counted, the LLR "
+                "unclipped and its evidence bound from the derived alpha",
+        p0bt_switchback_report, (Mutant("empty_regime_dropped", _edits("P0bt_empty_regime_dropped")),
+                                 Mutant("void_uncounted", _edits("P0bt_void_uncounted")),
+                                 Mutant("unmerged_unpriced", _edits("P0bt_unmerged_unpriced")),
+                                 Mutant("llr_reversed", _edits("P0bt_llr_reversed")),
+                                 Mutant("llr_clipped", _edits("P0bt_llr_clipped")),
+                                 Mutant("bound_without_alpha", _edits("P0bt_bound_without_alpha"))), HARNESS),
     Pin("P0i", "a same-length edit landing in the second a bytecode cache recorded takes effect in a copy",
         p0i_no_stale_bytecode, (Mutant("pycache_top_level_only", _edits("P0i_pycache_top_level_only")),
                                  Mutant("pycache_prefix_unset", _edits("P0i_pycache_prefix_unset"))), HARNESS),
@@ -7661,6 +8030,11 @@ PINS = [
         p0bp_stale_bytecode_verdict, (Mutant("bytecode_defences_off", _edits("P0bp_bytecode_defences_off")),
                                       Mutant("prefix_off_alone", _edits("P0bp_prefix_off_alone")),
                                       Mutant("exclusion_off_alone", _edits("P0bp_exclusion_off_alone"))), HARNESS),
+    Pin("P-par", "the runner gives the same record with one worker and with four, the four running at once; a dead "
+                 "worker's task is recorded, not dropped",
+        p_par_parallel_record, (Mutant("completion_order", _edits("P-par_completion_order")),
+                                Mutant("shared_scratch", _edits("P-par_shared_scratch")),
+                                Mutant("crash_dropped", _edits("P-par_crash_dropped"))), HARNESS),
     Pin("P0bq", "an awaits-guy label starts the next master Builder, queued behind any Builder in progress on master",
         p0bq_awaits_guy_queues_behind_master,
         (Mutant("awaits_guy_trigger_dropped", _edits("P0aj_awaits_guy_clause_removed")),
@@ -7869,7 +8243,9 @@ PINS = [
         p0bm_trusted_base, (Mutant("unlisted_secret_added", _edits("P0bm_unlisted_secret_added")),
                             Mutant("admission_unchecked", _edits("P0bm_admission_unchecked")),
                             Mutant("growth_unreported", _edits("P0bm_growth_unreported")),
-                            Mutant("inherit_unread", _edits("P0bm_inherit_unread"))),
+                            Mutant("inherit_unread", _edits("P0bm_inherit_unread")),
+                            Mutant("instruction_admission_ignored", _edits("P0bm_instruction_admission_ignored")),
+                            Mutant("admission_without_heading", _edits("P0bm_admission_without_heading"))),
         HARNESS + (".github/workflows/**", "CODEOWNERS", "docs/briefs/**")),
     Pin("P0ba", "a STATUS's header sha and pins citation are printed by the harness from the run's own head_sha, and a "
                 "push of a STATUS P0l would reject is refused",
@@ -8085,4 +8461,11 @@ PINS = [
                               Mutant("checksum_unchecked", _edits("P37_checksum_unchecked")),
                               Mutant("progress_not_updated", _edits("P37_progress_not_updated")),
                               Mutant("minihack_progress", _edits("P37_minihack_progress"))), JUDGE_SIDE),
+    Pin("P38", "the judge binds and prices NetHack from a manifest whose names, bounds and target supports are derived "
+               "from nle, BALROG and NetHack's source, and whose observations and targets an episode honours",
+        p38_nethack_manifest, (Mutant("endgame_depths_dropped", _edits("P38_endgame_depths_dropped")),
+                               Mutant("zeroed_xp_dropped", _edits("P38_zeroed_xp_dropped")),
+                               Mutant("delta_in_points", _edits("P38_delta_in_points")),
+                               Mutant("observation_raw", _edits("P38_observation_raw")),
+                               Mutant("achievements_raw", _edits("P38_achievements_raw"))), JUDGE_SIDE),
 ]

@@ -1,0 +1,6 @@
+# P-par's second mutant (brief 2, Wish #134): every run takes one fixed scratch root instead of its own, so two
+# workers running at once share it, and the copy one of them makes there.
+[[edit]]
+path = "harness/runner.py"
+old = "    scratch = Path(tempfile.mkdtemp(prefix=\"assize-scratch-\", dir=scratch_root))\n"
+new = "    scratch = Path(scratch_root or tempfile.gettempdir(), \"assize-scratch-shared\"); scratch.mkdir(exist_ok=True)\n"

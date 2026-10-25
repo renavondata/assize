@@ -363,3 +363,8 @@ Pin that can fail: a process-changing draft with no `price` line is accepted by 
 4. The L2 verdict line in the root `REPORT.md` is written when item 3 is done, as the ladder requires. The agent repository may use the sealed image from item 2 on.
 
 CLAUDE.md's ladder does not change. L2's exit gate still requires the zero diff, a NetHack verdict on the host, the released image and the freeze. Only the order inside L2 moves, from L2a → L2b → L2c to L2a → L2c → L2b.
+
+## Admitted by instruction #315
+
+- CODEOWNERS `/judge/ @gfrmin`
+- CODEOWNERS `/worlds/spec/ @gfrmin`

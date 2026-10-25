@@ -1,0 +1,8 @@
+# P0bt's mutant (Wish #80's amendment): a void resolution is read as still open, so the unexposed stratum and the void
+# picks are not counted.
+[[edit]]
+path = "harness/chooser.py"
+old = '''        if row["id"] in void:
+            return "void"'''
+new = '''        if row["id"] in void:
+            return "open"'''
