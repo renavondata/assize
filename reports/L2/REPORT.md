@@ -103,3 +103,25 @@ Content-addressed: the digest above is re-derived offline by P21 from the tree o
 
 ### Addendum: where P21 reads the recorded digest
 Harness copies carry no `reports/`, so P21's mutants cannot edit this file (CI run 39710710128: P21 clean ok, its three mutants STALE). The digest is therefore also committed in `release/seal.toml`, and P21 checks both: the composed digest against `release/seal.toml`, and this report against `release/seal.toml` at the invocation tree, with a fixture-tested rule (mutant `report_unchecked`). In that same run, P21's clean case passed on GitHub's `ubuntu-latest` runner, which has a different podman, so the digest above was re-derived on a second host.
+
+## L2c — sealed (instruction #342 item 3; PR #352): released; the Crafter host verdict is NOT obtained
+
+VERDICT (L2c, a layer-internal milestone; the root `REPORT.md` is not touched): **RELEASED, NOT YET SEALED.** The image is pushed and pulled back by digest and the digests agree. The Crafter host verdict under it was not obtained: the one `measure` run was cancelled by `measure.yml`'s `timeout-minutes: 45` before its pilot began. The instruction's stop rule for a UNFIT or MARGINAL verdict does not apply; there is no verdict. The L2 verdict line is therefore not written (a claim without its witness).
+
+Denominators: one release run, one measure run, one pins CI run on the code head.
+
+### Released (item 3a)
+- Release run 40204564144 (`release.yml`, success, head 4665616; transcript `reports/L2/seal/release-40204564144.txt`): composed manifest `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c`, equal to `release/seal.toml`'s before the push (step "Composed digest equals the seal").
+- Pushed reference: `ghcr.io/renavondata/assize-judge@sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c` with `GITHUB_TOKEN` (`packages: write`); no credential or package setting was missing.
+- Pulled digest (`skopeo inspect --format '{{.Digest}}'` of that reference): `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c`, equal to `release/seal.toml`'s and to the digest P21 holds on the head.
+- Pin: P0bu, 5 mutants (`compare_skipped`, `pulled_unchecked`, `failure_allowed`, `digests_unpreserved`, `permissions_widened`), each KILLED with a passing twin in pins CI run 40208386791 on f7abe49 (reports/L2/ci/40208386791.json): clean 103/103, mutants 347/347 KILLED, twins 347/347, leaked 0, stale 0, inconclusive 0, non-causal 0, exit 0.
+
+### Host verdict (item 3b): not obtained
+- `measure` run 40204672896 on head 4665616, label `measure` applied to PR #352 (facts `reports/L2/seal/measure-40204672896-facts.txt`, excerpt `reports/L2/seal/measure-40204672896-excerpt.txt`): `make measure` ran `make pins` on the host for 45 minutes and was cancelled by the step timeout with 255 of 342 mutant results printed; the pilot runs only after the pins pass, so it never started. The pins CI run on bb16260 took 8 minutes (run 40198472606) and the one on f7abe49 took 68 minutes (40208386791), both on hosted runners, so the host's pins-then-pilot sequence does not fit 45 minutes at 347 mutants.
+- Also on that run, five clean pins printed `CLEAN FAILED` (P0m, P0r, P0x, P0ac, P0bm). P0bm was a real failure fixed at f7abe49 (the trusted base lacked `release.yml`; see below). P0m, P0r, P0x and P0ac read the GitHub API or the branch and are not witnessed either way by this run.
+- What would unblock it: an instruction raising `measure.yml`'s `timeout-minutes` (an edit of `.github/`, which instruction #342 does not name), after which `measure` is re-applied to the PR head.
+
+### Deviations, recorded
+- `release.yml`'s `paths:` also lists `.github/workflows/release.yml`, so that a change to the workflow is witnessed by a run of it.
+- `harness/trusted_base.toml` lists `release.yml` and `release.yml github.token`, admitted by a new heading `## Admitted by instruction #342` in brief 2 (P0bm, audit criterion 7); the instruction's file list allows the brief only if item 2 was not merged separately.
+- `FAILED_EXEMPT` in `harness/pins.py` names `release`: its permissions cannot open an issue, and listing it in `failed.yml` is an edit of `.github/` the instruction does not name.

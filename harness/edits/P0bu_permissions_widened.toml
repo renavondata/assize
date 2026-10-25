@@ -1,0 +1,5 @@
+# P0bu's mutant `permissions_widened` (instruction #342 item 3a): the workflow's token may also write Actions.
+[[edit]]
+path = ".github/workflows/release.yml"
+old = "  contents: read\n  packages: write\n"
+new = "  contents: read\n  packages: write\n  actions: write\n"

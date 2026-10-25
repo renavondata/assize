@@ -1,0 +1,8 @@
+measure	make measure (host facts, then make pins)	2026-10-25T15:03:46.1126515Z CLEAN FAILED: P0m (observed fail)
+measure	make measure (host facts, then make pins)	2026-10-25T15:43:12.6696780Z ##[error]The operation was canceled.
+measure	make measure (host facts, then make pins)	2026-10-25T15:03:46.1126515Z CLEAN FAILED: P0m (observed fail)
+measure	make measure (host facts, then make pins)	2026-10-25T15:03:46.1130601Z CLEAN FAILED: P0r (observed fail)
+measure	make measure (host facts, then make pins)	2026-10-25T15:03:46.1148344Z CLEAN FAILED: P0x (observed fail)
+measure	make measure (host facts, then make pins)	2026-10-25T15:03:46.1152542Z CLEAN FAILED: P0ac (observed fail)
+measure	make measure (host facts, then make pins)	2026-10-25T15:03:46.1165720Z CLEAN FAILED: P0bm (observed fail)
+measure	make measure (host facts, then make pins)	2026-10-25T15:43:12.6696780Z ##[error]The operation was canceled.

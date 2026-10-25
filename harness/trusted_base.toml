@@ -12,6 +12,7 @@
 "measure.yml" = "Audit findings at 8aae43c8c792"
 "pins-master.yml" = "Audit findings at 8aae43c8c792"
 "pins.yml" = "Audit findings at 8aae43c8c792"
+"release.yml" = "Admitted by instruction #342"
 "review.yml" = "Audit findings at 8aae43c8c792"
 "stale.yml" = "Audit findings at 8aae43c8c792"
 
@@ -33,6 +34,7 @@
 "failed.yml secrets.ASSIZE_BUILDER_TOKEN" = "Audit findings at 8aae43c8c792"
 "pins-master.yml github.token" = "Audit findings at 8aae43c8c792"
 "pins.yml github.token" = "Audit findings at 8aae43c8c792"
+"release.yml github.token" = "Admitted by instruction #342"
 "review.yml secrets.ASSIZE_REVIEWER_TOKEN" = "Audit findings at 8aae43c8c792"
 "review.yml secrets.CLAUDE_CODE_OAUTH_TOKEN" = "Audit findings at 8aae43c8c792"
 "stale.yml github.token" = "Audit findings at 8aae43c8c792"

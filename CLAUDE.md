@@ -182,3 +182,10 @@ No two pull requests write the same path merely because every pull request write
 - A1.6 and rule 1 of Amendment 4: a session's forecast records are appended to `reports/L<n>/forecasts/<session id>.jsonl`, a file no other session writes. The ledger is the union of `reports/L<n>/forecasts.jsonl` (frozen, still read) and every file under `reports/L<n>/forecasts/`, ordered by `ts` then `id`. Rules 1 and 2 of Amendment 4 (P0q, P0r) apply to every file of the directory exactly as they applied to the single file.
 - A1.8: a Builder session writes `reports/L<n>/status/<branch>.md` in the shape of A1.8. `python -m harness.ledger status` prints the master view, the file of the most recently merged pull request by first-parent order on master; "no merge replaces STATUS.md with one whose header date is older" becomes "the master view is the newest by merge order" (P0ar). `reports/L<n>/STATUS.md` is frozen.
 - A1.7: the proposer row of the harness state is `harness/proposer.d/<branch>.toml`; `harness/proposer.toml` is frozen and still read; a session keyed in two files is a registry error (P0ar).
+
+## Amendment 6 — L2 ends at the seal (appended; instruction #342; wish #341)
+
+The layer ladder is read as follows from the merge of the pull request that appends this amendment; the table above is not edited.
+- The exit gate of L2 reads: "Interface ACCEPTED by zero diff; judge sealed, released as a digest-pinned image, and the Crafter verdict measured on the host under it; repo frozen".
+- The exit gate of L3 reads, for "in both Worlds": "in the sealed World".
+- NetHack, AutoAscend and the L2b MiniHack ladder are carried, not done. They are to be re-filed in `renavondata/jack`, which is Guy's to do; the ladder of this repository does not wait for them.

@@ -2694,7 +2694,10 @@ FAILED_EVENTS = (  # (what, workflow, conclusion, selects the report job) -- ins
 FAILED_EXEMPT = {"failed": "its own failure would trigger itself",
                  "measure": "debt: edit of .github/ awaits an instruction",
                  "pins-master": "debt: edit of .github/ awaits an instruction",
-                 "stale": "debt: edit of .github/ awaits an instruction"}
+                 "stale": "debt: edit of .github/ awaits an instruction",
+                 "release": "debt: its permissions are `contents: read` and `packages: write` alone (instruction #342), "
+                            "so it cannot open an issue, and failed.yml's list is an edit of .github/ the instruction "
+                            "does not name; P0bu holds that a failed step ends the job red"}
 
 
 def p0bs_failed_watches_every_workflow() -> bool:
@@ -2718,6 +2721,73 @@ def p0bs_failed_watches_every_workflow() -> bool:
         expect(name in names, f"the exemption {name} names a workflow that exists")
         expect(name not in listed, f"the exemption {name} is not also watched (a watched workflow leaves the list)")
     expect(not listed - set(names), f"failed.yml watches only workflows that exist ({sorted(listed - set(names))})")
+    return ok()
+
+
+RELEASE_WORKFLOW = ".github/workflows/release.yml"
+RELEASE_PERMISSIONS = {"contents: read", "packages: write"}
+RELEASE_STEPS = ("Composed digest equals the seal", "Push by digest", "Pulled digest equals the seal")
+
+
+def _run_release_step(script: str, cwd: Path, env: dict[str, str]) -> subprocess.CompletedProcess:
+    """A workflow `run:` script as Actions runs it, `bash -e`, in `cwd` with the environment `env` added to the PATH."""
+    return subprocess.run(["bash", "-e", "-c", script], cwd=cwd, env={"PATH": os.environ["PATH"]} | env,
+                          capture_output=True, text=True, timeout=60)
+
+
+def p0bu_release_checks_digest() -> bool:
+    """`release.yml` (instruction #342 item 3a) holds the permissions `contents: read` and `packages: write` and no
+    other, and its three steps run in order with no `if:` and no `continue-on-error:` anywhere, so a failed step ends
+    the job: the composed digest is compared to `release/seal.toml`'s before the push, the push preserves digests, and
+    the digest pulled back is compared to the seal. Both comparisons, run as written on fixtures, pass an equal digest,
+    write the digest they checked, and fail an unequal or an empty one."""
+    expect, ok = _expecter()
+    text = (ROOT / RELEASE_WORKFLOW).read_text()
+    block = re.search(r"^permissions:\n((?:  .+\n)+)", text, re.M)
+    expect(block is not None and {ln.strip() for ln in block.group(1).splitlines()} == RELEASE_PERMISSIONS
+           and len(re.findall(r"^\s*permissions:", text, re.M)) == 1,
+           f"permissions: {sorted(RELEASE_PERMISSIONS)} and nothing else, stated once")
+    paths = re.search(r"^  push:\n    paths:\n((?:      - .+\n)+)", text, re.M)
+    expect(paths is not None and {"release/**", "judge/**"} <= {ln.split("- ", 1)[1].strip('" \n')
+                                                                for ln in paths.group(1).splitlines()},
+           "the push trigger watches release/** and judge/**")
+    names = re.findall(r"^      - name: (.*)$", text, re.M)
+    expect(all(n in names for n in RELEASE_STEPS) and [names.index(n) for n in RELEASE_STEPS] == sorted(
+           names.index(n) for n in RELEASE_STEPS), f"steps {RELEASE_STEPS} are present, in this order ({names})")
+    expect(not re.search(r"^\s*(if|continue-on-error):", text, re.M), "no step is conditional or allowed to fail")
+    expect("--preserve-digests" in text and 'docker://$IMAGE@$DIGEST"' in text
+           and re.search(r"Push by digest\n(?:        .*\n)*?          DIGEST: \$\{\{ steps\.seal\.outputs\.digest \}\}", text),
+           "the push keeps digests and pushes by the digest the comparison wrote")
+    compare, pulled = _step_run(text, RELEASE_STEPS[0]), _step_run(text, RELEASE_STEPS[2])
+    expect(compare is not None and pulled is not None, "both comparison scripts are found")
+    if compare is None or pulled is None:
+        return ok()
+    a, b = "sha256:" + "a" * 64, "sha256:" + "b" * 64
+    work = Path(tempfile.mkdtemp(prefix="assize-release-", dir=context.scratch))
+    try:
+        (work / "release").mkdir()
+        (work / "out").mkdir()
+        (work / "release" / "seal.toml").write_text(f'digest = "{a}"\n')
+        bin_ = work / "bin"
+        bin_.mkdir()
+        (bin_ / "skopeo").write_text('#!/bin/sh\nprintf "%s\\n" "$FAKE_DIGEST"\n')
+        (bin_ / "skopeo").chmod(0o755)
+        for composed, want in ((a, True), (b, False), ("", False)):
+            (work / "out" / "seal.txt").write_text(f"manifest {composed}\nimage {b}\n" if composed else "")
+            output = work / "output"
+            output.write_text("")
+            got = _run_release_step(compare, work, {"GITHUB_OUTPUT": str(output)})
+            expect((got.returncode == 0) is want and (output.read_text() == f"digest={a}\n") is want,
+                   f"composed {composed[:14] or 'nothing'} against the seal: {'passes and writes' if want else 'fails and writes nothing'} "
+                   f"(exit {got.returncode})")
+        for fake, want in ((a, True), (b, False), ("", False)):
+            got = _run_release_step(pulled, work, {"PATH": f"{bin_}:{os.environ['PATH']}", "FAKE_DIGEST": fake, "DIGEST": a,
+                                                   "IMAGE": "ghcr.io/x/y", "CREDS": "u:p",
+                                                   "GITHUB_STEP_SUMMARY": str(work / "summary")})
+            expect((got.returncode == 0) is want,
+                   f"pulled {fake[:14] or 'nothing'} against the seal: {'passes' if want else 'fails'} (exit {got.returncode})")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
     return ok()
 
 
@@ -8015,6 +8085,14 @@ PINS = [
         p0bs_failed_watches_every_workflow, (Mutant("workflow_unlisted", _edits("P0bs_workflow_unlisted")),
                                              Mutant("exemption_stale", _edits("P0bs_exemption_stale"))),
         (".github/workflows/**",)),
+    Pin("P0bu", "release.yml compares the composed digest to the seal before it pushes and the pulled digest after, "
+                "fails the job on a difference, and holds `contents: read` and `packages: write` alone",
+        p0bu_release_checks_digest, (Mutant("compare_skipped", _edits("P0bu_compare_skipped")),
+                                     Mutant("pulled_unchecked", _edits("P0bu_pulled_unchecked")),
+                                     Mutant("failure_allowed", _edits("P0bu_failure_allowed")),
+                                     Mutant("digests_unpreserved", _edits("P0bu_digests_unpreserved")),
+                                     Mutant("permissions_widened", _edits("P0bu_permissions_widened"))),
+        (".github/workflows/release.yml",)),
     Pin("P0bt", "the switchback's four outcomes are reported for every regime with denominators, voids counted, the LLR "
                 "unclipped and its evidence bound from the derived alpha",
         p0bt_switchback_report, (Mutant("empty_regime_dropped", _edits("P0bt_empty_regime_dropped")),
