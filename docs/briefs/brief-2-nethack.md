@@ -368,3 +368,11 @@ CLAUDE.md's ladder does not change. L2's exit gate still requires the zero diff,
 
 - CODEOWNERS `/judge/ @gfrmin`
 - CODEOWNERS `/worlds/spec/ @gfrmin`
+
+## Wish #341: L2 ends at L2c (appended; instruction #342)
+
+Brief 2 §§2–4, A2's L2b scope and A3 item 3 are carried, not done.
+
+A3 item 4 now reads: "the L2 verdict line in the root `REPORT.md` is written when L2c is done".
+
+Carried items, listed in tracking issue #344: wishes #302, #300, #209, #208, #179, #173, #138, #134, #125, #103, #97, #86, #62, #61, #59, #58; drafts #304, #282, #280; NetHack issue #329 and pull requests #333 and #325.
