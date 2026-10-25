@@ -1,17 +1,18 @@
-# STATUS — L2 — 2026-10-23 — 65a1887 — PR #322
-VERDICT: SESSION DONE: instruction #320 done as written (one line, `fetch-depth: 0`); the measure run no longer fails on history but still fails on 4 pins for other causes, and reaches no Crafter verdict
+# STATUS — L2 — 2026-10-25 — 3ec1598 — PR #322
+VERDICT: SESSION DONE: PR #322 brought up to date with master (clean merge); diff against master unchanged (the one `fetch-depth: 0` line plus reports/ and proposer files); full pins green on the merged head
 LAYER BOUNDARY: no (per A1.3's definition: records no layer verdict in the root REPORT.md; adds or opens no brief)
-pins CI run 39931399600 on 65a1887: success (reports/L2/ci/39931399600.json)
-pins: CI run conclusion success; per-class counts not recomputed in this session (artifact pins.jsonl not read); local `make pins` not run (about 55 min, over the 10-minute cloud cap)
-changed: .github/workflows/measure.yml (+1 line), harness/proposer.d/instr-320-measure-full-history.toml, reports/L2/forecasts/d3e1551f-07e3-4ad5-8222-ec6cf7fbebbc.jsonl, reports/L2/ci/39931399600.json, reports/L2/status/instr-320-measure-full-history.md
-did: `claims next` skipped #315 (held by PR #316); took #320 (signed by gfrmin 2026-10-23T09:20:52Z, 0 body edits)
-did: added `measure` to PR #322 after the push, as the issue says. Measure run 39931411457, runner steel-legend (label measure), conclusion FAILURE, 09:22:39Z-09:59:22Z; history is present now (P0m ran against `227f2b6..HEAD`)
-did: measure failures are four clean pins, none about history: P0m (commit 65a1887 `unsigned_guy`: a `Proposer: guy` trailer needs a verified signature; issue #320 not read), P0r, P0x, P0ac (`gh api` exits 4: no GH_TOKEN in the measure job's env); 32 mutants NON-CAUSAL as a consequence; no Crafter verdict. Transcripts: artifact measure-host of run 39931411457
-did: departures from "Edit/Write only": one `sed -i` rewrote the PR number in my forecast file (321 to 322) after an issue took #321 mid-session; first push refused by pre-push (trailer block), answered by amending my own unpushed commit. No tool denials
-decided (not asked): did not add `GH_TOKEN` to measure.yml or touch the P0m signature rule — the issue says "nothing else" — p(stands on review)=0.9
-decided (not asked): PR #322 touches `.github/` (entrenched), so no auto-merge; approval is Guy's through CODEOWNERS — p=0.95
-forecasts: made 4 (dfbd3783caef, 9ea5f7fb4c6b, 5883234aafa8, af0ce03c24ca); resolved 0; cumulative log-loss not recomputed here
-price: guy-items 1; guy-latency not measured; sessions n/a; runner-min not recomputed (ledger price did not return in session)
-obligations added: L3: measure.yml gives the job no `GH_TOKEN`, so P0m, P0r, P0x and P0ac fail on the host; P0m rejects a `Proposer: guy` instruction commit as unsigned
-NEEDS YOU (at most 1): approve PR #322 as code owner (entrenched `.github/`)
-next: a master Builder takes #315 if PR #316 stalls; otherwise a new instruction is needed to give the measure job GH_TOKEN, so that the Crafter verdict (L2c record) can be measured
+pins CI run 40186719645 on 3ec1598: success (reports/L2/ci/40186719645.json)
+pins: clean 102/102; mutants 342/342 KILLED; twins 342/342; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (artifact pins-report of run 40186719645, summary record, full run: 0 skipped)
+changed: harness/proposer.d/instr-320-measure-full-history.toml (this session's row), merge of origin/master 164c8d8, reports/L2/ci/40186719645.json, reports/L2/status/instr-320-measure-full-history.md
+did: guards passed (account assize-builder; no dispatched PR; newest review reports/L2/review-09d707f….md is ACCEPT WITH OBLIGATIONS, so no blocking finding to work). Session started because gfrmin labelled #322 `blocked` at 2026-10-25T10:52:34Z, two minutes after stuck-PR sweep #349 listed it; the label carried no comment
+did: merged origin/master (47 commits behind, base 227f2b6 → 164c8d8; not DIRTY, merge-tree clean); `claims trailers` 0 findings; pre-push clean
+did: STATUS regenerated in the full A1.8 shape: review F3 (missing `pins:` per-class counts) answered by reading the summary record of the CI artifact
+did: PR branch, so no forecast row appended to reports/ (rule 2; a later row is late, P0r). The declaration's `session_minutes` row (6236dc96dcb1) was posted as a `vizier-ledger` comment at 12:02Z, late: by then the 30-minute bound had already passed (the CI wait alone took 66 min), so the row is not a prospective forecast. No tool denials; one `git merge -F -` failed (git cannot read stdin there) and was redone with a message file
+decided (not asked): read the unexplained `blocked` label as "move this stuck PR": brought it up to date and re-certified it rather than widening the diff (no GH_TOKEN in measure.yml; review F1 stays an L3 obligation and needs its own instruction) — p(stands on review)=0.8
+decided (not asked): took the branch's proposer.d row over for this session (the procedure asks for it before the first commit; the previous builder d3e1551f is still on record in its forecast file and commit 65a1887) — p=0.85
+decided (not asked): no auto-merge: `.github/workflows/measure.yml` is entrenched (A1.1), so Guy approves and merges — p=0.95
+forecasts: made 0 in reports/ (PR branch); 1 ledger comment (6236dc96dcb1, late); resolved 0; cumulative log-loss not recomputed here
+price: guy-items 1; guy-latency not measured; sessions n/a; runner-min not measured (`ledger price --since 227f2b6` ran past a 300 s timeout and was killed)
+obligations added: L3: `harness.ledger price` does not return in 5 min on a builder runner, so STATUS price lines go unmeasured (second session in a row)
+NEEDS YOU (at most 1): approve and merge PR #322 as code owner (entrenched `.github/workflows/measure.yml`); the review is ACCEPT WITH OBLIGATIONS and pins are green on the up-to-date head
+next: a master Builder takes #342 item 3 (the seal PR) once #322 merges; a new signed instruction is needed to give the measure job GH_TOKEN (review F1/F2)
