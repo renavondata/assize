@@ -7,12 +7,15 @@ on:
 
 permissions:
   contents: read
+  issues: read
+  pull-requests: read
+  actions: read
 
 jobs:
   measure:
     if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'measure'
     runs-on: [self-hosted, measure]
-    timeout-minutes: 45
+    timeout-minutes: 120
     env:
       ASSIZE_HOST: measure
     steps:
@@ -26,6 +29,8 @@ jobs:
         run: uv sync --frozen
       - name: make measure (host facts, then make pins)
         run: make measure HOST_OUT=out/host
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Upload host facts and pins report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

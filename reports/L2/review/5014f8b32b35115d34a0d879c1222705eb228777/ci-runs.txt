@@ -1,0 +1,26 @@
+CI runs on PR #358, read through the Actions API (`repos/renavondata/assize/actions/runs?head_sha=<sha>` and `.../runs?branch=instr-356-measure-pilot`), never `gh pr checks`; summary rows from each run's `pins-report` artifact, fetched by the API zip route.
+
+head 84f535d (the code head: commits a21c2f5 items 1–3, 84f535d the trusted-base admission), pull request opened 02:55:16Z:
+  pins          pull_request         40261479796  success    created 02:55:19Z, job 02:55:22Z–03:40:45Z (GitHub-hosted)
+  pins-master   pull_request_target  40261479896  cancelled  (superseded by 40261491507 seconds later)
+  pins-master   pull_request_target  40261491507  cancelled
+  build         pull_request         40261491088  skipped
+  measure       pull_request         40261491093  skipped    (no `measure` label; the host run was a workflow_dispatch on the branch: 40261491867)
+  review        pull_request         40261491111  skipped
+  summary row of 40261479796:
+  {"clean_failed": 0, "clean_ok": 103, "clean_total": 103, "exit_code": 0, "inconclusive": 0, "killed": 347, "kind": "summary", "leaked": 0, "mutants_total": 347, "non_causal": 0, "phase": "all", "registry": "harness", "since": "f7abe49dd13db126e4ed82d4b9a185065e39fe3f", "since_run": 40208386791, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 347, "twins_total": 347}
+  (the whole suite: 0 skipped although a base was chosen, because the registry changed since f7abe49; equal to the STATUS's pins line and to reports/L2/ci/40261479796.json)
+
+head 5014f8b (the reviewed head: STATUS and witness files, reports/ only), pushed 03:46Z:
+  pins          pull_request         40265720219  success    created 03:46:30Z, job 03:46:33Z–03:53:49Z
+  pins-master   pull_request_target  40265717488  cancelled  (superseded)
+  pins-master   pull_request_target  40265730866  in progress at the time of this file
+  build         pull_request         40265730537  skipped
+  measure       pull_request         40265731276  skipped
+  review        pull_request         40265730602  in progress: this session
+  summary row of 40265720219 (a `--since 84f535d` run):
+  {"clean_failed": 0, "clean_ok": 14, "clean_total": 14, "exit_code": 0, "inconclusive": 0, "killed": 63, "kind": "summary", "leaked": 0, "mutants_total": 63, "non_causal": 0, "phase": "all", "registry": "harness", "since": "84f535d7c70bbb818aae139d875b9c334d6ea0a2", "since_run": 40261479796, "skipped": 89, "skipped_mutants": 284, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 63, "twins_total": 63}
+
+Forecast rule 2 (Amendment 4, P0r): the four forecast rows of reports/L2/forecasts/4488d198-a345-48d5-9560-3483e9e23f8d.jsonl were added by a21c2f5 (author 02:43:19Z, committed 02:54:46Z after an amend), before the first `pins` run on the branch (40261479796 on 84f535d, 02:55:19Z); their `ts` 02:45:00Z precedes that run, so `_pins_green` scores it. Each id equals the first 12 hex characters of SHA-256(claim + ts) (checked by script: 161cd004ab6a, fdf1a4f8eac3, f850ab2127c8, c4102796bda3 all OK).
+
+`python -m harness.claims status-check reports/L2/status/instr-356-measure-pilot.md`: 1 files: 0 findings (exit 0).

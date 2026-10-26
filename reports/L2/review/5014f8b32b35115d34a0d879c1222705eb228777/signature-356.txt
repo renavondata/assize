@@ -1,0 +1,17 @@
+Instruction #356, signature check (CLAUDE.md Amendment 4 rule 5), read by the Reviewer on 2026-10-26 at about 03:50Z through the GitHub GraphQL API (`repository.issue(number:356)`: `userContentEdits`, `timelineItems` of LABELED_EVENT and UNLABELED_EVENT) and the REST timeline.
+
+issue: author assize-reviewer (the Vizier's draft), createdAt 2026-10-25T17:28:34Z, lastEditedAt 2026-10-26T02:40:50Z, editor gfrmin, updatedAt 2026-10-26T03:46:38Z.
+
+userContentEdits totalCount 2:
+  1. editedAt 2026-10-25T17:28:34Z, editor assize-reviewer: the body as drafted (no `Price:` line).
+  2. editedAt 2026-10-26T02:40:50Z, editor gfrmin: the same body with one line appended at the end: `Price: runner-min; up; 120`. No other difference between the two texts.
+
+label events:
+  2026-10-25T17:28:36Z labeled   needs-draft-check  assize-reviewer
+  2026-10-25T17:28:36Z labeled   draft              assize-reviewer
+  2026-10-25T17:30:34Z unlabeled needs-draft-check  assize-reviewer
+  2026-10-26T02:41:04Z labeled   instruction        gfrmin
+
+REST timeline after the `labeled instruction` event: commented assize-builder 02:42:05Z; cross-referenced assize-builder 02:55:17Z; cross-referenced assize-builder 03:47:52Z. No `edited` event and no body edit by any account after 02:41:04Z.
+
+Reading: the `labeled instruction` event by gfrmin stands at the end of the timeline and the body's last edit (02:40:50Z, gfrmin) precedes it, so the signed text is the body as read, with its `Price:` line. The pull request's three commits each carry `Instruction: #356`, `Proposer: guy` and `Proposer: builder claude-opus-5-5 4488d198-a345-48d5-9560-3483e9e23f8d`. P0m passed clean on the host (measure 40261491867, reports/L2/review/5014f8b32b35115d34a0d879c1222705eb228777/measure-40261491867-P0m-clean.log) and in CI (40261479796, 40265720219).

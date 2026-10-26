@@ -1,0 +1,6 @@
+declared tokens: ['build.yml secrets.ASSIZE_BUILDER_TOKEN', 'build.yml secrets.CLAUDE_CODE_OAUTH_TOKEN', 'failed.yml github.token', 'failed.yml secrets.ASSIZE_BUILDER_TOKEN', 'measure.yml github.token', 'pins-master.yml github.token', 'pins.yml github.token', 'release.yml github.token', 'review.yml secrets.ASSIZE_REVIEWER_TOKEN', 'review.yml secrets.CLAUDE_CODE_OAUTH_TOKEN', 'stale.yml github.token']
+admissions in the briefs: ['Admitted by instruction #315', 'Admitted by instruction #342', 'Admitted by instruction #356', 'Audit findings at 8aae43c8c792']
+as committed (entry + heading): PASS (no findings)
+entry removed from trusted_base.toml: FAIL ['unlisted token measure.yml github.token']
+heading removed from the brief (entry kept): FAIL ["unadmitted token measure.yml github.token: 'Admitted by instruction #356'"]
+entry and heading both removed (master's list against this head's .github/): FAIL ['unlisted token measure.yml github.token']

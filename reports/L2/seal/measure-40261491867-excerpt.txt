@@ -1,0 +1,8 @@
+2026-10-26T02:55:39.8738445Z make pins PINS_OUT=out/host/pins
+2026-10-26T03:02:00.7589665Z CLEAN FAILED: P0h (observed fail)
+2026-10-26T03:02:00.7591803Z CLEAN FAILED: P0bf (observed timeout)
+2026-10-26T03:41:44.4907423Z clean: 101/103 passed, 2/103 failed
+2026-10-26T03:41:44.4907789Z mutants: 347/347 killed, 0/347 survived, 0/347 inconclusive, 0/347 stale, 0/347 non-causal, 0 leaked (clean and mutant)
+2026-10-26T03:41:44.4908659Z PINS FAILED
+2026-10-26T03:41:44.5048065Z make[1]: *** [Makefile:20: pins] Error 1
+2026-10-26T03:41:44.5050978Z make: *** [Makefile:30: measure] Error 2

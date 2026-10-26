@@ -1,0 +1,18 @@
+copy of /home/assize-runner/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-gb3f7vh4/assize-copy-ah9t53aq/repo
+twin: no edits applied
+pin:       P0bf
+protects:  SIGTERM to the orchestrator mid-run leaves no scratch root, no copy and no descendant behind
+role:      twin
+tree:      /tmp/assize-scratch-gb3f7vh4/assize-copy-ah9t53aq/repo
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-gb3f7vh4
+  [ok] control: the hanging grandchild is live (4006337)
+  [ok] control: the run holds one scratch root and one copy under it when the signal is sent
+terminated run: exit 143; transcript /tmp/assize-scratch-gb3f7vh4/assize-sigterm-922jol9q/stdout.log
+  [ok] the orchestrator exits through its SIGTERM handler (143)
+  [ok] no assize-scratch-* remains
+  [ok] no assize-copy-* remains
+  [ok] the grandchild 4006337 is dead
+  [ok] no descendant of this check lives
+result:    PASS

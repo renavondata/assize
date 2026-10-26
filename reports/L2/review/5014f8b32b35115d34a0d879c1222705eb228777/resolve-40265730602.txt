@@ -1,0 +1,14 @@
+$ uv run --frozen python -m harness.ledger resolve --session 40265730602
+(run in the Reviewer's checkout of PR #358 at 5014f8b, 2026-10-26T03:57:42Z; the L0 and L1 files it wrote were empty and were removed before the commit, as on every review since PR #197)
+
+# reports/L0/forecasts/40265730602.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L1/forecasts/40265730602.jsonl: 0 open, 0 typed; resolved 0, unreadable 0
+# reports/L2/forecasts/40265730602.jsonl: 101 open, 95 typed; resolved 5, unreadable 0
+resolved 38e2281e34e9 True — reports/L2/review-bb16260964a5dc17bb6a10150d853b1201c21a2d.md at fcd3889a804b: ACCEPT
+resolved dca36efd9e1a False — run local: not an Actions run
+resolved f63bc964c204 True — pins run 40208386791 attempt 1 on f7abe49dd13d: success
+resolved 161cd004ab6a True — run 40260310790: 65.9 minutes, bound 140
+resolved fdf1a4f8eac3 True — pins run 40261479796 attempt 1 on 84f535d7c70b: success
+exit 0
+
+Note: 38e2281e34e9, dca36efd9e1a and f63bc964c204 were already resolved on master by the PR #352 review session (reports/L2/forecasts/40213876342.jsonl, merged in PR #357 at 6f970e9); this branch's merge-base 23029f6 predates that merge, so the resolver on this branch re-resolved them with the same outcomes and a new `ts`. `ledger.outcomes()` keeps the last record per id; the duplicates are committed as the mechanism wrote them (precedent: review of PR #226). 161cd004ab6a and fdf1a4f8eac3 are this pull request's Builder forecasts.

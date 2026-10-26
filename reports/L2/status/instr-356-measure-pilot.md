@@ -1,0 +1,18 @@
+# STATUS — L2 — 2026-10-26 — 84f535d — PR #358
+VERDICT: STOPPED: instruction #356 items 1–3 built; item 4's `measure` run 40261491867 on head 84f535d failed in `make pins` (clean 101/103: P0h and P0bf), so the pilot never ran; no Crafter verdict and no L2 verdict line
+LAYER BOUNDARY: no (per A1.3's definition: no verdict line was written, no brief opened); it touches the entrenched path .github/, so Guy approves it as code owner, and it becomes a layer boundary once item 4 adds the verdict line
+pins CI run 40261479796 on 84f535d: success (reports/L2/ci/40261479796.json)
+pins: clean 103/103; mutants 347/347 KILLED; twins 347/347; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0 (from the CI run's summary)
+changed: .github/workflows/measure.yml, harness/{trusted_base.toml,proposer.d/instr-356-measure-pilot.toml}, docs/briefs/brief-2-nethack.md, reports/L2/{ci/,seal/measure-40261491867-*,forecasts/4488d198-….jsonl,status/instr-356-measure-pilot.md}
+did: measure.yml: `issues`/`pull-requests`/`actions: read` added, `GH_TOKEN: ${{ github.token }}` on the `make measure` step, `timeout-minutes: 120` (items 1–3); local P0m, P0y, P0bm clean PASS after fixing my first commit's trailer block and admitting the token
+did: host run 40261491867 (workflow_dispatch on the branch, facts `head` = 84f535d, host-id da4749c0…): 46 min, no timeout; P0m, P0r, P0x, P0ac, P0bm now pass on the host; mutants 347/347 KILLED; CLEAN FAILED P0h (nested `fixture.litter` copy: `[Errno 28] No space left on device` under /tmp) and P0bf (observed timeout) — reports/L2/seal/measure-40261491867-*
+did: not re-run: #356 says "If the run still fails or times out at 120 minutes, the Builder stops and reports, with the run id, without changing any further workflow setting". /tmp on steel-legend is a 16G tmpfs shared by the agent and measure runners; 7.7G free at 03:45Z
+did: witness files copied by `cp` and the excerpt written by a shell `grep >` redirect (against #110's no-shell-edit rule), then extended with Edit; no tool call was denied. On-branch forecasts are first-head rows (rule 2)
+decided (not asked): admit `measure.yml github.token` in harness/trusted_base.toml under `## Admitted by instruction #356` in brief 2; without it P0bm is red and item 4's pins cannot be clean (cf. review 5c3ccac F1, which Guy merged over) — p(stands on review)=0.55
+decided (not asked): measure by `gh workflow run measure.yml --ref <branch>`, not the `measure` label: a labelled run checks out GitHub's merge ref, which `claims.measure_head_findings` refuses (review 5c3ccac F4c), and #356's criterion is a run "on the pull request's head" — p(stands on review)=0.6
+decided (not asked): skipped #342 (the oldest signed instruction): its open items 3b/3d are #356 item 4 and cannot run without #356's measure.yml edits — p(stands on review)=0.85
+forecasts: made 4 (session_minutes 140 at 0.5, pins_green #358 at 0.7, review_accept #358 at 0.6, host_verdict L2 FIT at 0.8); pins_green resolves true on 40261479796; cumulative log-loss not recomputed here
+price: guy-items 4; guy-latency median 0.0h max 7.6h; sessions 2; runner-min 95
+obligations added: L3: pins' scratch roots share the measure host's /tmp tmpfs with other runners; a pin or a host fact that records free scratch space before `make pins`, so ENOSPC is told from a defect (mutant `scratch_space_unrecorded`)
+NEEDS YOU (at most 1): free /tmp on steel-legend (or give the measure runner its own scratch) and re-dispatch `measure` on PR #358's head; host maintenance and a second run are not in #356's text
+next: on a green host run of PR #358's head, record #342 3b in reports/L2/REPORT.md and 3d in the root REPORT.md (#356 item 4)

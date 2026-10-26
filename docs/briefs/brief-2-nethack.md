@@ -381,3 +381,7 @@ Carried items, listed in tracking issue #344: wishes #302, #300, #209, #208, #17
 
 - workflow `release.yml`
 - token `release.yml github.token`
+
+## Admitted by instruction #356
+
+- token `measure.yml github.token`
