@@ -1,0 +1,19 @@
+pin:       P0bm
+protects:  the trusted base is listed: the list equals the workflows, runner labels, secrets, tokens and CODEOWNERS lines the tree declares, each admitted by an audit-dated amendment; growth is reported
+role:      clean
+tree:      /home/assize-runner/actions-runner/_work/assize/assize
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-_0im5xt3
+  [ok] fixture: the declared set is read from the expressions, `secrets: inherit` as `*` ({'workflow': frozenset({'a.yml', 'b.yml'}), 'runner_label': frozenset({'x', 'self-hosted', 'ubuntu-latest'}), 'secret': frozenset({'S', '*'}), 'token': frozenset({'a.yml secrets.S', 'b.yml secrets.*', 'a.yml github.token'}), 'codeowners': frozenset({'/X @o'})})
+  [ok] fixture: the exact, admitted list passes
+  [ok] fixture: a secret unlisted is refused (['unlisted secret S'], want ['unlisted secret S'])
+  [ok] fixture: an entry the tree no longer declares is refused (['stale workflow c.yml'], want ['stale workflow c.yml'])
+  [ok] fixture: an entry no amendment admits is refused (["unadmitted runner_label x: 'Wish #1'"], want ["unadmitted runner_label x: 'Wish #1'"])
+  [ok] fixture: a kind the law does not name is refused (['unknown kind account'], want ['unknown kind account'])
+  [ok] fixture: an `Admitted by instruction #<n>` heading in a brief is an admission ({'Admitted by instruction #7'})
+  [ok] fixture: an entry admitted by an instruction heading present in a brief passes ([])
+  [ok] fixture: an entry naming an instruction heading no brief carries is refused (["unadmitted codeowners /X @o: 'Admitted by instruction #8'"], want ["unadmitted codeowners /X @o: 'Admitted by instruction #8'"])
+  [ok] fixture: an entry absent from the earlier list is growth
+  [ok] fixture: against no earlier list, every entry is growth
+  [ok] harness/trusted_base.toml equals the tree's declared trusted base, every entry admitted ([])
+result:    PASS

@@ -1,0 +1,41 @@
+measure run 40261491867 (workflow_dispatch by assize-builder on branch instr-356-measure-pilot, head 84f535d7c70bbb818aae139d875b9c334d6ea0a2, created 2026-10-26T02:55:28Z, concluded failure 03:41:53Z; artifact measure-host id 12626062083, 1847879 bytes, fetched by the Reviewer through the Actions API).
+Source: pins/pins.jsonl of that artifact. Rows below are copied from it unchanged; the per-row listing is `pin mutant role verdict observed duration_s`.
+
+summary row:
+{"clean_failed": 2, "clean_ok": 101, "clean_total": 103, "exit_code": 1, "inconclusive": 0, "killed": 347, "kind": "summary", "leaked": 0, "mutants_total": 347, "non_causal": 0, "phase": "all", "registry": "harness", "since": null, "since_run": null, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 347, "twins_total": 347}
+
+the pins instruction #356 names, clean rows (verdict, exit_code):
+P0m   clean ok   exit 0
+P0r   clean ok   exit 0
+P0x   clean ok   exit 0
+P0ac  clean ok   exit 0
+P0bm  clean ok   exit 0
+
+the two clean failures, full rows:
+{"duration_s": 12.834, "exit_code": 1, "expected": "pass", "kind": "run", "leaked_processes": 0, "mutant": null, "observed": "fail", "pin": "P0h", "registry": "harness", "role": "clean", "run_dir": "/home/assize-runner/actions-runner/_work/assize/assize/out/host/pins/runs/P0h/clean", "scratch": "/tmp/assize-scratch-wyaah79s", "scratch_quiescent": true, "scratch_removed": true, "transcript": "out/host/pins/runs/P0h/clean/transcript.log", "tree": "invocation", "verdict": "FAILED"}
+{"duration_s": 120.107, "exit_code": null, "expected": "pass", "kind": "run", "leaked_processes": 0, "mutant": null, "observed": "timeout", "pin": "P0bf", "registry": "harness", "role": "clean", "run_dir": "/home/assize-runner/actions-runner/_work/assize/assize/out/host/pins/runs/P0bf/clean", "scratch": "/tmp/assize-scratch-4hd7xc31", "scratch_quiescent": true, "scratch_removed": true, "transcript": "out/host/pins/runs/P0bf/clean/transcript.log", "tree": "invocation", "verdict": "FAILED"}
+
+every P0h and P0bf row of the run (the same pins' twins passed in the mutant phase of the same run, minutes after the clean failures):
+P0h  -                             clean   FAILED  fail     12.834
+P0bf -                             clean   FAILED  timeout  120.107
+P0h  P0h/death_signal_reverted     mutant  KILLED  fail     17.734
+P0h  P0h/death_signal_reverted     twin    ok      pass     15.678
+P0h  P0h/scratch_kept              mutant  KILLED  fail     15.594
+P0h  P0h/scratch_kept              twin    ok      pass     15.63
+P0h  P0h/leaked_not_counted        mutant  KILLED  fail     15.625
+P0h  P0h/leaked_not_counted        twin    ok      pass     15.576
+P0h  P0h/subreaper_not_set         mutant  KILLED  fail     13.373
+P0h  P0h/subreaper_not_set         twin    ok      pass     15.677
+P0h  P0h/sweep_skipped             mutant  KILLED  fail     12.97
+P0h  P0h/sweep_skipped             twin    ok      pass     15.575
+P0h  P0h/copy_deleted_before_sweep mutant  KILLED  fail     15.273
+P0h  P0h/copy_deleted_before_sweep twin    ok      pass     15.622
+P0bf P0bf/sigterm_unhandled        mutant  KILLED  fail     0.905
+P0bf P0bf/sigterm_unhandled        twin    ok      pass     6.068
+
+clean phase: 103 rows, failed ['P0h', 'P0bf']; the five longest clean durations: P-par 20.5 s, P3 21.2 s, P10 23.5 s, P0x 28.9 s, P0bf 120.1 s (the child timeout, harness/config.toml child_timeout_s = 120).
+
+Comparison with the pull request's witness files at 5014f8b (diff, byte for byte): reports/L2/seal/measure-40261491867-facts.txt = facts.txt; -P0h-clean.log = pins/runs/P0h/clean/transcript.log; -P0bf-clean.log = pins/runs/P0bf/clean/transcript.log; -P0h-litter-stdout.log = pins/runs/P0h/clean/nested/litter/stdout.log. All four identical.
+
+`python -m harness.claims measure-head facts.txt 84f535d7c70bbb818aae139d875b9c334d6ea0a2`: 0 findings (exit 0).
+`python -m harness.claims measure-head facts.txt 5014f8b32b35115d34a0d879c1222705eb228777`: facts: head_differs: artefact measured 84f535d7c70bbb818aae139d875b9c334d6ea0a2, reviewed head is 5014f8b32b35115d34a0d879c1222705eb228777 (exit 1). 84f535d..5014f8b changes 7 files under reports/ only (271 insertions).

@@ -1,0 +1,53 @@
+copy of /home/assize-runner/actions-runner/_work/assize/assize
+  at /tmp/assize-scratch-h5ys2c33/assize-copy-0dh0r4g1/repo
+twin: no edits applied
+pin:       P0h
+protects:  after every child run, before its scratch root is deleted, every descendant of the orchestrator (a child subreaper) is dead: a cooperating grandchild dies by the parent-death signal and is not counted; a non-cooperating grandchild and a double-forked daemon are killed by the sweep, counted in leaked_processes, and make the run LEAKED; a mutant run's disposable copy is removed only after that sweep, so a grandchild still writing in it yields a LEAKED row, not an orchestrator exception. Out of scope: a process that never descends from the orchestrator (e.g. a container under the runtime's own shim; P10), and the outermost orchestrator being SIGKILLed.
+role:      twin
+tree:      /tmp/assize-scratch-h5ys2c33/assize-copy-0dh0r4g1/repo
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-h5ys2c33
+nested leaks: registry=fixture.leaks phase=mutants edits=(none) exit=1 rows=/home/assize-runner/actions-runner/_work/assize/assize/out/host/pins/runs/P0h/sweep_skipped/twin/nested/leaks/pins.jsonl
+  [ok] leaks: seeded edits applied (anchors unique)
+  [ok] leaks: summary row exit_code equals process exit code
+  [ok] leaks: cooperating grandchild: observed timeout, INCONCLUSIVE
+  [ok] leaks: cooperating grandchild: died by the death signal, leaked_processes 0
+  [ok] leaks: its twin passed
+  [ok] leaks: the check recorded its grandchild PID and nested copy
+  [ok] leaks: grandchild 4003187 (ignores SIGTERM) no longer alive
+  [ok] leaks: no live process holds the run's scratch root
+  [ok] leaks: parent saw the scratch root quiescent before deleting it
+  [ok] leaks: nested copy /tmp/assize-scratch-h5ys2c33/assize-scratch-qwf265w0/assize-copy-x0ua6cc9/repo removed
+  [ok] leaks: scratch root /tmp/assize-scratch-h5ys2c33/assize-scratch-qwf265w0 removed
+nested escapee: registry=fixture.escapee phase=clean edits=(none) exit=1 rows=/home/assize-runner/actions-runner/_work/assize/assize/out/host/pins/runs/P0h/sweep_skipped/twin/nested/escapee/pins.jsonl
+  [ok] escapee: seeded edits applied (anchors unique)
+  [ok] escapee: summary row exit_code equals process exit code
+  [ok] escapee: grandchild PID recorded (4003392)
+  [ok] escapee: grandchild dead when the nested run returns (killed by the sweep)
+  [ok] escapee: child observed timeout
+  [ok] escapee: leaked_processes >= 1 (1)
+  [ok] escapee: verdict LEAKED
+  [ok] escapee: summary leaked = 1
+  [ok] escapee: exit non-zero and equal to the summary's
+  [ok] escapee: scratch root /tmp/assize-scratch-h5ys2c33/assize-scratch-1ocwhqg1 removed
+nested daemon: registry=fixture.daemon phase=clean edits=(none) exit=1 rows=/home/assize-runner/actions-runner/_work/assize/assize/out/host/pins/runs/P0h/sweep_skipped/twin/nested/daemon/pins.jsonl
+  [ok] daemon: seeded edits applied (anchors unique)
+  [ok] daemon: summary row exit_code equals process exit code
+  [ok] daemon: PID recorded (4003593)
+  [ok] daemon: dead when the nested run returns (reparented to the subreaper and swept)
+  [ok] daemon: the check itself returned True
+  [ok] daemon: leaked_processes >= 1 (1)
+  [ok] daemon: verdict LEAKED
+  [ok] daemon: summary leaked = 1, clean_failed = 1
+  [ok] daemon: suite exits non-zero
+nested litter: registry=fixture.litter phase=mutants edits=(none) exit=1 rows=/home/assize-runner/actions-runner/_work/assize/assize/out/host/pins/runs/P0h/sweep_skipped/twin/nested/litter/pins.jsonl
+  [ok] litter: seeded edits applied (anchors unique)
+  [ok] litter: summary row exit_code equals process exit code
+  [ok] litter: writer PID recorded after its first write (4003676)
+  [ok] litter: writer dead when the nested run returns
+  [ok] litter: mutant failed, its twin passed
+  [ok] litter: leaked_processes >= 1 (1)
+  [ok] litter: verdict LEAKED
+  [ok] litter: copy /tmp/assize-scratch-h5ys2c33/assize-scratch-ah9cwpxq/assize-copy-2pppnuva/repo discarded
+  [ok] litter: the orchestrator finished: summary row with leaked = 1
+result:    PASS

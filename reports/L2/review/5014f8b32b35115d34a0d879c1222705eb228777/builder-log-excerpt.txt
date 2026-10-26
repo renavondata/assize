@@ -1,0 +1,32 @@
+Excerpts from the Builder session's log (artifact build-40260310790, id 12626431838, of build run 40260310790: `issues` event on master 23029f6, runner steel-agent, job 02:41:09Z–03:46:59Z), fetched by the Reviewer through the Actions API and read with a script that printed only the matched tool calls and the first lines of their results. Line numbers are those of build.log.
+
+line 86, 2026-10-26T02:43:24Z, tool_use (Bash):
+  mkdir -p out; (time timeout 590 uv run --frozen python -m harness run --registry harness --phase all --out out/pins --since f7abe49dd13db126e4ed82d4b9a185065e39fe3f --since-run 40208386791) > out/pins-local.txt 2>&1; echo exit $?; tail -15 out/pins-local.txt
+  (the Builder's local `--since` pins run, on the build runner, bounded at 590 s; it ended before the measure run was dispatched)
+
+line 254, 2026-10-26T02:55:23Z, tool_use (Bash):
+  grep -n "runs-on" .github/workflows/pins.yml .github/workflows/build.yml; gh pr edit 358 --add-label constitution 2>&1 | tail -1; gh workflow run measure.yml --ref instr-356-measure-pilot && sleep 8; gh run list --workflow measure.yml -L 2 --json databaseId,event,headSha,status,createdAt
+  (the `measure` dispatch on the branch; the `constitution` label it added at 02:55:26Z was removed by the Builder at 02:55:50Z, per the pull request's timeline, and is not on the pull request)
+
+line 385, 2026-10-26T03:43:03Z, tool_use (Bash):
+  hostname; df -h /tmp; grep -c "No space left" out/m/log.txt; grep -rl "No space left" out/m/art/pins/runs 2>/dev/null | wc -l; grep -A3 "^### tmp\|^### df" out/m/art/facts.txt | head
+line 386, result:
+  steel-legend
+  Filesystem      Size  Used Avail Use% Mounted on
+  tmpfs            16G  8.0G  7.7G  51% /tmp
+  0
+  1
+
+line 390, 2026-10-26T03:43:08Z, tool_use (Bash):
+  du -sh /tmp/* 2>/dev/null | sort -h | tail -8
+line 391, result:
+  124M	/tmp/s2
+  130M	/tmp/assize-review-1e38b3c-8HUS
+  139M	/tmp/p0ad-mut
+  149M	/tmp/tmp.kdV383lLdE
+  149M	/tmp/tmp.Xr8Tt5Wkev
+  151M	/tmp/rev229-co5ter
+  179M	/tmp/pytest-of-g
+  3.2G	/tmp/claude-1000
+
+Reading: the build runner (`steel-agent`) and the measure runner (`steel-legend`, facts.txt `uname`) share one host and one 16 GiB tmpfs at /tmp. Two minutes after the measure run ended, 8.0 GiB of it was held by directories no running job owned: 3.2 GiB of Claude Code task output (`/tmp/claude-1000`) and the scratch roots of earlier review and build sessions (`assize-review-1e38b3c-8HUS`, `rev229-co5ter`, `p0ad-mut`, `pytest-of-g`, `tmp.*`). The STATUS's "7.7G free at 03:45Z" is this measurement. The pins' own copies are small (the tree copied by `harness.tree.copy_tree` is 41 MiB at this head, `.git`, `.venv`, `out` and `reports` excluded; `workers = 1`); what filled the remaining 8 GiB during the clean phase (02:55:39Z–03:02:00Z) is not recorded by anything in the run.
