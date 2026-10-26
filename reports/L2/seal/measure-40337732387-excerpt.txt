@@ -1,0 +1,43 @@
+measure run 40337732387 (workflow_dispatch, ref instr-356-crafter-verdict, PR #361), conclusion success, artifact measure-host id 12661486123.
+Excerpted verbatim from the artifact's facts.txt and pins/pins.jsonl; the pilot's report is measure-40337732387-pilot-report.md beside this file.
+
+### facts.txt
+### date
+$ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-26T14:14:16Z
+[exit 0]
+### uname
+$ uname -a
+Linux steel-legend 7.2.6-arch2-1 #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 22:41:30 +0000 x86_64 GNU/Linux
+[exit 0]
+### lscpu (Model name, CPU(s))
+Model name:                              AMD Ryzen 5 5600X 6-Core Processor
+CPU(s):                                  12
+### cpuset-own
+/sys/fs/cgroup/system.slice/actions.runner.renavondata-assize.steel-legend.service cpuset.cpus=[3-5,9-11] cpuset.cpus.effective=[3-5,9-11]
+### head
+$ git rev-parse HEAD
+fb2eac3d93a2a7b4478e288b1c86211ceef73e60
+[exit 0]
+### host-id
+$ host_id /etc/machine-id
+da4749c005a00669b8571e5942795bc899ab05885706d555905772ade239b20f
+[exit 0]
+### podman-info
+$ podman info --format {{.Host.OCIRuntime.Name}} {{.Host.CgroupsVersion}} {{.Host.CgroupManager}} rootless={{.Host.Security.Rootless}}
+crun v2 systemd rootless=true
+[exit 0]
+
+### pins/pins.jsonl, kind "summary"
+{"clean_failed": 0, "clean_ok": 103, "clean_total": 103, "exit_code": 0, "inconclusive": 0, "killed": 347, "kind": "summary", "leaked": 0, "mutants_total": 347, "non_causal": 0, "phase": "all", "registry": "harness", "since": null, "since_run": null, "skipped": 0, "skipped_mutants": 0, "stale": 0, "survived": 0, "twins_failed": 0, "twins_ok": 347, "twins_total": 347}
+
+### pins/pins.jsonl, clean rows of the pins #356 names (pin, expected, exit_code, verdict)
+P0m pass 0 ok
+P0r pass 0 ok
+P0x pass 0 ok
+P0ac pass 0 ok
+P21 pass 0 ok
+P0bm pass 0 ok
+P0h pass 0 ok
+P0bf pass 0 ok
+P35 pass 0 ok

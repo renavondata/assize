@@ -125,3 +125,25 @@ Denominators: one release run, one measure run, one pins CI run on the code head
 - `release.yml`'s `paths:` also lists `.github/workflows/release.yml`, so that a change to the workflow is witnessed by a run of it.
 - `harness/trusted_base.toml` lists `release.yml` and `release.yml github.token`, admitted by a new heading `## Admitted by instruction #342` in brief 2 (P0bm, audit criterion 7); the instruction's file list allows the brief only if item 2 was not merged separately.
 - `FAILED_EXEMPT` in `harness/pins.py` names `release`: its permissions cannot open an issue, and listing it in `failed.yml` is an edit of `.github/` the instruction does not name.
+
+## L2c — sealed: the Crafter host verdict (instruction #356 item 4, for #342 items 3b and 3d; PR #361)
+
+VERDICT: **Crafter FIT under the sealed judge.** δ = 0.5 achievements per episode is detected with 90% mean posterior mass at 46 episodes per arm, 132.5 s of wall-clock (both arms) against the 86400 s budget; the assurance reading, shown beside it, is also FIT (97 episodes per arm, 279.5 s). Under the stated shift assumption P(FIT | this pilot) is near 1; the assumption, a random incumbent's variance standing in for a competent agent's, is the weak link, as at L1.
+
+Denominators: one `measure` run on this pull request's head, which gives the verdict; three earlier `measure` runs dispatched on master 1665652, listed below and not cited as evidence; one pins CI run on the code head (STATUS).
+
+### The run (item 3b)
+- `measure` run 40337732387, `workflow_dispatch` on `instr-356-crafter-verdict`, facts `head` = fb2eac3d93a2a7b4478e288b1c86211ceef73e60 (this pull request's head when dispatched), success, 14:14Z–15:07Z, within `measure.yml`'s 120 minutes. Witnesses: `reports/L2/seal/measure-40337732387-excerpt.txt` (host facts and pins summary) and `reports/L2/seal/measure-40337732387-pilot-report.md` (the pilot's report, byte-identical to the artifact's, artifact id 12661486123).
+- Host: steel-legend, host-id da4749c0…, AMD Ryzen 5 5600X, 12 threads, runner cgroup pinned to CPUs 3-5,9-11, rootless Podman 6.1.2 with crun on cgroup v2, Linux 7.2.6 — the L1 host.
+- `make pins` on the host before the pilot: clean 103/103; mutants 347/347 KILLED; twins 347/347; leaked 0; stale 0; inconclusive 0; non-causal 0; exit 0. P0m, P0r, P0x, P0ac (the pins #356 names), P21 (the seal digest), P0bm, P0h and P0bf passed clean.
+- The judge measured is the sealed one: `judge/` at the head is tree 113d9ffd7520f65f57448bf98f617e6d40661a35, the tree `release/seal.toml`'s digest `sha256:c7856fe2cc22222a9c1af4bde31272acd4e4ae4f60bae605c975e75ed918259c` is composed from, and P21 re-derived that digest from the tree on the host in the same run. Pilot records: judge_sha256 4a6ad9bc51a6be1a9b5a3f188d91b1edd690e14f19846db6d71b15ed6a507321, pilot_sha256 eea08d35…; the `image` the pilot prints (sha256:c2f6e943…) is the random incumbent's, built in the run.
+- Zero diff (the interface): P35 passed clean on the host in the same run, so `judge/` and `worlds/spec/` at the head equal the L2a baseline's trees as `harness/baseline.toml` records them.
+- Criteria and config: brief 1's, unchanged. `git diff 25f36e6 fb2eac3 -- pilot/config.toml` is empty (25f36e6 recorded the L1 verdict): 200 episodes, cap 7200 s, deltas 0.25/0.5/1.0, mass 0.9, fit_delta 0.5, marginal_delta 1.0, budget 86400 s, seed 0. The pilot's code changed since L1 only under L2a obligations 38–39 and P15, all merged before this run. Nothing was tuned after the scores.
+- Episodes: 200 recorded of 200 requested, 200 terminal. Utility mean 2.315 (min 0, max 6); Hafner score 1.620, beside it, never as it. Throughput 0.694 episodes/s over 288.1 s. Time-to-learn (expected reading, episodes per arm): δ 0.25 → 182, δ 0.5 → 46, δ 1.0 → 10.
+
+### Other host runs on the same code, not evidence
+Guy dispatched `measure` on master 1665652, which differs from fb2eac3 only by this branch's proposer and forecast files, three times before this session:
+- 40294623092: pins clean 103/103, 347/347 KILLED; the pilot refused before any episode, `not_private: …/private/heads.jsonl is mode 644` (host storage state).
+- 40303027739: pins the same; the pilot refused before any episode, `key_version: the store holds keys computed under ['None'], not cpython-3.11.16` (host storage state).
+- 40328209908: success; pins the same; pilot VERDICT FIT (δ 0.5 at 45 episodes per arm, utility mean 2.225 over 200).
+None of the three is on this pull request's head, so #356's criterion does not let them stand for the verdict. They are recorded so that the count of host runs on this code is explicit: four, two refused by the judge's storage checks before scoring, two FIT, none MARGINAL or UNFIT. The two FIT runs differ in utility (2.315 against 2.225) at the same config seed: the config seed drives time-to-learn's Monte Carlo, while evaluation seeds are fresh CSPRNG draws that the judge never reissues (`judge/seeds.py`), so the two runs score different episodes and are not replicas.
