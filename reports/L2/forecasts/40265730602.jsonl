@@ -1,0 +1,5 @@
+{"id": "38e2281e34e9", "ts": "2026-10-26T03:57:42Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40265730602"}, "outcome": true, "witness": "reports/L2/review-bb16260964a5dc17bb6a10150d853b1201c21a2d.md at fcd3889a804b: ACCEPT"}
+{"id": "dca36efd9e1a", "ts": "2026-10-26T03:57:42Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40265730602"}, "void": "unobservable", "outcome": false, "witness": "run local: not an Actions run"}
+{"id": "f63bc964c204", "ts": "2026-10-26T03:57:42Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40265730602"}, "outcome": true, "witness": "pins run 40208386791 attempt 1 on f7abe49dd13d: success"}
+{"id": "161cd004ab6a", "ts": "2026-10-26T03:57:42Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40265730602"}, "outcome": true, "witness": "run 40260310790: 65.9 minutes, bound 140"}
+{"id": "fdf1a4f8eac3", "ts": "2026-10-26T03:57:42Z", "proposer": {"kind": "mechanism", "model": "harness.ledger", "session": "40265730602"}, "outcome": true, "witness": "pins run 40261479796 attempt 1 on 84f535d7c70b: success"}
