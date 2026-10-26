@@ -1,0 +1,6 @@
+pin:       P0bf
+protects:  SIGTERM to the orchestrator mid-run leaves no scratch root, no copy and no descendant behind
+role:      clean
+tree:      /home/assize-runner/actions-runner/_work/assize/assize
+invoked:   /home/assize-runner/actions-runner/_work/assize/assize
+scratch:   /tmp/assize-scratch-4hd7xc31
