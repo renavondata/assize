@@ -1,0 +1,19 @@
+pin:       P0bu
+protects:  release.yml compares the composed digest to the seal before it pushes and the pulled digest after, fails the job on a difference, and holds `contents: read` and `packages: write` alone
+role:      clean
+tree:      /home/runner/work/assize/assize
+invoked:   /home/runner/work/assize/assize
+scratch:   /tmp/assize-scratch-2tbz641j
+  [ok] permissions: ['contents: read', 'packages: write'] and nothing else, stated once
+  [ok] the push trigger watches release/** and judge/**
+  [ok] steps ('Composed digest equals the seal', 'Push by digest', 'Pulled digest equals the seal') are present, in this order (['Install uv', 'Sync environment', 'Compose the image', 'Composed digest equals the seal', 'Push by digest', 'Pulled digest equals the seal'])
+  [ok] no step is conditional or allowed to fail
+  [ok] the push keeps digests and pushes by the digest the comparison wrote
+  [ok] both comparison scripts are found
+  [ok] composed sha256:aaaaaaa against the seal: passes and writes (exit 0)
+  [ok] composed sha256:bbbbbbb against the seal: fails and writes nothing (exit 1)
+  [ok] composed nothing against the seal: fails and writes nothing (exit 1)
+  [ok] pulled sha256:aaaaaaa against the seal: passes (exit 0)
+  [ok] pulled sha256:bbbbbbb against the seal: fails (exit 1)
+  [ok] pulled nothing against the seal: fails (exit 1)
+result:    PASS
