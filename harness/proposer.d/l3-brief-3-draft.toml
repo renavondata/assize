@@ -1,0 +1,4 @@
+# Who built the harness state of branch l3-brief-3-draft (CLAUDE.md A1.10: the draft of brief 3, L2's last deliverable, which PR #361 did not carry): this pull request's own proposer row.
+kind = "builder"
+model = "claude-opus-5-5"
+session = "e9634e38-6bc2-41fc-b52d-42a81a895640"
