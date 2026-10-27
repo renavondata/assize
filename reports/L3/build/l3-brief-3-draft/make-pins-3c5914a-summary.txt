@@ -1,0 +1,12 @@
+Local `make pins` on 3c5914a (branch l3-brief-3-draft), build run 40443775763, 03:29Z–04:30Z, agent runner on the host.
+Excerpt of the transcript's opening and closing lines, copied unchanged (the full 460-line transcript stayed in /tmp; the CI run is the citation):
+
+uv run --frozen python -m harness run --registry harness --phase all --out out/pins
+registry harness: 103 pins, 347 mutants; phase=all; child_timeout_s=120.0 (harness/config.toml)
+clean: 103/103 passed, 0/103 failed
+mutants: 347/347 killed, 0/347 survived, 0/347 inconclusive, 0/347 stale, 0/347 non-causal, 0 leaked (clean and mutant)
+twins: 347/347 passed
+skipped: 0/103 pins, 0 mutants
+report: out/pins/pins.jsonl
+PINS PASSED
+exit 0
